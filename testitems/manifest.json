@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "configs": [
+    {
+      "kernel_args": "console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd",
+      "initramfs": "initrds/debian-buster-amd64.cpio.gz",
+      "kernel": "kernels/debian-buster-amd64.vmlinuz",
+      "name": "debian reproducible"
+    },
+    {
+      "kernel_args": "console=ttyS0,115200",
+      "initrd": "",
+      "kernel": "kernels/vmlinuz-fedora",
+      "name": "stboot testconfig"
+    }
+  ],
+  "rootCert": "../cryptoenv/root.cert"
+}
