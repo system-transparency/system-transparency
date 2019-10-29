@@ -1,0 +1,39 @@
+{{- $architecture := or .architecture "amd64" -}}
+{{- $suite := or .suite "buster" -}}
+{{ $image := or .image (printf "debian-%s-%s" $suite $architecture) }}
+
+architecture: {{ $architecture }}
+
+actions:
+  - action: debootstrap
+    suite: {{ $suite }}
+    components:
+      - main
+      - contrib
+      - non-free
+    mirror: https://snapshot.debian.org/archive/debian/20191004T111800Z/
+    variant: minbase
+
+  - action: apt
+    description: Install some packages
+    packages: [ systemd, linux-image-amd64, openssh-server, adduser, firmware-linux, openvpn ]
+
+  - action: run
+    chroot: true
+    script: run-in-chroot.sh
+
+  - action: overlay
+    source: overlays/add_example_root
+
+  - action: run
+    chroot: true
+    command: echo debian > /etc/hostname
+
+  - action: run
+    chroot: false
+    script: pack-reproducible.sh {{ $image }}
+
+# since pack is not supporting reproducible builds, we pack manual
+#  - action: pack
+#    file: {{ $image }}
+#    compression: gz
