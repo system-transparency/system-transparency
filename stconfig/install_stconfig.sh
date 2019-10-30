@@ -16,7 +16,7 @@ mkdir configs
 cd $BASEDIR/../configs
 mkdir example
 cp -r $BASEDIR/../testitems/kernels $BASEDIR/../configs/example/kernels
-cp -r $BASEDIR/../testitems/signing $BASEDIR/../configs/example/signing
+cp -r $BASEDIR/../testitems/signing/create-key.sh $BASEDIR/../configs/example/signing/create-keys.sh
 cp $BASEDIR/../testitems/manifest.json $BASEDIR/../configs/example/manifest.json
 echo "No Initramfs available at the time."
 #cp $BASEDIR/../testitems/initramfs $BASEDIR/../configs/example/initramfs
