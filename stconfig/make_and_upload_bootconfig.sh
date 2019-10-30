@@ -2,7 +2,7 @@
 
 SERVER="mullvad.9esec.io"
 BOOTFILE="stboot.zip"
-WORKDIR="remotesources"
+WORKDIR="$PWD/../configs/example"
 
 # configtool parameter
 MANIFEST="$WORKDIR/manifest.json"
