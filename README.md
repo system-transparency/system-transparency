@@ -84,10 +84,10 @@ SSH key of user must be deployed on provisioning server.
 
 #### Set up environment
 First of all you need a running debian system. Native or inside a virtual machine like VirtualBox (https://www.virtualbox.org/).  
-On the virtual machine you need to clone the repository for access to the scripts.
+On debian you need to clone the repository for access to the scripts.
 After setting up the repository run as root or sudo:
 ```
-./system-transparency/remote-os/debian/setup.sh
+apt-get install fakeroot debos
 ```
 This script will install all necessary packages for debian you'll need to creat a reproducible kernel.
 After that, just run the following script:
