@@ -94,6 +94,8 @@ After that, just run the following script:
 ```
 ./system-transparency/remote-os/debian/build.sh
 ```
+Now the only thing you need to do is copying the created linux kernel and initramfs to a new config folder (in your host system).
+Then copying the manifest.json from configs/example into your custom config and edit the pathes inside manifest.json
 
 # Acknowledgement
 Thanks to the tails project for their reproducible build debian system. Thanks to the OpenWrt project for the source date epoch functions.
