@@ -1,6 +1,7 @@
 #! /bin/bash 
 
 BASEDIR="$PWD"
+GOBIN="/usr/bin/go"
 
 echo "[UROOT]"
 cd $HOME/go/src/github.com/u-root/u-root
@@ -8,8 +9,8 @@ cd $HOME/go/src/github.com/u-root/u-root
 git checkout stboot
 git status
 echo "[UROOT] go install"
-GOPATH=$HOME/go /usr/local/go/bin/go install $HOME/go/src/github.com/u-root/u-root/
-GOPATH=$HOME/go /usr/local/go/bin/go install $HOME/go/src/github.com/u-root/u-root/cmds/boot/stboot
+GOPATH=$HOME/go $GOBIN install $HOME/go/src/github.com/u-root/u-root/
+GOPATH=$HOME/go $GOBIN install $HOME/go/src/github.com/u-root/u-root/cmds/boot/stboot
 echo "[UROOT installed]"
 
 
