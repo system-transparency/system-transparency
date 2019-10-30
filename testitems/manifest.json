@@ -9,10 +9,10 @@
     },
     {
       "kernel_args": "console=ttyS0,115200",
-      "initrd": "",
+      "initramfs": "",
       "kernel": "kernels/vmlinuz-fedora",
       "name": "stboot testconfig"
     }
   ],
-  "rootCert": "../cryptoenv/root.cert"
+  "rootCert": "signing/root.cert"
 }

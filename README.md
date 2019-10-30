@@ -51,7 +51,7 @@ git checkout --track origin/stboot
 ```
 
 ### 3) Build initramfs for image.
-Run:
+Inside system-transparency repository base directory run:
 ```
 cd stboot
 ./install-u-root.sh
@@ -62,7 +62,7 @@ cd stboot
 ```
 ./build_image.sh
 ```
-This script will build an image based on SysLinux you can run inside QEMU. 
+This script will build an image based on SysLinux but without initramfs. 
 
 ### 4) Merge image and initramfs
 Run:
@@ -82,23 +82,22 @@ QEMU should start up and will drop you into a shell. You can use some shell comm
 
 ## Setup for boot config creation
 
-Now you have a running QEMU image but no boot configuration to execute. The following part will show you how to built a boot configuration and upload it to you provisioning server.
+Now you have a running QEMU image but no boot configuration to execute. The following part will show you how to built a boot configuration and upload it to your provisioning server.
 
 ### 1) Build a reproducible debian linux kernel and initramfs
 
-First of all you need a running debian system. Native or inside a virtual machine like VirtualBox (https://www.virtualbox.org/).  
+First of all you need a running debian system or a virtual machine like VirtualBox (https://www.virtualbox.org/) with debian.  
 On debian you need to clone the repository for access to the scripts.
 After setting up the repository run as root or sudo:
 ```
 apt-get install fakeroot debos
 ```
-This script will install all necessary packages for debian you'll need to creat a reproducible kernel.
+This script will install all necessary packages for debian you'll need to create a reproducible kernel and initramfs for your example boot configuration.
 After that, just run the following script:
 ```
 ./system-transparency/remote-os/debian/build.sh
 ```
-Now the only thing you need to do is copying the created linux kernel and initramfs to a new config folder (in your host system).
-Then copying the manifest.json from configs/example into your custom config and edit the pathes inside manifest.json
+If you have built it on a virtual machine, make sure you copy the kernel and initramfs to your host system.
 
 ### 2) STConfig tool
 The STconfig tool is used to create the boot config zip-archive which later will be downloaded during the boot process by `stboot`
@@ -137,7 +136,7 @@ This is one of the key elements of STBoot. Every boot configuration has to be si
 ```
 stconfig sign path/to/stboot.zip path/to/privatekey.key path/to/certificate.cert
 ```
-Right now, STBoot require a triple signed boot configuration, so you need to sign your test configuration with key1 & cert1, key2 & cert2, key3 & cert3
+Right now, STBoot require a triple signed boot configuration, so you need to sign your test configuration with key1 & cert1, key2 & cert2, key3 & cert3 or a different combination but at least three.
 
 ### 5) Upload your boot configuration to provisioning server
 The triple signed boot configuration archive can be uploaded by running:
