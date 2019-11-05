@@ -1,6 +1,5 @@
 #! /bin/bash 
 
-BASEDIR="$PWD"
 GOBIN="/usr/bin/go"
 
 echo "[UROOT]"
