@@ -7,7 +7,7 @@ fi
 
 MNTPOINT="/tmp/img"
 IMG="BIOS_MBR_FAT_Syslinux_Linuxboot_OS.img"
-INITRD="linuxboot/initramfs_uroot.cpio"
+INITRD="$PWD/../../stboot/initramfs_uroot.cpio"
 
 echo "[INFO]: looking for loop device ..."
 losetup -f || { echo 'losetup failed'; exit 1; }
