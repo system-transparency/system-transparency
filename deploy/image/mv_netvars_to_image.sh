@@ -1,14 +1,16 @@
 #!/bin/bash
 
+BASE=$(dirname "$0")
+
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit
 fi
 
 MNTPOINT="/tmp/img"
-IMG="BIOS_MBR_FAT_Syslinux_Linuxboot_OS.img"
-FILE="$PWD/../../stboot/netvars.json"
-KERNELFILE="$PWD/../../stboot/bzImage-uroot"
+IMG="$BASE/BIOS_MBR_FAT_Syslinux_Linuxboot_OS.img"
+FILE="$BASE/../../stboot/netvars.json"
+KERNELFILE="$BASE/../../stboot/bzImage-uroot"
 
 echo "[INFO]: looking for loop device ..."
 losetup -f || { echo 'losetup failed'; exit 1; }

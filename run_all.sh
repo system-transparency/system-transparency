@@ -1,13 +1,13 @@
 #! /bin/bash
 
+BASE=$(dirname "$0")
+
 echo "############################################################"
 echo " 1. step:"
 echo " (Re)build the stconfig tool"
 echo "############################################################"
 echo "                                                     "
-cd stconfig
-bash ./install_stconfig.sh
-cd ..
+bash ./stconfig/install_stconfig.sh
 
 echo "############################################################"
 echo " next step:"
@@ -17,7 +17,7 @@ echo "                                                     "
 while true; do
     read -p "Continue? (y/n)" yn
     case $yn in
-        [Yy]* ) cd stconfig; bash ./make_and_upload_bootconfig.sh; cd ..; break;;
+        [Yy]* ) bash ./stconfig/make_and_upload_bootconfig.sh; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
@@ -33,7 +33,7 @@ echo "                                                     "
 while true; do
     read -p "Continue? (y/n)" yn
     case $yn in
-        [Yy]* ) cd stboot; bash ./install-u-root.sh; bash ./make_initramfs.sh; cd ..; break;;
+        [Yy]* ) bash ./stboot/install-u-root.sh; bash ./stboot/make_initramfs.sh; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
@@ -49,7 +49,7 @@ echo "                                                     "
 while true; do
     read -p "Continue as root? (y/n)" yn
     case $yn in
-        [Yy]* ) cd deploy/image; sudo bash ./mv_initrd_to_image.sh; sudo bash ./mv_netvars_to_image.sh; cd ../..; break;;
+        [Yy]* ) sudo bash ./deploy/image/mv_initrd_to_image.sh; sudo bash ./deploy/image/mv_netvars_to_image.sh; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac

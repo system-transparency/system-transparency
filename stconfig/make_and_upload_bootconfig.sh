@@ -1,8 +1,8 @@
 #!/bin/bash
-
+BASE=$(dirname "$0")
 SERVER="mullvad.9esec.io"
 BOOTFILE="stboot.zip"
-WORKDIR="$PWD/../configs/example/"
+WORKDIR="$BASE/../configs/example/"
 
 # configtool parameter
 MANIFEST="$WORKDIR/manifest.json"
@@ -18,6 +18,7 @@ stconfig sign $WORKDIR/$BOOTFILE $WORKDIR/signing/signing-key-1.key $WORKDIR/sig
 stconfig sign $WORKDIR/$BOOTFILE $WORKDIR/signing/signing-key-2.key $WORKDIR/signing/signing-key-2.cert
 stconfig sign $WORKDIR/$BOOTFILE $WORKDIR/signing/signing-key-3.key $WORKDIR/signing/signing-key-3.cert
 
-echo "[INFO]: upload $BOOTFILE tp $SERVER"
-scp $WORKDIR/$BOOTFILE root@$SERVER:/var/www/testdata/ || { echo 'upload via sco faid'; exit 1; }
+echo "[INFO]: upload $BOOTFILE to $SERVER"
+scp $WORKDIR/$BOOTFILE root@$SERVER:/var/www/testdata/ || { echo 'upload via sco failed'; exit 1; }
 echo "[INFO]: successfully uploaded signed $BOOTFILE to $SERVER"
+rm -Rf $WORKDIR/$BOOTFILE
