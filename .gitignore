@@ -1,2 +1,6 @@
 /configs
 /stboot/*.cpio
+/stboot/*bz*
+/stboot/*.json
+/stconfig/.original/
+/deploy/image/*.img

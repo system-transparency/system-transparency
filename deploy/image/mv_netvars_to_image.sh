@@ -7,8 +7,8 @@ fi
 
 MNTPOINT="/tmp/img"
 IMG="BIOS_MBR_FAT_Syslinux_Linuxboot_OS.img"
-FILE="linuxboot/netvars.json"
-KERNELFILE="linuxboot/bzImage-uroot"
+FILE="$PWD/../../stboot/netvars.json"
+KERNELFILE="$PWD/../../stboot/bzImage-uroot"
 
 echo "[INFO]: looking for loop device ..."
 losetup -f || { echo 'losetup failed'; exit 1; }
