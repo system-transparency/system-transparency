@@ -8,7 +8,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 MNTPOINT="/tmp/img"
-IMG="$BASE/BIOS_MBR_FAT_Syslinux_Linuxboot_OS.img"
+IMG="$BASE/MBR_Syslinux_Linuxboot.img"
 FILE="$BASE/../../stboot/netvars.json"
 KERNELFILE="$BASE/../../stboot/bzImage-uroot"
 
@@ -24,8 +24,6 @@ mkdir -p $MNTPOINT || { echo 'mkdir failed'; exit 1; }
 mount ${DEV}p1 $MNTPOINT || { echo 'mount failed'; exit 1; }
 cp $FILE $MNTPOINT || { echo 'cp failed'; exit 1; }
 echo "[INFO]: moved $FILE to $IMG"
-cp $KERNELFILE $MNTPOINT || { echo 'cp kernel failed'; exit 1; }
-echo "[INFO]: moved $KERNELFILE to $IMG"
 umount $MNTPOINT || { echo 'umount failed'; exit 1; }
 partx -d $DEV || { echo 'partx -d failed'; exit 1; }
 losetup -d $DEV || { echo 'losetup -d failed'; exit 1; }

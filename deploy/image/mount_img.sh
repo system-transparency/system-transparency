@@ -6,7 +6,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 MNTPOINT="/tmp/img"
-IMG="BIOS_MBR_FAT_Syslinux_Linuxboot_OS.img"
+IMG="MBR_Syslinux_Linuxboot.img"
 
 echo "[INFO]: looking for loop device ..."
 losetup -f || { echo 'losetup failed'; exit 1; }

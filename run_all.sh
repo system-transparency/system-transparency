@@ -2,6 +2,19 @@
 
 BASE=$(dirname "$0")
 
+IMG="deploy/image/MBR_Syslinux_Linuxboot.img"
+if [ ! -f "$IMG" ]; then
+    while true; do
+       echo "$IMG does not exist."
+       read -p "Create now? Root privileges are required. (y/n)" yn
+       case $yn in
+          [Yy]* ) sudo bash ./deploy/image/create_image.sh; break;;
+          [Nn]* ) exit;;
+          * ) echo "Please answer yes or no.";;
+       esac
+    done
+fi
+
 echo "############################################################"
 echo " 1. step:"
 echo " (Re)build the stconfig tool"

@@ -7,7 +7,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 MNTPOINT="/tmp/img"
-IMG="$BASE/BIOS_MBR_FAT_Syslinux_Linuxboot_OS.img"
+IMG="$BASE/MBR_Syslinux_Linuxboot.img"
 INITRD="$BASE/../../stboot/initramfs_uroot.cpio"
 
 echo "[INFO]: looking for loop device ..."

@@ -7,12 +7,12 @@ fi
 
 if [ -z "$var" ]
 then
-      echo "usage: umount.sh path/tp/loopdev"
+      echo "usage: umount.sh path/to/loopdev"
 fi
 
 DEV=$1
 MNTPOINT="/tmp/img"
-IMG="BIOS_MBR_FAT_Syslinux_Linuxboot_OS.img"
+IMG="MBR_Syslinux_Linuxboot.img"
 
 echo "[INFO]: unmount $IMG"
 umount $MNTPOINT || { echo 'umount failed'; exit 1; }
