@@ -34,24 +34,38 @@ while true; do
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
-done  
+done
 
 
 echo "                                                     "
 echo "############################################################"
 echo " next step:"
-echo " (Re)build u-root command and create linuxboot initramfs"
+echo " (Re)build u-root command"
 echo "############################################################"
 echo "                                                     "
 while true; do
     read -p "Continue? (y/n)" yn
     case $yn in
-        [Yy]* ) bash ./stboot/install-u-root.sh; bash ./stboot/make_initramfs.sh; break;;
+        [Yy]* ) bash ./stboot/install-u-root.sh; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
-done   
+done
 
+echo "                                                     "
+echo "############################################################"
+echo " next step:"
+echo " Use u-root to create linuxboot initramfs"
+echo "############################################################"
+echo "                                                     "
+while true; do
+    read -p "Continue? (y/n)" yn
+    case $yn in
+        [Yy]* ) bash ./stboot/make_initramfs.sh; break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
 
 echo "                                                     "
 echo "############################################################"
