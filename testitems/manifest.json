@@ -2,10 +2,10 @@
   "version": 1,
   "configs": [
     {
-      "kernel_args": "console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd",
-      "initramfs": "initrds/debian-buster-amd64.cpio.gz",
+      "name": "debian reproducible",
       "kernel": "kernels/debian-buster-amd64.vmlinuz",
-      "name": "debian reproducible"
+      "kernel_args": "console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd",
+      "initramfs": ""
     }
   ],
   "rootCert": "signing/root.cert"
