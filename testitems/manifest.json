@@ -6,12 +6,6 @@
       "initramfs": "initrds/debian-buster-amd64.cpio.gz",
       "kernel": "kernels/debian-buster-amd64.vmlinuz",
       "name": "debian reproducible"
-    },
-    {
-      "kernel_args": "console=ttyS0,115200",
-      "initramfs": "",
-      "kernel": "kernels/vmlinuz-fedora",
-      "name": "stboot testconfig"
     }
   ],
   "rootCert": "signing/root.cert"

@@ -10,12 +10,14 @@ then
       echo "usage: umount.sh path/to/loopdev"
 fi
 
+BASE=$(dirname "$0")
+
 DEV=$1
-MNTPOINT="/tmp/img"
-IMG="MBR_Syslinux_Linuxboot.img"
+MNT="/tmp/mnt_stimg"
+IMG="$BASE/MBR_Syslinux_Linuxboot.img"
 
 echo "[INFO]: unmount $IMG"
-umount $MNTPOINT || { echo 'umount failed'; exit 1; }
-partx -d $DEV || { echo 'partx -d failed'; exit 1; }
+umount $MNT || { echo 'umount failed'; losetup -d $DEV; exit 1; }
+rm -r -f $MNT || { echo 'cleanup tmpdir failed'; losetup -d $DEV; exit 1; } 
 losetup -d $DEV || { echo 'losetup -d failed'; exit 1; }
 echo "[INFO]: loop device is free again"

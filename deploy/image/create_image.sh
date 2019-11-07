@@ -7,14 +7,13 @@ fi
 
 BASE=$(dirname "$0")
 
-MNTPOINT="/tmp/img"
 IMG="$BASE/MBR_Syslinux_Linuxboot.img"
 PARTTABLE="$BASE/mbr.table"
 SYSLINUX_SRC="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
 SYSLINUX_TAR="syslinux-6.03.tar.xz"
 SYSLINUX_DIR="syslinux-6.03"
 SYSLINUX_CFG="$BASE/syslinux.cfg"
-LNXBT_KERNEL="$BASE/bzImage-uroot"
+LNXBT_KERNEL="$BASE/vmlinuz-linuxboot"
 TMP=$(mktemp -d -t stimg-XXXXXXXX)
 MNT=$(mktemp -d -t stmnt-XXXXXXXX)
 
@@ -55,7 +54,11 @@ cp $LNXBT_KERNEL $MNT
 
 umount $MNT || { echo 'Unmounting failed'; losetup -d $DEV; exit 1; }
 losetup -d $DEV || { echo 'Loop device clean up failed'; exit 1; }
-rm -r $TMP $MNT
+rm -r -f $TMP $MNT
+
+read -p "Type your username to own the image file:" user
+chown -c $user:$user $IMG
+
 echo ""
 echo "$IMG created. Initramfs needs to be included."
 

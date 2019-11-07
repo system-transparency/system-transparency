@@ -17,14 +17,14 @@ fi
 
 echo "############################################################"
 echo " 1. step:"
-echo " (Re)build the stconfig tool"
+echo " (Re)build stconfig tool"
 echo "############################################################"
 echo "                                                     "
 bash ./stconfig/install_stconfig.sh
 
 echo "############################################################"
 echo " next step:"
-echo " Utilize stconfi tool and upload resulting zip file"
+echo " Utilize stconfig tool and upload resulting boot file"
 echo "############################################################"
 echo "                                                     "
 while true; do
@@ -40,7 +40,7 @@ done
 echo "                                                     "
 echo "############################################################"
 echo " next step:"
-echo " Update repo, rebuild u-root cmd and create initrd"
+echo " (Re)build u-root command and create linuxboot initramfs"
 echo "############################################################"
 echo "                                                     "
 while true; do
@@ -56,7 +56,7 @@ done
 echo "                                                     "
 echo "############################################################"
 echo " next step:"
-echo " Include updated initrd and netvars.json into syslinux image"
+echo " Include initramfs and netvars.json into linuxboot image"
 echo "############################################################"
 echo "                                                     "
 while true; do
@@ -71,7 +71,7 @@ done
 echo "                                                     "
 echo "############################################################"
 echo " next step:"
-echo " Run QEMU"
+echo " Run QEMU with linuxboot image"
 echo "############################################################"
 echo "                                                     "
 while true; do
