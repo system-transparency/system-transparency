@@ -1,7 +1,7 @@
 #! /bin/bash
 
 BASE=$(dirname "$0")
-
+MANIFEST=${1:-configs/example/manifest.json}
 IMG="deploy/image/MBR_Syslinux_Linuxboot.img"
 if [ ! -f "$IMG" ]; then
     while true; do
@@ -30,7 +30,7 @@ echo "                                                     "
 while true; do
     read -p "Continue? (y/n)" yn
     case $yn in
-        [Yy]* ) bash ./stconfig/make_and_upload_bootconfig.sh; break;;
+        [Yy]* ) bash ./stconfig/make_and_upload_bootconfig.sh $MANIFEST; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
