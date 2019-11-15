@@ -1,7 +1,7 @@
 linux kernel config
 
 In addition to x86_64 based defconfig:
-'''
+```
 Processor type and features  --->
     [*] Linux guest support --->
         [*] Enable Paravirtualization code
@@ -18,4 +18,4 @@ Device Drivers  --->
     Character devices  --->
         <*> Hardware Random Number Generator Core support  --->
             <*>   VirtIO Random Number Generator support
-'''
+```
