@@ -48,6 +48,10 @@ build_debian_image() {
 		dargs+=("--chroot")
 	fi
 
+	if debos --help 2>&1 |grep -q -- --disable-fakemachine ; then
+		dargs+=("--disable-fakemachine")
+	fi
+
 	debos \
 		"--environ-var=SOURCE_DATE_EPOCH:$SOURCE_DATE_EPOCH" \
 		"--environ-var=LC_ALL:$LC_ALL" \
