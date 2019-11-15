@@ -4,4 +4,5 @@
 /stboot/*.json
 /stconfig/.original/
 /deploy/image/*.img
+/deploy/image/vmlinuz-linuxboot
 /.original*

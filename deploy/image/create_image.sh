@@ -30,6 +30,18 @@ if [ -f "$IMG" ]; then
     done 
 fi
 
+if [ ! -f "$LNXBT_KERNEL" ]; then
+    while true; do
+       read -p "$LNXBT_KERNEL not found. Build kernel now? (y/n)" yn
+       case $yn in
+          [Yy]* ) bash ${BASE}/build_kernel.sh; break;;
+          [Nn]* ) exit;;
+          * ) echo "Please answer yes or no.";;
+       esac
+    done 
+fi
+
+
 echo "____ Downloading Syslinux Bootloader ____"
 wget $SYSLINUX_SRC/$SYSLINUX_TAR -P $TMP || { echo -e "Download $failed"; exit 1; }
 tar -xf $TMP/$SYSLINUX_TAR -C $TMP || { echo -e "Decompression $failed"; exit 1; }
@@ -60,6 +72,7 @@ rm -r -f $TMP $MNT
 
 read -p "Type your username to own the image file:" user
 chown -c $user:$user $IMG
+chown -c $user:$user $LNXBT_KERNEL
 
 echo ""
 echo "$IMG created. Initramfs needs to be included."
