@@ -16,7 +16,13 @@ actions:
 
   - action: apt
     description: Install some packages
-    packages: [ systemd, linux-image-amd64, openssh-server, adduser, firmware-linux, openvpn ]
+    packages:
+      - adduser
+      - firmware-linux
+      - linux-image-amd64
+      - openssh-server
+      - openvpn
+      - systemd
 
   - action: run
     chroot: true
