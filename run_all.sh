@@ -2,7 +2,8 @@
 
 BASE=$(dirname "$0")
 
-while getopts ":d" opt; do
+MANIFEST="configs/example/manifest.json"
+while getopts ":dm:" opt; do
   case $opt in
     d)
       echo
@@ -10,14 +11,19 @@ while getopts ":d" opt; do
       echo
       DEVELOP=true
       ;;
+    m)
+      MANIFEST=$OPTARG
+      ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
       exit 1
       ;;
+    :)
+      echo "Option -$OPTARG requires a path argument." >&2
+      exit 1
+      ;;
   esac
 done
-
-MANIFEST=${1:-configs/example/manifest.json}
 
 IMG="deploy/image/MBR_Syslinux_Linuxboot.img"
 if [ ! -f "$IMG" ]; then

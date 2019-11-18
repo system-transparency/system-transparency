@@ -16,7 +16,7 @@ ssh -t root@$SERVER 'rm -f /var/www/testdata/bc.zip; exit' || { echo -e "Removin
 
 echo "[INFO]: pack manifest.json, OS-kernel, etc. into $BOOTFILE"
 
-stconfig create $WORKDIR/$MANIFEST -o $WORKDIR/$BOOTFILE || { echo 'stconfig failed'; exit 1; }
+stconfig create $WORKDIR/$MANIFEST -o $WORKDIR/$BOOTFILE || { echo -e "stconfig $failed"; exit 1; }
 
 echo "[INFO]: sign $BOOTFILE with example keys"
 stconfig sign $WORKDIR/$BOOTFILE $WORKDIR/signing/signing-key-1.key $WORKDIR/signing/signing-key-1.cert
