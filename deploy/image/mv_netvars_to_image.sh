@@ -9,7 +9,7 @@ fi
 
 MNT=$(mktemp -d -t "mnt-st-XXXX")
 IMG="$BASE/MBR_Syslinux_Linuxboot.img"
-FILE="$BASE/../../stboot/netvars.json"
+FILE="$BASE/../../stboot/include/netvars.json"
 
 echo "[INFO]: looking for loop device ..."
 losetup -f || { echo 'losetup failed'; exit 1; }

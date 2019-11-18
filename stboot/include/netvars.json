@@ -1,0 +1,9 @@
+{
+  "host_ip":"10.0.2.15/24",
+  "netmask":"",
+  "gateway":"10.0.2.2/24",
+  "dns":"",
+  "bootstrap_url":"https://mullvad.9esec.io/stboot.zip",
+  "signature_pub_key":"BRm21PdiJ5pZa0HyA7DwBB+z+EtFZyUvH/2gy7/5Zus=",
+  "minimal-amount-signatures": 3
+}

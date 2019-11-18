@@ -100,19 +100,21 @@ while true; do
     esac
 done   
 
-echo "                                                     "
-echo "############################################################"
-echo " Include netvars.json into linuxboot image"
-echo "############################################################"
-echo "                                                     "
-while true; do
-    read -p "Continue as root? (y/n)" yn
-    case $yn in
-        [Yy]* ) sudo bash ./deploy/image/mv_netvars_to_image.sh; break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done   
+# netvars.json is included into the initramfs at the moment
+
+#echo "                                                     "
+#echo "############################################################"
+#echo " Include netvars.json into linuxboot image"
+#echo "############################################################"
+#echo "                                                     "
+#while true; do
+#    read -p "Continue as root? (y/n)" yn
+#    case $yn in
+#        [Yy]* ) sudo bash ./deploy/image/mv_netvars_to_image.sh; break;;
+#        [Nn]* ) exit;;
+#        * ) echo "Please answer yes or no.";;
+#    esac
+#done   
 
 
 echo "                                                     "
