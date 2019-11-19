@@ -38,12 +38,14 @@ if [ ! -f "$IMG" ]; then
     done
 fi
 
+echo
 echo "############################################################"
 echo " (Re)build stconfig tool"
 echo "############################################################"
 echo "                                                     "
 bash ./stconfig/install_stconfig.sh
 
+echo
 echo "############################################################"
 echo " Utilize stconfig tool and upload resulting boot file"
 echo "############################################################"
