@@ -47,6 +47,13 @@ bash ./stconfig/install_stconfig.sh
 
 echo
 echo "############################################################"
+echo " Build reproducible Debian with docker and create manifest"
+echo "############################################################"
+echo "                                                      "  
+bash ./remote-os/debian/build_os_docker.sh
+
+echo
+echo "############################################################"
 echo " Utilize stconfig tool and upload resulting boot file"
 echo "############################################################"
 echo "                                                     "
