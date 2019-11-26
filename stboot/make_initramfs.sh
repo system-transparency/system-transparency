@@ -9,6 +9,7 @@ if [ "$1" == "dev" ] ; then
     -files "$BASE/include/LetsEncrypt_Authority_X3_signed_by_X1.pem:root/LetsEncrypt_Authority_X3.pem" \
     -files "$BASE/include/netsetup.elv:root/netsetup.elv" \
     all \
+    github.com/system-transparency/uinit \
     || { echo -e "creating initramfs $failed"; exit 1; }
 else
     echo "### make minimal initramf including stboot only ###"
@@ -19,6 +20,7 @@ else
     github.com/u-root/u-root/cmds/core/elvish \
     github.com/u-root/u-root/cmds/core/ip \
     github.com/u-root/u-root/cmds/boot/stboot \
+    github.com/system-transparency/uinit \
     || { echo -e "creating initramfs $failed"; exit 1; }
 fi 
 
