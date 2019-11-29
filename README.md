@@ -19,7 +19,7 @@ This method is used for testing with QEMU.
 * QEMU emulator (tested with version 2.11.1)
 * Provisioning server with https-request capability
 * ssh access to root@yourserver.test (your 'provisioning server')
-* Virtual machine with Debian-Buster for creating a reproducible debian build (native and over linux containers).
+* Docker for building the a reproducible debian buster kernel and initramfs.
 
 
 ## Setup for image
@@ -84,40 +84,43 @@ QEMU should start up and will drop you into a shell. You can use some shell comm
 
 Now you have a running QEMU image but no boot configuration to execute. The following part will show you how to built a boot configuration and upload it to your provisioning server.
 
-### 1) Build a reproducible debian linux kernel and initramfs
-
-First of all you need a running debian system or a virtual machine like VirtualBox (https://www.virtualbox.org/) with debian.  
-On debian you need to clone the repository for access to the scripts.
-After setting up the repository run as root or sudo:
-```
-apt-get install fakeroot debos
-```
-This script will install all necessary packages for debian you'll need to create a reproducible kernel and initramfs for your example boot configuration.
-After that, just run the following script:
-```
-./system-transparency/remote-os/debian/build.sh
-```
-If you have built it on a virtual machine, make sure you copy the kernel and initramfs to your host system.
-
-### 2) STConfig tool
+### 1) STConfig tool
 The STconfig tool is used to create the boot config zip-archive which later will be downloaded during the boot process by `stboot`
-```
-cd $HOME/go/src/u-root/u-root/cmds/configtool
-go install
-```
-This will install the conigtool into `$HOME/go/bin`
-
-### 3) Generating boot config
 Only the first time you need to run this script to initialize the workspace:
 ```
 cd stconfig
 ./install_stconfig.sh
 ```
-This will place a folder named 'config/example' inside you repository.
-The config folder is marked in the .gitignore file.
-Inside the example folder you'll find three folders: kernels, initramfs and signing.
+This will place a folder named 'config/' inside you repository. The config folder is marked in the .gitignore file.
 
-Copy the 'debian-buster-amd64.vmlinuz' kernel inside the kernels folder and the 'initramfs.cpio.bz' inside the initramfs folder.
+### 2) Build a reproducible debian linux kernel and initramfs
+
+First of all you need docker. For debian/ubuntu host:  
+```
+sudo apt-get install docker.io
+```
+
+After you installed docker, just run the following script:
+```
+cd remote-os/debian
+./build_os_docker.sh
+```
+The script will create a new folders configs/debian. Inside this, three folder are made as well.
+A docker image will be created, based on the Dockerfile and execute the container.
+The container will create a new folder ./out  and copies the built kernel and initramfs inside.
+From there, kernel and initramfs files are copied to subfolders kernel and initrds in
+
+```
+./configs/debian/*
+```
+
+It also creates the manifest.json inside with the necessary paths.
+
+### 3) Generating boot config
+
+
+Inside the configs/debian folder you'll find three folders: kernels, initramfs and signing.
+
 The manifest.json file is used by the 'stconfig' tool for the creation of the boot configuration.
 You need to check the paths for kernel, initramfs and rootCert.
 Inside the signing folder you'll find the 'create-keys.sh'
@@ -144,6 +147,14 @@ The triple signed boot configuration archive can be uploaded by running:
 ./upload_config.sh
 ```
 SSH key of user must be deployed on provisioning server.
+
+## Run everything at once
+To run everything at once you can run:
+```
+./run_all.sh
+```
+The interactive script will ask you for every step. Look inside run_all.sh and the other scripts to understand what they do in detail.
+Have fun :)
 
 # Acknowledgement
 Thanks to the tails project for their reproducible build debian system. Thanks to the OpenWrt project for the source date epoch functions.
