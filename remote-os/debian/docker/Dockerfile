@@ -38,9 +38,9 @@ RUN git remote add stdebos https://github.com/system-transparency/debos && \
 RUN go install github.com/go-debos/debos/cmd/debos && cp ${GOPATH}/bin/debos /usr/local/bin/debos
 
 # patch debootstrap to support docker builds
-COPY docker/debootstrap-buster.patch /tmp/debootstrap-buster.patch
+COPY debootstrap-buster.patch /tmp/debootstrap-buster.patch
 WORKDIR /usr/share/debootstrap/
 RUN cat /tmp/debootstrap-buster.patch | patch -p1
 
 WORKDIR /
-ENTRYPOINT /system-transparency/remote-os/debian/build.sh
+ENTRYPOINT /system-transparency/remote-os/debian/docker/build-debian.sh

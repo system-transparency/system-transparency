@@ -6,4 +6,5 @@
 /deploy/image/*.img
 /deploy/image/vmlinuz-linuxboot
 /.original*
-/remote-os/debian/out
+/remote-os/debian/docker/out
+/remote-os/debian/docker/document_build.info

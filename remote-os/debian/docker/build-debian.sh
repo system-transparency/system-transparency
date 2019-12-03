@@ -33,7 +33,7 @@ document_debpkg() {
 document_build_info() {
 	{
 		document_debpkg debos
-	} > ../document_build.info
+	} > ./document_build.info
 }
 
 build_debian_image() {
