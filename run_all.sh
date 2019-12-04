@@ -1,62 +1,122 @@
 #! /bin/bash
 
-BASE=$(dirname "$0")
+set -o errexit
+set -o pipefail
+set -o nounset
+# set -o xtrace
 
-MANIFEST="configs/example/manifest.json"
+failed="\e[1;5;31mfailed\e[0m"
+
+# Set magic variables for current file & dir
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+file="${dir}/$(basename "${BASH_SOURCE[0]}")"
+base="$(basename ${file} .sh)"
+root="${dir}"
+
+manifest=${root}/configs/debian-buster-amd64/manifest.json
 while getopts ":dm:" opt; do
   case $opt in
     d)
       echo
       echo "Run in developer mode!" >&2
       echo
-      DEVELOP=true
+      develop=true
       ;;
     m)
-      MANIFEST=$OPTARG
+      manifest=$OPTARG
       ;;
     \?)
-      echo "Invalid option: -$OPTARG" >&2
+      echo "Invalid option: -${OPTARG}" >&2
       exit 1
       ;;
     :)
-      echo "Option -$OPTARG requires a path argument." >&2
+      echo "Option -${OPTARG} requires a path argument." >&2
       exit 1
       ;;
   esac
 done
 
+echo "Checking dependancies ..."
+array=( "go" "openssl" "docker" )
+for i in "${array[@]}"
+do
+    command -v $i >/dev/null 2>&1 || { 
+        echo >&2 "$i required"; 
+        exit 1; 
+    }
+done
 
 echo
 echo "############################################################"
 echo " Build bootloader image"
 echo "############################################################"
 echo "                                                      "
-IMG="deploy/image/MBR_Syslinux_Linuxboot.img"
-if [ ! -f "$IMG" ]; then
-    while true; do
-       echo "$IMG does not exist."
-       read -p "Create now? Root privileges are required. (y/n)" yn
-       case $yn in
-          [Yy]* ) sudo bash ./deploy/image/create_image.sh; break;;
-          [Nn]* ) exit;;
-          * ) echo "Please answer yes or no.";;
-       esac
-    done
-fi
+while true; do
+   echo "Run  (r) Root privileges are required"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) sudo bash ${root}/deploy/image/create_image.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
+
+echo
+echo "############################################################"
+echo " Generate example keys and certificates"
+echo "############################################################"
+echo "                                                      "
+while true; do
+   echo "Run  (r)"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/keys/generate-keys-and-certs.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
 
 echo
 echo "############################################################"
 echo " Build reproducible Debian OS"
 echo "############################################################"
 echo "                                                      "
-bash ./remote-os/debian/create-manifest.sh
+while true; do
+   echo "Run  (r) Root privileges may be required"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/remote-os/debian/create-manifest.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
 
 echo
 echo "############################################################"
 echo " (Re)build stconfig tool"
 echo "############################################################"
 echo "                                                     "
-bash ./stconfig/install_stconfig.sh
+while true; do
+   echo "Run  (r)"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/stconfig/install_stconfig.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
 
 echo
 echo "############################################################"
@@ -64,14 +124,18 @@ echo " Utilize stconfig tool and upload resulting boot file"
 echo "############################################################"
 echo "                                                     "
 while true; do
-    read -p "Continue? (y/n)" yn
-    case $yn in
-        [Yy]* ) bash ./stconfig/make_and_upload_bootconfig.sh $MANIFEST; break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
+   echo "manifest: ${manifest}"
+   echo "Run  (r) with manifest"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/stconfig/make_and_upload_bootconfig.sh $manifest; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
 done
-
 
 echo "                                                     "
 echo "############################################################"
@@ -79,12 +143,16 @@ echo " (Re)build u-root command"
 echo "############################################################"
 echo "                                                     "
 while true; do
-    read -p "Continue? (y/n)" yn
-    case $yn in
-        [Yy]* ) bash ./stboot/install-u-root.sh; break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
+   echo "Run  (r)"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/stboot/install-u-root.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
 done
 
 echo "                                                     "
@@ -93,12 +161,18 @@ echo " Use u-root to create linuxboot initramfs"
 echo "############################################################"
 echo "                                                     "
 while true; do
-    read -p "Continue? (y/n)" yn
-    case $yn in
-        [Yy]* ) if [ $DEVELOP ]; then bash ./stboot/make_initramfs.sh dev; else bash ./stboot/make_initramfs.sh; fi; break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
+   echo "Run  (r)"
+   echo "Run  (d) with 'develop' flag"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/stboot/make_initramfs.sh; break;;
+      [Dd]* ) bash ${root}/stboot/make_initramfs.sh dev; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
 done
 
 echo "                                                     "
@@ -107,13 +181,17 @@ echo " Include initramfs into linuxboot image"
 echo "############################################################"
 echo "                                                     "
 while true; do
-    read -p "Continue as root? (y/n)" yn
-    case $yn in
-        [Yy]* ) sudo bash ./deploy/image/mv_initrd_to_image.sh; break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done   
+   echo "Run  (r) Root privileges are required"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) sudo bash ${root}/deploy/image/mv_initrd_to_image.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
 
 # netvars.json is included into the initramfs at the moment
 
@@ -123,13 +201,17 @@ done
 #echo "############################################################"
 #echo "                                                     "
 #while true; do
-#    read -p "Continue as root? (y/n)" yn
-#    case $yn in
-#        [Yy]* ) sudo bash ./deploy/image/mv_netvars_to_image.sh; break;;
-#        [Nn]* ) exit;;
-#        * ) echo "Please answer yes or no.";;
-#    esac
-#done   
+#   echo "Run it. Root privileges are required (r)"
+#   echo "Skip (s)"
+#   echo "Quit (q)"
+#   read -p ">> " x
+#   case $x in
+#      [Rr]* ) sudo bash ${root}/deploy/image/mv_netvars_to_image.sh; break;;
+#      [Ss]* ) break;;
+#      [Qq]* ) exit;;
+#      * ) echo "Invalid input";;
+#   esac
+#done
 
 
 echo "                                                     "
@@ -138,10 +220,15 @@ echo " Run QEMU with linuxboot image"
 echo "############################################################"
 echo "                                                     "
 while true; do
-    read -p "Continue? (y/n)" yn
-    case $yn in
-        [Yy]* ) bash ./start_qemu_image.sh; break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
+   echo "Run  (r)"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/start_qemu_image.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
 done
+

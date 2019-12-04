@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit 1
+fi
+
 set -o errexit
 set -o pipefail
 set -o nounset
@@ -11,18 +16,19 @@ failed="\e[1;5;31mfailed\e[0m"
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 file="${dir}/$(basename "${BASH_SOURCE[0]}")"
 base="$(basename ${file} .sh)"
-root="$(cd "${dir}/../../" && pwd)" 
+root="$(cd "${dir}/../../" && pwd)"
 
-if [ -d ${root}/configs/debian ]; then
-    rmdir -v --ignore-fail-on-non-empty ${root}/configs/debian
-fi
+kernel="debian-buster-amd64.vmlinuz"
+initrd="debian-buster-amd64.cpio.gz"
 
-#Build docker image
-sudo docker build -t debos ${dir}/docker || { echo -e "building doker image $failed"; exit 1; }
-#Build DebianOS reproducible via docker container
-sudo docker run --cap-add=SYS_ADMIN --privileged -it -v ${root}:/system-transparency/ debos || { echo -e "running doker image $failed"; exit 1; }
+echo "____Build docker image____"
+docker build -t debos ${dir}/docker || { echo -e "building doker image $failed"; exit 1; }
+echo "____Build Debian OS reproducible via docker container____"
+docker run --cap-add=SYS_ADMIN --privileged -it -v ${root}:/system-transparency/ debos || { echo -e "running doker image $failed"; exit 1; }
 
-echo "Kernel and Initramfs generated at: ${dir}/out"
+read -p "Type your username to own artefacts:" user
+chown -c $user:$user ${dir}/docker/out/${kernel}
+chown -c $user:$user ${dir}/docker/out/${initrd}
 
-#create mainfest.json inside example directory
-#./${root}/stconfig/create_manifest.sh
+echo "Kernel and Initramfs generated at: ${dir}/docker/out"
+

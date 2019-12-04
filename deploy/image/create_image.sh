@@ -2,7 +2,7 @@
 
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
-  exit
+  exit 1
 fi
 
 
@@ -21,7 +21,9 @@ MNT=$(mktemp -d -t stmnt-XXXXXXXX)
 
 if [ -f "$IMG" ]; then
     while true; do
-       read -p "$IMG already exists! Override? (y/n)" yn
+       echo "Current image file:"
+       ls -l $IMG
+       read -p "Update? (y/n)" yn
        case $yn in
           [Yy]* ) rm $IMG; break;;
           [Nn]* ) exit;;
@@ -38,8 +40,11 @@ if [ ! -f "$LNXBT_KERNEL" ]; then
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
-    done 
+    done
+else
+    echo "Linuxboot kernel:  $LNXBT_KERNEL"
 fi
+
 
 
 echo "____ Downloading Syslinux Bootloader ____"
@@ -75,5 +80,5 @@ chown -c $user:$user $IMG
 chown -c $user:$user $LNXBT_KERNEL
 
 echo ""
-echo "$IMG created. Initramfs needs to be included."
+echo "$IMG created. Linuxboot initramfs needs to be included."
 
