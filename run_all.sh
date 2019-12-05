@@ -48,6 +48,24 @@ done
 
 echo
 echo "############################################################"
+echo " Generate example keys and certificates"
+echo "############################################################"
+echo "                                                      "
+while true; do
+   echo "Run  (r)"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/keys/generate-keys-and-certs.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
+
+echo
+echo "############################################################"
 echo " Build bootloader image"
 echo "############################################################"
 echo "                                                      "
@@ -64,23 +82,25 @@ while true; do
    esac
 done
 
-echo
-echo "############################################################"
-echo " Generate example keys and certificates"
-echo "############################################################"
-echo "                                                      "
-while true; do
-   echo "Run  (r)"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -p ">> " x
-   case $x in
-      [Rr]* ) bash ${root}/keys/generate-keys-and-certs.sh; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
+# netvars.json is included into the initramfs at the moment
+
+#echo "                                                     "
+#echo "############################################################"
+#echo " Include netvars.json into linuxboot image"
+#echo "############################################################"
+#echo "                                                     "
+#while true; do
+#   echo "Run it. Root privileges are required (r)"
+#   echo "Skip (s)"
+#   echo "Quit (q)"
+#   read -p ">> " x
+#   case $x in
+#      [Rr]* ) sudo bash ${root}/deploy/image/mv_netvars_to_image.sh; break;;
+#      [Ss]* ) break;;
+#      [Qq]* ) exit;;
+#      * ) echo "Invalid input";;
+#   esac
+#done
 
 echo
 echo "############################################################"
@@ -100,46 +120,9 @@ while true; do
    esac
 done
 
-echo
-echo "############################################################"
-echo " (Re)build stconfig tool"
-echo "############################################################"
-echo "                                                     "
-while true; do
-   echo "Run  (r)"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -p ">> " x
-   case $x in
-      [Rr]* ) bash ${root}/stconfig/install_stconfig.sh; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
-echo
-echo "############################################################"
-echo " Utilize stconfig tool and upload resulting boot file"
-echo "############################################################"
-echo "                                                     "
-while true; do
-   echo "manifest: ${manifest}"
-   echo "Run  (r) with manifest"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -p ">> " x
-   case $x in
-      [Rr]* ) bash ${root}/stconfig/make_and_upload_bootconfig.sh $manifest; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
 echo "                                                     "
 echo "############################################################"
-echo " (Re)build u-root command"
+echo " Build u-root command"
 echo "############################################################"
 echo "                                                     "
 while true; do
@@ -149,6 +132,24 @@ while true; do
    read -p ">> " x
    case $x in
       [Rr]* ) bash ${root}/stboot/install-u-root.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
+
+echo
+echo "############################################################"
+echo " Build stconfig tool"
+echo "############################################################"
+echo "                                                     "
+while true; do
+   echo "Run  (r)"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/stconfig/install_stconfig.sh; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -193,26 +194,24 @@ while true; do
    esac
 done
 
-# netvars.json is included into the initramfs at the moment
-
-#echo "                                                     "
-#echo "############################################################"
-#echo " Include netvars.json into linuxboot image"
-#echo "############################################################"
-#echo "                                                     "
-#while true; do
-#   echo "Run it. Root privileges are required (r)"
-#   echo "Skip (s)"
-#   echo "Quit (q)"
-#   read -p ">> " x
-#   case $x in
-#      [Rr]* ) sudo bash ${root}/deploy/image/mv_netvars_to_image.sh; break;;
-#      [Ss]* ) break;;
-#      [Qq]* ) exit;;
-#      * ) echo "Invalid input";;
-#   esac
-#done
-
+echo
+echo "############################################################"
+echo " Utilize stconfig tool and upload resulting boot file"
+echo "############################################################"
+echo "                                                     "
+while true; do
+   echo "manifest: ${manifest}"
+   echo "Run  (r) with manifest"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/stconfig/make_and_upload_bootconfig.sh $manifest; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
 
 echo "                                                     "
 echo "############################################################"

@@ -23,11 +23,11 @@ if [ -f ${root}/configs/debian-buster-amd64/manifest.json ]; then
 fi
 
 if [ ! -f "${dir}/docker/out/${kernel}" ] || [ ! -f "${dir}/docker/out/${initrd}" ]; then
-    echo "____Build reproducible Debian OS inside docker____"
+    echo "[INFO]: Build reproducible Debian OS inside docker"
     echo "Root privileges are required"
     sudo bash ${dir}/run-docker.sh
 else
-    echo "Current Debian OS artefacts: "
+    echo "[INFO]: Current Debian OS artefacts: "
     ls -l ${dir}/docker/out/${kernel}
     ls -l ${dir}/docker/out/${initrd}
     while true; do
@@ -40,12 +40,12 @@ else
     done
 fi
 
-echo "____Copy nessesary files to config directory____"
+echo "[INFO]: Copy nessesary files to config directory"
 mkdir -p ${root}/configs/debian-buster-amd64/kernels && cp -v ${dir}/docker/out/${kernel} ${root}/configs/debian-buster-amd64/kernels
 mkdir -p ${root}/configs/debian-buster-amd64/initrds && cp -v ${dir}/docker/out/${initrd} ${root}/configs/debian-buster-amd64/initrds
 mkdir -p ${root}/configs/debian-buster-amd64/signing && cp -v ${root}/keys/root.cert ${root}/configs/debian-buster-amd64/signing
 
-echo "____Create manifest.json for debian boot configuration____"
+echo "[INFO]: Create manifest.json for debian boot configuration"
 touch ${root}/configs/debian-buster-amd64/manifest.json
 sudo echo '{ 
   "version": 1, 

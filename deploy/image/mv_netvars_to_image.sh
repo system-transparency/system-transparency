@@ -7,22 +7,35 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-MNT=$(mktemp -d -t "mnt-st-XXXX")
-IMG="$BASE/MBR_Syslinux_Linuxboot.img"
-FILE="$BASE/../../stboot/include/netvars.json"
+set -o errexit
+set -o pipefail
+set -o nounset
+# set -o xtrace
 
-echo "[INFO]: looking for loop device ..."
-losetup -f || { echo 'losetup failed'; exit 1; }
-DEV=$(losetup -f)
+failed="\e[1;5;31mfailed\e[0m"
 
-echo "[INFO]: setup $IMG to $DEV and mout at $MNT"
-losetup $DEV $IMG || { echo -e "losetup $failed"; exit 1; }
-partx -u $DEV || { echo -e "partx $failed"; losetup -d $DEV; exit 1; }
-mkdir -p $MNT || { echo -e "mkdir $failed"; losetup -d $DEV; exit 1; }
-mount ${DEV}p1 $MNT || { echo -e "mount $failed"; losetup -d $DEV; exit 1; }
-cp -v $FILE $MNT || { echo 'cp failed'; losetup -d $DEV; exit 1; }
-umount $MNT || { echo -e "umount $failed"; losetup -d $DEV; exit 1; }
-rm -r -f $MNT || { echo -e "cleanup tmpdir $failed"; losetup -d $DEV; exit 1; }
-losetup -d $DEV || { echo -e "losetup -d $failed"; losetup -d $DEV; exit 1; }
+# Set magic variables for current file & dir
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+file="${dir}/$(basename "${BASH_SOURCE[0]}")"
+base="$(basename ${file} .sh)"
+root="$(cd "${dir}/../../" && pwd)"
+
+mnt=$(mktemp -d -t "mnt-st-XXXX")
+img="${dir}/MBR_Syslinux_Linuxboot.img"
+file="${root}/stboot/include/netvars.json"
+
+echo "[INFO]: looking for loop device"
+losetup -f || { echo 'losetup $failed'; exit 1; }
+dev=$(losetup -f)
+
+echo "[INFO]: setup $img to $dev and mout at $mnt"
+losetup ${dev} ${img} || { echo -e "losetup $failed"; exit 1; }
+partx -u ${dev} || { echo -e "partx $failed"; losetup -d ${dev}; exit 1; }
+mkdir -p ${mnt} || { echo -e "mkdir $failed"; losetup -d ${dev}; exit 1; }
+mount ${dev}p1 ${mnt} || { echo -e "mount $failed"; losetup -d ${dev}; exit 1; }
+cp -v ${file} ${mnt}
+umount ${mnt} || { echo -e "umount $failed"; losetup -d ${dev}; exit 1; }
+rm -r -f ${mnt} || { echo -e "cleanup tmpdir $failed"; losetup -d ${dev}; exit 1; }
+losetup -d ${dev} || { echo -e "losetup -d $failed"; losetup -d ${dev}; exit 1; }
 echo "[INFO]: loop device is free again"
 

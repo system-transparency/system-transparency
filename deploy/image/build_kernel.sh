@@ -1,69 +1,84 @@
 #!/bin/bash 
 
+set -o errexit
+set -o pipefail
+set -o nounset
+# set -o xtrace
+
 failed="\e[1;5;31mfailed\e[0m"
-BASE=$(dirname "$0")
 
-LNXBT_KERNEL="$BASE/vmlinuz-linuxboot"
-KERNEL_SRC="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
-KERNEL_VER="linux-4.19.6"
-KERNEL_CONFIG="$BASE/x86_64_linuxboot_config"
-TMP=$(mktemp -d -t stkernel-XXXXXXXX)
-DEVKEYS="torvalds@kernel.org gregkh@kernel.org"
+# Set magic variables for current file & dir
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+file="${dir}/$(basename "${BASH_SOURCE[0]}")"
+base="$(basename ${file} .sh)"
+root="$(cd "${dir}/../../" && pwd)"
 
-if [ -f "$LNXBT_KERNEL" ]; then
+
+lnxbt_kernel="${dir}/vmlinuz-linuxboot"
+kernel_src="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
+kernel_ver="linux-4.19.6"
+kernel_config="${dir}/x86_64_linuxboot_config"
+tmp=$(mktemp -d -t stkernel-XXXXXXXX)
+dev_keys="torvalds@kernel.org gregkh@kernel.org"
+
+if [ -f "${lnxbt_kernel}" ]; then
     while true; do
-       read -p "$LNXBT_KERNEL already exists! Override? (y/n)" yn
+       echo "Current Linuxboot kernel:"
+       ls -l ${lnxbt_kernel}
+       echo "kernel config:"
+       ls -l ${kernel_config}
+       read -p "Recompile? (y/n)" yn
        case $yn in
-          [Yy]* ) rm $IMG; break;;
+          [Yy]* ) rm ${lnxbt_kernel}; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
     done 
 fi
 
-echo "____ Downloading Linux Kernel source files and signature____"
-wget $KERNEL_SRC/${KERNEL_VER}.tar.xz -P $TMP || { rm -rf ${TMP}; echo -e "Downloading source files $failed"; exit 1; }
-#xz -d -v $TMP/${KERNEL_VER}.tar.xz || { echo -e "Decompression $failed"; exit 1; }
-wget $KERNEL_SRC/${KERNEL_VER}.tar.sign -P $TMP || { rm -rf ${TMP}; echo -e "Downloading signature $failed"; exit 1; }
 
-mkdir ${TMP}/gnupg
-echo "____ Fetching all the necessary keys ____"
+echo "[INFO]: Downloading Linux Kernel source files and signature"
+wget ${kernel_src}/${kernel_ver}.tar.xz -P ${tmp} || { rm -rf ${tmp}; echo -e "Downloading source files $failed"; exit 1; }
+wget ${kernel_src}/${kernel_ver}.tar.sign -P ${tmp} || { rm -rf ${tmp}; echo -e "Downloading signature $failed"; exit 1; }
+
+mkdir ${tmp}/gnupg
+echo "[INFO]: Fetching kernel developer keys"
 gpg --batch --quiet \
-    --homedir ${TMP}/gnupg \
+    --homedir ${tmp}/gnupg \
     --auto-key-locate wkd \
-    --locate-keys ${DEVKEYS} 
+    --locate-keys ${dev_keys} 
 if [[ $? != "0" ]]; then
     echo -e "Fetching keys $failed"
-    rm -rf ${TMP}
+    rm -rf ${tmp}
     exit 1
 fi
-KEYRING=${TMP}/gnupg/keyring.gpg
-gpg --batch --export ${DEVKEYS} > ${KEYRING}
-DEVKEYRING=${TMP}/gnupg/devkeyring.gpg}
+keyring=${tmp}/gnupg/keyring.gpg
+gpg --batch --export ${dev_keys} > ${keyring}
+devkeyring=${tmp}/gnupg/devkeyring.gpg}
 
-echo "____ Verifying signature on the kernel tarball ____"
-COUNT=$(xz -cd ${TMP}/${KERNEL_VER}.tar.xz \
-        | gpgv --keyring=${KEYRING} --status-fd=1 ${TMP}/${KERNEL_VER}.tar.sign - \
+echo "[INFO]: Verifying signature of the kernel tarball"
+count=$(xz -cd ${tmp}/${kernel_ver}.tar.xz \
+        | gpgv --keyring=${keyring} --status-fd=1 ${tmp}/${kernel_ver}.tar.sign - \
         | grep -c -E '^\[GNUPG:\] (GOODSIG|VALIDSIG)')
-if [[ ${COUNT} -lt 2 ]]; then
+if [[ ${count} -lt 2 ]]; then
     echo -e "Verifying kernle tarball $failed"
-    rm -rf ${TMP}
+    rm -rf ${tmp}
     exit 1
 fi
 
 echo
-echo "Successfully downloaded and verified kernel"
+echo "[INFO]: Successfully downloaded and verified kernel"
+echo "[INFO]: Build Linuxboot kernel"
 
-tar -xf ${TMP}/${KERNEL_VER}.tar.xz -C $TMP || { rm -rf ${TMP}; echo -e "Unpacking $failed"; exit 1; }
+tar -xf ${tmp}/${kernel_ver}.tar.xz -C ${tmp} || { rm -rf ${tmp}; echo -e "Unpacking $failed"; exit 1; }
 
-[ -f "$KERNEL_CONFIG" ] || { rm -rf ${TMP}; echo -e "Finding $KERNEL_CONFIG $failed"; exit 1; }
-cp -v $KERNEL_CONFIG ${TMP}/${KERNEL_VER}/.config
-SAVEDIR=$(pwd)
-cd ${TMP}/${KERNEL_VER}
-make -j$(nproc) || { rm -rf ${TMP}; echo -e "Compiling kernel $failed"; exit 1; }
-cd $SAVEDIR
-cp -v ${TMP}/${KERNEL_VER}/arch/x86/boot/bzImage $LNXBT_KERNEL
-rm -rf ${TMP}
+[ -f "${kernel_config}" ] || { rm -rf ${tmp}; echo -e "Finding $KERNEL_CONFIG $failed"; exit 1; }
+cp -v ${kernel_config} ${tmp}/${kernel_ver}/.config
+cd ${tmp}/${kernel_ver}
+make -j$(nproc) || { rm -rf ${tmp}; echo -e "Compiling kernel $failed"; exit 1; }
+cd ${dir}
+cp -v ${tmp}/${kernel_ver}/arch/x86/boot/bzImage $lnxbt_kernel
+rm -rf ${tmp}
 echo
-echo "Successfully created $LNXBT_KERNEL ($KERNEL_VER)"
+echo "Successfully created $lnxbt_kernel ($kernel_ver)"
 

@@ -5,80 +5,87 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+set -o errexit
+set -o pipefail
+set -o nounset
+# set -o xtrace
 
 failed="\e[1;5;31mfailed\e[0m"
-BASE=$(dirname "$0")
 
-IMG="$BASE/MBR_Syslinux_Linuxboot.img"
-PARTTABLE="$BASE/mbr.table"
-SYSLINUX_SRC="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
-SYSLINUX_TAR="syslinux-6.03.tar.xz"
-SYSLINUX_DIR="syslinux-6.03"
-SYSLINUX_CFG="$BASE/syslinux.cfg"
-LNXBT_KERNEL="$BASE/vmlinuz-linuxboot"
-TMP=$(mktemp -d -t stimg-XXXXXXXX)
-MNT=$(mktemp -d -t stmnt-XXXXXXXX)
+# Set magic variables for current file & dir
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+file="${dir}/$(basename "${BASH_SOURCE[0]}")"
+base="$(basename ${file} .sh)"
+root="$(cd "${dir}/../../" && pwd)"
 
-if [ -f "$IMG" ]; then
+img="${dir}/MBR_Syslinux_Linuxboot.img"
+part_table="${dir}/mbr.table"
+syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
+syslinux_tar="syslinux-6.03.tar.xz"
+syslinux_dir="syslinux-6.03"
+syslinux_config="${dir}/syslinux.cfg"
+lnxbt_kernel="${dir}/vmlinuz-linuxboot"
+tmp=$(mktemp -d -t stimg-XXXXXXXX)
+mnt=$(mktemp -d -t stmnt-XXXXXXXX)
+
+if [ -f "${img}" ]; then
     while true; do
        echo "Current image file:"
-       ls -l $IMG
+       ls -l $img
        read -p "Update? (y/n)" yn
        case $yn in
-          [Yy]* ) rm $IMG; break;;
+          [Yy]* ) rm $img; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
     done 
 fi
 
-if [ ! -f "$LNXBT_KERNEL" ]; then
-    while true; do
-       read -p "$LNXBT_KERNEL not found. Build kernel now? (y/n)" yn
-       case $yn in
-          [Yy]* ) bash ${BASE}/build_kernel.sh; break;;
-          [Nn]* ) exit;;
-          * ) echo "Please answer yes or no.";;
-       esac
-    done
+echo "[INFO]: check for Linuxboot kernel"
+bash ${dir}/build_kernel.sh
+
+if [ ! -f "${lnxbt_kernel}" ]; then
+    echo "${lnxbot_kernel} not found!"
+    echo -e "creating image $failed"; exit 1
 else
-    echo "Linuxboot kernel:  $LNXBT_KERNEL"
+    echo "Linuxboot kernel:  ${lnxbt_kernel}"
 fi
 
 
 
-echo "____ Downloading Syslinux Bootloader ____"
-wget $SYSLINUX_SRC/$SYSLINUX_TAR -P $TMP || { echo -e "Download $failed"; exit 1; }
-tar -xf $TMP/$SYSLINUX_TAR -C $TMP || { echo -e "Decompression $failed"; exit 1; }
+echo "[INFO]: Downloading Syslinux Bootloader"
+wget ${syslinux_src}/${syslinux_tar} -P ${tmp} || { echo -e "Download $failed"; exit 1; }
+tar -xf ${tmp}/${syslinux_tar} -C ${tmp} || { echo -e "Decompression $failed"; exit 1; }
 
-echo "____ Creating raw image ____"
-dd if=/dev/zero of=$IMG bs=1M count=200
+echo "[INFO]: Creating raw image"
+dd if=/dev/zero of=${img} bs=1M count=200
 losetup -f || { echo -e "Finding free loop device $failed"; exit 1; }
-DEV=$(losetup -f)
-losetup $DEV $IMG || { echo -e "Loop device setup $failed"; losetup -d $DEV; exit 1; }
-sfdisk --no-reread --no-tell-kernel $DEV < $PARTTABLE || { echo -e "partitioning $failed"; losetup -d $DEV; exit 1; }
-partx -u $DEV || { echo -e "partx $failed"; losetup -d $DEV; exit 1; }
-mkfs -t vfat ${DEV}p1 || { echo -e "Creating filesystem $failed"; losetup -d $DEV; exit 1; }
+dev=$(losetup -f)
+losetup ${dev} ${img} || { echo -e "Loop device setup $failed"; losetup -d ${dev}; exit 1; }
+sfdisk --no-reread --no-tell-kernel ${dev} < ${part_table} || { echo -e "partitioning $failed"; losetup -d ${dev}; exit 1; }
+partx -u ${dev} || { echo -e "partx $failed"; losetup -d ${dev}; exit 1; }
+mkfs -t vfat ${dev}p1 || { echo -e "Creating filesystem $failed"; losetup -d ${dev}; exit 1; }
 
-echo "____ Installing Syslinux ____"
-mount ${DEV}p1 $MNT || { echo -e "Mounting ${DEV}p1 $failed"; losetup -d $DEV; exit 1; }
-mkdir  $MNT/syslinux || { echo -e "Making Syslinux config directory $failed"; losetup -d $DEV; exit 1; }
-umount $MNT || { echo -e "Unmounting $failed"; losetup -d $DEV; exit 1; }
-$TMP/$SYSLINUX_DIR/bios/linux/syslinux --directory /syslinux/ --install ${DEV}p1 || { echo -e "Writing vollume boot record $failed"; $DEV; exit 1; }
-dd bs=440 count=1 conv=notrunc if=$TMP/$SYSLINUX_DIR/bios/mbr/mbr.bin of=$DEV || { echo -e "Writing master boot record $failed"; losetup -d $DEV; exit 1; }
-mount ${DEV}p1 $MNT || { echo -e "Mounting ${DEV}p1 $failed"; losetup -d $DEV; exit 1; }
-cp $SYSLINUX_CFG $MNT/syslinux
-cp $LNXBT_KERNEL $MNT
+echo "[INFO]: Installing Syslinux"
+mount ${dev}p1 ${mnt} || { echo -e "Mounting ${dev}p1 $failed"; losetup -d ${dev}; exit 1; }
+mkdir  ${mnt}/syslinux || { echo -e "Making Syslinux config directory $failed"; losetup -d ${dev}; exit 1; }
+umount ${mnt} || { echo -e "Unmounting $failed"; losetup -d ${dev}; exit 1; }
+${tmp}/${syslinux_dir}/bios/linux/syslinux --directory /syslinux/ --install ${dev}p1 || { echo -e "Writing vollume boot record $failed"; ${dev}; exit 1; }
+dd bs=440 count=1 conv=notrunc if=${tmp}/${syslinux_dir}/bios/mbr/mbr.bin of=${dev} || { echo -e "Writing master boot record $failed"; losetup -d ${dev}; exit 1; }
+mount ${dev}p1 ${mnt} || { echo -e "Mounting ${dev}p1 $failed"; losetup -d $dev; exit 1; }
+cp ${syslinux_config} ${mnt}/syslinux
+cp ${lnxbt_kernel} ${mnt}
 
 
-umount $MNT || { echo -e "Unmounting $failed"; losetup -d $DEV; exit 1; }
-losetup -d $DEV || { echo -e "Loop device clean up $failed"; exit 1; }
-rm -r -f $TMP $MNT
+umount ${mnt} || { echo -e "Unmounting $failed"; losetup -d $dev; exit 1; }
+losetup -d ${dev} || { echo -e "Loop device clean up $failed"; exit 1; }
+rm -r -f ${tmp} ${mnt}
 
 read -p "Type your username to own the image file:" user
-chown -c $user:$user $IMG
-chown -c $user:$user $LNXBT_KERNEL
+chown -c $user:$user ${img}
+chown -c $user:$user ${lnxbt_kernel}
 
 echo ""
-echo "$IMG created. Linuxboot initramfs needs to be included."
+echo "${img} created."
+echo "Linuxboot initramfs needs to be included."
 
