@@ -53,15 +53,14 @@ if [[ $? != "0" ]]; then
     exit 1
 fi
 keyring=${tmp}/gnupg/keyring.gpg
-gpg --batch --export ${dev_keys} > ${keyring}
-devkeyring=${tmp}/gnupg/devkeyring.gpg}
+gpg --batch --homedir ${tmp}/gnupg --no-default-keyring --export ${dev_keys} > ${keyring}
 
 echo "[INFO]: Verifying signature of the kernel tarball"
 count=$(xz -cd ${tmp}/${kernel_ver}.tar.xz \
-        | gpgv --keyring=${keyring} --status-fd=1 ${tmp}/${kernel_ver}.tar.sign - \
+        | gpgv --homedir ${tmp}/gnupg --keyring=${keyring} --status-fd=1 ${tmp}/${kernel_ver}.tar.sign - \
         | grep -c -E '^\[GNUPG:\] (GOODSIG|VALIDSIG)')
 if [[ ${count} -lt 2 ]]; then
-    echo -e "Verifying kernle tarball $failed"
+    echo -e "Verifying kernel tarball $failed"
     rm -rf ${tmp}
     exit 1
 fi
