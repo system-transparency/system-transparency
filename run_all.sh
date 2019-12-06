@@ -47,6 +47,7 @@ do
         exit 1; 
     }
 done
+echo "$PATH"|grep -q $(go env GOPATH)/bin || { echo "$(go env GOPATH)/bin must be added to PATH"; exit 1; }
 echo "OK"
 
 echo
