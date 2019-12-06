@@ -8,3 +8,4 @@
 /.original*
 /remote-os/debian/docker/out
 /remote-os/debian/docker/document_build.info
+/remote-os/debian/docker/.debos-*
