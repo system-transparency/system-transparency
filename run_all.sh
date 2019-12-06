@@ -37,7 +37,9 @@ while getopts ":dm:" opt; do
 done
 
 echo "Checking dependancies ..."
-array=( "go" "openssl" "docker" )
+array=( "go" "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" \
+        "wget" "dd" "losetup" "sfdisk" "partx" "mkfs" "mount" "umount" "shasum" "ssh" "scp")
+
 for i in "${array[@]}"
 do
     command -v $i >/dev/null 2>&1 || { 
@@ -45,6 +47,7 @@ do
         exit 1; 
     }
 done
+echo "OK"
 
 echo
 echo "############################################################"
