@@ -22,7 +22,10 @@ root="$(cd "${dir}/../../" && pwd)"
 
 mnt=$(mktemp -d -t "mnt-st-XXXX")
 img="${dir}/MBR_Syslinux_Linuxboot.img"
-file="${root}/stboot/include/netvars.json"
+var_file="hostvars.json"
+file="${root}/stboot/${var_file}"
+
+[ -f ${file} ] || { echo "${file} does not exist"; echo "Including ${var_file} into image $failed";  exit 1; }
 
 echo "[INFO]: looking for loop device"
 losetup -f || { echo 'losetup $failed'; exit 1; }

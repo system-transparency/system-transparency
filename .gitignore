@@ -1,11 +1,9 @@
 /configs
 /stboot/*.cpio
-/stboot/*bz*
 /stboot/*.json
-/stconfig/.original/
+/stboot/include/*.json
 /deploy/image/*.img
 /deploy/image/vmlinuz-linuxboot
-/.original*
 /remote-os/debian/docker/out
 /remote-os/debian/docker/document_build.info
 /remote-os/debian/docker/.debos-*

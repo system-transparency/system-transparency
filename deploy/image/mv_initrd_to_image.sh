@@ -22,6 +22,8 @@ mnt=$(mktemp -d -t "mnt-st-XXXX")
 img="${dir}/MBR_Syslinux_Linuxboot.img"
 initrd="${root}/stboot/initramfs-linuxboot.cpio"
 
+[ -f ${initrd} ] || { echo "${initrd} does not exist"; echo "Including initramfs into image $failed";  exit 1; }
+
 echo "[INFO]: look for loop device"
 losetup -f || { echo -e "losetup $failed"; exit 1; }
 dev=$(losetup -f)

@@ -13,8 +13,8 @@ file="${dir}/$(basename "${BASH_SOURCE[0]}")"
 base="$(basename ${file} .sh)"
 root="${dir}"
 
-manifest=${root}/configs/debian-buster-amd64/manifest.json
-while getopts ":dm:" opt; do
+config=${root}/configs/debian-buster-amd64/stconfig.json
+while getopts ":dc:" opt; do
   case $opt in
     d)
       echo
@@ -22,8 +22,8 @@ while getopts ":dm:" opt; do
       echo
       develop=true
       ;;
-    m)
-      manifest=$OPTARG
+    c)
+      config=$OPTARG
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -86,11 +86,29 @@ while true; do
    esac
 done
 
+echo
+echo "############################################################"
+echo " Create example hostvars.json"
+echo "############################################################"
+echo "                                                      "
+while true; do
+   echo "Run  (r)"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/stboot/create_hostvars.sh; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
+
 # netvars.json is included into the initramfs at the moment
 
 #echo "                                                     "
 #echo "############################################################"
-#echo " Include netvars.json into linuxboot image"
+#echo " Include hostvars.json into linuxboot image"
 #echo "############################################################"
 #echo "                                                     "
 #while true; do
@@ -108,7 +126,7 @@ done
 
 echo
 echo "############################################################"
-echo " Build reproducible Debian OS"
+echo " Build reproducible Debian OS and create config directory"
 echo "############################################################"
 echo "                                                      "
 while true; do
@@ -117,7 +135,7 @@ while true; do
    echo "Quit (q)"
    read -p ">> " x
    case $x in
-      [Rr]* ) bash ${root}/remote-os/debian/create-manifest.sh; break;;
+      [Rr]* ) bash ${root}/remote-os/debian/create-stconfig.sh; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -204,13 +222,13 @@ echo " Utilize stconfig tool and upload resulting boot file"
 echo "############################################################"
 echo "                                                     "
 while true; do
-   echo "manifest: ${manifest}"
-   echo "Run  (r) with manifest"
+   echo "configuration: ${config}"
+   echo "Run  (r) with configuration"
    echo "Skip (s)"
    echo "Quit (q)"
    read -p ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stconfig/make_and_upload_bootconfig.sh $manifest; break;;
+      [Rr]* ) bash ${root}/stconfig/make_and_upload_bootconfig.sh ${config}; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

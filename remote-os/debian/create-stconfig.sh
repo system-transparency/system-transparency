@@ -15,11 +15,13 @@ root="$(cd "${dir}/../../" && pwd)"
 
 kernel="debian-buster-amd64.vmlinuz"
 initrd="debian-buster-amd64.cpio.gz"
+cfg_dir="debian-buster-amd64"
+cfg_file="stconfig.json"
 
 #Check if debian config directory already exists
-if [ -f ${root}/configs/debian-buster-amd64/manifest.json ]; then
+if [ -f ${root}/configs/${cfg_dir}/${cfg_file} ]; then
     echo "clean config directory"
-    rm -r ${root}/configs/debian-buster-amd64
+    rm -r ${root}/configs/${cfg_dir}
 fi
 
 if [ ! -f "${dir}/docker/out/${kernel}" ] || [ ! -f "${dir}/docker/out/${initrd}" ]; then
@@ -41,15 +43,14 @@ else
 fi
 
 echo "[INFO]: Copy nessesary files to config directory"
-mkdir -p ${root}/configs/debian-buster-amd64/kernels && cp -v ${dir}/docker/out/${kernel} ${root}/configs/debian-buster-amd64/kernels
-mkdir -p ${root}/configs/debian-buster-amd64/initrds && cp -v ${dir}/docker/out/${initrd} ${root}/configs/debian-buster-amd64/initrds
-mkdir -p ${root}/configs/debian-buster-amd64/signing && cp -v ${root}/keys/root.cert ${root}/configs/debian-buster-amd64/signing
+mkdir -p ${root}/configs/${cfg_dir}/kernels && cp -v ${dir}/docker/out/${kernel} ${root}/configs/${cfg_dir}/kernels
+mkdir -p ${root}/configs/${cfg_dir}/initrds && cp -v ${dir}/docker/out/${initrd} ${root}/configs/${cfg_dir}/initrds
+mkdir -p ${root}/configs/${cfg_dir}/signing && cp -v ${root}/keys/root.cert ${root}/configs/${cfg_dir}/signing
 
-echo "[INFO]: Create manifest.json for debian boot configuration"
-touch ${root}/configs/debian-buster-amd64/manifest.json
-sudo echo '{ 
-  "version": 1, 
-  "configs": [ 
+echo "[INFO]: Create ${cfg_file} for debian boot configuration"
+touch ${root}/configs/${cfg_dir}/${cfg_file}
+echo '{  
+  "boot_configs": [ 
     { 
       "name": "Debian Buster reproducible", 
       "kernel": "kernels/'$kernel'", 
@@ -57,9 +58,9 @@ sudo echo '{
       "initramfs": "initrds/'$initrd'" 
     } 
   ], 
-  "rootCert": "signing/root.cert" 
-}' > ${root}/configs/debian-buster-amd64/manifest.json
+  "root_cert": "signing/root.cert" 
+}' > ${root}/configs/${cfg_dir}/${cfg_file}
 
-cat ${root}/configs/debian-buster-amd64/manifest.json
+cat ${root}/configs/${cfg_dir}/${cfg_file}
 
-echo "Successfully createt ${root}/configs/debian-buster-amd64/manifest.json"
+echo "Successfully createt ${root}/configs/${cfg_dir}/${cfg_file}"
