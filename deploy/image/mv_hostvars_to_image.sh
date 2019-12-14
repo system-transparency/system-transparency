@@ -22,10 +22,10 @@ root="$(cd "${dir}/../../" && pwd)"
 
 mnt=$(mktemp -d -t "mnt-st-XXXX")
 img="${dir}/MBR_Syslinux_Linuxboot.img"
-var_file="hostvars.json"
-file="${root}/stboot/${var_file}"
+var_file_name="hostvars.json"
+var_file="${root}/stboot/${var_file_name}"
 
-[ -f ${file} ] || { echo "${file} does not exist"; echo "Including ${var_file} into image $failed";  exit 1; }
+[ -f ${var_file} ] || { echo "${var_file} does not exist"; echo "Including ${var_file_name} into image $failed";  exit 1; }
 
 echo "[INFO]: looking for loop device"
 losetup -f || { echo 'losetup $failed'; exit 1; }
@@ -36,7 +36,7 @@ losetup ${dev} ${img} || { echo -e "losetup $failed"; exit 1; }
 partx -u ${dev} || { echo -e "partx $failed"; losetup -d ${dev}; exit 1; }
 mkdir -p ${mnt} || { echo -e "mkdir $failed"; losetup -d ${dev}; exit 1; }
 mount ${dev}p1 ${mnt} || { echo -e "mount $failed"; losetup -d ${dev}; exit 1; }
-cp -v ${file} ${mnt}
+cp -v ${var_file} ${mnt}
 umount ${mnt} || { echo -e "umount $failed"; losetup -d ${dev}; exit 1; }
 rm -r -f ${mnt} || { echo -e "cleanup tmpdir $failed"; losetup -d ${dev}; exit 1; }
 losetup -d ${dev} || { echo -e "losetup -d $failed"; losetup -d ${dev}; exit 1; }
