@@ -13,7 +13,6 @@ file="${dir}/$(basename "${BASH_SOURCE[0]}")"
 base="$(basename ${file} .sh)"
 root="$(cd "${dir}/../" && pwd)"
 
-server="mullvad.9esec.io"
 config_path=""
 if [[ $# -eq 0 ]] ; then
     echo "Path to a manifest.json must be provided"
@@ -37,6 +36,3 @@ stconfig sign $config_dir/$bootball ${root}/keys/signing-key-1.key ${root}/keys/
 stconfig sign $config_dir/$bootball ${root}/keys/signing-key-2.key ${root}/keys/signing-key-2.cert || { echo -e "stconfig sign $failed"; exit 1; }
 stconfig sign $config_dir/$bootball ${root}/keys/signing-key-3.key ${root}/keys/signing-key-3.cert || { echo -e "stconfig sign $failed"; exit 1; }
 
-echo "[INFO]: upload ${config_dir}/${bootball} to ${server}"
-scp $config_dir/$bootball root@$server:/var/www/testdata/ || { echo -e "upload via scp $failed"; exit 1; }
-echo "[INFO]: successfully uploaded signed $bootball to $server"

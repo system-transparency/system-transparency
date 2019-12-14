@@ -218,7 +218,7 @@ done
 
 echo
 echo "############################################################"
-echo " Utilize stconfig tool and upload resulting boot file"
+echo " Use stconfig tool to create and sign bootball"
 echo "############################################################"
 echo "                                                     "
 while true; do
@@ -228,12 +228,33 @@ while true; do
    echo "Quit (q)"
    read -p ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stconfig/make_and_upload_bootconfig.sh ${config}; break;;
+      [Rr]* ) bash ${root}/stconfig/create_and_sign_bootball.sh ${config}; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
    esac
 done
+
+echo
+echo "############################################################"
+echo " Upload bootball to provisioning server"
+echo "############################################################"
+echo "                                                     "
+bootball="$(dirname "${config}")/stboot.ball"
+while true; do
+   echo "bootball: ${bootball}"
+   echo "Run  (r) with bootball"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -p ">> " x
+   case $x in
+      [Rr]* ) bash ${root}/stconfig/upload_bootball.sh ${bootball}; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
+
 
 echo "                                                     "
 echo "############################################################"
