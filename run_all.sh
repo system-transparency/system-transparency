@@ -12,6 +12,19 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 file="${dir}/$(basename "${BASH_SOURCE[0]}")"
 base="$(basename ${file} .sh)"
 root="${dir}"
+currentver="$(gcc -dumpversion)"
+
+function checkGCC {
+   requiredver="8"
+   if [ "$currentver" -gt "$requiredver" ]; then 
+         echo "GCC not supported"
+         exit 1
+   else
+       echo "GCC supported"
+   fi
+}
+
+checkGCC
 
 config=${root}/configs/debian-buster-amd64/stconfig.json
 while getopts ":dc:" opt; do
