@@ -36,3 +36,6 @@ stconfig sign $config_dir/$bootball ${root}/keys/signing-key-1.key ${root}/keys/
 stconfig sign $config_dir/$bootball ${root}/keys/signing-key-2.key ${root}/keys/signing-key-2.cert || { echo -e "stconfig sign $failed"; exit 1; }
 stconfig sign $config_dir/$bootball ${root}/keys/signing-key-3.key ${root}/keys/signing-key-3.cert || { echo -e "stconfig sign $failed"; exit 1; }
 
+echo ""
+echo "[INFO]: $bootball:"
+ls -l $config_dir/$bootball
