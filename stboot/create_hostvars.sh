@@ -35,7 +35,7 @@ echo '{
   "netmask":"",
   "gateway":"10.0.2.2/24",
   "dns":"",
-  "bootstrap_url":"https://mullvad.9esec.io",
+  "bootstrap_url":"https://stboot.9esec.dev",
   "minimal_signatures_match": 3
 }' > ${dir}/include/${var_file}
 

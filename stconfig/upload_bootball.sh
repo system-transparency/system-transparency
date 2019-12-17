@@ -13,8 +13,8 @@ file="${dir}/$(basename "${BASH_SOURCE[0]}")"
 base="$(basename ${file} .sh)"
 root="$(cd "${dir}/../" && pwd)"
 
-server="mullvad.9esec.io"
-server_path="/var/www/testdata"
+server="stboot.9esec.dev"
+server_path="/home/provisioner/www"
 
 bootball=""
 if [[ $# -eq 0 ]] ; then
@@ -26,6 +26,6 @@ else
 fi
 
 echo "[INFO]: upload ${bootball} to ${server_path} at ${server}"
-scp $bootball root@$server:${server_path} || { echo -e "upload via scp $failed"; exit 1; }
+scp $bootball provisioner@$server:${server_path}/"$(basename ${bootball})" || { echo -e "upload via scp $failed"; exit 1; }
 echo "[INFO]: successfully uploaded bootball"
 
