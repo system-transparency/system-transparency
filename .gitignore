@@ -1,4 +1,4 @@
-/configs
+/configs/*/
 /stboot/*.cpio
 /stboot/*.json
 /stboot/include/*.json
