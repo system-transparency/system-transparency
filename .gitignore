@@ -2,10 +2,10 @@
 /stboot/*.cpio
 /stboot/*.json
 /stboot/include/*.json
-/deploy/image/*.img
-/deploy/image/vmlinuz-linuxboot
-/remote-os/debian/docker/out
-/remote-os/debian/docker/document_build.info
-/remote-os/debian/docker/.debos-*
+/deploy/mixed-firmware/*.img
+/deploy/mixed-firmware/vmlinuz-linuxboot
+/operating-system/debian/docker/out
+/operating-system/debian/docker/document_build.info
+/operating-system/debian/docker/.debos-*
 /keys/signing-key-*
 /keys/root.*

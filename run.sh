@@ -83,7 +83,7 @@ done
 
 echo
 echo "############################################################"
-echo " Build bootloader image"
+echo " Build bootloader for mixed-firmware deployment"
 echo "############################################################"
 echo "                                                      "
 while true; do
@@ -92,7 +92,7 @@ while true; do
    echo "Quit (q)"
    read -p ">> " x
    case $x in
-      [Rr]* ) sudo bash ${root}/deploy/image/create_image.sh; break;;
+      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/create_image.sh; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -121,7 +121,7 @@ done
 
 #echo "                                                     "
 #echo "############################################################"
-#echo " Include hostvars.json into linuxboot image"
+#echo " Include hostvars.json into bootloader image"
 #echo "############################################################"
 #echo "                                                     "
 #while true; do
@@ -130,7 +130,7 @@ done
 #   echo "Quit (q)"
 #   read -p ">> " x
 #   case $x in
-#      [Rr]* ) sudo bash ${root}/deploy/image/mv_netvars_to_image.sh; break;;
+#      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/mv_netvars_to_image.sh; break;;
 #      [Ss]* ) break;;
 #      [Qq]* ) exit;;
 #      * ) echo "Invalid input";;
@@ -148,7 +148,7 @@ while true; do
    echo "Quit (q)"
    read -p ">> " x
    case $x in
-      [Rr]* ) bash ${root}/remote-os/debian/create-stconfig.sh; break;;
+      [Rr]* ) bash ${root}/operating-system/debian/create-stconfig.sh; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -213,7 +213,7 @@ done
 
 echo "                                                     "
 echo "############################################################"
-echo " Include initramfs into linuxboot image"
+echo " Include initramfs into bootloader image"
 echo "############################################################"
 echo "                                                     "
 while true; do
@@ -222,7 +222,7 @@ while true; do
    echo "Quit (q)"
    read -p ">> " x
    case $x in
-      [Rr]* ) sudo bash ${root}/deploy/image/mv_initrd_to_image.sh; break;;
+      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/mv_initrd_to_image.sh; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -271,7 +271,7 @@ done
 
 echo "                                                     "
 echo "############################################################"
-echo " Run QEMU with linuxboot image"
+echo " Run QEMU with mixed-firmware image"
 echo "############################################################"
 echo "                                                     "
 while true; do
@@ -280,7 +280,7 @@ while true; do
    echo "Quit (q)"
    read -p ">> " x
    case $x in
-      [Rr]* ) bash ${root}/start_qemu_image.sh; break;;
+      [Rr]* ) bash ${root}/start_qemu_mixed-firmware.sh; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

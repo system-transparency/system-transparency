@@ -13,6 +13,6 @@ file="${dir}/$(basename "${BASH_SOURCE[0]}")"
 base="$(basename ${file} .sh)"
 root="$dir"
 
-image="${root}/deploy/image/MBR_Syslinux_Linuxboot.img"
-#terminal
+image="${root}/deploy/mixed-firmware/MBR_Syslinux_Linuxboot.img"
+
 qemu-system-x86_64 -drive if=virtio,file=${image},format=raw -device virtio-rng-pci -m 8192 -nographic 
