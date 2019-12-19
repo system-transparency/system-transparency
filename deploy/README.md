@@ -15,3 +15,10 @@ Directory | Description
 [`stconfig/`](../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
 
 ## Deploy
+The *stboot* boatloader can be deployed to a host in different ways. The sub directories here cover these solutions.
+
+Generally *stboot* is part of the host's firmware and comes as a flavor of *linuxboot*, more precisely as part of the *u-root* initrmfs inside *linuxboot*.
+
+See also:
+* https://www.linuxboot.org/
+* https://github.com/u-root/u-root
