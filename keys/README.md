@@ -15,3 +15,8 @@ Directory | Description
 [`stconfig/`](../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
 
 ## Keys
+This directory contains example data only.
+
+### Scripts
+#### `generate_keys_and_certs.sh`
+This script is invoked by `run.sh`. It generates certificate authority (CA), a self signed root certificate and a set of 5 signing keys, certified by the CA.
