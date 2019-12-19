@@ -15,3 +15,4 @@ Directory | Description
 [`stconfig/`](../../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
 
 ## Deploy Coreboot-ROM
+Work in progress ...
