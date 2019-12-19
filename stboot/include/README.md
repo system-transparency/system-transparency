@@ -15,3 +15,8 @@ Directory | Description
 [`stconfig/`](../../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
 
 ## Stboot Include
+#### `LetsEncrypt_Authority_X3_signed_by_X1.pem`
+Certificate to establish a HTTPS connection to the provisioning server.
+
+#### `netsetup.elv`
+Elvish shell script to be used for debugging purposes.
