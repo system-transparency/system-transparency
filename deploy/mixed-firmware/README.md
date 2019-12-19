@@ -15,13 +15,40 @@ Directory | Description
 [`stconfig/`](../../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
 
 ## Deploy Mixed-Firmware
+This deployment solution can be used if no direct control over the host default firmware is given. Since the *stboot* bootloader uses the *linuxboot* architecture it consists of a Linux kernel and an initfamfs, which can be treated as a usual operating system. The approach of this solution is to create an image including this kernel and initramfs. Additionally, the image contains an active boot partition with a separate bootloader written to it. *Syslinux* is used here.
 
+The image can then be written to the host's hard drive. During the boot process of the host's default firmware the *Syslinux* bootloader is called and hands over control to the *stboot bootloader finally.
 
+### Scripts
+#### `build_kernel.sh`
+This script is invoked by 'run.sh'. It downloads and veriifys sours code for Linux kernel version 4.19.6. The kernel is build according to 'x86_64_linuxboot_config' file. This kernel will be used as part of linuxboot. The script writes 'vmlinuz-linuxboot' in this directory.
 
+#### `create_image.sh`
+This script is invoked by 'run.sh'. Firstly it creates a raw image, secondly *sfdisk* is used to write the partitions table. Thirdly the script downloads *Syslinux* bootloader and installs it to the Master Boot Record and the Partition Boot Record respectively. Finally, the *linuxboot* kernel 'vmlinuz-linuxboot' is copied to the image. The output is 'MBR_Syslinux_Linuxboot.img'.
 
-linux kernel config
+Notice that the image is incomplete at this state. The appropriate initramfs need to be included.
 
-In addition to x86_64 based defconfig:
+#### `mount_img.sh`
+This script is for custom use. If you want to inspect or modify files of 'MBR_Syslinux_Linuxboot.img' use this script. It mounts the image via a loop device at a temporary directory. The path is printed to the console.
+
+#### `mv_hostvars_to_image.sh`
+Optional at the moment. This Script copies the 'hostvars.json' configuration file to the image.
+
+#### `mv_initrd_to_image.sh`
+this script is invoked by 'run.sh'. It copies the linuxboot initramfs including *stboot* to the image.
+
+#### `umount_img.sh`
+Counterpart of 'mount_img.sh'. The loop device used at mounting needs to be passed.
+
+### Configuration Files
+#### `mbr.table`
+This files describes the partition layout of the image
+
+#### `syslinux.cfg`
+This is the configuration file for *Syslinux*. The paths for kernel and initramfs are set here.
+
+#### `x86_64_linuxboot_config`
+This is the kernel config for the *linuxboot* kernel. In addition to x86_64 based *defconfig* the following is set:
 ```
 Processor type and features  --->
     [*] Linux guest support --->
