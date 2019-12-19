@@ -15,3 +15,18 @@ Directory | Description
 [`stconfig/`](README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
 
 ## Stconfig
+*Stboot* itself is part of the *u-root* project (https://github.com/u-root/u-root) and is written in Go. Since *Stboot* is still in a beta phase at the moment, the code resides at https://github.com/u-root/u-root/tree/stboot branch. This directory mainly provides utilities for the ongoing development.
+
+The *u-root* project also includes some tools related to its various commands. *Stconfig* is a tool for the host's operator to prepare a 'stboot.ball' file for the provisioning server. This file is downloaded to the host during the *Stboot's* bootprocess. *Stboot* is heavily dependent on that 'stboot.ball' being prepared by this tool.
+
+See https://docs.system-transparency.org for further information about 'stconfig.json' and 'stboot.ball'.
+
+### Scripts
+#### 'install_stconfig.sh'
+This script is invoked by 'run.sh'. It downloads and installs the 'stconfig' tool.
+
+#### 'create_and_sign_bootball.sh'
+This script is invoked by 'run.sh'. It uses 'stconfig' to create a 'stboot.ball' from the 'stconfig.json' in the 'configs/' directory. The path to a dedicated configuration directory is passed to the script. Further it uses 'stconfig' to sign the generated 'stboot.ball' with the example keys from 'keys/'.
+
+#### 'upload_bootball.sh'
+This script is invoked by 'run.sh'. It uploads the 'stboot.ball' file to the provisioning server. SSH access to the server is needed. See https://docs.system-transparency.org for further information about the provisioning server.
