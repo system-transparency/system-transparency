@@ -22,11 +22,11 @@ The *u-root* project also includes some tools related to its various commands. *
 See https://docs.system-transparency.org for further information about 'stconfig.json' and 'stboot.ball'.
 
 ### Scripts
-#### 'install_stconfig.sh'
+#### `install_stconfig.sh`
 This script is invoked by 'run.sh'. It downloads and installs the 'stconfig' tool.
 
-#### 'create_and_sign_bootball.sh'
+#### `create_and_sign_bootball.sh`
 This script is invoked by 'run.sh'. It uses 'stconfig' to create a 'stboot.ball' from the 'stconfig.json' in the 'configs/' directory. The path to a dedicated configuration directory is passed to the script. Further it uses 'stconfig' to sign the generated 'stboot.ball' with the example keys from 'keys/'.
 
-#### 'upload_bootball.sh'
+#### `upload_bootball.sh`
 This script is invoked by 'run.sh'. It uploads the 'stboot.ball' file to the provisioning server. SSH access to the server is needed. See https://docs.system-transparency.org for further information about the provisioning server.
