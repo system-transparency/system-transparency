@@ -7,7 +7,7 @@ Each folder contains an own README.md describing its content and the purpose of 
 ## Table of Content
 Directory | Description
 ------------ | -------------
-[`/`](#/) | entry point
+[`/`](#scripts) | entry point
 [`configs/`](configs/README.md) | configuration of operating systems
 [`deploy/`](deploy/README.md) | scripts and files to build firmware binaries
 [`deploy/coreboot-rom`](deploy/coreboot-rom/README.md) | (work in progress)
