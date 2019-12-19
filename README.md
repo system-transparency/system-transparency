@@ -5,14 +5,23 @@ The source code of the various components resides in the appropriate repositorie
 Each folder contains an own README.md describing its content and the purpose of the files.
 
 ## Table of Content
-* `configs/` : configuration of operating systems
-* `deploy/` : scripts and files to build firmware binaries
-* `keys/` : example certificates and signing keys
-* `operating-system/` : folders including scripts ans files to build reproducible operating systems
-* `stboot/` : scripts and files to build stboot bootloader from source 
-* `stconfig/`: scripts and files to build the bootloader's configuration tool from source
+Directory | Description
+------------ | -------------
+[`/`](##/joj) | entry point
+[`configs/`](configs/README.md) | configuration of operating systems
+[`deploy/`](deploy/README.md) | scripts and files to build firmware binaries
+[`deploy/coreboot-rom`](deploy/coreboot-rom/README.md) | (work in progress)
+[`deploy/mixed-firmware`](deploy/mixed-firmware/README.md) | disk image solution
+[`keys/`](keys/README.md) | example certificates and signing keys
+[`operating-system/`](operating-system/README.md) | folders including scripts ans files to build reproducible operating systems
+[`operating-system/debian`](operating-system/debian/README.md) | reproducible debian buster
+[`operating-system/debian/docker`](operating-system/debian/docker/README.md) | docker environment
+[`stboot/`](stboot/README.md) | scripts and files to build stboot bootloader from source 
+[`stboot/include`](stboot/include/README.md) | fieles to be includes into the bootloader's initramfs
+[`stconfig/`](stconfig/README.md) | scripts and files to build the bootloader's configuration tool from source
 
-## Scripts
+## /joj
+### Scripts
 #### `run.sh`
 This script is the global entry point to build up or update the environment.
 It runs a dependency check and prompts you to execute all other necessary scripts and thereby leads through the whole setup process. Each step can be run, run with special options where applicable or skipped. In this way you can also only renew certain parts of the environment.
