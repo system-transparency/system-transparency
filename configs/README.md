@@ -15,4 +15,7 @@ Directory | Description
 [`stconfig/`](../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
 
 ## Configs
+Directories for individual operating-system configuration can be created here. These directories must at least contain a 'stconfig.json' file. The corresponding files like OS-kernel, OS-initramfs, etc. can be included as well. After utilizing the *stconfig tool* 'stboot.ball' is saved there as well.
+See http://doc.system-transparency.org for further information about 'stconfig.json' and 'stboot.ball'
 
+The *debian* system included in this repository will create its configuration directory here automatically during the setup.
