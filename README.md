@@ -7,7 +7,7 @@ Each folder contains an own README.md describing its content and the purpose of 
 ## Table of Content
 Directory | Description
 ------------ | -------------
-[`/`](##/joj) | entry point
+[`/`](#/) | entry point
 [`configs/`](configs/README.md) | configuration of operating systems
 [`deploy/`](deploy/README.md) | scripts and files to build firmware binaries
 [`deploy/coreboot-rom`](deploy/coreboot-rom/README.md) | (work in progress)
@@ -20,7 +20,7 @@ Directory | Description
 [`stboot/include`](stboot/include/README.md) | fieles to be includes into the bootloader's initramfs
 [`stconfig/`](stconfig/README.md) | scripts and files to build the bootloader's configuration tool from source
 
-## /joj
+## /
 ### Scripts
 #### `run.sh`
 This script is the global entry point to build up or update the environment.
