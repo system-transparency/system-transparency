@@ -15,4 +15,32 @@ Directory | Description
 [`stconfig/`](../../../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
 
 ## Operating-System Debian Docker
+todo: intro
+
+### Scripts
+#### `build_debian.sh`
+Invoked by `run.sh`. Todo...
+
+#### `pack-reproducible.sh`
+Part of *Debian* build process in *Docker*
+
+#### `run-in-chroot.sh`
+Part of *Debian* build process in *Docker*
+
+### Configuration Files
+#### `debootstrap-buster.patch`
+todo ...
+
+#### `debos.yaml`
+todo ...
+
+#### `Dockerfile`
+todo ...
+
+### Directories
+#### `out/`
+Built directory. The compiled kernel and initramfs are stored here.
+
+#### `overlays/`
+todo ...
 
