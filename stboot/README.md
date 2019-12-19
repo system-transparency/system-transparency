@@ -29,3 +29,5 @@ This script is invoked by 'run.sh'. It downloads the source code for the 'u-root
 #### `make_initrmafs.sh`
 This script is invoked by 'run.sh'. It uses the 'u-root' command to build 'initramfs-linuxboot.cpio' including the *uinit* binary, the *Stboot* bootloader and further files from the 'include/' directory.
 This 'initramfs-linuxboot.cpio' is the core component of each deployment solution of *System Transparency's* firmware part.
+
+This script accepts a '-d' flag. It then includes the full set of available *Go* commands into the initfamfs to enable debugging — e.g before *uinit* hands over control to the *Stboot* bootloader or in case of a bootloader panic.
