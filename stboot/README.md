@@ -22,6 +22,9 @@ One part of the *u-root* project is the 'u-root' command to create an initramfs 
 ### Scripts
 #### `create_hostvars.sh`
 This script is invoked by 'run.sh'. It creates an example 'hostvars.json' file. This can be used as a template for a custom 'hostvars.json'. See https://docs.system-transparency.org for further information about this configuration file.
+Choose one of the following flags when calling:
+* `d` : empty IP. This will trigger DHCP
+* `q` : IP configuration suitable for *QEMU*
 
 #### `install-u-root.sh`
 This script is invoked by 'run.sh'. It downloads the source code for the 'u-root' command and the *Stboot* bootloader and compiles them. Further it installs a special *uinit* binary from https://github.com/system-transparency/uinit needed to call the bootloader from the initramfs' init-script.
