@@ -38,7 +38,7 @@ Optional at the moment. This Script copies the 'hostvars.json' configuration fil
 this script is invoked by 'run.sh'. It copies the linuxboot initramfs including *stboot* to the image.
 
 #### `umount_img.sh`
-Counterpart of 'mount_img.sh'. The loop device used at mounting needs to be passed.
+Counterpart of 'mount_img.sh'.
 
 ### Configuration Files
 #### `mbr.table`
