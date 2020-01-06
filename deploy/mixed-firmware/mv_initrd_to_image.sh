@@ -24,17 +24,9 @@ initrd="${root}/stboot/initramfs-linuxboot.cpio"
 
 [ -f ${initrd} ] || { echo "${initrd} does not exist"; echo "Including initramfs into image $failed";  exit 1; }
 
-echo "[INFO]: look for loop device"
-losetup -f || { echo -e "losetup $failed"; exit 1; }
-dev=$(losetup -f)
-
-echo "[INFO]: setup ${img} to ${dev} and mout at ${mnt}"
-losetup ${dev} ${img} || { echo -e "losetup $failed"; exit 1; }
-partx -u ${dev} || { echo -e "partx $failed"; losetup -d ${dev}; exit 1; }
-mkdir -p ${mnt} || { echo -e "mkdir $failed"; losetup -d ${dev}; exit 1; }
-mount ${dev}p1 ${mnt} || { echo -e "mount $failed"; losetup -d ${dev}; exit 1; }
-cp -v ${initrd} ${mnt} || { echo -e "cp $failed"; losetup -d ${dev}; exit 1; }
-umount ${mnt} || { echo -e "umount $failed"; losetup -d ${dev}; exit 1; }
-rm -r -f ${mnt} || { echo -e "cleanup tmpdir $failed"; losetup -d ${dev}; exit 1; }
-losetup -d ${dev} || { echo -e "losetup -d $failed"; exit 1; }
-echo "[INFO]: loop device is free again"
+mkdir -p ${mnt} || { echo -e "mkdir $failed"; exit 1; }
+mount -o loop,offset=1048576 ${img} ${mnt} || { echo -e "mount $failed"; exit 1; }
+cp -v ${initrd} ${mnt} || { echo -e "cp $failed"; exit 1; }
+umount ${mnt} || { echo -e "umount $failed"; exit 1; }
+rm -r -f ${mnt} || { echo -e "cleanup tmpdir $failed"; exit 1; }
+echo "[INFO]: successfully moved ${initrd} to ${img}"

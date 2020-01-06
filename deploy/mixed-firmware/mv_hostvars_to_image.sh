@@ -27,18 +27,10 @@ var_file="${root}/stboot/${var_file_name}"
 
 [ -f ${var_file} ] || { echo "${var_file} does not exist"; echo "Including ${var_file_name} into image $failed";  exit 1; }
 
-echo "[INFO]: looking for loop device"
-losetup -f || { echo 'losetup $failed'; exit 1; }
-dev=$(losetup -f)
-
-echo "[INFO]: setup $img to $dev and mout at $mnt"
-losetup ${dev} ${img} || { echo -e "losetup $failed"; exit 1; }
-partx -u ${dev} || { echo -e "partx $failed"; losetup -d ${dev}; exit 1; }
 mkdir -p ${mnt} || { echo -e "mkdir $failed"; losetup -d ${dev}; exit 1; }
-mount ${dev}p1 ${mnt} || { echo -e "mount $failed"; losetup -d ${dev}; exit 1; }
+mount -o loop,offset=1048576 ${img} ${mnt} || { echo -e "mount $failed"; exit 1; }
 cp -v ${var_file} ${mnt}
-umount ${mnt} || { echo -e "umount $failed"; losetup -d ${dev}; exit 1; }
-rm -r -f ${mnt} || { echo -e "cleanup tmpdir $failed"; losetup -d ${dev}; exit 1; }
-losetup -d ${dev} || { echo -e "losetup -d $failed"; losetup -d ${dev}; exit 1; }
-echo "[INFO]: loop device is free again"
+umount ${mnt} || { echo -e "umount $failed"; exit 1; }
+rm -r -f ${mnt} || { echo -e "cleanup tmpdir $failed"; exit 1; }
+echo "[INFO]: successfully moved ${var_file} to ${img}"
 

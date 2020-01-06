@@ -21,13 +21,11 @@ root="$(cd "${dir}/../../" && pwd)"
 mnt="/tmp/mnt_stimg"
 img="${dir}/MBR_Syslinux_Linuxboot.img"
 
-echo "[INFO]: look for loop device"
-losetup -f || { echo -e "losetup $failed"; exit 1; }
-dev=$(losetup -f)
-
-echo "[INFO]: setup image to ${dev}"
-losetup ${dev} ${img} || { echo -e "losetup $failed"; exit 1; }
-partx -u ${dev} || { echo -e "partx $failed"; losetup -d ${dev}; exit 1; }
-mkdir -p ${mnt} || { echo -e "mkdir $failed"; losetup -d ${dev}; exit 1; }
-mount ${dev}p1 ${mnt} || { echo -e "mount $failed"; losetup -d ${dev}; exit 1; }
+mkdir -p ${mnt} || { echo -e "mkdir $failed"; exit 1; }
+# offset: sfdisk -d ${img}
+# ...
+# deploy/mixed-firmware/MBR_Syslinux_Linuxboot.img1 : start=        2048, size=      407552, type=83, bootable
+#
+# 2048 blocks * 512 bytes per block -> 1048576  
+mount -o loop,offset=1048576 ${img} ${mnt} || { echo -e "mount $failed"; exit 1; }
 echo "[INFO]: mounted ${img} at ${mnt}"
