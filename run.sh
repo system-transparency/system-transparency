@@ -31,7 +31,31 @@ function checkGCC {
    fi
 }
 
+function checkGO {
+   minver=("1" "11") 
+
+   command -v go >/dev/null 2>&1 || { 
+      echo >&2 "GO required";
+      exit 1;
+   }
+
+   majorver="$(go version | egrep -o 'go(\d+.\d+)' | sed 's/go//' | cut -d . -f 1)"
+   minorver="$(go version | egrep -o 'go(\d+.\d+)' | sed 's/go//' | cut -d . -f 2)"
+
+   if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then 
+         echo "GO version ${majorver}.${minorver} is not supported. Need version ${minver[0]}.${minver[1]} or later."
+         exit 1
+   else
+       echo "GO supported"
+   fi
+
+   echo "$PATH"|grep -q $(go env GOPATH)/bin || { echo "$(go env GOPATH)/bin must be added to PATH"; exit 1; }
+}
+
+
+
 checkGCC
+checkGO
 
 config=${root}/configs/debian-buster-amd64/stconfig.json
 while getopts ":dc:" opt; do
@@ -57,17 +81,40 @@ while getopts ":dc:" opt; do
 done
 
 echo "Checking dependancies ..."
-array=( "go" "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" \
-        "wget" "dd" "losetup" "sfdisk" "partx" "mkfs" "mount" "umount" "shasum" "ssh" "scp")
+cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
+        "wget" "dd" "losetup" "sfdisk" "partx" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
+        "bison" "flex" "pkg-config" "bc")
+libs=( "libelf" "libcrypto" )
+files=( "/lib/ld-linux.so.2" )
 
-for i in "${array[@]}"
+for i in "${cmds[@]}"
 do
     command -v $i >/dev/null 2>&1 || { 
         echo >&2 "$i required"; 
         exit 1; 
     }
 done
-echo "$PATH"|grep -q $(go env GOPATH)/bin || { echo "$(go env GOPATH)/bin must be added to PATH"; exit 1; }
+
+for i in "${libs[@]}"
+do
+   pkg-config "$i" >/dev/null 2>&1 || {
+      echo >&2 "$i required";
+      exit 1;
+   }
+done
+
+if [[ ! -f "/lib/ld-linux.so.2" ]]
+then
+   echo "i386 libc required";
+   exit 1
+fi
+
+if findmnt -T "${root}" | grep -cq "nodev"
+then
+   echo "The directory ${root} is mounted with nodev option but debootstrap needs to mknod to work."
+   exit 1
+fi
+
 echo "OK"
 
 echo
