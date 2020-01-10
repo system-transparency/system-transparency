@@ -40,11 +40,11 @@ wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${tmp}" || { rm -rf "${tmp}"; ec
 
 mkdir "${tmp}/gnupg"
 echo "[INFO]: Fetching kernel developer keys"
-gpg --batch --quiet \
+if ! gpg --batch --quiet \
     --homedir "${tmp}/gnupg" \
     --auto-key-locate wkd \
-    --locate-keys "${dev_keys}" 
-if [[ $? != "0" ]]; then
+    --locate-keys "${dev_keys}"
+then
     echo -e "Fetching keys $failed"
     rm -rf "${tmp}"
     exit 1
@@ -68,7 +68,7 @@ echo "[INFO]: Build Linuxboot kernel"
 
 tar -xf "${tmp}/${kernel_ver}.tar.xz" -C "${tmp}" || { rm -rf "${tmp}"; echo -e "Unpacking $failed"; exit 1; }
 
-[ -f "${kernel_config}" ] || { rm -rf "${tmp}"; echo -e "Finding $KERNEL_CONFIG $failed"; exit 1; }
+[ -f "${kernel_config}" ] || { rm -rf "${tmp}"; echo -e "Finding $kernel_config $failed"; exit 1; }
 cp -v "${kernel_config}" "${tmp}/${kernel_ver}/.config"
 cd "${tmp}/${kernel_ver}"
 make "-j$(nproc)" || { rm -rf "${tmp}"; echo -e "Compiling kernel $failed"; exit 1; }

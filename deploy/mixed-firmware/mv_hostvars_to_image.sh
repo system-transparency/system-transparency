@@ -23,7 +23,7 @@ var_file="${root}/stboot/${var_file_name}"
 
 [ -f "${var_file}" ] || { echo "${var_file} does not exist"; echo "Including ${var_file_name} into image $failed";  exit 1; }
 
-mkdir -p "${mnt}" || { echo -e "mkdir $failed"; losetup -d "${dev}"; exit 1; }
+mkdir -p "${mnt}" || { echo -e "mkdir $failed"; exit 1; }
 mount -o loop,offset=1048576 "${img}" "${mnt}" || { echo -e "mount $failed"; exit 1; }
 cp -v "${var_file}" "${mnt}"
 umount "${mnt}" || { echo -e "umount $failed"; exit 1; }

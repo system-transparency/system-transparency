@@ -56,7 +56,7 @@ echo "[INFO]: check for Linuxboot kernel"
 bash "${dir}/build_kernel.sh"
 
 if [ ! -f "${lnxbt_kernel}" ]; then
-    echo "${lnxbot_kernel} not found!"
+    echo "${lnxbt_kernel} not found!"
     echo -e "creating image $failed"; exit 1
 else
     echo "Linuxboot kernel:  ${lnxbt_kernel}"
