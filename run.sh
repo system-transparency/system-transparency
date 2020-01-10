@@ -12,12 +12,19 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 file="${dir}/$(basename "${BASH_SOURCE[0]}")"
 base="$(basename ${file} .sh)"
 root="${dir}"
-currentver="$(gcc -dumpversion)"
 
 function checkGCC {
-   requiredver="8"
-   if [ "$currentver" -gt "$requiredver" ]; then 
-         echo "GCC not supported"
+   maxver="8"
+
+   command -v gcc >/dev/null 2>&1 || { 
+      echo >&2 "GCC required";
+      exit 1;
+   }
+
+   currentver="$(gcc -dumpversion | cut -d . -f 1)"
+
+   if [ "$currentver" -gt "$maxver" ]; then 
+         echo "GCC version ${currentver} is not supported. Need version ${maxver} or earlier."
          exit 1
    else
        echo "GCC supported"
