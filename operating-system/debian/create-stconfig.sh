@@ -5,12 +5,8 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
-failed="\e[1;5;31mfailed\e[0m"
-
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-file="${dir}/$(basename "${BASH_SOURCE[0]}")"
-base="$(basename ${file} .sh)"
 root="$(cd "${dir}/../../" && pwd)"
 
 kernel="debian-buster-amd64.vmlinuz"
