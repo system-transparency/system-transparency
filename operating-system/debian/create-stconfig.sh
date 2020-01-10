@@ -23,15 +23,15 @@ fi
 if [ ! -f "${dir}/docker/out/${kernel}" ] || [ ! -f "${dir}/docker/out/${initrd}" ]; then
     echo "[INFO]: Build reproducible Debian OS inside docker"
     echo "Root privileges are required"
-    sudo bash "${dir}/run-docker.sh" "`id -un`"
+    sudo bash "${dir}/run-docker.sh" "$(id -un)"
 else
     echo "[INFO]: Current Debian OS artefacts: "
     ls -l "${dir}/docker/out/${kernel}"
     ls -l "${dir}/docker/out/${initrd}"
     while true; do
-       read -p "Update? Root privileges are required (y/n)" yn
+       read -rp "Update? Root privileges are required (y/n)" yn
        case $yn in
-          [Yy]* ) sudo bash "${dir}/run-docker.sh" "`id -un`"; break;;
+          [Yy]* ) sudo bash "${dir}/run-docker.sh" "$(id -un)"; break;;
           [Nn]* ) break;;
           * ) echo "Please answer yes or no.";;
        esac
