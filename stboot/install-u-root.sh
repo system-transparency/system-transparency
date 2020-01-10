@@ -10,8 +10,6 @@ failed="\e[1;5;31mfailed\e[0m"
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 file="${dir}/$(basename "${BASH_SOURCE[0]}")"
-base="$(basename ${file} .sh)"
-root="$(cd "${dir}/../" && pwd)"
 
 gopath="$(go env GOPATH)"
 if [ -z "${gopath}" ]; then
@@ -26,9 +24,9 @@ echo "[INFO]: check for source code at ${uroot_src}"
 if [ ! -d "${uroot_src}" ]; then
     echo "u-root source code repository not found!"
     while true; do
-       read -p "Download u-root soure code now? (y/n)" yn
+       read -rp "Download u-root soure code now? (y/n)" yn
        case $yn in
-          [Yy]* ) GOPATH=${gopath} go get github.com/u-root/u-root; break;;
+          [Yy]* ) GOPATH="${gopath}" go get github.com/u-root/u-root; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -36,20 +34,20 @@ if [ ! -d "${uroot_src}" ]; then
 else
     echo "[INFO]: using repository ${uroot_src}"
 fi
-cd ${uroot_src}
+cd "${uroot_src}"
 
 # needs to be done as long as stboot is not merged into u-root master
 echo "[INFO]: switch to stboot development branch"
 git checkout --quiet stboot
 git status
 echo "[INFO]: install u-root"
-GOPATH=${gopath} go install ${gopath}/src/github.com/u-root/u-root/ || { echo -e "installing u-root $failed"; exit 1; }
+GOPATH="${gopath}" go install "${gopath}/src/github.com/u-root/u-root/" || { echo -e "installing u-root $failed"; exit 1; }
 # needs to be done as long as stboot is not merged into u-root master
 echo "[INFO]: install u-root stboot patch"
-GOPATH=${gopath} go install ${gopath}/src/github.com/u-root/u-root/cmds/boot/stboot || { echo -e "installing u-root stboot patch $failed"; exit 1; }
+GOPATH="${gopath}" go install "${gopath}/src/github.com/u-root/u-root/cmds/boot/stboot" || { echo -e "installing u-root stboot patch $failed"; exit 1; }
 
 # get the stboot uinit script from system transparency repository
 echo "[INFO]: install stboot uinit binary"
-GOPATH=${gopath} go get -u github.com/system-transparency/uinit || { echo -e "installing stboot uinit binary $failed"; exit 1; }
+GOPATH="${gopath}" go get -u github.com/system-transparency/uinit || { echo -e "installing stboot uinit binary $failed"; exit 1; }
 
 
