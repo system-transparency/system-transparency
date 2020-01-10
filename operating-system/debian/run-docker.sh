@@ -16,6 +16,8 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
+failed="\e[1;5;31mfailed\e[0m"
+
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
@@ -31,12 +33,12 @@ kernel="debian-buster-amd64.vmlinuz"
 initrd="debian-buster-amd64.cpio.gz"
 
 echo "____Build docker image____"
-docker build -t debos ${dir}/docker || { echo -e "building docker image $failed"; exit 1; }
+docker build -t debos "${dir}/docker" || { echo -e "building docker image $failed"; exit 1; }
 echo "____Build Debian OS reproducible via docker container____"
-docker run --cap-add=SYS_ADMIN --privileged -it -v ${root}:/system-transparency/ debos || { echo -e "running docker image $failed"; exit 1; }
+docker run --cap-add=SYS_ADMIN --privileged -it -v "${root}:/system-transparency/" debos || { echo -e "running docker image $failed"; exit 1; }
 
-chown -c $user_name ${dir}/docker/out/${kernel}
-chown -c $user_name ${dir}/docker/out/${initrd}
+chown -c "$user_name" "${dir}/docker/out/${kernel}"
+chown -c "$user_name" "${dir}/docker/out/${initrd}"
 
 echo "Kernel and Initramfs generated at: ${dir}/docker/out"
 
