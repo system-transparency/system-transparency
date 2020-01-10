@@ -48,7 +48,7 @@ GOPATH=${gopath} go install ${gopath}/src/github.com/u-root/u-root/ || { echo -e
 echo "[INFO]: install u-root stboot patch"
 GOPATH=${gopath} go install ${gopath}/src/github.com/u-root/u-root/cmds/boot/stboot || { echo -e "installing u-root stboot patch $failed"; exit 1; }
 
-# get the stboot uinit script from stystem transparency repository
+# get the stboot uinit script from system transparency repository
 echo "[INFO]: install stboot uinit binary"
 GOPATH=${gopath} go get -u github.com/system-transparency/uinit || { echo -e "installing stboot uinit binary $failed"; exit 1; }
 
