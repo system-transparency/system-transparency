@@ -7,9 +7,6 @@ set -o nounset
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-file="${dir}/$(basename "${BASH_SOURCE[0]}")"
-base="$(basename ${file} .sh)"
-root="$(cd "${dir}/../" && pwd)"
 
 OPENSSL=openssl
 
