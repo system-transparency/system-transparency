@@ -8,7 +8,7 @@ export LC_ALL=C
 export LANG=C
 export TZ=UTC
 
-set -e -x
+set -e
 
 cd "$(dirname "$0")"
 export TOP=$(pwd)
