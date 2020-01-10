@@ -65,7 +65,7 @@ fi
 
 
 echo "[INFO]: Softlink at ${dir}/${var_file}"
-cd "${dir}" && ln -s "include/${var_file}"
+cd "${dir}" && ln -s "include/${var_file}" .
 
 cat "${dir}/${var_file}"
 

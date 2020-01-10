@@ -7,10 +7,6 @@ set -o nounset
 
 failed="\e[1;5;31mfailed\e[0m"
 
-# Set magic variables for current file & dir
-dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-file="${dir}/$(basename "${BASH_SOURCE[0]}")"
-
 gopath="$(go env GOPATH)"
 if [ -z "${gopath}" ]; then
     echo "GOPATH is not set!"
