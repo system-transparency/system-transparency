@@ -40,17 +40,13 @@ wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${tmp}" || { rm -rf "${tmp}"; ec
 
 mkdir "${tmp}/gnupg"
 echo "[INFO]: Fetching kernel developer keys"
-if ! gpg --batch --quiet \
-    --homedir "${tmp}/gnupg" \
-    --auto-key-locate wkd \
-    --locate-keys "${dev_keys}"
-then
+if ! gpg --batch --quiet --homedir "${tmp}/gnupg" --auto-key-locate wkd --locate-keys ${dev_keys}; then
     echo -e "Fetching keys $failed"
     rm -rf "${tmp}"
     exit 1
 fi
 keyring=${tmp}/gnupg/keyring.gpg
-gpg --batch --homedir "${tmp}/gnupg" --no-default-keyring --export "${dev_keys}" > "${keyring}"
+gpg --batch --homedir "${tmp}/gnupg" --no-default-keyring --export ${dev_keys} > "${keyring}"
 
 echo "[INFO]: Verifying signature of the kernel tarball"
 count=$(xz -cd "${tmp}/${kernel_ver}.tar.xz" \
