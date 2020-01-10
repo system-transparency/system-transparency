@@ -92,7 +92,7 @@ while true; do
    echo "Quit (q)"
    read -p ">> " x
    case $x in
-      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/create_image.sh; break;;
+      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/create_image.sh "`id -un`"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

@@ -5,6 +5,12 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+if [ "$#" -ne 1 ]
+then
+   echo "$0 USER"
+   exit 1
+fi
+
 set -o errexit
 set -o pipefail
 set -o nounset
@@ -27,6 +33,14 @@ syslinux_config="${dir}/syslinux.cfg"
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
 tmp=$(mktemp -d -t stimg-XXXXXXXX)
 mnt=$(mktemp -d -t stmnt-XXXXXXXX)
+
+user_name="$1"
+
+if ! id "${user_name}" >/dev/null 2>&1
+then
+   echo "User ${user_name} does not exist"
+   exit 1
+fi
 
 if [ -f "${img}" ]; then
     while true; do
@@ -81,9 +95,8 @@ umount ${mnt} || { echo -e "Unmounting $failed"; losetup -d $dev; exit 1; }
 losetup -d ${dev} || { echo -e "Loop device clean up $failed"; exit 1; }
 rm -r -f ${tmp} ${mnt}
 
-read -p "Type your username to own the image file:" user
-chown -c $user:$user ${img}
-chown -c $user:$user ${lnxbt_kernel}
+chown -c ${user_name} ${img}
+chown -c ${user_name} ${lnxbt_kernel}
 
 echo ""
 echo "${img} created."
