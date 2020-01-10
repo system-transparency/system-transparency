@@ -1,7 +1,5 @@
 #!/bin/bash
 
-BASE=$(dirname "$0")
-
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit
@@ -16,8 +14,6 @@ failed="\e[1;5;31mfailed\e[0m"
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-file="${dir}/$(basename "${BASH_SOURCE[0]}")"
-base="$(basename ${file} .sh)"
 root="$(cd "${dir}/../../" && pwd)"
 
 mnt=$(mktemp -d -t "mnt-st-XXXX")
