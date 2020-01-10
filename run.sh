@@ -115,7 +115,7 @@ while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) bash ${root}/keys/generate-keys-and-certs.sh; break;;
       [Ss]* ) break;;
@@ -133,7 +133,7 @@ while true; do
    echo "Run  (r) Root privileges are required"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/create_image.sh "`id -un`"; break;;
       [Ss]* ) break;;
@@ -152,7 +152,7 @@ while true; do
    echo "Run  (2) empty IP -> DHCP"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [1]* ) bash ${root}/stboot/create_hostvars.sh -q; break;;
       [2]* ) bash ${root}/stboot/create_hostvars.sh -d; break;;
@@ -173,7 +173,7 @@ done
 #   echo "Run  (r) Root privileges are required"
 #   echo "Skip (s)"
 #   echo "Quit (q)"
-#   read -p ">> " x
+#   read -rp ">> " x
 #   case $x in
 #      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/mv_netvars_to_image.sh; break;;
 #      [Ss]* ) break;;
@@ -191,7 +191,7 @@ while true; do
    echo "Run  (r) Root privileges may be required"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) bash ${root}/operating-system/debian/create-stconfig.sh; break;;
       [Ss]* ) break;;
@@ -209,7 +209,7 @@ while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) bash ${root}/stboot/install-u-root.sh; break;;
       [Ss]* ) break;;
@@ -227,7 +227,7 @@ while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) bash ${root}/stconfig/install_stconfig.sh; break;;
       [Ss]* ) break;;
@@ -246,7 +246,7 @@ while true; do
    echo "Run  (d) with 'develop' flag"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) bash ${root}/stboot/make_initramfs.sh; break;;
       [Dd]* ) bash ${root}/stboot/make_initramfs.sh dev; break;;
@@ -265,7 +265,7 @@ while true; do
    echo "Run  (r) Root privileges are required"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/mv_initrd_to_image.sh; break;;
       [Ss]* ) break;;
@@ -284,7 +284,7 @@ while true; do
    echo "Run  (r) with configuration"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) bash ${root}/stconfig/create_and_sign_bootball.sh ${config}; break;;
       [Ss]* ) break;;
@@ -304,7 +304,7 @@ while true; do
    echo "Run  (r) with bootball"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) bash ${root}/stconfig/upload_bootball.sh ${bootball}; break;;
       [Ss]* ) break;;
@@ -323,7 +323,7 @@ while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
       [Rr]* ) bash ${root}/start_qemu_mixed-firmware.sh; break;;
       [Ss]* ) break;;
