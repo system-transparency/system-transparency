@@ -45,7 +45,7 @@ function checkGO {
        echo "GO supported"
    fi
 
-   echo "$PATH"|grep -q $(go env GOPATH)/bin || { echo "$(go env GOPATH)/bin must be added to PATH"; exit 1; }
+   echo "$PATH"|grep -q "$(go env GOPATH)/bin" || { echo "$(go env GOPATH)/bin must be added to PATH"; exit 1; }
 }
 
 
@@ -78,7 +78,7 @@ libs=( "libelf" "libcrypto" )
 
 for i in "${cmds[@]}"
 do
-    command -v $i >/dev/null 2>&1 || { 
+    command -v "$i" >/dev/null 2>&1 || { 
         echo >&2 "$i required"; 
         exit 1; 
     }
@@ -117,7 +117,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/keys/generate-keys-and-certs.sh; break;;
+      [Rr]* ) bash "${root}/keys/generate-keys-and-certs.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -135,7 +135,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/create_image.sh "`id -un`"; break;;
+      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/create_image.sh" "$(id -un)"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -154,8 +154,8 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [1]* ) bash ${root}/stboot/create_hostvars.sh -q; break;;
-      [2]* ) bash ${root}/stboot/create_hostvars.sh -d; break;;
+      [1]* ) bash "${root}/stboot/create_hostvars.sh" -q; break;;
+      [2]* ) bash "${root}/stboot/create_hostvars.sh" -d; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -175,7 +175,7 @@ done
 #   echo "Quit (q)"
 #   read -rp ">> " x
 #   case $x in
-#      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/mv_netvars_to_image.sh; break;;
+#      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/mv_netvars_to_image.sh"; break;;
 #      [Ss]* ) break;;
 #      [Qq]* ) exit;;
 #      * ) echo "Invalid input";;
@@ -193,7 +193,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/operating-system/debian/create-stconfig.sh; break;;
+      [Rr]* ) bash "${root}/operating-system/debian/create-stconfig.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -211,7 +211,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stboot/install-u-root.sh; break;;
+      [Rr]* ) bash "${root}/stboot/install-u-root.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -229,7 +229,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stconfig/install_stconfig.sh; break;;
+      [Rr]* ) bash "${root}/stconfig/install_stconfig.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -248,8 +248,8 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stboot/make_initramfs.sh; break;;
-      [Dd]* ) bash ${root}/stboot/make_initramfs.sh dev; break;;
+      [Rr]* ) bash "${root}/stboot/make_initramfs.sh"; break;;
+      [Dd]* ) bash "${root}/stboot/make_initramfs.sh" dev; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -267,7 +267,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/mv_initrd_to_image.sh; break;;
+      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/mv_initrd_to_image.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -286,7 +286,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stconfig/create_and_sign_bootball.sh ${config}; break;;
+      [Rr]* ) bash "${root}/stconfig/create_and_sign_bootball.sh" "${config}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -306,7 +306,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stconfig/upload_bootball.sh ${bootball}; break;;
+      [Rr]* ) bash "${root}/stconfig/upload_bootball.sh" "${bootball}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -325,7 +325,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/start_qemu_mixed-firmware.sh; break;;
+      [Rr]* ) bash "${root}/start_qemu_mixed-firmware.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
