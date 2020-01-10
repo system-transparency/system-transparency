@@ -27,6 +27,12 @@ This script is the global entry point to build up or update the environment.
 It runs a dependency check and prompts you to execute all other necessary scripts and thereby leads through the whole setup process. Each step can be run, run with special options where applicable or skipped. In this way you can also only renew certain parts of the environment.
 Run each step when executing for the first time. Some scripts need root privileges.
 
+On Debian-based systems you'll need the following packages:
+
+```bash
+apt install golang docker.io openssl git qemu-system-x86 wget sudo bison flex pkg-config libelf-dev libssl-dev bc i386-libc
+```
+
 #### `start_qemu_mixed-firmware.sh`
 This script is invoked by `run.sh`. It will boot up *qemu* to test the system. All output is printed to the console.
 Use `ctrl+a` , `x` to terminate.
