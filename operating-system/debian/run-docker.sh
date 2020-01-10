@@ -5,6 +5,12 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+if [ "$#" -ne 1 ]
+then
+   echo "$0 USER"
+   exit 1
+fi
+
 set -o errexit
 set -o pipefail
 set -o nounset
@@ -17,6 +23,13 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 file="${dir}/$(basename "${BASH_SOURCE[0]}")"
 base="$(basename ${file} .sh)"
 root="$(cd "${dir}/../../" && pwd)"
+user_name="$1"
+
+if ! id "${user_name}" >/dev/null 2>&1
+then
+   echo "User ${user_name} does not exist"
+   exit 1
+fi
 
 kernel="debian-buster-amd64.vmlinuz"
 initrd="debian-buster-amd64.cpio.gz"
@@ -26,9 +39,8 @@ docker build -t debos ${dir}/docker || { echo -e "building docker image $failed"
 echo "____Build Debian OS reproducible via docker container____"
 docker run --cap-add=SYS_ADMIN --privileged -it -v ${root}:/system-transparency/ debos || { echo -e "running docker image $failed"; exit 1; }
 
-read -p "Type your username to own artefacts:" user
-chown -c $user:$user ${dir}/docker/out/${kernel}
-chown -c $user:$user ${dir}/docker/out/${initrd}
+chown -c $user_name ${dir}/docker/out/${kernel}
+chown -c $user_name ${dir}/docker/out/${initrd}
 
 echo "Kernel and Initramfs generated at: ${dir}/docker/out"
 
