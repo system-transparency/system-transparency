@@ -5,12 +5,8 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
-failed="\e[1;5;31mfailed\e[0m"
-
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-file="${dir}/$(basename "${BASH_SOURCE[0]}")"
-base="$(basename ${file} .sh)"
 root="${dir}"
 
 function checkGCC {
@@ -39,8 +35,8 @@ function checkGO {
       exit 1;
    }
 
-   majorver="$(go version | egrep -o 'go(\d+.\d+)' | sed 's/go//' | cut -d . -f 1)"
-   minorver="$(go version | egrep -o 'go(\d+.\d+)' | sed 's/go//' | cut -d . -f 2)"
+   majorver="$(go version | sed 's/go version go//' | cut -d . -f 1)"
+   minorver="$(go version | sed 's/go version go//' | cut -d . -f 2)"
 
    if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then 
          echo "GO version ${majorver}.${minorver} is not supported. Need version ${minver[0]}.${minver[1]} or later."
@@ -58,14 +54,8 @@ checkGCC
 checkGO
 
 config=${root}/configs/debian-buster-amd64/stconfig.json
-while getopts ":dc:" opt; do
+while getopts ":c:" opt; do
   case $opt in
-    d)
-      echo
-      echo "Run in developer mode!" >&2
-      echo
-      develop=true
-      ;;
     c)
       config=$OPTARG
       ;;
@@ -85,7 +75,6 @@ cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
         "wget" "dd" "losetup" "sfdisk" "partx" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
         "bison" "flex" "pkg-config" "bc")
 libs=( "libelf" "libcrypto" )
-files=( "/lib/ld-linux.so.2" )
 
 for i in "${cmds[@]}"
 do
