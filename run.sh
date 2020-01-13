@@ -5,36 +5,57 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
-failed="\e[1;5;31mfailed\e[0m"
-
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-file="${dir}/$(basename "${BASH_SOURCE[0]}")"
-base="$(basename ${file} .sh)"
 root="${dir}"
-currentver="$(gcc -dumpversion)"
 
 function checkGCC {
-   requiredver="8"
-   if [ "$currentver" -gt "$requiredver" ]; then 
-         echo "GCC not supported"
+   maxver="8"
+
+   command -v gcc >/dev/null 2>&1 || { 
+      echo >&2 "GCC required";
+      exit 1;
+   }
+
+   currentver="$(gcc -dumpversion | cut -d . -f 1)"
+
+   if [ "$currentver" -gt "$maxver" ]; then 
+         echo "GCC version ${currentver} is not supported. Need version ${maxver} or earlier."
          exit 1
    else
        echo "GCC supported"
    fi
 }
 
+function checkGO {
+   minver=("1" "11") 
+
+   command -v go >/dev/null 2>&1 || { 
+      echo >&2 "GO required";
+      exit 1;
+   }
+
+   majorver="$(go version | sed 's/go version go//' | cut -d . -f 1)"
+   minorver="$(go version | sed 's/go version go//' | cut -d . -f 2)"
+
+   if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then 
+         echo "GO version ${majorver}.${minorver} is not supported. Need version ${minver[0]}.${minver[1]} or later."
+         exit 1
+   else
+       echo "GO supported"
+   fi
+
+   echo "$PATH"|grep -q "$(go env GOPATH)/bin" || { echo "$(go env GOPATH)/bin must be added to PATH"; exit 1; }
+}
+
+
+
 checkGCC
+checkGO
 
 config=${root}/configs/debian-buster-amd64/stconfig.json
-while getopts ":dc:" opt; do
+while getopts ":c:" opt; do
   case $opt in
-    d)
-      echo
-      echo "Run in developer mode!" >&2
-      echo
-      develop=true
-      ;;
     c)
       config=$OPTARG
       ;;
@@ -50,17 +71,39 @@ while getopts ":dc:" opt; do
 done
 
 echo "Checking dependancies ..."
-array=( "go" "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" \
-        "wget" "dd" "losetup" "sfdisk" "partx" "mkfs" "mount" "umount" "shasum" "ssh" "scp")
+cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
+        "wget" "dd" "losetup" "sfdisk" "partx" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
+        "bison" "flex" "pkg-config" "bc")
+libs=( "libelf" "libcrypto" )
 
-for i in "${array[@]}"
+for i in "${cmds[@]}"
 do
-    command -v $i >/dev/null 2>&1 || { 
+    command -v "$i" >/dev/null 2>&1 || { 
         echo >&2 "$i required"; 
         exit 1; 
     }
 done
-echo "$PATH"|grep -q $(go env GOPATH)/bin || { echo "$(go env GOPATH)/bin must be added to PATH"; exit 1; }
+
+for i in "${libs[@]}"
+do
+   pkg-config "$i" >/dev/null 2>&1 || {
+      echo >&2 "$i required";
+      exit 1;
+   }
+done
+
+if [[ ! -f "/lib/ld-linux.so.2" ]]
+then
+   echo "i386 libc required";
+   exit 1
+fi
+
+if findmnt -T "${root}" | grep -cq "nodev"
+then
+   echo "The directory ${root} is mounted with nodev option but debootstrap needs to mknod to work."
+   exit 1
+fi
+
 echo "OK"
 
 echo
@@ -72,9 +115,9 @@ while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/keys/generate-keys-and-certs.sh; break;;
+      [Rr]* ) bash "${root}/keys/generate-keys-and-certs.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -90,9 +133,9 @@ while true; do
    echo "Run  (r) Root privileges are required"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/create_image.sh; break;;
+      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/create_image.sh" "$(id -un)"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -109,10 +152,10 @@ while true; do
    echo "Run  (2) empty IP -> DHCP"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [1]* ) bash ${root}/stboot/create_hostvars.sh -q; break;;
-      [2]* ) bash ${root}/stboot/create_hostvars.sh -d; break;;
+      [1]* ) bash "${root}/stboot/create_hostvars.sh" -q; break;;
+      [2]* ) bash "${root}/stboot/create_hostvars.sh" -d; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -130,9 +173,9 @@ done
 #   echo "Run  (r) Root privileges are required"
 #   echo "Skip (s)"
 #   echo "Quit (q)"
-#   read -p ">> " x
+#   read -rp ">> " x
 #   case $x in
-#      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/mv_netvars_to_image.sh; break;;
+#      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/mv_netvars_to_image.sh"; break;;
 #      [Ss]* ) break;;
 #      [Qq]* ) exit;;
 #      * ) echo "Invalid input";;
@@ -148,9 +191,9 @@ while true; do
    echo "Run  (r) Root privileges may be required"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/operating-system/debian/create-stconfig.sh; break;;
+      [Rr]* ) bash "${root}/operating-system/debian/create-stconfig.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -166,9 +209,9 @@ while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stboot/install-u-root.sh; break;;
+      [Rr]* ) bash "${root}/stboot/install-u-root.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -184,9 +227,9 @@ while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stconfig/install_stconfig.sh; break;;
+      [Rr]* ) bash "${root}/stconfig/install_stconfig.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -203,10 +246,10 @@ while true; do
    echo "Run  (d) with 'develop' flag"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stboot/make_initramfs.sh; break;;
-      [Dd]* ) bash ${root}/stboot/make_initramfs.sh dev; break;;
+      [Rr]* ) bash "${root}/stboot/make_initramfs.sh"; break;;
+      [Dd]* ) bash "${root}/stboot/make_initramfs.sh" dev; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -222,9 +265,9 @@ while true; do
    echo "Run  (r) Root privileges are required"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) sudo bash ${root}/deploy/mixed-firmware/mv_initrd_to_image.sh; break;;
+      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/mv_initrd_to_image.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -241,9 +284,9 @@ while true; do
    echo "Run  (r) with configuration"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stconfig/create_and_sign_bootball.sh ${config}; break;;
+      [Rr]* ) bash "${root}/stconfig/create_and_sign_bootball.sh" "${config}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -261,9 +304,9 @@ while true; do
    echo "Run  (r) with bootball"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/stconfig/upload_bootball.sh ${bootball}; break;;
+      [Rr]* ) bash "${root}/stconfig/upload_bootball.sh" "${bootball}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -280,9 +323,9 @@ while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
-   read -p ">> " x
+   read -rp ">> " x
    case $x in
-      [Rr]* ) bash ${root}/start_qemu_mixed-firmware.sh; break;;
+      [Rr]* ) bash "${root}/start_qemu_mixed-firmware.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
