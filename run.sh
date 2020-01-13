@@ -206,12 +206,16 @@ echo " Build u-root command"
 echo "############################################################"
 echo "                                                     "
 while true; do
-   echo "Run  (r)"
+   echo "Run  (1) update sources and build u-root cmd"
+   echo "Run  (2) rebuild u-root cmd"
+   echo "Run  (3) choose custom brnach and rebuild u-root cmd" 
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/stboot/install-u-root.sh"; break;;
+      [1]* ) bash "${root}/stboot/install-u-root.sh" -u; break;;
+      [2]* ) bash "${root}/stboot/install-u-root.sh"; break;;
+      [3]* ) bash "${root}/stboot/install-u-root.sh" -b; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -224,12 +228,16 @@ echo " Build stconfig tool"
 echo "############################################################"
 echo "                                                     "
 while true; do
-   echo "Run  (r)"
+   echo "Run  (1) update sources and build stconfig tool"
+   echo "Run  (2) rebuild stconfig tool"
+   echo "Run  (3) choose custom brnach and rebuild stconfig tool" 
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/stconfig/install_stconfig.sh"; break;;
+      [1]* ) bash "${root}/stconfig/install_stconfig.sh" -u; break;;
+      [2]* ) bash "${root}/stconfig/install_stconfig.sh"; break;;
+      [3]* ) bash "${root}/stconfig/install_stconfig.sh" -b; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

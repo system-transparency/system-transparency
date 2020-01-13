@@ -18,9 +18,26 @@ if [ -z "${gopath}" ]; then
     echo -e "installing stconfig tool $failed"; exit 1;
 fi
 uroot_src="${gopath}/src/github.com/u-root/u-root"
+branch="stboot"
+
+choose_branch=false
+while getopts "bu" opt; do
+  case $opt in
+    b)
+      choose_branch=true
+      ;;
+    u)
+      echo "[INFO]: updating ${uroot_src}";
+      GOPATH="${gopath}" go get github.com/u-root/u-root
+      ;;
+    \?)
+      echo "Invalid option: -${OPTARG}" >&2
+      exit 1
+      ;;
+  esac
+done
 
 echo "[INFO]: unsing GOPATH ${gopath}"
-echo "[INFO]: check for source code at ${uroot_src}"
 if [ ! -d "${uroot_src}" ]; then
     echo "u-root source code repository not found!"
     while true; do
@@ -36,9 +53,13 @@ else
 fi
 cd "${uroot_src}"
 
-# needs to be done as long as stboot is not merged into u-root master
-echo "[INFO]: switch to stboot development branch"
-git checkout --quiet stboot
+if "${choose_branch}" ; then
+    git branch
+    read -rp "Enter branch: "  branch
+fi
+
+echo "[INFO]: switch to branch ${branch}"
+git checkout --quiet "${branch}" || { echo -e "installing u-root $failed"; exit 1; }
 git status
 echo "[INFO]: install stconfig tool"
 GOPATH="${gopath}" go install "${uroot_src}/tools/stconfig" || { echo -e "installing stconfig tool $failed"; exit 1; }
