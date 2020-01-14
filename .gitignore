@@ -9,3 +9,4 @@
 /operating-system/debian/docker/.debos-*
 /keys/signing-key-*
 /keys/root.*
+/.notes/
