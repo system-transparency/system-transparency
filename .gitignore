@@ -10,3 +10,4 @@
 /keys/signing-key-*
 /keys/root.*
 /.notes/
+/releases/
