@@ -14,7 +14,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
 kernel_src="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
 kernel_ver="linux-4.19.6"
-kernel_config="${dir}/x86_64_linuxboot_config"
+kernel_config="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig"
 tmp=$(mktemp -d -t stkernel-XXXXXXXX)
 dev_keys="torvalds@kernel.org gregkh@kernel.org"
 
@@ -67,6 +67,16 @@ tar -xf "${tmp}/${kernel_ver}.tar.xz" -C "${tmp}" || { rm -rf "${tmp}"; echo -e 
 [ -f "${kernel_config}" ] || { rm -rf "${tmp}"; echo -e "Finding $kernel_config $failed"; exit 1; }
 cp -v "${kernel_config}" "${tmp}/${kernel_ver}/.config"
 cd "${tmp}/${kernel_ver}"
+while true; do
+    echo "Following desconfig will be used:" 
+    ls -l "${kernel_config}"
+    echo "It is recommended to just save&exit in the upcoming menu."
+    read -rp "Press any key to continue" x
+    case $x in
+       * ) break;;
+    esac
+done 
+make menuconfig
 make "-j$(nproc)" || { rm -rf "${tmp}"; echo -e "Compiling kernel $failed"; exit 1; }
 cd "${dir}"
 cp -v "${tmp}/${kernel_ver}/arch/x86/boot/bzImage" "$lnxbt_kernel"
