@@ -257,7 +257,7 @@ while true; do
    read -rp ">> " x
    case $x in
       [Rr]* ) bash "${root}/stboot/make_initramfs.sh"; break;;
-      [Dd]* ) bash "${root}/stboot/make_initramfs.sh" dev; break;;
+      [Dd]* ) bash "${root}/stboot/make_initramfs.sh" -d; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
