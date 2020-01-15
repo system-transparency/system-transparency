@@ -15,4 +15,4 @@ root="$dir"
 
 image="${root}/deploy/mixed-firmware/MBR_Syslinux_Linuxboot.img"
 
-qemu-system-x86_64 -drive if=virtio,file=${image},format=raw -net user -net nic  -device virtio-rng-pci -m 8192 -nographic 
+qemu-system-x86_64 -drive if=virtio,file=${image},format=raw -net user -net nic -device virtio-rng-pci -rtc base=localtime -m 8192 -nographic 

@@ -38,6 +38,7 @@ if "${develop}" ; then
     echo "[INFO]: create initramfs with full tooling for development"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/initramfs-linuxboot.cpio" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
+    -files "${dir}/include/timestamp:etc/timestamp" \
     -files "${dir}/include/LetsEncrypt_Authority_X3_signed_by_X1.pem:root/LetsEncrypt_Authority_X3.pem" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
     all \
@@ -46,6 +47,7 @@ else
     echo "[INFO]: create minimal initramf including stboot und uinit only"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/initramfs-linuxboot.cpio" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
+    -files "${dir}/include/timestamp:etc/timestamp" \
     -files "${dir}/include/LetsEncrypt_Authority_X3_signed_by_X1.pem:root/LetsEncrypt_Authority_X3.pem" \
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/core/elvish \
