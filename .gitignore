@@ -2,6 +2,7 @@
 /stboot/*.cpio
 /stboot/*.json
 /stboot/include/*.json
+/stboot/include/timestamp
 /deploy/mixed-firmware/*.img
 /deploy/mixed-firmware/vmlinuz-linuxboot
 /operating-system/debian/docker/out

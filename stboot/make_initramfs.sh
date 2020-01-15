@@ -34,6 +34,10 @@ fi
 
 [ -f "${dir}/include/${var_file}" ] || { echo "${dir}/include/${var_file} does not exist"; echo "Cannot include ${var_file}. Creating initramfs $failed";  exit 1; }
 
+echo "[INFO]: writing "$(date +%s)" to timestamp file"
+touch "${dir}/include/timestamp"
+date +%s > "${dir}/include/timestamp" || { echo "Cannot write timestamp. Creating initramfs $failed";  exit 1; }
+
 if "${develop}" ; then
     echo "[INFO]: create initramfs with full tooling for development"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/initramfs-linuxboot.cpio" \
