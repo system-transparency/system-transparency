@@ -41,7 +41,8 @@ if "${develop}" ; then
     -files "${dir}/include/timestamp:etc/timestamp" \
     -files "${dir}/include/LetsEncrypt_Authority_X3_signed_by_X1.pem:root/LetsEncrypt_Authority_X3.pem" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
-    all \
+    core \
+    github.com/u-root/u-root/cmds/boot/stboot \
     || { echo -e "creating initramfs $failed"; exit 1; }
 else
     echo "[INFO]: create minimal initramf including stboot und uinit only"
@@ -51,7 +52,6 @@ else
     -files "${dir}/include/LetsEncrypt_Authority_X3_signed_by_X1.pem:root/LetsEncrypt_Authority_X3.pem" \
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/core/elvish \
-    github.com/u-root/u-root/cmds/core/ip \
     github.com/u-root/u-root/cmds/boot/stboot \
     || { echo -e "creating initramfs $failed"; exit 1; }
 fi 
