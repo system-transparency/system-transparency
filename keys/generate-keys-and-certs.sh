@@ -7,6 +7,7 @@ set -o nounset
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root="$(cd "${dir}/../" && pwd)"
 
 OPENSSL=openssl
 
@@ -20,8 +21,8 @@ echo "[INFO]: create a CA and a set of 5 signing keys, certified by it"
 
 # Root certificate fingerprint
 "${OPENSSL}" base64 -d -in "${dir}/root.cert" -out /tmp/rootcert
-shasum -a 256 -b /tmp/rootcert
-
+shasum -a 256 -b /tmp/rootcert > "${dir}/rootcert.fingerprint"
+cut -d' ' -f1 "${dir}/rootcert.fingerprint" > "${root}/stboot/include/signing_rootcert.fingerprint"
 for I in 1 2 3 4 5
 do
   # Gen signing key
@@ -34,7 +35,8 @@ do
   rm "${dir}/signing-key-${I}.req"
 done
 
-echo "root.cert:          The root CA certificate"
-echo "root.key:           The root CA private key"
-echo "signing-key-N.cert: The certifikate corresponding to key N"
-echo "signing-key-N.key:  Key N's private key"
+echo "[INFO]: root.cert:          The root CA certificate"
+echo "[INFO]: root.key:           The root CA private key"
+echo "[INFO]: signing-key-N.cert: The certifikate corresponding to key N"
+echo "[INFO]: signing-key-N.key:  Key N's private key"
+echo "[INFO]: write fingerprint of root.cert to ${root}/stboot/include/signing_rootcert.fingerprint"

@@ -3,6 +3,7 @@
 /stboot/*.json
 /stboot/include/*.json
 /stboot/include/timestamp
+/stboot/include/signing_rootcert.fingerprint
 /deploy/mixed-firmware/*.img
 /deploy/mixed-firmware/vmlinuz-linuxboot
 /operating-system/debian/docker/out
@@ -10,5 +11,6 @@
 /operating-system/debian/docker/.debos-*
 /keys/signing-key-*
 /keys/root.*
+/keys/rootcert.fingerprint
 /.notes/
 /releases/

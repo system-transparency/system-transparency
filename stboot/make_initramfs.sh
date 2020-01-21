@@ -44,16 +44,18 @@ if "${develop}" ; then
     -files "${dir}/include/${var_file}:etc/${var_file}" \
     -files "${dir}/include/timestamp:etc/timestamp" \
     -files "${dir}/include/LetsEncrypt_Authority_X3_signed_by_X1.pem:root/LetsEncrypt_Authority_X3.pem" \
+    -files "${dir}/include/signing_rootcert.fingerprint:root/signing_rootcert.fingerprint" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
     core \
     github.com/u-root/u-root/cmds/boot/stboot \
     || { echo -e "creating initramfs $failed"; exit 1; }
 else
-    echo "[INFO]: create minimal initramf including stboot und uinit only"
+    echo "[INFO]: create minimal initramf including stboot only"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/initramfs-linuxboot.cpio" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
     -files "${dir}/include/timestamp:etc/timestamp" \
     -files "${dir}/include/LetsEncrypt_Authority_X3_signed_by_X1.pem:root/LetsEncrypt_Authority_X3.pem" \
+    -files "${dir}/include/signing_rootcert.fingerprint:root/signing_rootcert.fingerprint" \
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/core/elvish \
     github.com/u-root/u-root/cmds/boot/stboot \
