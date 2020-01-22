@@ -30,7 +30,15 @@ Run each step when executing for the first time. Some scripts need root privileg
 On Debian-based systems you'll need the following packages:
 
 ```bash
-apt install golang docker.io openssl git qemu-system-x86 wget sudo bison flex pkg-config libelf-dev libssl-dev bc libc6-i386 gcc-8 g++-8
+apt install golang docker.io openssl git qemu-system-x86 wget sudo bison flex pkg-config libelf-dev libssl-dev bc libc6-i386 gcc-8 g++-8 libncurses-dev
+```
+
+You then need to make GCC 8 the default.
+
+```bash
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+sudo update-alternatives --config gcc
 ```
 
 #### `start_qemu_mixed-firmware.sh`
