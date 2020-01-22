@@ -34,8 +34,30 @@ cp ../x11ssh-tf.defconfig .config
 git submodule update --checkout --init
 make -C util/ifdtool/
 ```
-Extract the vendor firmware from the X11SSH to `original_vendor_bios_dump.bin`
+### Extract the vendor firmware from the X11SSH
+Use Flashrom from the coreboot repo (maybe install `libpci-dev`)
+```
+cd ../
+https://review.coreboot.org/flashrom
+cd flashrom
+make
+```
+Connect Flasher to the board and test cobbection a few times (ch341a_spi flasher is used here)
+```
+sudo./flashrom -p ch341a_spi
+```
+Read out the vendor firmware several times and check for read errors
+```
+sudo ./flashrom -p ch341a_spi -r bios.1
+sudo ./flashrom -p ch341a_spi -r bios.2
+sudo ./flashrom -p ch341a_spi -r bios.3
+diff bios.1 bios.2
+diff bios.1 bios.3
+```
+Save the dumo as `original_vendor_bios_dump.bin` in the coreboot dir
 
+### Build Coreboot continued
+Get ME and fd blob out of vendor firmware:
 ```
 ./util/ifdtool -x original_vendor_bios_dump.bin
 mkdir -p 3rdparty/blobs/mainboard/supermicro/x11-lga1151-series/
@@ -60,4 +82,9 @@ At the bottom of the page you can download the SMCIPMITool.
 ```
 SMCIPMITool ip user pass bios update coreboot.rom -F -N -MER
 SMCIPMITool ip user pass ipmi power reset/up/down/staus
+```
+
+### Flash X11SSH manually (alternatively)
+```
+sudo ./flashrom -p ch341a_spi --ifd -i bios -w ../coreboot/build/coreboot.rom
 ```
