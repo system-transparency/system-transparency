@@ -73,7 +73,7 @@ done
 echo "Checking dependancies ..."
 cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
         "wget" "dd" "losetup" "sfdisk" "partx" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
-        "bison" "flex" "pkg-config" "bc")
+        "bison" "flex" "pkg-config" "bc" "date" "jq")
 libs=( "libelf" "libcrypto" )
 
 for i in "${cmds[@]}"
