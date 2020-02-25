@@ -213,9 +213,9 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [1]* ) bash "${root}/stboot/install-u-root.sh" -u; break;;
-      [2]* ) bash "${root}/stboot/install-u-root.sh"; break;;
-      [3]* ) bash "${root}/stboot/install-u-root.sh" -b; break;;
+      [1]* ) bash "${root}/stboot/install_u-root.sh" -u; break;;
+      [2]* ) bash "${root}/stboot/install_u-root.sh"; break;;
+      [3]* ) bash "${root}/stboot/install_u-root.sh" -b; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

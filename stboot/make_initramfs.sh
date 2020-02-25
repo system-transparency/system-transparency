@@ -11,6 +11,9 @@ failed="\e[1;5;31mfailed\e[0m"
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 var_file="hostvars.json"
+https_roots_file="HTTPSroots.pem"
+bootstrap_url_file="bootstrapURL.json"
+ntp_server_file="NTPserver.json"
 
 develop=false
 while getopts "d" opt; do
@@ -34,17 +37,16 @@ fi
 
 [ -f "${dir}/include/${var_file}" ] || { echo "${dir}/include/${var_file} does not exist"; echo "Cannot include ${var_file}. Creating initramfs $failed";  exit 1; }
 
-echo "[INFO]: writing "$(date +%s)" to timestamp file"
-touch "${dir}/include/timestamp"
-date +%s > "${dir}/include/timestamp" || { echo "Cannot write timestamp. Creating initramfs $failed";  exit 1; }
+echo "[INFO]: update timstamp in hostvars.json to "$(date +%s)""
+jq '.build_timestamp = $newVal' --argjson newVal $(date +%s) ${dir}/include/hostvars.json > tmp.$$.json && mv tmp.$$.json ${dir}/include/hostvars.json || { echo "Cannot update timestamp in hostvars.json. Creating initramfs $failed";  exit 1; }
 
 if "${develop}" ; then
     echo "[INFO]: create initramfs with full tooling for development"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/initramfs-linuxboot.cpio" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
-    -files "${dir}/include/timestamp:etc/timestamp" \
-    -files "${dir}/include/LetsEncrypt_Authority_X3_signed_by_X1.pem:root/LetsEncrypt_Authority_X3.pem" \
-    -files "${dir}/include/signing_rootcert.fingerprint:root/signing_rootcert.fingerprint" \
+    -files "${dir}/include/HTTPSroots.pem:root/${https_roots_file}" \
+    -files "${dir}/include/bootstrapURL.json:root/${bootstrap_url_file}" \
+    -files "${dir}/include/NTPserver.json:root/${ntp_server_file}" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
     core \
     github.com/u-root/u-root/cmds/boot/stboot \
@@ -53,9 +55,9 @@ else
     echo "[INFO]: create minimal initramf including stboot only"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/initramfs-linuxboot.cpio" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
-    -files "${dir}/include/timestamp:etc/timestamp" \
-    -files "${dir}/include/LetsEncrypt_Authority_X3_signed_by_X1.pem:root/LetsEncrypt_Authority_X3.pem" \
-    -files "${dir}/include/signing_rootcert.fingerprint:root/signing_rootcert.fingerprint" \
+    -files "${dir}/include/HTTPSroots.pem:root/${https_roots_file}" \
+    -files "${dir}/include/bootstrapURL.json:root/${bootstrap_url_file}" \
+    -files "${dir}/include/NTPserver.json:root/${ntp_server_file}" \
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/core/elvish \
     github.com/u-root/u-root/cmds/boot/stboot \

@@ -7,8 +7,10 @@ set -o nounset
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root="$(cd "${dir}/../" && pwd)"
 
 var_file="hostvars.json"
+fingerprint_file="${root}/keys/rootcert.fingerprint"
 
 dhcp=false
 qemu=false
@@ -44,28 +46,32 @@ fi
 echo "[INFO]: Create  ${var_file} at ${dir}/include/"
 touch "${dir}/include/${var_file}"
 if [ "${dhcp}" = true ]; then
-    echo '{
-      "host_ip":"",
-      "netmask":"",
-      "gateway":"",
-      "dns":"",
-      "bootstrap_url":"https://stboot.9esec.dev",
-      "minimal_signatures_match": 3
-    }' > "${dir}/include/${var_file}"
+    echo "{
+      \"host_ip\":\"\",
+      \"netmask\":\"\",
+      \"gateway\":\"\",
+      \"dns\":\"\",
+      \"bootstrap_url\":\"https://stboot.9esec.dev\",
+      \"minimal_signatures_match\": 3,
+      \"fingerprints\": [
+        \""$(cut -d' ' -f1 ${fingerprint_file})"\"
+      ],
+      \"build_timestamp\": 0
+    }" > "${dir}/include/${var_file}"
 elif [ "${qemu}" = true ]; then
-    echo '{
-      "host_ip":"10.0.2.15/24",
-      "netmask":"",
-      "gateway":"10.0.2.2/24",
-      "dns":"",
-      "bootstrap_url":"https://stboot.9esec.dev",
-      "minimal_signatures_match": 3
-    }' > "${dir}/include/${var_file}"
+    echo "{
+      \"host_ip\":\"10.0.2.15/24\",
+      \"netmask\":\"\",
+      \"gateway\":\"10.0.2.2/24\",
+      \"dns\":\"\",
+      \"bootstrap_url\":\"https://stboot.9esec.dev\",
+      \"minimal_signatures_match\": 3,
+      \"fingerprints\": [
+        \""$(cut -d' ' -f1 ${fingerprint_file})"\"
+      ],
+      \"build_timestamp\": 0
+    }" > "${dir}/include/${var_file}"
 fi
 
-
-echo "[INFO]: Softlink at ${dir}/${var_file}"
-cd "${dir}" && ln -s "include/${var_file}" .
-
-cat "${dir}/${var_file}"
-
+cat "${dir}/include/${var_file}"
+echo "[INFO]: build_timestamp will be updated when initramfs is beeing build"
