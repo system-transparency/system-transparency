@@ -12,7 +12,8 @@ Directory | Description
 [`operating-system/debian/docker/`](../../operating-system/debian/docker/README.md#operating-system-debian-docker) | docker environment
 [`stboot/`](../../stboot/README.md#stboot) | scripts and files to build stboot bootloader from source
 [`stboot/include/`](../../stboot/include/README.md#stboot-include) | fieles to be includes into the bootloader's initramfs
-[`stconfig/`](../../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
+[`stboot/data/`](../../stboot/data/README.md#stboot-data) | fieles to be placed on a data partition of the host
+[`stconfig/`](../../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool
 
 ## Deploy Mixed-Firmware
 This deployment solution can be used if no direct control over the host default firmware is given. Since the *stboot* bootloader uses the *linuxboot* architecture it consists of a Linux kernel and an initfamfs, which can be treated as a usual operating system. The approach of this solution is to create an image including this kernel and initramfs. Additionally, the image contains an active boot partition with a separate bootloader written to it. *Syslinux* is used here.

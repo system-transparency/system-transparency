@@ -12,7 +12,8 @@ Directory | Description
 [`operating-system/debian/docker/`](../operating-system/debian/docker/README.md#operating-system-debian-docker) | docker environment
 [`stboot/`](../stboot/README.md#stboot) | scripts and files to build stboot bootloader from source
 [`stboot/include/`](../stboot/include/README.md#stboot-include) | fieles to be includes into the bootloader's initramfs
-[`stconfig/`](../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
+[`stboot/data/`](../stboot/data/README.md#stboot-data) | fieles to be placed on a data partition of the host
+[`stconfig/`](../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool
 
 ## Configs
 Directories for individual operating-system configuration can be created here. These directories must at least contain a 'stconfig.json' file. The corresponding files like OS-kernel, OS-initramfs, etc. can be included as well. After utilizing the *stconfig tool* 'stboot.ball' is saved there as well.

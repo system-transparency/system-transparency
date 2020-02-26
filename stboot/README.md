@@ -12,7 +12,8 @@ Directory | Description
 [`operating-system/debian/docker/`](../operating-system/debian/docker/README.md#operating-system-debian-docker) | docker environment
 [`stboot/`](README.md#stboot) | scripts and files to build stboot bootloader from source
 [`stboot/include/`](include/README.md#stboot-include) | fieles to be includes into the bootloader's initramfs
-[`stconfig/`](../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
+[`stboot/data/`](data/README.md#stboot-data) | fieles to be placed on a data partition of the host
+[`stconfig/`](../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool
 
 ## Stboot
 *Stboot* itself is part of the *u-root* project (https://github.com/u-root/u-root) and is written in Go. Since *Stboot* is still in a beta phase at the moment, the code resides at https://github.com/u-root/u-root/tree/stboot branch. This directory mainly provides utilities for the ongoing development.
@@ -26,7 +27,7 @@ Choose one of the following flags when calling:
 * `d` : empty IP. This will trigger DHCP
 * `q` : IP configuration suitable for *QEMU*
 
-#### `install-u-root.sh`
+#### `install_u-root.sh`
 This script is invoked by 'run.sh'. It downloads the source code for the 'u-root' command and the *Stboot* bootloader and compiles them. Further it installs a special *uinit* binary from https://github.com/system-transparency/uinit needed to call the bootloader from the initramfs' init-script.
 
 #### `make_initrmafs.sh`

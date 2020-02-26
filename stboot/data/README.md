@@ -11,16 +11,23 @@ Directory | Description
 [`operating-system/debian/`](../../operating-system/debian/README.md#operating-system-debian) | reproducible debian buster
 [`operating-system/debian/docker/`](../../operating-system/debian/docker/README.md#operating-system-debian-docker) | docker environment
 [`stboot/`](../README.md#stboot) | scripts and files to build stboot bootloader from source
-[`stboot/include/`](README.md#stboot-include) | fieles to be includes into the bootloader's initramfs
-[`stboot/data/`](../data/README.md#stboot-data) | fieles to be placed on a data partition of the host
+[`stboot/include/`](../include/README.md#stboot-include) | fieles to be includes into the bootloader's initramfs
+[`stboot/data/`](README.md#stboot-data) | fieles to be placed on a data partition of the host
 [`stconfig/`](../../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool
 
-## Stboot Include
-Files in this folder will be included into the stboot bootloader directly.
+## Stboot Data
+Files in this foder are ment to be places at a data partition at the host machine. This partition will be mounted by the bootloader.
 
-### Files
-#### `hostvars.json` (will be generated)
-Bootloader configuration data. See https://www.system-transparency.org/usage/hostvars.json
+### Scripts
+#### `create_example_data.sh`
+This script is invoked by 'run.sh'. It creates the files listed below with example data.
 
-#### `netsetup.elv`
-Elvish shell script to be used for debugging purposes.
+### Configuration Files
+#### `provisioning-servers.json` (will be generated)
+See https://www.system-transparency.org/usage/provisioning-servers.json
+
+#### `https-root-certificates.pem` (will be generated)
+See https://www.system-transparency.org/usage/https-root-certificates.pem
+
+#### `ntp-servers.json` (will be generated)
+See https://www.system-transparency.org/usage/ntp-servers.json

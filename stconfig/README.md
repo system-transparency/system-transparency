@@ -12,7 +12,8 @@ Directory | Description
 [`operating-system/debian/docker/`](../operating-system/debian/docker/README.md#operating-system-debian-docker) | docker environment
 [`stboot/`](../stboot/README.md#stboot) | scripts and files to build stboot bootloader from source
 [`stboot/include/`](../stboot/include/README.md#stboot-include) | fieles to be includes into the bootloader's initramfs
-[`stconfig/`](README.md#stconfig) | scripts and files to build the bootloader's configuration tool from >
+[`stboot/data/`](../stboot/data/README.md#stboot-data) | fieles to be placed on a data partition of the host
+[`stconfig/`](README.md#stconfig) | scripts and files to build the bootloader's configuration tool
 
 ## Stconfig
 *Stboot* itself is part of the *u-root* project (https://github.com/u-root/u-root) and is written in Go. Since *Stboot* is still in a beta phase at the moment, the code resides at https://github.com/u-root/u-root/tree/stboot branch. This directory mainly provides utilities for the ongoing development.
