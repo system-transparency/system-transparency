@@ -51,7 +51,6 @@ if [ "${dhcp}" = true ]; then
       \"netmask\":\"\",
       \"gateway\":\"\",
       \"dns\":\"\",
-      \"bootstrap_url\":\"https://stboot.9esec.dev\",
       \"minimal_signatures_match\": 3,
       \"fingerprints\": [
         \""$(cut -d' ' -f1 ${fingerprint_file})"\"
@@ -64,7 +63,6 @@ elif [ "${qemu}" = true ]; then
       \"netmask\":\"\",
       \"gateway\":\"10.0.2.2/24\",
       \"dns\":\"\",
-      \"bootstrap_url\":\"https://stboot.9esec.dev\",
       \"minimal_signatures_match\": 3,
       \"fingerprints\": [
         \""$(cut -d' ' -f1 ${fingerprint_file})"\"

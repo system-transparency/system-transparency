@@ -126,24 +126,6 @@ done
 
 echo
 echo "############################################################"
-echo " Build bootloader for mixed-firmware deployment"
-echo "############################################################"
-echo "                                                      "
-while true; do
-   echo "Run  (r) Root privileges are required"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -rp ">> " x
-   case $x in
-      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/create_image.sh" "$(id -un)"; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
-echo
-echo "############################################################"
 echo " Create example hostvars.json"
 echo "############################################################"
 echo "                                                      "
@@ -162,25 +144,41 @@ while true; do
    esac
 done
 
-# netvars.json is included into the initramfs at the moment
+echo
+echo "############################################################"
+echo " Create example data files"
+echo "############################################################"
+echo "                                                      "
+while true; do
+   echo "Run  (r)"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -rp ">> " x
+   case $x in
+      [Rr]* ) bash "${root}/stboot/data/create_example_data.sh"; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
 
-#echo "                                                     "
-#echo "############################################################"
-#echo " Include hostvars.json into bootloader image"
-#echo "############################################################"
-#echo "                                                     "
-#while true; do
-#   echo "Run  (r) Root privileges are required"
-#   echo "Skip (s)"
-#   echo "Quit (q)"
-#   read -rp ">> " x
-#   case $x in
-#      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/mv_netvars_to_image.sh"; break;;
-#      [Ss]* ) break;;
-#      [Qq]* ) exit;;
-#      * ) echo "Invalid input";;
-#   esac
-#done
+echo
+echo "############################################################"
+echo " Build bootloader for mixed-firmware deployment"
+echo "############################################################"
+echo "                                                      "
+while true; do
+   echo "Run  (r) Root privileges are required"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -rp ">> " x
+   case $x in
+      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/create_image.sh" "$(id -un)"; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
 
 echo
 echo "############################################################"
@@ -208,7 +206,7 @@ echo "                                                     "
 while true; do
    echo "Run  (1) update sources and build u-root cmd"
    echo "Run  (2) rebuild u-root cmd"
-   echo "Run  (3) choose custom brnach and rebuild u-root cmd" 
+   echo "Run  (3) choose custom branch and rebuild u-root cmd" 
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
@@ -230,7 +228,7 @@ echo "                                                     "
 while true; do
    echo "Run  (1) update sources and build stconfig tool"
    echo "Run  (2) rebuild stconfig tool"
-   echo "Run  (3) choose custom brnach and rebuild stconfig tool" 
+   echo "Run  (3) choose custom branch and rebuild stconfig tool" 
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
