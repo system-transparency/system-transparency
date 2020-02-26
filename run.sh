@@ -182,7 +182,7 @@ done
 
 echo
 echo "############################################################"
-echo " Build reproducible Debian OS and create config directory"
+echo " Setup boot configuration for reproducible Debian OS"
 echo "############################################################"
 echo "                                                      "
 while true; do

@@ -16,3 +16,8 @@ Directory | Description
 [`stconfig/`](../../stconfig/README.md#stconfig) | scripts and files to build the bootloader's configuration tool
 
 ## Operating-System Debian
+### Scripts
+#### `create_stconfig.sh`
+This script is invoked by `run.sh`. It creates a configuration directory for the *debian* system in `configs/` including a `stconfig.json` configuration file. This can also serve as template for custom configuration directories.
+
+See https://docs.system-transparency.org for further information about `stconfig.json`
