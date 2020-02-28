@@ -22,6 +22,7 @@ failed="\e[1;5;31mfailed\e[0m"
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 img="${dir}/MBR_Syslinux_Linuxboot.img"
+img_backup="${dir}/MBR_Syslinux_Linuxboot.img.backup"
 part_table="${dir}/mbr.table"
 syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
 syslinux_tar="syslinux-6.03.tar.xz"
@@ -45,7 +46,7 @@ if [ -f "${img}" ]; then
        ls -l "$img"
        read -rp "Update? (y/n)" yn
        case $yn in
-          [Yy]* ) rm "$img"; break;;
+          [Yy]* ) echo "[INFO]: backup existing image to ${img_backup}"; mv "${img}" "${img_backup}"; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac

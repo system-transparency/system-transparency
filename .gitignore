@@ -1,12 +1,14 @@
 /configs/*/
 /stboot/*.cpio
 /stboot/*.cpio.gz
+stboot/*.backup
 /stboot/*.json
 /stboot/include/hostvars.json
 /stboot/data/*.json
 /stboot/data/*.pem
 /deploy/mixed-firmware/*.img
 /deploy/mixed-firmware/vmlinuz-linuxboot
+deploy/mixed-firmware/*.backup
 /operating-system/debian/docker/out
 /operating-system/debian/docker/document_build.info
 /operating-system/debian/docker/.debos-*

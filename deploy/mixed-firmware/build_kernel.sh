@@ -12,6 +12,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
+lnxbt_kernel_backup="${dir}/vmlinuz-linuxboot.backup"
 kernel_src="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
 kernel_ver="linux-4.19.6"
 kernel_config="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig"
@@ -26,7 +27,7 @@ if [ -f "${lnxbt_kernel}" ]; then
        ls -l "${kernel_config}"
        read -rp "Recompile? (y/n)" yn
        case $yn in
-          [Yy]* ) rm "${lnxbt_kernel}"; break;;
+          [Yy]* ) echo "[INFO]: backup existing kernel to ${lnxbt_kernel_backup}"; mv "${lnxbt_kernel}" "${lnxbt_kernel_backup}"; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac

@@ -10,7 +10,9 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 kernel="debian-buster-amd64.vmlinuz"
+kernel_backup="debian-buster-amd64.vmlinuz.backup"
 initrd="debian-buster-amd64.cpio.gz"
+initrd_backup="debian-buster-amd64.cpio.gz.backup"
 cfg_dir="debian-buster-amd64"
 cfg_file="stconfig.json"
 
@@ -31,7 +33,9 @@ else
     while true; do
        read -rp "Update? Root privileges are required (y/n)" yn
        case $yn in
-          [Yy]* ) sudo bash "${dir}/run-docker.sh" "$(id -un)"; break;;
+          [Yy]* ) echo "[INFO]: backup existing kernel to ${dir}/docker/out/${kernel_backup}"; sudo mv "${dir}/docker/out/${kernel}" "${dir}/docker/out/${kernel_backup}"; \
+                  echo "[INFO]: backup existing initramfs to ${dir}/docker/out/${initrd_backup}"; sudo mv "${dir}/docker/out/${initrd}" "${dir}/docker/out/${initrd_backup}"; \
+                  sudo bash "${dir}/run-docker.sh" "$(id -un)"; break;;
           [Nn]* ) break;;
           * ) echo "Please answer yes or no.";;
        esac
