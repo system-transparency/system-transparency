@@ -130,14 +130,12 @@ echo " Create example hostvars.json"
 echo "############################################################"
 echo "                                                      "
 while true; do
-   echo "Run  (1) for static IP for qemu"
-   echo "Run  (2) empty IP -> DHCP"
+   echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [1]* ) bash "${root}/stboot/create_hostvars.sh" -q; break;;
-      [2]* ) bash "${root}/stboot/create_hostvars.sh" -d; break;;
+      [Rr]* ) bash "${root}/stboot/create_hostvars.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

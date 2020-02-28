@@ -23,6 +23,9 @@ Files in this foder are ment to be places at a data partition at the host machin
 This script is invoked by 'run.sh'. It creates the files listed below with example data.
 
 ### Configuration Files
+#### `network.json` (will be generated)
+See https://www.system-transparency.org/usage/network.json
+
 #### `provisioning-servers.json` (will be generated)
 See https://www.system-transparency.org/usage/provisioning-servers.json
 

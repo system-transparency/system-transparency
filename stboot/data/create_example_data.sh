@@ -9,12 +9,14 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 https_root_certificates_file="https-root-certificates.pem"
+network_file="network.json"
 ntp_servers_file="ntp-servers.json"
 provisioning_servers_file="provisioning-servers.json"
 
 ##############################
 # https-root-certificates.json
 ##############################
+write=true
 if [ -f "${dir}/${https_root_certificates_file}" ]; then
     while true; do
        echo "[INFO]: Current ${https_root_certificates_file}:"
@@ -22,15 +24,16 @@ if [ -f "${dir}/${https_root_certificates_file}" ]; then
        read -rp "Override? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${dir}/${https_root_certificates_file}"; break;;
-          [Nn]* ) exit;;
+          [Nn]* ) write=false: break;;
           * ) echo "Please answer yes or no.";;
        esac
     done 
 fi
 
-echo "[INFO]: Create ${https_root_certificates_file}"
-touch "${dir}/${https_root_certificates_file}"
-echo '
+if "${write}" ; then
+   echo "[INFO]: Create ${https_root_certificates_file}"
+   touch "${dir}/${https_root_certificates_file}"
+   echo '
 LetsEncrypt Authority X3 (signed by X1)
 -----BEGIN CERTIFICATE-----
 MIIFjTCCA3WgAwIBAgIRANOxciY0IzLc9AUoUSrsnGowDQYJKoZIhvcNAQELBQAw
@@ -64,13 +67,66 @@ ayLThlHLN81gSkJjVrPI0Y8xCVPB4twb1PFUd2fPM3sA1tJ83sZ5v8vgFv2yofKR
 PB0t6JzUA81mSqM3kxl5e+IZwhYAyO0OTg3/fs8HqGTNKd9BqoUwSRBzp06JMg5b
 rUCGwbCUDI0mxadJ3Bz4WxR6fyNpBK2yAinWEsikxqEt
 -----END CERTIFICATE-----
-' > "${dir}/${https_root_certificates_file}"
+   ' > "${dir}/${https_root_certificates_file}"
 
-cat "${dir}/${https_root_certificates_file}"
+   cat "${dir}/${https_root_certificates_file}"
+fi
+
+##################
+# network.json
+##################
+write=true
+if [ -f "${dir}/${network_file}" ]; then
+    while true; do
+       echo "[INFO]: Current ${network_file}:"
+       cat "${dir}/${network_file}"
+       read -rp "Override? (y/n)" yn
+       case $yn in
+          [Yy]* ) rm -f "${dir}/${network_file}"; break;;
+          [Nn]* ) write=false; break;;
+          * ) echo "Please answer yes or no.";;
+       esac
+    done 
+fi
+
+if "${write}"; then
+   while true; do
+      echo "[INFO]: Create ${network_file}. Choose ip configuration:"
+      echo "(1) Qemu"
+      echo "(2) empty-> DHCP"
+      read -rp ">> " x
+      touch "${dir}/${network_file}"
+      if [ "${x}" = 1 ]; then
+         echo '
+{
+   "host_ip":"10.0.2.15/24",
+   "netmask":"",
+   "gateway":"10.0.2.2/24",
+   "dns":""
+}
+         ' > "${dir}/${network_file}"
+         break
+      elif [ "${x}" = 2 ]; then
+         echo '
+{
+   "host_ip":"",
+   "netmask":"",
+   "gateway":"",
+   "dns":""
+}
+         ' > "${dir}/${network_file}"
+         break
+      else
+         echo "Invalid input!"
+      fi
+   done
+   cat "${dir}/${network_file}"
+fi
 
 ##################
 # ntp-servers.json
 ##################
+write=true
 if [ -f "${dir}/${ntp_servers_file}" ]; then
     while true; do
        echo "[INFO]: Current ${ntp_servers_file}:"
@@ -78,25 +134,28 @@ if [ -f "${dir}/${ntp_servers_file}" ]; then
        read -rp "Override? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${dir}/${ntp_servers_file}"; break;;
-          [Nn]* ) exit;;
+          [Nn]* ) write=false; break;;
           * ) echo "Please answer yes or no.";;
        esac
     done 
 fi
 
-echo "[INFO]: Create ${ntp_servers_file}"
-touch "${dir}/${ntp_servers_file}"
-echo '
+if "${write}"; then
+   echo "[INFO]: Create ${ntp_servers_file}"
+   touch "${dir}/${ntp_servers_file}"
+   echo '
 [
    "0.beevik-ntp.pool.ntp.org"
 ]
-' > "${dir}/${ntp_servers_file}"
+   ' > "${dir}/${ntp_servers_file}"
 
-cat "${dir}/${ntp_servers_file}"
+   cat "${dir}/${ntp_servers_file}"
+fi
 
 ##############################
 # provisioning-servers.json
 ##############################
+write=true
 if [ -f "${dir}/${provisioning_servers_file}" ]; then
     while true; do
        echo "[INFO]: Current ${provisioning_servers_file}:"
@@ -104,20 +163,21 @@ if [ -f "${dir}/${provisioning_servers_file}" ]; then
        read -rp "Override? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${dir}/${provisioning_servers_file}"; break;;
-          [Nn]* ) exit;;
+          [Nn]* ) write=false; break;;
           * ) echo "Please answer yes or no.";;
        esac
     done 
 fi
 
-echo "[INFO]: Create ${provisioning_servers_file}"
-touch "${dir}/${provisioning_servers_file}"
-echo '
+if "${write}"; then
+   echo "[INFO]: Create ${provisioning_servers_file}"
+   touch "${dir}/${provisioning_servers_file}"
+   echo '
 [
    "https://stboot.9esec.dev"
 ]
-' > "${dir}/${provisioning_servers_file}"
+   ' > "${dir}/${provisioning_servers_file}"
 
-cat "${dir}/${provisioning_servers_file}"
-
+   cat "${dir}/${provisioning_servers_file}"
+fi
 
