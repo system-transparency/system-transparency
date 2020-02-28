@@ -1,5 +1,6 @@
 /configs/*/
 /stboot/*.cpio
+/stboot/*.cpio.gz
 /stboot/*.json
 /stboot/include/hostvars.json
 /stboot/data/*.json

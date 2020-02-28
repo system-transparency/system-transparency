@@ -64,4 +64,6 @@ else
     || { echo -e "creating initramfs $failed"; exit 1; }
 fi 
 
+echo "[INFO]: compress to initramfs.cpio.gz"
+gzip -f "${dir}/initramfs-linuxboot.cpio" || { echo -e "gzip $failed"; exit 1; }
 

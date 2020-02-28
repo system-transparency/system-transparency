@@ -164,7 +164,7 @@ done
 
 echo
 echo "############################################################"
-echo " Build bootloader for mixed-firmware deployment"
+echo " Build bootloader image for mixed-firmware deployment"
 echo "############################################################"
 echo "                                                      "
 while true; do
