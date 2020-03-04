@@ -1,4 +1,0 @@
-label: mbr
-
-size=20MiB,type=83,bootable
-type=83

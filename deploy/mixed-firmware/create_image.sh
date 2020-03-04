@@ -24,7 +24,7 @@ root="$(cd "${dir}/../../" && pwd)"
 
 img="${dir}/MBR_Syslinux_Linuxboot.img"
 img_backup="${dir}/MBR_Syslinux_Linuxboot.img.backup"
-part_table="${dir}/mbr.table"
+part_table="${dir}/gpt.table"
 syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
 syslinux_tar="syslinux-6.03.tar.xz"
 syslinux_dir="syslinux-6.03"
@@ -81,18 +81,23 @@ echo "[INFO]: Make VFAT filesystem for boot partition"
 mkfs -t vfat "${dev}p1" || { echo -e "Creating filesystem on 1st partition $failed"; losetup -d "${dev}"; exit 1; }
 echo "[INFO]: Make EXT4 filesystem for data partition"
 mkfs -t ext4 "${dev}p2" || { echo -e "Creating filesystem on 2nd psrtition $failed"; losetup -d "${dev}"; exit 1; }
+partprobe -s "${dev}" || { echo -e "partprobe $failed"; losetup -d "${dev}"; exit 1; }
+echo "[INFO]: raw image layout:"
+lsblk -o NAME,SIZE,TYPE,PTTYPE,PARTUUID,PARTLABEL,FSTYPE ${dev}
 
+echo ""
 echo "[INFO]: Installing Syslinux"
 mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; losetup -d "${dev}"; exit 1; }
 mkdir  "${mnt}/syslinux" || { echo -e "Making Syslinux config directory $failed"; losetup -d "${dev}"; exit 1; }
 umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "${dev}"; exit 1; }
 "${tmp}/${syslinux_dir}/bios/linux/syslinux" --directory /syslinux/ --install "${dev}p1" || { echo -e "Writing vollume boot record $failed"; losetup -d "${dev}"; exit 1; }
-dd bs=440 count=1 conv=notrunc "if=${tmp}/${syslinux_dir}/bios/mbr/mbr.bin" "of=${dev}" || { echo -e "Writing master boot record $failed"; losetup -d "${dev}"; exit 1; }
+dd bs=440 count=1 conv=notrunc "if=${tmp}/${syslinux_dir}/bios/mbr/gptmbr.bin" "of=${dev}" || { echo -e "Writing master boot record $failed"; losetup -d "${dev}"; exit 1; }
 mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; losetup -d "$dev"; exit 1; }
 cp "${syslinux_config}" "${mnt}/syslinux"
 cp "${lnxbt_kernel}" "${mnt}"
 umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
 
+echo ""
 echo "[INFO]: Moving data files"
 mount "${dev}p2" "${mnt}" || { echo -e "Mounting ${dev}p2 $failed"; losetup -d "$dev"; exit 1; }
 cp -R "${root}/stboot/data/." "${mnt}" || { echo -e "Copying files $failed"; losetup -d "$dev"; exit 1; }

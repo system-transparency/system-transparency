@@ -1,0 +1,4 @@
+label: gpt
+
+size=20MiB, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4,name="STBOOT", attrs="LegacyBIOSBootable"
+            type=0FC63DAF-8483-4772-8E79-3D69D8477DE4,name="STDATA"
