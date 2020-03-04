@@ -20,6 +20,7 @@ failed="\e[1;5;31mfailed\e[0m"
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root="$(cd "${dir}/../../" && pwd)"
 
 img="${dir}/MBR_Syslinux_Linuxboot.img"
 img_backup="${dir}/MBR_Syslinux_Linuxboot.img.backup"
@@ -75,28 +76,35 @@ losetup -f || { echo -e "Finding free loop device $failed"; exit 1; }
 dev=$(losetup -f)
 losetup "${dev}" "${img}" || { echo -e "Loop device setup $failed"; losetup -d "${dev}"; exit 1; }
 sfdisk --no-reread --no-tell-kernel "${dev}" < "${part_table}" || { echo -e "partitioning $failed"; losetup -d "${dev}"; exit 1; }
-partx -u "${dev}" || { echo -e "partx $failed"; losetup -d "${dev}"; exit 1; }
-mkfs -t vfat "${dev}p1" || { echo -e "Creating filesystem $failed"; losetup -d "${dev}"; exit 1; }
+partprobe -s "${dev}" || { echo -e "partprobe $failed"; losetup -d "${dev}"; exit 1; }
+echo "[INFO]: Make VFAT filesystem for boot partition"
+mkfs -t vfat "${dev}p1" || { echo -e "Creating filesystem on 1st partition $failed"; losetup -d "${dev}"; exit 1; }
+echo "[INFO]: Make EXT4 filesystem for data partition"
+mkfs -t ext4 "${dev}p2" || { echo -e "Creating filesystem on 2nd psrtition $failed"; losetup -d "${dev}"; exit 1; }
 
 echo "[INFO]: Installing Syslinux"
 mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; losetup -d "${dev}"; exit 1; }
 mkdir  "${mnt}/syslinux" || { echo -e "Making Syslinux config directory $failed"; losetup -d "${dev}"; exit 1; }
 umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "${dev}"; exit 1; }
-"${tmp}/${syslinux_dir}/bios/linux/syslinux" --directory /syslinux/ --install "${dev}p1" || { echo -e "Writing vollume boot record $failed"; "${dev}"; exit 1; }
+"${tmp}/${syslinux_dir}/bios/linux/syslinux" --directory /syslinux/ --install "${dev}p1" || { echo -e "Writing vollume boot record $failed"; losetup -d "${dev}"; exit 1; }
 dd bs=440 count=1 conv=notrunc "if=${tmp}/${syslinux_dir}/bios/mbr/mbr.bin" "of=${dev}" || { echo -e "Writing master boot record $failed"; losetup -d "${dev}"; exit 1; }
 mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; losetup -d "$dev"; exit 1; }
 cp "${syslinux_config}" "${mnt}/syslinux"
 cp "${lnxbt_kernel}" "${mnt}"
-
-
 umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
+
+echo "[INFO]: Moving data files"
+mount "${dev}p2" "${mnt}" || { echo -e "Mounting ${dev}p2 $failed"; losetup -d "$dev"; exit 1; }
+cp -R "${root}/stboot/data/." "${mnt}" || { echo -e "Copying files $failed"; losetup -d "$dev"; exit 1; }
+umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
+
 losetup -d "${dev}" || { echo -e "Loop device clean up $failed"; exit 1; }
 rm -r -f "${tmp}" "${mnt}"
-
+echo ""
 chown -c "${user_name}" "${img}"
 chown -c "${user_name}" "${lnxbt_kernel}"
 
 echo ""
-echo "${img} created."
-echo "Linuxboot initramfs needs to be included."
+echo "[INFO]: ${img} created."
+echo "[INFO]: Linuxboot initramfs needs to be included."
 

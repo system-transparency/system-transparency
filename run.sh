@@ -72,7 +72,7 @@ done
 
 echo "Checking dependancies ..."
 cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
-        "wget" "dd" "losetup" "sfdisk" "partx" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
+        "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
         "bison" "flex" "pkg-config" "bc" "date" "jq")
 libs=( "libelf" "libcrypto" )
 

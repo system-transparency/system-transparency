@@ -9,6 +9,7 @@ failed="\e[1;5;31mfailed\e[0m"
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 initramfs_name="initramfs-linuxboot.cpio"
 initramfs_name_compressed="initramfs-linuxboot.cpio.gz"
 initramfs_backup="initramfs-linuxboot.cpio.gz.backup"
