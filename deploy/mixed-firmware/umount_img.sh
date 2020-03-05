@@ -18,5 +18,5 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mnt="/tmp/mnt_stimg"
 img="${dir}/MBR_Syslinux_Linuxboot.img"
 echo "[INFO]: unmount ${img}"
-umount "${mnt}" || { echo -e "umount $failed"; exit 1; }
-rm -r -f "${mnt}" || { echo -e "cleanup tmpdir $failed"; exit 1; }
+umount "${mnt}p1" || { echo -e "umount $failed"; exit 1; }
+rm -r -f "${mnt}p1" || { echo -e "cleanup tmpdir $failed"; exit 1; }
