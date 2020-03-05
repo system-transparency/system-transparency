@@ -15,4 +15,15 @@ root="$dir"
 
 image="${root}/deploy/mixed-firmware/Syslinux_Linuxboot.img"
 
-qemu-system-x86_64 -drive if=virtio,file=${image},format=raw -net user -net nic -device virtio-rng-pci -rtc base=localtime -m 8192 -nographic 
+qemu-system-x86_64 -drive if=virtio,file=${image},format=raw \
+-object rng-random,filename=/dev/urandom,id=rng0 \
+-device e1000,netdev=n1 \
+-netdev user,id=n1,hostfwd=tcp:127.0.0.1:23-:2222,net=192.168.1.0/24,host=192.168.1.1 \
+-rtc base=localtime \
+-m 8192M \
+-device virtio-rng-pci,rng=rng0 \
+-serial stdio  \
+#-monitor /dev/null  \
+#-nographic \
+#-append earlyprintk=ttyS0,115200\ console=ttyS0 \
+

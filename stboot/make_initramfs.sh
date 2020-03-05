@@ -1,4 +1,4 @@
-#! /bin/bash 
+#! /bin/bash
 
 set -o errexit
 set -o pipefail
@@ -46,10 +46,13 @@ if [ -f "${dir}/${initramfs_name_compressed}" ]; then
 fi
 if "${core_tools}" ; then
     echo "[INFO]: create initramfs including all u-root core tools"
-    GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/${initramfs_name}" \
+    GOPATH="${gopath}" u-root -build=bb -uinitcmd=/bbin/cpuserver -o "${dir}/${initramfs_name}" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
+    -files "${dir}/include/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
+    -files "${dir}/include/cpu_rsa.pub:key.pub" \
     core \
+    github.com/u-root/cpu/cmds/cpuserver \
     github.com/u-root/u-root/cmds/boot/stboot \
     || { echo -e "creating initramfs $failed"; exit 1; }
 else
@@ -60,8 +63,7 @@ else
     github.com/u-root/u-root/cmds/core/elvish \
     github.com/u-root/u-root/cmds/boot/stboot \
     || { echo -e "creating initramfs $failed"; exit 1; }
-fi 
+fi
 
 echo "[INFO]: compress to ${initramfs_name_compressed}"
 gzip -f "${dir}/${initramfs_name}" || { echo -e "gzip $failed"; exit 1; }
-
