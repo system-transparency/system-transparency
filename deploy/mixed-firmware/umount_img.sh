@@ -16,7 +16,7 @@ failed="\e[1;5;31mfailed\e[0m"
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 mnt="/tmp/mnt_stimg"
-img="${dir}/MBR_Syslinux_Linuxboot.img"
+img="${dir}/Syslinux_Linuxboot.img"
 echo "[INFO]: unmount ${img}"
 umount "${mnt}p1" || { echo -e "umount $failed"; exit 1; }
 rm -r -f "${mnt}p1" || { echo -e "cleanup tmpdir $failed"; exit 1; }

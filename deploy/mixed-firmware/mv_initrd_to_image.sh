@@ -17,7 +17,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 mnt=$(mktemp -d -t "mnt-st-XXXX")
-img="${dir}/MBR_Syslinux_Linuxboot.img"
+img="${dir}/Syslinux_Linuxboot.img"
 initrd="${root}/stboot/initramfs-linuxboot.cpio.gz"
 
 [ -f "${initrd}" ] || { echo "${initrd} does not exist"; echo "Including initramfs into image $failed";  exit 1; }

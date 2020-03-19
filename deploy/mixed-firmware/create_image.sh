@@ -22,7 +22,7 @@ failed="\e[1;5;31mfailed\e[0m"
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
-img="${dir}/MBR_Syslinux_Linuxboot.img"
+img="${dir}/Syslinux_Linuxboot.img"
 img_backup="${dir}/MBR_Syslinux_Linuxboot.img.backup"
 part_table="${dir}/gpt.table"
 syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"

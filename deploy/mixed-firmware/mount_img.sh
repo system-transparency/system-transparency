@@ -16,7 +16,7 @@ failed="\e[1;5;31mfailed\e[0m"
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 mnt="/tmp/mnt_stimg"
-img="${dir}/MBR_Syslinux_Linuxboot.img"
+img="${dir}/Syslinux_Linuxboot.img"
 
 mkdir -p "${mnt}p1" || { echo -e "mkdir $failed"; exit 1; }
 mkdir -p "${mnt}p2" || { echo -e "mkdir $failed"; exit 1; }
