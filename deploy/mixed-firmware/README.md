@@ -29,8 +29,11 @@ This script is invoked by 'run.sh'. Firstly it creates a raw image, secondly *sf
 
 Notice that the image is incomplete at this state. The appropriate initramfs need to be included.
 
-#### `mount_img.sh`
-This script is for custom use. If you want to inspect or modify files of 'MBR_Syslinux_Linuxboot.img' use this script. It mounts the image via a loop device at a temporary directory. The path is printed to the console.
+#### `mount_boot.sh`
+This script is for custom use. If you want to inspect or modify files of the boot partition (1st partition) of 'Syslinux_Linuxboot.img' use this script. It mounts the image via a loop device at a temporary directory. The path is printed to the console.
+
+#### `mount_data.sh`
+This script is for custom use. If you want to inspect or modify files of the data partition (2nd partition) of 'Syslinux_Linuxboot.img' use this script. It mounts the image via a loop device at a temporary directory. The path is printed to the console.
 
 #### `mv_hostvars_to_image.sh`
 Optional at the moment. This Script copies the 'hostvars.json' configuration file to the image.
@@ -38,8 +41,11 @@ Optional at the moment. This Script copies the 'hostvars.json' configuration fil
 #### `mv_initrd_to_image.sh`
 this script is invoked by 'run.sh'. It copies the linuxboot initramfs including *stboot* to the image.
 
-#### `umount_img.sh`
-Counterpart of 'mount_img.sh'.
+#### `umount_boot.sh`
+Counterpart of 'mount_boot.sh'.
+
+#### `umount_data.sh`
+Counterpart of 'mount_data.sh'.
 
 ### Configuration Files
 #### `mbr.table`
