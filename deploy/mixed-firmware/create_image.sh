@@ -23,7 +23,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 img="${dir}/Syslinux_Linuxboot.img"
-img_backup="${dir}/MBR_Syslinux_Linuxboot.img.backup"
+img_backup="${dir}/Syslinux_Linuxboot.img.backup"
 part_table="${dir}/gpt.table"
 syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
 syslinux_tar="syslinux-6.03.tar.xz"
@@ -71,7 +71,7 @@ wget "${syslinux_src}/${syslinux_tar}" -P "${tmp}" || { echo -e "Download $faile
 tar -xf "${tmp}/${syslinux_tar}" -C "${tmp}" || { echo -e "Decompression $failed"; exit 1; }
 
 echo "[INFO]: Creating raw image"
-dd if=/dev/zero "of=${img}" bs=1M count=200
+dd if=/dev/zero "of=${img}" bs=1M count=20
 losetup -f || { echo -e "Finding free loop device $failed"; exit 1; }
 dev=$(losetup -f)
 losetup "${dev}" "${img}" || { echo -e "Loop device setup $failed"; losetup -d "${dev}"; exit 1; }
@@ -101,6 +101,8 @@ echo ""
 echo "[INFO]: Moving data files"
 mount "${dev}p2" "${mnt}" || { echo -e "Mounting ${dev}p2 $failed"; losetup -d "$dev"; exit 1; }
 cp -R "${root}/stboot/data/." "${mnt}" || { echo -e "Copying files $failed"; losetup -d "$dev"; exit 1; }
+rm "${mnt}/create_example_data.sh"
+rm "${mnt}/README.md"
 umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
 
 losetup -d "${dev}" || { echo -e "Loop device clean up $failed"; exit 1; }

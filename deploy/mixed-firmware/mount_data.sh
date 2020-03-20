@@ -21,10 +21,10 @@ img="${dir}/Syslinux_Linuxboot.img"
 mkdir -p "${mnt}_data" || { echo -e "mkdir $failed"; exit 1; }
 # offset: sfdisk -d ${img}
 # ...
-# deploy/mixed-firmware/Syslinux_Linuxboot.img1 : start=        2048, size=       40960, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=671EE130-82A5-9C45-9C20-8963039DEBD4, name="STBOOT", attrs="LegacyBIOSBo"
-# deploy/mixed-firmware/Syslinux_Linuxboot.img2 : start=       43008, size=      366559, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=BDB5C1C2-7BD7-E94A-BE80-F6257250F2B8, name="STDATA"
+# deploy/mixed-firmware/Syslinux_Linuxboot.img1 : start=        2048, size=       24576, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=B48F8501-978A-F644-9509-7D1146C867"
+# deploy/mixed-firmware/Syslinux_Linuxboot.img2 : start=       26624, size=       14303, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=0CC2C552-FACE-4745-B9F2-B90257BBD6"
 #
 # 2nd partition: 
-# 43008 blocks * 512 bytes per block -> 22020096 
-mount -o loop,offset=22020096 "${img}" "${mnt}_data" || { echo -e "mount 2nd partition $failed"; exit 1; }
+# 26624 blocks * 512 bytes per block -> 13631488 
+mount -o loop,offset=13631488 "${img}" "${mnt}_data" || { echo -e "mount 2nd partition $failed"; exit 1; }
 echo "[INFO]: mounted 2st partition of ${img} at ${mnt}_data"
