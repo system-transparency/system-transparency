@@ -8,7 +8,8 @@ stboot/*.backup
 /stboot/data/*.pem
 /deploy/mixed-firmware/*.img
 /deploy/mixed-firmware/vmlinuz-linuxboot
-deploy/mixed-firmware/*.backup
+/deploy/mixed-firmware/*.backup
+/deploy/mixed-firmware/x86_64_x11ssh_qemu_linuxboot.defconfig.modified
 /operating-system/debian/docker/out
 /operating-system/debian/docker/document_build.info
 /operating-system/debian/docker/.debos-*

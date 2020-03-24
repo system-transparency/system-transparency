@@ -16,8 +16,17 @@ lnxbt_kernel_backup="${dir}/vmlinuz-linuxboot.backup"
 kernel_src="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
 kernel_ver="linux-4.19.6"
 kernel_config="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig"
+kernel_config_mod="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig.modified"
 tmp=$(mktemp -d -t stkernel-XXXXXXXX)
 dev_keys="torvalds@kernel.org gregkh@kernel.org"
+
+user_name="$1"
+
+if ! id "${user_name}" >/dev/null 2>&1
+then
+   echo "User ${user_name} does not exist"
+   exit 1
+fi
 
 if [ -f "${lnxbt_kernel}" ]; then
     while true; do
@@ -66,10 +75,10 @@ echo "[INFO]: Build Linuxboot kernel"
 tar -xf "${tmp}/${kernel_ver}.tar.xz" -C "${tmp}" || { rm -rf "${tmp}"; echo -e "Unpacking $failed"; exit 1; }
 
 [ -f "${kernel_config}" ] || { rm -rf "${tmp}"; echo -e "Finding $kernel_config $failed"; exit 1; }
-cp -v "${kernel_config}" "${tmp}/${kernel_ver}/.config"
+cp "${kernel_config}" "${tmp}/${kernel_ver}/.config"
 cd "${tmp}/${kernel_ver}"
 while true; do
-    echo "Following desconfig will be used:" 
+    echo "Following configuration will be loaded as .config:" 
     ls -l "${kernel_config}"
     echo "It is recommended to just save&exit in the upcoming menu."
     read -rp "Press any key to continue" x
@@ -78,10 +87,21 @@ while true; do
     esac
 done 
 make menuconfig
+make savedefconfig 
+cp defconfig "${kernel_config_mod}"
 make "-j$(nproc)" || { rm -rf "${tmp}"; echo -e "Compiling kernel $failed"; exit 1; }
 cd "${dir}"
-cp -v "${tmp}/${kernel_ver}/arch/x86/boot/bzImage" "$lnxbt_kernel"
+cp "${tmp}/${kernel_ver}/arch/x86/boot/bzImage" "$lnxbt_kernel"
 rm -rf "${tmp}"
-echo
+
+echo ""
+chown -c "${user_name}" "${lnxbt_kernel}"
+chown -c "${user_name}" "${lnxbt_kernel_backup}"
+chown -c "${user_name}" "${kernel_config}"
+chown -c "${user_name}" "${kernel_config_mod}"
+
+echo ""
 echo "Successfully created $lnxbt_kernel ($kernel_ver)"
+echo "Any config changes you may have made via menuconfig are saved to:"
+echo "${kernel_config_mod}"
 

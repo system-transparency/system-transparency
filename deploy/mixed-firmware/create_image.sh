@@ -55,7 +55,7 @@ if [ -f "${img}" ]; then
 fi
 
 echo "[INFO]: check for Linuxboot kernel"
-bash "${dir}/build_kernel.sh"
+bash "${dir}/build_kernel.sh" "${user_name}"
 
 if [ ! -f "${lnxbt_kernel}" ]; then
     echo "${lnxbt_kernel} not found!"
@@ -109,7 +109,6 @@ losetup -d "${dev}" || { echo -e "Loop device clean up $failed"; exit 1; }
 rm -r -f "${tmp}" "${mnt}"
 echo ""
 chown -c "${user_name}" "${img}"
-chown -c "${user_name}" "${lnxbt_kernel}"
 
 echo ""
 echo "[INFO]: ${img} created."
