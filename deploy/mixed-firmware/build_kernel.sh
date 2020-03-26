@@ -45,8 +45,8 @@ fi
 
 
 echo "[INFO]: Downloading Linux Kernel source files and signature"
-wget "${kernel_src}/${kernel_ver}.tar.xz" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading source files $failed"; exit 1; }
-wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading signature $failed"; exit 1; }
+[ -f "${tmp}/${kernel_ver}.tar.xz" ] || wget "${kernel_src}/${kernel_ver}.tar.xz" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading source files $failed"; exit 1; }
+[ -f "${tmp}/${kernel_ver}.tar.sign" ] || wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading signature $failed"; exit 1; }
 
 mkdir "${tmp}/gnupg"
 echo "[INFO]: Fetching kernel developer keys"
