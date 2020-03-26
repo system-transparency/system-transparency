@@ -78,7 +78,7 @@ libs=( "libelf" "libcrypto" )
 
 for i in "${cmds[@]}"
 do
-    command -v "$i" >/dev/null 2>&1 || { 
+    PATH=/usr/sbin:$PATH command -v "$i" >/dev/null 2>&1 || {
         echo >&2 "$i required"; 
         exit 1; 
     }
