@@ -70,7 +70,7 @@ while getopts ":c:" opt; do
   esac
 done
 
-echo "Checking dependancies ..."
+echo "Checking dependencies ..."
 cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
         "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
         "bison" "flex" "pkg-config" "bc" "date" "jq")
