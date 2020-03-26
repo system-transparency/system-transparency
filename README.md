@@ -31,7 +31,7 @@ Run each step when executing for the first time. Some scripts need root privileg
 On Debian-based systems you'll need the following packages:
 
 ```bash
-apt install golang docker.io openssl git qemu-system-x86 wget sudo bison flex pkg-config libelf-dev libssl-dev bc libc6-i386 gcc-8 g++-8 libncurses-dev
+apt install golang docker.io openssl git qemu-system-x86 wget sudo bison flex pkg-config libelf-dev libssl-dev bc libc6-i386 gcc-8 g++-8 libncurses-dev gpg parted jq make dosfstools
 ```
 
 You then need to make GCC 8 the default.
