@@ -17,7 +17,7 @@ kernel_src="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
 kernel_ver="linux-4.19.6"
 kernel_config="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig"
 kernel_config_mod="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig.modified"
-tmp=${ST_tmp_stkernel:-$(mktemp -d -t stkernel-XXXXXXXX)}
+tmp=${ST_STKERNEL_TMPDIR:-$(mktemp -d -t stkernel-XXXXXXXX)}
 dev_keys="torvalds@kernel.org gregkh@kernel.org"
 
 user_name="$1"
