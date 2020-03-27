@@ -96,7 +96,7 @@ rm -rf "${tmp}"
 
 echo ""
 chown -c "${user_name}" "${lnxbt_kernel}"
-chown -c "${user_name}" "${lnxbt_kernel_backup}"
+[ -f "${lnxbt_kernel_backup}" ] && chown -c "${user_name}" "${lnxbt_kernel_backup}"
 chown -c "${user_name}" "${kernel_config}"
 chown -c "${user_name}" "${kernel_config_mod}"
 
