@@ -43,6 +43,15 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /
 sudo update-alternatives --config gcc
 ```
 
+The following environment variables can be set to influence the build or update of the environment.
+
+- ST_STKERNEL_TMPDIR (default: generated)
+- ST_STBOOT_URL (default: https://stboot.9esec.dev)
+- ST_STBOOT_SERVER (default: stboot.9esec.dev)
+- ST_STBOOT_SERVER_PATH (default: /home/provisioner/www)
+- ST_STBOOT_PROVISIONER (default: provisioner)
+- ST_QEMU_MEM: 8192
+
 #### `start_qemu_mixed-firmware.sh`
 This script is invoked by `run.sh`. It will boot up *qemu* to test the system. All output is printed to the console.
 Use `ctrl+a` , `x` to terminate.
