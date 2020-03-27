@@ -32,13 +32,16 @@ fi
 kernel="debian-buster-amd64.vmlinuz"
 initrd="debian-buster-amd64.cpio.gz"
 
-echo "____Build docker image____"
+echo "[INFO]: Build docker image"
+echo ""
 docker build -t debos "${dir}/docker" || { echo -e "building docker image $failed"; exit 1; }
-echo "____Build Debian OS reproducible via docker container____"
+echo ""
+echo "[INFO]: Build Debian OS reproducible via docker container"
+echo ""
 docker run --cap-add=SYS_ADMIN --privileged -it -v "${root}:/system-transparency/" debos || { echo -e "running docker image $failed"; exit 1; }
 
 chown -c "$user_name" "${dir}/docker/out/${kernel}"
 chown -c "$user_name" "${dir}/docker/out/${initrd}"
 
-echo "Kernel and Initramfs generated at: ${dir}/docker/out"
+echo "Kernel and Initramfs generated at: $(realpath --relative-to=${root} "${dir}/docker/out")"
 

@@ -25,7 +25,7 @@ if [ -f "${dir}/include/${var_file}" ]; then
     done 
 fi
 
-echo "[INFO]: Create  ${var_file} at ${dir}/include/"
+echo "[INFO]: Create $(realpath --relative-to=${root} "${dir}/include/${var_file}")"
 touch "${dir}/include/${var_file}"
 echo "
 {

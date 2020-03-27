@@ -11,12 +11,13 @@ set -o nounset
 # set -o xtrace
 
 failed="\e[1;5;31mfailed\e[0m"
+root="$(cd "${dir}/../../" && pwd)"
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 mnt="/tmp/mnt_stimg"
 img="${dir}/Syslinux_Linuxboot.img"
-echo "[INFO]: unmount ${img}"
+echo "[INFO]: unmount $(realpath --relative-to=${root} ${img})"
 umount "${mnt}_boot" || { echo -e "umount $failed"; exit 1; }
 rm -r -f "${mnt}_boot" || { echo -e "cleanup tmpdir $failed"; exit 1; }

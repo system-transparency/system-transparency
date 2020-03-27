@@ -28,13 +28,13 @@ if [ ! -f "${dir}/docker/out/${kernel}" ] || [ ! -f "${dir}/docker/out/${initrd}
     sudo bash "${dir}/run-docker.sh" "$(id -un)"
 else
     echo "[INFO]: Current Debian OS artefacts: "
-    ls -l "${dir}/docker/out/${kernel}"
-    ls -l "${dir}/docker/out/${initrd}"
+    ls -l "$(realpath --relative-to=${root} "${dir}/docker/out/${kernel}")"
+    ls -l "$(realpath --relative-to=${root} "${dir}/docker/out/${initrd}")"
     while true; do
        read -rp "Update? Root privileges are required (y/n)" yn
        case $yn in
-          [Yy]* ) echo "[INFO]: backup existing kernel to ${dir}/docker/out/${kernel_backup}"; sudo mv "${dir}/docker/out/${kernel}" "${dir}/docker/out/${kernel_backup}"; \
-                  echo "[INFO]: backup existing initramfs to ${dir}/docker/out/${initrd_backup}"; sudo mv "${dir}/docker/out/${initrd}" "${dir}/docker/out/${initrd_backup}"; \
+          [Yy]* ) echo "[INFO]: backup existing kernel to $(realpath --relative-to=${root} "${dir}/docker/out/${kernel_backup}")"; sudo mv "${dir}/docker/out/${kernel}" "${dir}/docker/out/${kernel_backup}"; \
+                  echo "[INFO]: backup existing initramfs to $(realpath --relative-to=${root} "${dir}/docker/out/${initrd_backup}")"; sudo mv "${dir}/docker/out/${initrd}" "${dir}/docker/out/${initrd_backup}"; \
                   sudo bash "${dir}/run-docker.sh" "$(id -un)"; break;;
           [Nn]* ) break;;
           * ) echo "Please answer yes or no.";;
@@ -63,4 +63,4 @@ echo '{
 
 cat "${root}/configs/${cfg_dir}/${cfg_file}"
 
-echo "Successfully createt ${root}/configs/${cfg_dir}/${cfg_file}"
+echo "Successfully createt configs/${cfg_dir}/${cfg_file}"

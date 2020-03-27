@@ -44,10 +44,10 @@ fi
 if [ -f "${img}" ]; then
     while true; do
        echo "Current image file:"
-       ls -l "$img"
+       ls -l "$(realpath --relative-to=${root} ${img})"
        read -rp "Update? (y/n)" yn
        case $yn in
-          [Yy]* ) echo "[INFO]: backup existing image to ${img_backup}"; mv "${img}" "${img_backup}"; break;;
+          [Yy]* ) echo "[INFO]: backup existing image to $(realpath --relative-to=${root} ${img_backup})"; mv "${img}" "${img_backup}"; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -58,10 +58,10 @@ echo "[INFO]: check for Linuxboot kernel"
 bash "${dir}/build_kernel.sh" "${user_name}"
 
 if [ ! -f "${lnxbt_kernel}" ]; then
-    echo "${lnxbt_kernel} not found!"
+    echo "$(realpath --relative-to=${root} ${lnxbt_kernel}) not found!"
     echo -e "creating image $failed"; exit 1
 else
-    echo "Linuxboot kernel:  ${lnxbt_kernel}"
+    echo "Linuxboot kernel: $(realpath --relative-to=${root} ${lnxbt_kernel})"
 fi
 
 
@@ -82,7 +82,7 @@ mkfs -t vfat "${dev}p1" || { echo -e "Creating filesystem on 1st partition $fail
 echo "[INFO]: Make EXT4 filesystem for data partition"
 mkfs -t ext4 "${dev}p2" || { echo -e "Creating filesystem on 2nd psrtition $failed"; losetup -d "${dev}"; exit 1; }
 partprobe -s "${dev}" || { echo -e "partprobe $failed"; losetup -d "${dev}"; exit 1; }
-echo "[INFO]: raw image layout:"
+echo "[INFO]: Raw image layout:"
 lsblk -o NAME,SIZE,TYPE,PTTYPE,PARTUUID,PARTLABEL,FSTYPE ${dev}
 
 echo ""
@@ -111,6 +111,6 @@ echo ""
 chown -c "${user_name}" "${img}"
 
 echo ""
-echo "[INFO]: ${img} created."
+echo "[INFO]: $(realpath --relative-to=${root} ${img}) created."
 echo "[INFO]: Linuxboot initramfs needs to be included."
 

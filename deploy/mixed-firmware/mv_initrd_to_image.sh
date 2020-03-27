@@ -27,4 +27,4 @@ mount -o loop,offset=1048576 "${img}" "${mnt}" || { echo -e "mount $failed"; exi
 cp  "${initrd}" "${mnt}" || { echo -e "cp $failed"; exit 1; }
 umount "${mnt}" || { echo -e "umount $failed"; exit 1; }
 rm -r -f "${mnt}" || { echo -e "cleanup tmpdir $failed"; exit 1; }
-echo "[INFO]: successfully moved ${initrd} to ${img}"
+echo "[INFO]: successfully moved $(realpath --relative-to=${root} ${initrd}) to $(realpath --relative-to=${root} ${img})"

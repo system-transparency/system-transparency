@@ -9,6 +9,7 @@ failed="\e[1;5;31mfailed\e[0m"
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root="$(cd "${dir}/../../" && pwd)"
 
 
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
@@ -31,12 +32,10 @@ fi
 if [ -f "${lnxbt_kernel}" ]; then
     while true; do
        echo "Current Linuxboot kernel:"
-       ls -l "${lnxbt_kernel}"
-       echo "kernel config:"
-       ls -l "${kernel_config}"
+       ls -l "$(realpath --relative-to=${root} ${lnxbt_kernel})"
        read -rp "Recompile? (y/n)" yn
        case $yn in
-          [Yy]* ) echo "[INFO]: backup existing kernel to ${lnxbt_kernel_backup}"; mv "${lnxbt_kernel}" "${lnxbt_kernel_backup}"; break;;
+          [Yy]* ) echo "[INFO]: backup existing kernel to $(realpath --relative-to=${root} ${lnxbt_kernel_backup})"; mv "${lnxbt_kernel}" "${lnxbt_kernel_backup}"; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -78,8 +77,7 @@ tar -xf "${tmp}/${kernel_ver}.tar.xz" -C "${tmp}" || { rm -rf "${tmp}"; echo -e 
 cp "${kernel_config}" "${tmp}/${kernel_ver}/.config"
 cd "${tmp}/${kernel_ver}"
 while true; do
-    echo "Following configuration will be loaded as .config:" 
-    ls -l "${kernel_config}"
+    echo "Load  $(realpath --relative-to=${root} ${kernel_config}) as .config:" 
     echo "It is recommended to just save&exit in the upcoming menu."
     read -rp "Press any key to continue" x
     case $x in
@@ -101,7 +99,7 @@ chown -c "${user_name}" "${kernel_config}"
 chown -c "${user_name}" "${kernel_config_mod}"
 
 echo ""
-echo "Successfully created $lnxbt_kernel ($kernel_ver)"
+echo "Successfully created $(realpath --relative-to=${root} $lnxbt_kernel) ($kernel_ver)"
 echo "Any config changes you may have made via menuconfig are saved to:"
-echo "${kernel_config_mod}"
+echo "$(realpath --relative-to=${root} ${kernel_config_mod})"
 

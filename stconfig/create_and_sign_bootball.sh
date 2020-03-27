@@ -35,5 +35,4 @@ stconfig sign "$config_dir/$bootball" "${root}/keys/signing-key-2.key" "${root}/
 stconfig sign "$config_dir/$bootball" "${root}/keys/signing-key-3.key" "${root}/keys/signing-key-3.cert" || { echo -e "stconfig sign $failed"; exit 1; }
 
 echo ""
-echo "[INFO]: $bootball:"
-ls -l "$config_dir/$bootball"
+echo "[INFO]: $(realpath --relative-to=${root} "$config_dir/$bootball") created."

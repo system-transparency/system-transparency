@@ -14,6 +14,7 @@ failed="\e[1;5;31mfailed\e[0m"
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root="$(cd "${dir}/../../" && pwd)"
 
 mnt="/tmp/mnt_stimg"
 img="${dir}/Syslinux_Linuxboot.img"
@@ -27,4 +28,4 @@ mkdir -p "${mnt}_data" || { echo -e "mkdir $failed"; exit 1; }
 # 2nd partition: 
 # 26624 blocks * 512 bytes per block -> 13631488 
 mount -o loop,offset=13631488 "${img}" "${mnt}_data" || { echo -e "mount 2nd partition $failed"; exit 1; }
-echo "[INFO]: mounted 2st partition of ${img} at ${mnt}_data"
+echo "[INFO]: mounted 2st partition of $(realpath --relative-to=${root} ${img}) at ${mnt}_data"

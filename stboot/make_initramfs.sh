@@ -46,7 +46,7 @@ echo "[INFO]: update timstamp in hostvars.json to "$(date +%s)""
 jq '.build_timestamp = $newVal' --argjson newVal $(date +%s) ${dir}/include/hostvars.json > tmp.$$.json && mv tmp.$$.json ${dir}/include/hostvars.json || { echo "Cannot update timestamp in hostvars.json. Creating initramfs $failed";  exit 1; }
 
 if [ -f "${dir}/${initramfs_name_compressed}" ]; then
-  echo "[INFO]: backup existing initramfs to ${dir}/${initramfs_backup}"
+  echo "[INFO]: backup existing initramfs to $(realpath --relative-to=${root} "${dir}/${initramfs_backup}")"
   mv "${dir}/${initramfs_name_compressed}" "${dir}/${initramfs_backup}"
 fi
 if "${develop}" ; then

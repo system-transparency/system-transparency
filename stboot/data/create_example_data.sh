@@ -94,6 +94,7 @@ if "${write}"; then
       echo "[INFO]: Create ${network_file}. Choose ip configuration:"
       echo "(1) Qemu"
       echo "(2) empty-> DHCP"
+      echo "You can edit stboot/data/network.json for custom static IP later."
       read -rp ">> " x
       touch "${dir}/${network_file}"
       if [ "${x}" = 1 ]; then
@@ -180,4 +181,8 @@ if "${write}"; then
 
    cat "${dir}/${provisioning_servers_file}"
 fi
+
+echo ""
+echo "[INFO]: You can modify the files in stboot/data/ to your needs."
+echo "[INFO]: Most important: Edit stboot/data/provisioning-server.json if using your own server."
 

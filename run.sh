@@ -73,7 +73,7 @@ done
 echo "Checking dependencies ..."
 cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
         "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
-        "bison" "flex" "pkg-config" "bc" "date" "jq")
+        "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath")
 libs=( "libelf" "libcrypto" )
 
 needs_exit=false
@@ -291,7 +291,7 @@ echo " Use stconfig tool to create and sign bootball"
 echo "############################################################"
 echo "                                                     "
 while true; do
-   echo "configuration: ${config}"
+   echo "configuration: $(realpath --relative-to=${root} ${config})"
    echo "Run  (r) with configuration"
    echo "Skip (s)"
    echo "Quit (q)"
