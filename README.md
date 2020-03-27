@@ -33,6 +33,7 @@ On Debian-based systems you'll need the following packages:
 ```bash
 apt install golang docker.io openssl git qemu-system-x86 wget sudo bison flex pkg-config libelf-dev libssl-dev bc libc6-i386 gcc-8 g++-8 libncurses-dev gpg parted jq make dosfstools
 ```
+NOTE: u-root requires golang >= 1.12, so if you're on Debian 10 (Buster) you might want to install golang from buster-backports which carries golang-1.14.
 
 You then need to make GCC 8 the default.
 
