@@ -6,8 +6,8 @@ set -o nounset
 # set -o xtrace
 
 failed="\e[1;5;31mfailed\e[0m"
-server="stboot.9esec.dev"
-server_path="/home/provisioner/www"
+server=${ST_STBOOT_SERVER:-"stboot.9esec.dev"}
+server_path=${ST_STBOOT_SERVER_PATH:-"/home/provisioner/www"}
 
 bootball=""
 if [[ $# -eq 0 ]] ; then

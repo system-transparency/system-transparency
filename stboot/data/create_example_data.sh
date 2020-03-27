@@ -12,6 +12,7 @@ https_root_certificates_file="https-root-certificates.pem"
 network_file="network.json"
 ntp_servers_file="ntp-servers.json"
 provisioning_servers_file="provisioning-servers.json"
+stboot_url=${ST_STBOOT_URL:-"https://stboot.9esec.dev"}
 
 ##############################
 # https-root-certificates.json
@@ -174,7 +175,7 @@ if "${write}"; then
    touch "${dir}/${provisioning_servers_file}"
    echo '
 [
-   "https://stboot.9esec.dev"
+   "${stboot_url}"
 ]
    ' > "${dir}/${provisioning_servers_file}"
 
