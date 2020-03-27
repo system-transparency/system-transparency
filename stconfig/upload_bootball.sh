@@ -8,6 +8,7 @@ set -o nounset
 failed="\e[1;5;31mfailed\e[0m"
 server=${ST_STBOOT_SERVER:-"stboot.9esec.dev"}
 server_path=${ST_STBOOT_SERVER_PATH:-"/home/provisioner/www"}
+provisioner=${ST_STBOOT_PROVISIONER:-"provisioner"}
 
 bootball=""
 if [[ $# -eq 0 ]] ; then
@@ -19,6 +20,6 @@ else
 fi
 
 echo "[INFO]: upload ${bootball} to ${server_path} at ${server}"
-scp "$bootball" "provisioner@$server:${server_path}/$(basename "${bootball}")" || { echo -e "upload via scp $failed"; exit 1; }
+scp "$bootball" "${provisioner}@$server:${server_path}/$(basename "${bootball}")" || { echo -e "upload via scp $failed"; exit 1; }
 echo "[INFO]: successfully uploaded bootball"
 
