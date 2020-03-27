@@ -173,11 +173,11 @@ fi
 if "${write}"; then
    echo "[INFO]: Create ${provisioning_servers_file}"
    touch "${dir}/${provisioning_servers_file}"
-   echo '
+   cat <<EOF > "${dir}/${provisioning_servers_file}"
 [
    "${stboot_url}"
 ]
-   ' > "${dir}/${provisioning_servers_file}"
+EOF
 
    cat "${dir}/${provisioning_servers_file}"
 fi
