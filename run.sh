@@ -12,15 +12,15 @@ root="${dir}"
 function checkGCC {
    maxver="8"
 
-   command -v gcc >/dev/null 2>&1 || { 
+   command -v gcc >/dev/null 2>&1 || {
       echo >&2 "GCC required";
       exit 1;
    }
 
    currentver="$(gcc -dumpversion | cut -d . -f 1)"
 
-   if [ "$currentver" -gt "$maxver" ]; then 
-         echo "GCC version ${currentver} is not supported. Need version ${maxver} or earlier."
+   if [ "$currentver" -gt "$maxver" ]; then
+         echo "GCC version ${currentver} is not supported. Needs version ${maxver} or earlier."
          exit 1
    else
        echo "GCC supported"
@@ -28,9 +28,9 @@ function checkGCC {
 }
 
 function checkGO {
-   minver=("1" "11") 
+   minver=("1" "11")
 
-   command -v go >/dev/null 2>&1 || { 
+   command -v go >/dev/null 2>&1 || {
       echo >&2 "GO required";
       exit 1;
    }
@@ -38,8 +38,8 @@ function checkGO {
    majorver="$(go version | sed 's/go version go//' | cut -d . -f 1)"
    minorver="$(go version | sed 's/go version go//' | cut -d . -f 2)"
 
-   if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then 
-         echo "GO version ${majorver}.${minorver} is not supported. Need version ${minver[0]}.${minver[1]} or later."
+   if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then
+         echo "GO version ${majorver}.${minorver} is not supported. Needs version ${minver[0]}.${minver[1]} or later."
          exit 1
    else
        echo "GO supported"
@@ -64,23 +64,25 @@ while getopts ":c:" opt; do
       exit 1
       ;;
     :)
-      echo "Option -${OPTARG} requires a path argument." >&2
+      echo "Option -${OPTARG} requires a path as an argument." >&2
       exit 1
       ;;
   esac
 done
 
-echo "Checking dependancies ..."
+echo "Checking dependencies ..."
 cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
         "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
         "bison" "flex" "pkg-config" "bc" "date" "jq")
 libs=( "libelf" "libcrypto" )
 
+needs_exit=false
+
 for i in "${cmds[@]}"
 do
-    command -v "$i" >/dev/null 2>&1 || { 
-        echo >&2 "$i required"; 
-        exit 1; 
+    command -v "$i" >/dev/null 2>&1 || {
+        echo >&2 "$i required";
+        needs_exit=true
     }
 done
 
@@ -88,19 +90,24 @@ for i in "${libs[@]}"
 do
    pkg-config "$i" >/dev/null 2>&1 || {
       echo >&2 "$i required";
-      exit 1;
+      needs_exit=true
    }
 done
 
 if [[ ! -f "/lib/ld-linux.so.2" ]]
 then
    echo "i386 libc required";
-   exit 1
+   needs_exit=true
+fi
+
+if $needs_exit ; then
+  echo 'Please install all missing dependencies!';
+  exit 1;
 fi
 
 if findmnt -T "${root}" | grep -cq "nodev"
 then
-   echo "The directory ${root} is mounted with nodev option but debootstrap needs to mknod to work."
+   echo "The directory ${root} is mounted with the nodev option but debootstrap needs mknod to work."
    exit 1
 fi
 
@@ -202,9 +209,9 @@ echo " Build u-root command"
 echo "############################################################"
 echo "                                                     "
 while true; do
-   echo "Run  (1) update sources and build u-root cmd"
-   echo "Run  (2) rebuild u-root cmd"
-   echo "Run  (3) choose custom branch and rebuild u-root cmd" 
+   echo "Run  (1) update sources and build u-root command"
+   echo "Run  (2) rebuild u-root command"
+   echo "Run  (3) choose custom branch and rebuild u-root command"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
@@ -226,7 +233,7 @@ echo "                                                     "
 while true; do
    echo "Run  (1) update sources and build stconfig tool"
    echo "Run  (2) rebuild stconfig tool"
-   echo "Run  (3) choose custom branch and rebuild stconfig tool" 
+   echo "Run  (3) choose custom branch and rebuild stconfig tool"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
@@ -335,4 +342,3 @@ while true; do
       * ) echo "Invalid input";;
    esac
 done
-
