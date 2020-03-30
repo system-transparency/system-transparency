@@ -24,7 +24,7 @@ Files in this foder are ment to be places at a data partition at the host machin
 
 #### `create_example_data.sh`
 
-This script is invoked by 'run.sh'. It creates the files listed below with example data.
+This script is invoked by 'run.sh'. It creates the files listed below with example data. Most of the default data can be used right away, but you will probably need to change the URL of the provisioning server in `provisioning-servers.json`.
 
 ### Configuration Files
 

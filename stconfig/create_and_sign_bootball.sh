@@ -36,3 +36,4 @@ stconfig sign "$config_dir/$bootball" "${root}/keys/signing-key-3.key" "${root}/
 
 echo ""
 echo "[INFO]: $(realpath --relative-to=${root} "$config_dir/$bootball") created."
+echo "[INFO]: You can use stconfig manually, too. Try 'stconfig --help'"

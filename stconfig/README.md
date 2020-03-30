@@ -36,4 +36,20 @@ This script is invoked by 'run.sh'. It uses 'stconfig' to create a 'stboot.ball'
 
 #### `upload_bootball.sh`
 
-This script is invoked by 'run.sh'. It uploads the 'stboot.ball' file to the provisioning server. SSH access to the server is needed. See https://system-transparency.org for further information about the provisioning server.
+This script is invoked by 'run.sh'. It uploads the 'stboot.ball' file to the provisioning server. SSH access to the server is needed. See https://system-transparency.org for further information about the provisioning server. Settings regarding your provisioning Server can be done in `prov-server-access.sh`
+
+#### `prov-server-access.sh` (will be generated on first call of `run.sh`)
+This file contains information to access the provisioning server via SSH. It is generated with empty values. You need to insert the values according to your setup.
+
+```
+# prov_server is the URL of the provisioning server.
+prov_server=""
+
+# prov_server_user is the username at the provisioning server.
+prov_server_user=""
+
+# prov_server_path is the web root of the provisioning server.
+prov_server_path=""
+```
+
+
