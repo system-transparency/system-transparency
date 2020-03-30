@@ -23,6 +23,7 @@ initrd="${root}/stboot/initramfs-linuxboot.cpio.gz"
 [ -f "${initrd}" ] || { echo "${initrd} does not exist"; echo "Including initramfs into image $failed";  exit 1; }
 
 mkdir -p "${mnt}" || { echo -e "mkdir $failed"; exit 1; }
+sleep 1		  # helps mount from failing with 32 ("mount failure")
 mount -o loop,offset=1048576 "${img}" "${mnt}" || { echo -e "mount $failed"; exit 1; }
 cp  "${initrd}" "${mnt}" || { echo -e "cp $failed"; exit 1; }
 umount "${mnt}" || { echo -e "umount $failed"; exit 1; }
