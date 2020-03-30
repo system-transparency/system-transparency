@@ -29,7 +29,7 @@ else
     [ -f "${bootball}" ] || { echo "${bootball} does not exist";  exit 1; }
 fi
 
-echo "[INFO]: upload ${bootball} to ${server_path} at ${server}"
-scp "$bootball" "${user}@${server}:${server_path}/$(basename "${bootball}")" || { echo -e "upload via scp $failed"; exit 1; }
+echo "[INFO]: upload ${bootball} to ${prov_server_path} at ${prov_server}"
+scp "$bootball" "${prov_server_user}@${prov_server}:${prov_server_path}/$(basename "${bootball}")" || { echo -e "upload via scp $failed"; exit 1; }
 echo "[INFO]: successfully uploaded bootball"
 
