@@ -11,7 +11,7 @@ root="${dir}"
 
 misc_cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
             "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
-            "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath")
+            "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath" "make" "mkfs.vfat")
 
 misc_libs=( "libelf" "libcrypto" )
 
