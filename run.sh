@@ -26,8 +26,31 @@ while getopts ":c:" opt; do
   esac
 done
 
+# initially create empty provisioning server access file
+file="${root}/stconfig/prov-server-access.sh"
+if [ ! -f ${file} ]; then
+   echo "[INFO]: Create empty $(realpath --relative-to=${root} ${file}) configuration file"
+   echo '
+#!/bin/bash
+
+# The script upoad_bootball.sh uses this data during uplaod.
+# Upload is done via scp, so make sure ssh key are setup right on the server.
+
+# prov_server is the URL of the provisioning server.
+prov_server=""
+
+# prov_server_user is the username at the provisioning server.
+prov_server_user=""
+
+# prov_server_path is the web root of the provisioning server.
+prov_server_path=""
+   ' > ${file}
+fi
+
+
 source "${dir}/checks.sh" || { echo -e "$failed : ${cfg} not found"; exit 1; }
 
+echo ""
 echo "Checking dependencies ..."
 checkGCC
 checkGO

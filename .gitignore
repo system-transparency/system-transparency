@@ -1,11 +1,12 @@
 /configs/*/
 /stboot/*.cpio
 /stboot/*.cpio.gz
-stboot/*.backup
+/stboot/*.backup
 /stboot/*.json
 /stboot/include/hostvars.json
 /stboot/data/*.json
 /stboot/data/*.pem
+/stconfig/prov-server-access.sh
 /deploy/mixed-firmware/*.img
 /deploy/mixed-firmware/vmlinuz-linuxboot
 /deploy/mixed-firmware/*.backup

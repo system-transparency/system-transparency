@@ -103,7 +103,7 @@ function checkProvServerSettings {
     if [ -z "$prov_server" ] || [ -z "$prov_server_user" ] || [ -z "$prov_server_path" ]; then
         while true; do
             echo "WARING: missing settings in $(realpath --relative-to=${root} ${cfg})"
-            echo "You won't be able to uplaod stboot.ball later!"
+            echo "You won't be able to upload stboot.ball later without editing this file."
             read -rp "Continue? (y/n)" yn
             case $yn in
                 [Yy]* ) break;;
