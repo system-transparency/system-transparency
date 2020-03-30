@@ -21,7 +21,7 @@ function checkMISC {
 
     for i in "${misc_cmds[@]}"
     do
-        command -v "$i" >/dev/null 2>&1 || {
+        PATH=/sbin:/usr/sbin:$PATH command -v "$i" >/dev/null 2>&1 || {
             echo >&2 "$i required";
             needs_exit=true
         } 
