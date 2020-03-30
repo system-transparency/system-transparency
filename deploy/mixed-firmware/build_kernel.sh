@@ -18,7 +18,7 @@ kernel_src="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
 kernel_ver="linux-4.19.6"
 kernel_config="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig"
 kernel_config_mod="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig.modified"
-tmp=$(mktemp -d -t stkernel-XXXXXXXX)
+tmp=${ST_STKERNEL_TMPDIR:-$(mktemp -d -t stkernel-XXXXXXXX)}
 dev_keys="torvalds@kernel.org gregkh@kernel.org"
 
 user_name="$1"
@@ -44,8 +44,8 @@ fi
 
 
 echo "[INFO]: Downloading Linux Kernel source files and signature"
-wget "${kernel_src}/${kernel_ver}.tar.xz" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading source files $failed"; exit 1; }
-wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading signature $failed"; exit 1; }
+[ -f "${tmp}/${kernel_ver}.tar.xz" ] || wget "${kernel_src}/${kernel_ver}.tar.xz" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading source files $failed"; exit 1; }
+[ -f "${tmp}/${kernel_ver}.tar.sign" ] || wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading signature $failed"; exit 1; }
 
 mkdir "${tmp}/gnupg"
 echo "[INFO]: Fetching kernel developer keys"
