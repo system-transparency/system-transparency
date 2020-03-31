@@ -24,7 +24,7 @@ while getopts "bu" opt; do
       ;;
     u)
       echo "[INFO]: updating ${uroot_src}";
-      GOPATH="${gopath}" go get github.com/u-root/u-root
+      GOPATH="${gopath}" go get -u github.com/u-root/u-root
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
