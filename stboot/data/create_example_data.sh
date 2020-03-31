@@ -101,7 +101,6 @@ if "${write}"; then
          echo '
 {
    "host_ip":"10.0.2.15/24",
-   "netmask":"",
    "gateway":"10.0.2.2/24",
    "dns":""
 }
@@ -111,7 +110,6 @@ if "${write}"; then
          echo '
 {
    "host_ip":"",
-   "netmask":"",
    "gateway":"",
    "dns":""
 }
