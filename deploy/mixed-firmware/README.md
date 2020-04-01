@@ -60,13 +60,27 @@ Counterpart of 'mount_data.sh'.
 
 ### Configuration Files
 
-#### `mbr.table`
+#### `gpt.table`
 
 This files describes the partition layout of the image
 
 #### `syslinux.cfg`
 
-This is the configuration file for _Syslinux_. The paths for kernel and initramfs are set here.
+This is the configuration file for _Syslinux_. The paths for kernel and initramfs are set here. Further the kernel command line can be adjusted to controll the behavior of stboot as well. The default looks like this:
+```
+DEFAULT linuxboot
+
+LABEL linuxboot
+	KERNEL ../vmlinuz-linuxboot
+	APPEND console=ttyS0,115200 uroot.uinitargs="-debug"
+	INITRD ../initramfs-linuxboot.cpio.gz
+```
+To controll the output of stboot there are the following options for the kernel command line:
+
+* print output to multiple consoles: `console=tty0 console=ttyS0,115200 printk.devkmsg=on uroot.uinitargs="-debug -klog"` (input is still taken from the last console defined. Furthermore it can happen that certain messages are only displayed on the last console)
+
+* print minimal output: `console=ttyS0,115200`
+
 
 #### `x86_64_linuxboot_config`
 

@@ -44,6 +44,9 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /
 sudo update-alternatives --config gcc
 ```
 
+## Configure stboot
+To controll the printed output of stboot in the mixed firmware scenario see [syslinux.cfg](deploy/mixed-firmware/#syslinux.cfg). Many other configurations are controlles via special files like described in the DETAILS section at [system-transparency.org](https://www.system-transparency.org/)
+
 ## /
 
 ### Scripts
