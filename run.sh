@@ -258,7 +258,11 @@ echo "############################################################"
 echo " Upload bootball to provisioning server"
 echo "############################################################"
 echo "                                                     "
-bootball="$(dirname "${config}")/stboot.ball"
+bootball_pattern="stboot.ball*"
+dir=$(dirname "${config}")
+files=( ${dir}/$bootball_pattern )
+[ "${#files[@]}" -gt "1" ] && { echo -e "upload $failed : more then one bootbool files in $(dirname "${dir}")"; exit 1; }
+bootball=${files[0]}
 while true; do
    echo "bootball: ${bootball}"
    echo "Run  (r) with bootball"
