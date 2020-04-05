@@ -30,7 +30,7 @@ syslinux_tar="syslinux-6.03.tar.xz"
 syslinux_dir="syslinux-6.03"
 syslinux_config="${dir}/syslinux.cfg"
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
-tmp=$(mktemp -d -t stimg-XXXXXXXX)
+src="${root}/src/syslinux/"
 mnt=$(mktemp -d -t stmnt-XXXXXXXX)
 
 user_name="$1"
@@ -65,10 +65,15 @@ else
 fi
 
 
+if [ -d ${src} ]; then 
+   echo "[INFO]: Using cached sources in $(realpath --relative-to=${root} ${src})"
+else
+   echo "[INFO]: Downloading Syslinux Bootloader"
+   wget "${syslinux_src}/${syslinux_tar}" -P "${src}" || { echo -e "Download $failed"; exit 1; }
+   tar -xf "${src}/${syslinux_tar}" -C "${src}" || { echo -e "Decompression $failed"; exit 1; }
+   chown -R "${user_name}" "${src}"
+fi
 
-echo "[INFO]: Downloading Syslinux Bootloader"
-wget "${syslinux_src}/${syslinux_tar}" -P "${tmp}" || { echo -e "Download $failed"; exit 1; }
-tar -xf "${tmp}/${syslinux_tar}" -C "${tmp}" || { echo -e "Decompression $failed"; exit 1; }
 
 echo "[INFO]: Creating raw image"
 dd if=/dev/zero "of=${img}" bs=1M count=20
@@ -90,8 +95,8 @@ echo "[INFO]: Installing Syslinux"
 mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; losetup -d "${dev}"; exit 1; }
 mkdir  "${mnt}/syslinux" || { echo -e "Making Syslinux config directory $failed"; losetup -d "${dev}"; exit 1; }
 umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "${dev}"; exit 1; }
-"${tmp}/${syslinux_dir}/bios/linux/syslinux" --directory /syslinux/ --install "${dev}p1" || { echo -e "Writing vollume boot record $failed"; losetup -d "${dev}"; exit 1; }
-dd bs=440 count=1 conv=notrunc "if=${tmp}/${syslinux_dir}/bios/mbr/gptmbr.bin" "of=${dev}" || { echo -e "Writing master boot record $failed"; losetup -d "${dev}"; exit 1; }
+"${src}/${syslinux_dir}/bios/linux/syslinux" --directory /syslinux/ --install "${dev}p1" || { echo -e "Writing vollume boot record $failed"; losetup -d "${dev}"; exit 1; }
+dd bs=440 count=1 conv=notrunc "if=${src}/${syslinux_dir}/bios/mbr/gptmbr.bin" "of=${dev}" || { echo -e "Writing master boot record $failed"; losetup -d "${dev}"; exit 1; }
 mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; losetup -d "$dev"; exit 1; }
 cp "${syslinux_config}" "${mnt}/syslinux"
 cp "${lnxbt_kernel}" "${mnt}"
@@ -106,7 +111,7 @@ rm "${mnt}/README.md"
 umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
 
 losetup -d "${dev}" || { echo -e "Loop device clean up $failed"; exit 1; }
-rm -r -f "${tmp}" "${mnt}"
+rm -r -f "${mnt}"
 echo ""
 chown -c "${user_name}" "${img}"
 

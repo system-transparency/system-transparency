@@ -18,7 +18,7 @@ kernel_src="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
 kernel_ver="linux-4.19.6"
 kernel_config="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig"
 kernel_config_mod="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig.modified"
-tmp=$(mktemp -d -t stkernel-XXXXXXXX)
+src="${root}/src/kernel"
 dev_keys="torvalds@kernel.org gregkh@kernel.org"
 
 user_name="$1"
@@ -43,39 +43,44 @@ if [ -f "${lnxbt_kernel}" ]; then
 fi
 
 
-echo "[INFO]: Downloading Linux Kernel source files and signature"
-wget "${kernel_src}/${kernel_ver}.tar.xz" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading source files $failed"; exit 1; }
-wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${tmp}" || { rm -rf "${tmp}"; echo -e "Downloading signature $failed"; exit 1; }
+if [ -d ${src} ]; then
+    echo "[INFO]: Using cached sources in $(realpath --relative-to=${root} ${src})"
+else
+    echo "[INFO]: Downloading Linux Kernel source files and signature"
+    wget "${kernel_src}/${kernel_ver}.tar.xz" -P "${src}" || { rm -rf "${src}"; echo -e "Downloading source files $failed"; exit 1; }
+    wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${src}" || { rm -rf "${src}"; echo -e "Downloading signature $failed"; exit 1; }
 
-mkdir "${tmp}/gnupg"
-echo "[INFO]: Fetching kernel developer keys"
-if ! gpg --batch --quiet --homedir "${tmp}/gnupg" --auto-key-locate wkd --locate-keys ${dev_keys}; then
-    echo -e "Fetching keys $failed"
-    rm -rf "${tmp}"
-    exit 1
+    mkdir "${src}/gnupg"
+    echo "[INFO]: Fetching kernel developer keys"
+    if ! gpg --batch --quiet --homedir "${src}/gnupg" --auto-key-locate wkd --locate-keys ${dev_keys}; then
+        echo -e "Fetching keys $failed"
+        rm -rf "${src}"
+        exit 1
+    fi
+    keyring=${src}/gnupg/keyring.gpg
+    gpg --batch --homedir "${src}/gnupg" --no-default-keyring --export ${dev_keys} > "${keyring}"
+
+    echo "[INFO]: Verifying signature of the kernel tarball"
+    count=$(xz -cd "${src}/${kernel_ver}.tar.xz" \
+            | gpgv --homedir "${src}/gnupg" "--keyring=${keyring}" --status-fd=1 "${src}/${kernel_ver}.tar.sign" - \
+            | grep -c -E '^\[GNUPG:\] (GOODSIG|VALIDSIG)')
+    if [[ "${count}" -lt 2 ]]; then
+        echo -e "Verifying kernel tarball $failed"
+        rm -rf "${src}"
+        exit 1
+    fi
+
+    echo
+    echo "[INFO]: Successfully downloaded and verified kernel"
+    echo "[INFO]: Build Linuxboot kernel"
+
+    tar -xf "${src}/${kernel_ver}.tar.xz" -C "${src}" || { rm -rf "${src}"; echo -e "Unpacking $failed"; exit 1; }
+    chown -R "${user_name}" "${src}"
 fi
-keyring=${tmp}/gnupg/keyring.gpg
-gpg --batch --homedir "${tmp}/gnupg" --no-default-keyring --export ${dev_keys} > "${keyring}"
 
-echo "[INFO]: Verifying signature of the kernel tarball"
-count=$(xz -cd "${tmp}/${kernel_ver}.tar.xz" \
-        | gpgv --homedir "${tmp}/gnupg" "--keyring=${keyring}" --status-fd=1 "${tmp}/${kernel_ver}.tar.sign" - \
-        | grep -c -E '^\[GNUPG:\] (GOODSIG|VALIDSIG)')
-if [[ "${count}" -lt 2 ]]; then
-    echo -e "Verifying kernel tarball $failed"
-    rm -rf "${tmp}"
-    exit 1
-fi
-
-echo
-echo "[INFO]: Successfully downloaded and verified kernel"
-echo "[INFO]: Build Linuxboot kernel"
-
-tar -xf "${tmp}/${kernel_ver}.tar.xz" -C "${tmp}" || { rm -rf "${tmp}"; echo -e "Unpacking $failed"; exit 1; }
-
-[ -f "${kernel_config}" ] || { rm -rf "${tmp}"; echo -e "Finding $kernel_config $failed"; exit 1; }
-cp "${kernel_config}" "${tmp}/${kernel_ver}/.config"
-cd "${tmp}/${kernel_ver}"
+[ -f "${kernel_config}" ] || { rm -rf "${src}"; echo -e "Finding $kernel_config $failed"; exit 1; }
+cp "${kernel_config}" "${src}/${kernel_ver}/.config"
+cd "${src}/${kernel_ver}"
 while true; do
     echo "Load  $(realpath --relative-to=${root} ${kernel_config}) as .config:" 
     echo "It is recommended to just save&exit in the upcoming menu."
@@ -87,10 +92,9 @@ done
 make menuconfig
 make savedefconfig 
 cp defconfig "${kernel_config_mod}"
-make "-j$(nproc)" || { rm -rf "${tmp}"; echo -e "Compiling kernel $failed"; exit 1; }
+make "-j$(nproc)" || { rm -rf "${src}"; echo -e "Compiling kernel $failed"; exit 1; }
 cd "${dir}"
-cp "${tmp}/${kernel_ver}/arch/x86/boot/bzImage" "$lnxbt_kernel"
-rm -rf "${tmp}"
+cp "${src}/${kernel_ver}/arch/x86/boot/bzImage" "$lnxbt_kernel"
 
 echo ""
 chown -c "${user_name}" "${lnxbt_kernel}"
