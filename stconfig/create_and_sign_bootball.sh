@@ -37,16 +37,20 @@ done
 rm -f ${config_dir}/${bootball_pattern} || { echo -e "Removing old bootball files $failed"; exit 1; }
 echo "[INFO]: pack ${config} and OS boot files into bootball."
 
-stconfig create "${config_path}" "${mac}" || { echo -e "stconfig create $failed"; exit 1; }
+if [ -z ${mac} ]; then
+    stconfig create "${config_path}" || { echo -e "stconfig create $failed"; exit 1; }
+else
+    stconfig create --mac="${mac}" "${config_path}" || { echo -e "stconfig create $failed"; exit 1; }
+fi
 
 files=( $config_dir/$bootball_pattern )
 [ "${#files[@]}" -gt "1" ] && { echo -e "stconfig sign $failed : more then one bootbool files in ${config_dir}"; exit 1; }
 bootball=${files[0]}
 
 echo "[INFO]: sign $bootball with example keys"
-stconfig sign "$bootball" "${root}/keys/signing-key-1.key" "${root}/keys/signing-key-1.cert" || { echo -e "stconfig sign $failed"; exit 1; }
-stconfig sign "$bootball" "${root}/keys/signing-key-2.key" "${root}/keys/signing-key-2.cert" || { echo -e "stconfig sign $failed"; exit 1; }
-stconfig sign "$bootball" "${root}/keys/signing-key-3.key" "${root}/keys/signing-key-3.cert" || { echo -e "stconfig sign $failed"; exit 1; }
+stconfig sign --key="${root}/keys/signing-key-1.key" --cert="${root}/keys/signing-key-1.cert" "$bootball"|| { echo -e "stconfig sign $failed"; exit 1; }
+stconfig sign --key="${root}/keys/signing-key-2.key" --cert="${root}/keys/signing-key-2.cert" "$bootball"|| { echo -e "stconfig sign $failed"; exit 1; }
+stconfig sign --key="${root}/keys/signing-key-3.key" --cert="${root}/keys/signing-key-3.cert" "$bootball"|| { echo -e "stconfig sign $failed"; exit 1; }
 
 echo ""
 echo "[INFO]: $(realpath --relative-to=${root} "$bootball") created and signed with example keys."
