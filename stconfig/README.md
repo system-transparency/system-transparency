@@ -18,9 +18,10 @@
 
 ## Stconfig
 
-_Stboot_ itself is part of the _u-root_ project (https://github.com/u-root/u-root) and is written in Go. Since _Stboot_ is still in a beta phase at the moment, the code resides at https://github.com/u-root/u-root/tree/stboot branch. This directory mainly provides utilities for the ongoing development.
+_Stboot_ itself is part of the _u-root_ project (https://github.com/u-root/u-root) and is written in Go. Since _Stboot_ is still in a beta phase at the moment, the code resides at https://github.com/u-root/u-root/tree/stboot branch.
 
-The _u-root_ project also includes some tools related to its various commands. _Stconfig_ is a tool for the host's operator to prepare a 'stboot.ball' file for the provisioning server. This file is downloaded to the host during the _Stboot's_ bootprocess. _Stboot_ is heavily dependent on that 'stboot.ball' being prepared by this tool.
+The _u-root_ project also includes some tools related to its various commands. _Stconfig_ is a tool for the host's operator to prepare a bootball file ('stboot.ball') for the provisioning server. This file is downloaded to the host during the _Stboot's_ bootprocess. _Stboot_ is heavily dependent on that bootball being prepared by this tool.
+Usually the generated bootball should work for all hosts. But if there is the need for a host specific bootball, you can create a unique bootball identified by the MAC address of the appropriate server. The host will look for a specific boot ball on the provisioning server first. If none is present, the host will download the general one. See `stconfig --help-long` for inforamtion on how to parse the MAC address.
 
 See https://system-transparency.org for further information about 'stconfig.json' and 'stboot.ball'.
 
@@ -32,7 +33,7 @@ This script is invoked by 'run.sh'. It downloads and installs the 'stconfig' too
 
 #### `create_and_sign_bootball.sh`
 
-This script is invoked by 'run.sh'. It uses 'stconfig' to create a 'stboot.ball' from the 'stconfig.json' in the 'configs/' directory. The path to a dedicated configuration directory is passed to the script. Further it uses 'stconfig' to sign the generated 'stboot.ball' with the example keys from 'keys/'.
+This script is invoked by 'run.sh'. It uses 'stconfig' to create a 'stboot.ball' from the 'stconfig.json' in the 'configs/' directory. The path to a dedicated configuration directory is passed to the script. Further it uses 'stconfig' to sign the generated 'stboot.ball' with the example keys from 'keys/'. Optionally you can enter a MAC address to create a host dependent bootball.
 
 #### `upload_bootball.sh`
 
