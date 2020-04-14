@@ -21,4 +21,6 @@ qemu-system-x86_64 \
   -net user,hostfwd=tcp::2222-:2222 \
   -net nic \
   -object rng-random,filename=/dev/urandom,id=rng0 \
-  -device virtio-rng-pci,rng=rng0
+  -device virtio-rng-pci,rng=rng0 \
+  -rtc base=localtime \
+  -m 8192
