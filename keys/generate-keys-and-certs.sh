@@ -53,3 +53,5 @@ echo "[INFO]: Generating ssh keys for using the cpu command"
 
 ssh-keygen -b 2048 -t rsa -f "${cpu_key_dir}/ssh_host_rsa_key" -q -N ""
 ssh-keygen -b 2048 -t rsa -f "${cpu_key_dir}/cpu_rsa" -q -N ""
+
+echo "[INFO]: Key generation successfull!"
