@@ -15,9 +15,8 @@
 /operating-system/debian/docker/out
 /operating-system/debian/docker/document_build.info
 /operating-system/debian/docker/.debos-*
-/keys/signing-key-*
-/keys/root.*
-/keys/rootcert.fingerprint
+/keys/signing_keys
+/keys/cpu_keys
 /.notes/
 /releases/
 /src/

@@ -9,6 +9,7 @@ failed="\e[1;5;31mfailed\e[0m"
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+key_dir="${dir}/../keys"
 
 initramfs_name="initramfs-linuxboot.cpio"
 initramfs_name_compressed="initramfs-linuxboot.cpio.gz"
@@ -55,8 +56,9 @@ if "${develop}" ; then
 >>>>>>> caeec68... Adjusted initramfs creation; Updated ssh keys
     -files "${dir}/include/${var_file}:etc/${var_file}" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
-    -files "${dir}/include/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
-    -files "${dir}/include/cpu_rsa.pub:key.pub" \
+    -files "${dir}/include/start_cpu.elv:root/start_cpu.elv" \
+    -files "${key_dir}/cpu_keys/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
+    -files "${key_dir}/cpu_keys/cpu_rsa.pub:key.pub" \
     core \
     github.com/u-root/cpu/cmds/cpuserver \
     github.com/u-root/u-root/cmds/boot/stboot \
@@ -65,8 +67,16 @@ else
     echo "[INFO]: create minimal initramf including stboot only"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/${initramfs_name}" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
+    -files "${dir}/include/start_cpu.elv:root/start_cpu.elv" \
+    -files "${dir}/data/https-root-certificates.pem:root/${https_roots_file}" \
+    -files "${dir}/data/network.json:root/${network_file}" \
+    -files "${dir}/data/provisioning-servers.json:root/${prov_servers_file}" \
+    -files "${dir}/data/ntp-servers.json:root/${ntp_server_file}" \
+    -files "${key_dir}/cpu_keys/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
+    -files "${key_dir}/cpu_keys/cpu_rsa.pub:key.pub" \
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/core/elvish \
+    github.com/u-root/cpu/cmds/cpuserver \
     github.com/u-root/u-root/cmds/boot/stboot \
     || { echo -e "creating initramfs $failed"; exit 1; }
 fi
