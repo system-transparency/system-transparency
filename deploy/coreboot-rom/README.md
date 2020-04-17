@@ -50,7 +50,7 @@ cd flashrom
 make
 ```
 
-Connect Flasher to the board and test cobbection a few times (ch341a_spi flasher is used here)
+Connect Flasher to the board and test connection a few times (ch341a_spi flasher is used here)
 
 ```
 sudo./flashrom -p ch341a_spi
@@ -79,17 +79,17 @@ cp ../blobs/{me.bin,descriptor.bin} 3rdparty/blobs/mainboard/supermicro/x11-lga1
 make menuconfig
 BUILD_TIMELESS=1 make
 ```
-
 The coreboot image is in build/coreboot.rom
+
 LinuxBoot payload integration:
+
 Copy the linuxboot kernel and initramfs including stboot here (e.g from the mixed-firmware workflow)
 After running the tooling they are in
 `deploy/mixed-firmware/vmlinuz-linuxboot`
-`stboot/initramfs-linuxboot.cpio`
+`stboot/initramfs-linuxboot.cpio.gz`
 
 ```
-gzip -9 initramfs.cpio
-./build/cbfstool ./build/coreboot.rom add-payload -r COREBOOT -f kernel -n fallback/payload -C "console=ttyS0,115200 ro" -I initramfs.cpio.gz
+./build/cbfstool ./build/coreboot.rom add-payload -r COREBOOT -f vmlinuz-linuxboot -n fallback/payload -C "console=ttyS0,115200 ro" -I initramfs-linuxboot.cpio.gz
 ```
 
 ### Flash X11SSH via bmc:
