@@ -243,6 +243,8 @@ echo "############################################################"
 echo "                                                     "
 while true; do
    echo "configuration: $(realpath --relative-to=${root} ${config})"
+   cat ${config}
+   echo ""
    echo "Run  (r) with configuration"
    echo "Skip (s)"
    echo "Quit (q)"
