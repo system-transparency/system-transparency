@@ -1,3 +1,4 @@
+/caddy/
 /configs/*/
 /stboot/*.cpio
 /stboot/*.cpio.gz
@@ -20,3 +21,4 @@
 /.notes/
 /releases/
 /src/
+/tboot/
