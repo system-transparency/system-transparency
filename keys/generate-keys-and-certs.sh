@@ -6,15 +6,14 @@ set -o nounset
 # set -o xtrace
 
 # Set magic variables for current file & dir
-key_root="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd )"
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root="$(cd "${dir}/../" && pwd)"
 
-signing_key_dir="${key_root}/signing_keys"
+signing_key_dir="${dir}/signing_keys"
+cpu_key_dir="${dir}/cpu_keys"
+
 mkdir -p ${signing_key_dir}
-
-cpu_key_dir="${key_root}/cpu_keys"
 mkdir -p ${cpu_key_dir}
-
-root="${key_root}/../"
 
 OPENSSL=openssl
 
@@ -54,4 +53,4 @@ echo "[INFO]: Generating ssh keys for using the cpu command"
 ssh-keygen -b 2048 -t rsa -f "${cpu_key_dir}/ssh_host_rsa_key" -q -N ""
 ssh-keygen -b 2048 -t rsa -f "${cpu_key_dir}/cpu_rsa" -q -N ""
 
-echo "[INFO]: Key generation successfull!"
+echo "[INFO]: Key generation for CPU command successfull!"
