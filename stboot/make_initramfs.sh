@@ -15,11 +15,6 @@ initramfs_name_compressed="initramfs-linuxboot.cpio.gz"
 initramfs_backup="initramfs-linuxboot.cpio.gz.backup"
 var_file="hostvars.json"
 
-https_roots_file="https-root-certificates.pem"
-network_file="network.json"
-prov_servers_file="provisioning-servers.json"
-ntp_server_file="ntp-servers.json"
-
 develop=false
 while getopts "d" opt; do
   case $opt in
@@ -53,10 +48,6 @@ if "${develop}" ; then
     echo "[INFO]: create initramfs with full tooling for development"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/${initramfs_name}" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
-    -files "${dir}/data/https-root-certificates.pem:root/${https_roots_file}" \
-    -files "${dir}/data/network.json:root/${network_file}" \
-    -files "${dir}/data/provisioning-servers.json:root/${prov_servers_file}" \
-    -files "${dir}/data/ntp-servers.json:root/${ntp_server_file}" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
     core \
     github.com/u-root/u-root/cmds/boot/stboot \
@@ -65,10 +56,6 @@ else
     echo "[INFO]: create minimal initramf including stboot only"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/${initramfs_name}" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
-    -files "${dir}/data/https-root-certificates.pem:root/${https_roots_file}" \
-    -files "${dir}/data/network.json:root/${network_file}" \
-    -files "${dir}/data/provisioning-servers.json:root/${prov_servers_file}" \
-    -files "${dir}/data/ntp-servers.json:root/${ntp_server_file}" \
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/core/elvish \
     github.com/u-root/u-root/cmds/boot/stboot \
