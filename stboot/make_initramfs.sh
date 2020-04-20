@@ -56,7 +56,7 @@ if "${develop}" ; then
 >>>>>>> caeec68... Adjusted initramfs creation; Updated ssh keys
     -files "${dir}/include/${var_file}:etc/${var_file}" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
-    -files "${dir}/include/start_cpu.elv:root/start_cpu.elv" \
+    -files "${dir}/include/start_cpu.elv:/start_cpu.elv" \
     -files "${key_dir}/cpu_keys/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
     -files "${key_dir}/cpu_keys/cpu_rsa.pub:key.pub" \
     core \
@@ -67,6 +67,7 @@ else
     echo "[INFO]: create minimal initramf including stboot only"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/${initramfs_name}" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
+    -files "${dir}/include/start_cpu.elv:/start_cpu.elv" \
     -files "${key_dir}/cpu_keys/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
     -files "${key_dir}/cpu_keys/cpu_rsa.pub:key.pub" \
     github.com/u-root/u-root/cmds/core/init \
