@@ -205,13 +205,13 @@ echo "############################################################"
 echo "                                                     "
 while true; do
    echo "Run  (r)"
-   echo "Run  (d) with 'develop' flag"
+   echo "Run  (c) including u-root core tools"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
       [Rr]* ) bash "${root}/stboot/make_initramfs.sh"; break;;
-      [Dd]* ) bash "${root}/stboot/make_initramfs.sh" -d; break;;
+      [Cc]* ) bash "${root}/stboot/make_initramfs.sh" -c; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

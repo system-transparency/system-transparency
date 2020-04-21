@@ -15,11 +15,11 @@ initramfs_name_compressed="initramfs-linuxboot.cpio.gz"
 initramfs_backup="initramfs-linuxboot.cpio.gz.backup"
 var_file="hostvars.json"
 
-develop=false
-while getopts "d" opt; do
+core_tools=false
+while getopts "c" opt; do
   case $opt in
-    d)
-      develop=true
+    c)
+      core_tools=true
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -44,8 +44,8 @@ if [ -f "${dir}/${initramfs_name_compressed}" ]; then
   echo "[INFO]: backup existing initramfs to $(realpath --relative-to=${root} "${dir}/${initramfs_backup}")"
   mv "${dir}/${initramfs_name_compressed}" "${dir}/${initramfs_backup}"
 fi
-if "${develop}" ; then
-    echo "[INFO]: create initramfs with full tooling for development"
+if "${core_tools}" ; then
+    echo "[INFO]: create initramfs including all u-root core tools"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/${initramfs_name}" \
     -files "${dir}/include/${var_file}:etc/${var_file}" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
