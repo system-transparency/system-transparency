@@ -14,14 +14,14 @@ ntp_servers_file="ntp-servers.json"
 provisioning_servers_file="provisioning-servers.json"
 
 ##############################
-# https-root-certificates.json
+# https-root-certificates.pem
 ##############################
 write=true
 if [ -f "${dir}/${https_root_certificates_file}" ]; then
     while true; do
        echo "[INFO]: Current ${https_root_certificates_file}:"
        cat "${dir}/${https_root_certificates_file}"
-       read -rp "Override? (y/n)" yn
+       read -rp "Override with default? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${dir}/${https_root_certificates_file}"; break;;
           [Nn]* ) write=false: break;;
@@ -80,7 +80,7 @@ if [ -f "${dir}/${network_file}" ]; then
     while true; do
        echo "[INFO]: Current ${network_file}:"
        cat "${dir}/${network_file}"
-       read -rp "Override? (y/n)" yn
+       read -rp "Override with default? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${dir}/${network_file}"; break;;
           [Nn]* ) write=false; break;;
@@ -130,7 +130,7 @@ if [ -f "${dir}/${ntp_servers_file}" ]; then
     while true; do
        echo "[INFO]: Current ${ntp_servers_file}:"
        cat "${dir}/${ntp_servers_file}"
-       read -rp "Override? (y/n)" yn
+       read -rp "Override with default? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${dir}/${ntp_servers_file}"; break;;
           [Nn]* ) write=false; break;;
@@ -159,7 +159,7 @@ if [ -f "${dir}/${provisioning_servers_file}" ]; then
     while true; do
        echo "[INFO]: Current ${provisioning_servers_file}:"
        cat "${dir}/${provisioning_servers_file}"
-       read -rp "Override? (y/n)" yn
+       read -rp "Override with default? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${dir}/${provisioning_servers_file}"; break;;
           [Nn]* ) write=false; break;;
