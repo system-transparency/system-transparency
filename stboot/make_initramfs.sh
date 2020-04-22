@@ -58,9 +58,9 @@ if "${develop}" ; then
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
     -files "${dir}/include/start_cpu.elv:/start_cpu.elv" \
     -files "${key_dir}/cpu_keys/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
-    -files "${key_dir}/cpu_keys/cpu_rsa.pub:key.pub" \
+    -files "${key_dir}/cpu_keys/cpu_rsa.pub:cpu_rsa.pub" \
     core \
-    github.com/u-root/cpu/cmds/cpuserver \
+    github.com/u-root/cpu/cmds/cpud \
     github.com/u-root/u-root/cmds/boot/stboot \
     || { echo -e "creating initramfs $failed"; exit 1; }
 else
@@ -69,10 +69,10 @@ else
     -files "${dir}/include/${var_file}:etc/${var_file}" \
     -files "${dir}/include/start_cpu.elv:/start_cpu.elv" \
     -files "${key_dir}/cpu_keys/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
-    -files "${key_dir}/cpu_keys/cpu_rsa.pub:key.pub" \
+    -files "${key_dir}/cpu_keys/cpu_rsa.pub:cpu_rsa.pub" \
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/core/elvish \
-    github.com/u-root/cpu/cmds/cpuserver \
+    github.com/u-root/cpu/cmds/cpud \
     github.com/u-root/u-root/cmds/boot/stboot \
     || { echo -e "creating initramfs $failed"; exit 1; }
 fi

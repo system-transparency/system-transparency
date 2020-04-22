@@ -17,6 +17,7 @@ Your _remote target_ needs port `2222` to be accessible from the outside.
 Run:
 
 ```shell
+$ go get github.com/u-root/cpu/cmds/cpu
 $ go install github.com/u-root/cpu/cmds/cpu
 ```
 
@@ -28,7 +29,7 @@ Now you can run it
 $ cpu
 Usage: cpu [options] host [shell command]:
   -bin string
-        path of cpu binary (default "cpuserver")
+        path of cpu binary (default "cpud")
   -bindover string
         : separated list of directories in /tmp/cpu to bind over / (default "/lib:/lib64:/lib32:/usr:/bin:/etc:/home")
   -d    enable debug prints
@@ -49,7 +50,7 @@ Before accessing the remote machine trough `cpu` you first need to start the cpu
 $ elvish start_cpu.elv
 ```
 
-This will start the `cpuserver` with all the required keys.
+This will start the `cpud` with all the required keys.
 
 Now, on your own system run:
 
