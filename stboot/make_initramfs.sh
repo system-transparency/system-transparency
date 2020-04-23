@@ -45,15 +45,9 @@ if [ -f "${dir}/${initramfs_name_compressed}" ]; then
   echo "[INFO]: backup existing initramfs to $(realpath --relative-to=${root} "${dir}/${initramfs_backup}")"
   mv "${dir}/${initramfs_name_compressed}" "${dir}/${initramfs_backup}"
 fi
-<<<<<<< HEAD
 if "${core_tools}" ; then
     echo "[INFO]: create initramfs including all u-root core tools"
-    GOPATH="${gopath}" u-root -build=bb -uinitcmd=/bbin/cpuserver -o "${dir}/${initramfs_name}" \
-=======
-if "${develop}" ; then
-    echo "[INFO]: create initramfs with full tooling for development"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${dir}/${initramfs_name}" \
->>>>>>> caeec68... Adjusted initramfs creation; Updated ssh keys
     -files "${dir}/include/${var_file}:etc/${var_file}" \
     -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
     -files "${dir}/include/start_cpu.elv:/start_cpu.elv" \
