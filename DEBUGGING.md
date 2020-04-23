@@ -58,6 +58,24 @@ Now, on your own system run:
 $ cpu -key path/to/your/private_key hostname.domain.com
 ```
 
-This will connect you to the remote server and bring all your tools and environment with it.
+So, for the testing environment for example:
+
+```
+$ cpu -key keys/cpu_keys/cpu_rsa localhost
+```
+
+This will connect you to the remote server and bring all your tools and environment with it. Be aware that this process might take up to a few minutes depending on the size of your environment and the power of the remote machine.
 
 Enjoy!
+
+### Testing the `cpu` command using qemu
+
+_NOTE: Make sure you followed all the steps in section [Installation](#Installation)_
+
+Run `./run.sh` to generate all keys and make sure the newest stboot kernel and image has been built.
+
+Run `./start_qemu_mixed-firmware.sh`, wait 6 seconds then press <kbd>Ctrl-C</kbd> to enter the shell.
+
+Inside the shell run `elvish start_cpu.elv` to start the `cpud` server, then open another terminal.
+
+In the newly opened terminal run `cpu -key keys/cpu_keys/cpu_rsa localhost`. This might take a while but it should make you end up inside the qemu machine with all your local tools at hand.
