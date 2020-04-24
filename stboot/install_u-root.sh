@@ -63,3 +63,13 @@ GOPATH="${gopath}" go install "${gopath}/src/github.com/u-root/u-root/" || { ech
 echo "[INFO]: install u-root stboot patch"
 GOPATH="${gopath}" go install "${gopath}/src/github.com/u-root/u-root/cmds/boot/stboot" || { echo -e "installing u-root stboot patch $failed"; exit 1; }
 
+cpu_bin="${gopath}/bin/cpu"
+cpud_src="${gopath}/src/github.com/u-root/cpu/cmds/cpud"
+if [ ! -f ${cpu_bin} ]; then
+    echo "[INFO]: install cpu command for debugging"
+    GOPATH="${gopath}" go get github.com/u-root/cpu/cmds/cpu
+fi
+if [ ! -d ${cpud_src} ]; then
+    echo "[INFO]: install cpu daemon for debugging"
+    GOPATH="${gopath}" go get github.com/u-root/cpu/cmds/cpud
+fi

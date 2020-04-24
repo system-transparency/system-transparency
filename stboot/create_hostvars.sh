@@ -10,7 +10,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
 var_file="hostvars.json"
-fingerprint_file="${root}/keys/rootcert.fingerprint"
+fingerprint_file="${root}/keys/signing_keys/rootcert.fingerprint"
 
 if [ -f "${dir}/include/${var_file}" ]; then
     while true; do
@@ -22,7 +22,7 @@ if [ -f "${dir}/include/${var_file}" ]; then
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
-    done 
+    done
 fi
 
 echo "[INFO]: Create $(realpath --relative-to=${root} "${dir}/include/${var_file}")"
