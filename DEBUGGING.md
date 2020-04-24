@@ -7,23 +7,16 @@ Since the stboot image running on a server has much fewer tools and services tha
 ### Prerequisites
 
 These instructions expect _your system_ to be Linux-based.
-You need to have the `go` programming language installed on _your system_.
+You need to have the `go` programming language installed on _your system_ and GOPATH is set correctly (see [Prerequisites](/README.md#Prerequisites))
 
 It also expects you to have access to the serial console of your _remote target_.
 Your _remote target_ needs port `2222` to be accessible from the outside.
 
 ### Installation
 
-Run:
+Usually the cpu command should be installed and the cpu daemon should be included into the linuxboot intramfs during the setup by `run.sh` already.
 
-```shell
-$ go get github.com/u-root/cpu/cmds/cpu
-$ go install github.com/u-root/cpu/cmds/cpu
-```
-
-to install the `cpu` tool to your `$GOPATH` and thus make it available to your `$PATH`.
-
-Now you can run it
+Try to run it:
 
 ```
 $ cpu
@@ -40,6 +33,13 @@ Usage: cpu [options] host [shell command]:
   -init
         run as init (Debug only; normal test is if we are pid 1
   ...
+```
+
+Otherwise, to install it now run:
+
+```shell
+$ go get github.com/u-root/cpu/cmds/cpu
+$ go get github.com/u-root/cpu/cmds/cpud
 ```
 
 ### Usage
