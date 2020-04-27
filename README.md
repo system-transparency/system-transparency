@@ -59,19 +59,7 @@ This script is the global entry point to build up or update the environment.
 It runs a dependency check and prompts you to execute all other necessary scripts and thereby leads through the whole setup process. Each step can be run, run with special options where applicable or skipped. In this way you can also only renew certain parts of the environment.
 Run each step when executing for the first time. Some scripts need root privileges.
 
-On Debian-based systems you'll need the following packages:
-
-```bash
-apt install golang docker.io openssl git qemu-system-x86 wget sudo bison flex pkg-config libelf-dev libssl-dev bc libc6-i386 gcc-8 g++-8 libncurses-dev
-```
-
-You then need to make GCC 8 the default.
-
-```bash
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
-sudo update-alternatives --config gcc
-```
+The file `run.config` contains configuration variables and should be edited prior to the running of `run.sh`.
 
 #### `start_qemu_mixed-firmware.sh`
 

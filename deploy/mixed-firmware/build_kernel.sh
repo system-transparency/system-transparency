@@ -20,6 +20,7 @@ kernel_config="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig"
 kernel_config_mod="${dir}/x86_64_x11ssh_qemu_linuxboot.defconfig.modified"
 src="${root}/src/kernel"
 dev_keys="torvalds@kernel.org gregkh@kernel.org"
+keyring=${src}/gnupg/keyring.gpg
 
 user_name="$1"
 
@@ -42,43 +43,51 @@ if [ -f "${lnxbt_kernel}" ]; then
     done 
 fi
 
-
-if [ -d ${src} ]; then
+if [ -f "${src}/${kernel_ver}.tar.xz" ]; then
     echo "[INFO]: Using cached sources in $(realpath --relative-to=${root} ${src})"
 else
-    echo "[INFO]: Downloading Linux Kernel source files and signature"
-    wget "${kernel_src}/${kernel_ver}.tar.xz" -P "${src}" || { rm -rf "${src}"; echo -e "Downloading source files $failed"; exit 1; }
-    wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${src}" || { rm -rf "${src}"; echo -e "Downloading signature $failed"; exit 1; }
+    echo "[INFO]: Downloading Linux Kernel source files"
+    wget "${kernel_src}/${kernel_ver}.tar.xz" -P "${src}" || { echo -e "Downloading source files $failed"; exit 1; }
+fi
 
-    mkdir "${src}/gnupg"
+if [ -f "${src}/${kernel_ver}.tar.sign" ]; then
+    echo "[INFO]: Using cached signature in $(realpath --relative-to=${root} ${src})"
+else
+    echo "[INFO]: Downloading Linux Kernel source signature"
+    wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${src}" || { echo -e "Downloading signature $failed"; exit 1; }
+fi
+
+[ -d "${src}/gnupg" ] || { mkdir "${src}/gnupg"; chmod 700 "${src}/gnupg"; }
+
+if [ -f "${keyring}" ]; then
+    echo "[INFO]: Using cached kernel developer keys in $(realpath --relative-to=${root} ${src})"
+else
     echo "[INFO]: Fetching kernel developer keys"
     if ! gpg --batch --quiet --homedir "${src}/gnupg" --auto-key-locate wkd --locate-keys ${dev_keys}; then
         echo -e "Fetching keys $failed"
-        rm -rf "${src}"
         exit 1
     fi
-    keyring=${src}/gnupg/keyring.gpg
     gpg --batch --homedir "${src}/gnupg" --no-default-keyring --export ${dev_keys} > "${keyring}"
-
-    echo "[INFO]: Verifying signature of the kernel tarball"
-    count=$(xz -cd "${src}/${kernel_ver}.tar.xz" \
-            | gpgv --homedir "${src}/gnupg" "--keyring=${keyring}" --status-fd=1 "${src}/${kernel_ver}.tar.sign" - \
-            | grep -c -E '^\[GNUPG:\] (GOODSIG|VALIDSIG)')
-    if [[ "${count}" -lt 2 ]]; then
-        echo -e "Verifying kernel tarball $failed"
-        rm -rf "${src}"
-        exit 1
-    fi
-
-    echo
-    echo "[INFO]: Successfully downloaded and verified kernel"
-    echo "[INFO]: Build Linuxboot kernel"
-
-    tar -xf "${src}/${kernel_ver}.tar.xz" -C "${src}" || { rm -rf "${src}"; echo -e "Unpacking $failed"; exit 1; }
-    chown -R "${user_name}" "${src}"
 fi
 
-[ -f "${kernel_config}" ] || { rm -rf "${src}"; echo -e "Finding $kernel_config $failed"; exit 1; }
+echo "[INFO]: Verifying signature of the kernel tarball"
+count=$(xz -cd "${src}/${kernel_ver}.tar.xz" \
+	   | gpgv --homedir "${src}/gnupg" "--keyring=${keyring}" --status-fd=1 "${src}/${kernel_ver}.tar.sign" - \
+           | grep -c -E '^\[GNUPG:\] (GOODSIG|VALIDSIG)')
+if [[ "${count}" -lt 2 ]]; then
+    echo -e "Verifying kernel tarball $failed"
+    exit 1
+fi
+echo
+echo "[INFO]: Successfully verified kernel source tar ball"
+
+echo "[INFO]: Unpacking kernel source tar ball"
+[ -d "${src}/${kernel_ver}" ] && rm -rf "${src}/${kernel_ver}"
+tar -xf "${src}/${kernel_ver}.tar.xz" -C "${src}" || { echo -e "Unpacking $failed"; exit 1; }
+chown -R "${user_name}" "${src}"
+
+echo "[INFO]: Build Linuxboot kernel"
+[ -f "${kernel_config}" ] || { echo -e "Finding $kernel_config $failed"; exit 1; }
 cp "${kernel_config}" "${src}/${kernel_ver}/.config"
 cd "${src}/${kernel_ver}"
 while true; do
@@ -92,18 +101,20 @@ done
 make menuconfig
 make savedefconfig 
 cp defconfig "${kernel_config_mod}"
-make "-j$(nproc)" || { rm -rf "${src}"; echo -e "Compiling kernel $failed"; exit 1; }
+
+make "-j$(nproc)" || { echo -e "Compiling kernel $failed"; exit 1; }
 cd "${dir}"
 cp "${src}/${kernel_ver}/arch/x86/boot/bzImage" "$lnxbt_kernel"
 
 echo ""
-chown -c "${user_name}" "${lnxbt_kernel}"
-chown -c "${user_name}" "${lnxbt_kernel_backup}"
-chown -c "${user_name}" "${kernel_config}"
-chown -c "${user_name}" "${kernel_config_mod}"
+[ -f "${lnxbt_kernel}" ] && chown -c "${user_name}" "${lnxbt_kernel}"
+[ -f "${lnxbt_kernel_backup}" ] && chown -c "${user_name}" "${lnxbt_kernel_backup}"
+[ -f "${kernel_config}" ] && chown -c "${user_name}" "${kernel_config}"
+[ -f "${kernel_config_mod}" ] && chown -c "${user_name}" "${kernel_config_mod}"
 
 echo ""
 echo "Successfully created $(realpath --relative-to=${root} $lnxbt_kernel) ($kernel_ver)"
 echo "Any config changes you may have made via menuconfig are saved to:"
 echo "$(realpath --relative-to=${root} ${kernel_config_mod})"
 
+trap - EXIT

@@ -11,6 +11,11 @@ failed="\e[1;5;31mfailed\e[0m"
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="${dir}"
 
+# Source global build config file.
+run_config=${root}/run.config
+[ -r ${run_config} ] && source ${run_config}
+
+# Set up operating-system configuration.
 config=${root}/configs/debian-buster-amd64/stconfig.json
 while getopts ":c:" opt; do
   case $opt in
@@ -111,7 +116,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/stboot/data/create_example_data.sh"; break;;
+      [Rr]* ) bash "${root}/stboot/data/create_example_data.sh" "${run_config}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -293,7 +298,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/start_qemu_mixed-firmware.sh"; break;;
+      [Rr]* ) bash "${root}/start_qemu_mixed-firmware.sh" "${run_config}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

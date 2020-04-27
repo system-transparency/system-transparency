@@ -5,6 +5,12 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
+# Source global build config file.
+if [ $# -gt 0 ]; then
+    run_config=$1; shift
+    [ -r ${run_config} ] && source ${run_config}
+fi
+
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -12,6 +18,7 @@ https_root_certificates_file="https-root-certificates.pem"
 network_file="network.json"
 ntp_servers_file="ntp-servers.json"
 provisioning_servers_file="provisioning-servers.json"
+stboot_url=${ST_PROVISIONING_SERVER_URL:-"https://stboot.9esec.dev"}
 
 ##############################
 # https-root-certificates.pem
@@ -171,11 +178,11 @@ fi
 if "${write}"; then
    echo "[INFO]: Create ${provisioning_servers_file}"
    touch "${dir}/${provisioning_servers_file}"
-   echo '
+   cat <<EOF > "${dir}/${provisioning_servers_file}"
 [
-   "https://stboot.9esec.dev"
+   "${stboot_url}"
 ]
-   ' > "${dir}/${provisioning_servers_file}"
+EOF
 
    cat "${dir}/${provisioning_servers_file}"
 fi

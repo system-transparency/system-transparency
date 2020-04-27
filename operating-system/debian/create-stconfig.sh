@@ -63,4 +63,4 @@ echo '{
 
 cat "${root}/configs/${cfg_dir}/${cfg_file}"
 
-echo "Successfully createt configs/${cfg_dir}/${cfg_file}"
+echo "Successfully created configs/${cfg_dir}/${cfg_file}"
