@@ -5,6 +5,12 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
+# Source global build config file.
+if [ $# -gt 0 ]; then
+    run_config=$1; shift
+    [ -r ${run_config} ] && source ${run_config}
+fi
+
 failed="\e[1;5;31mfailed\e[0m"
 
 # Set magic variables for current file & dir
@@ -25,4 +31,4 @@ qemu-system-x86_64 \
   -object rng-random,filename=/dev/urandom,id=rng0 \
   -device virtio-rng-pci,rng=rng0 \
   -rtc base=localtime \
-  -m 8192
+  -m ${mem}

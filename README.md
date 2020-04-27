@@ -59,10 +59,8 @@ This script is the global entry point to build up or update the environment.
 It runs a dependency check and prompts you to execute all other necessary scripts and thereby leads through the whole setup process. Each step can be run, run with special options where applicable or skipped. In this way you can also only renew certain parts of the environment.
 Run each step when executing for the first time. Some scripts need root privileges.
 
-The following environment variables can be set to influence the build or update of the environment.
+The file `run.config` contains configuration variables and should be edited prior to the running of `run.sh`.
 
-- ST_QEMU_MEM (default: 8192)
-c
 #### `start_qemu_mixed-firmware.sh`
 
 This script is invoked by `run.sh`. It will boot up _qemu_ to test the system. All output is printed to the console.

@@ -298,7 +298,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/start_qemu_mixed-firmware.sh"; break;;
+      [Rr]* ) bash "${root}/start_qemu_mixed-firmware.sh" "${run_config}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
