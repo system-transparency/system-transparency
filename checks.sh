@@ -77,8 +77,9 @@ function checkGO {
       exit 1;
    }
 
-   majorver="$(go version | sed 's/go version go//' | cut -d . -f 1)"
-   minorver="$(go version | sed 's/go version go//' | cut -d . -f 2)"
+   ver=$(go version | cut -d ' ' -f 3 | sed 's/go//')
+   majorver="$(echo $ver | cut -d . -f 1)"
+   minorver="$(echo $ver | cut -d . -f 2)"
 
    if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then
          echo "GO version ${majorver}.${minorver} is not supported. Needs version ${minver[0]}.${minver[1]} or later."
