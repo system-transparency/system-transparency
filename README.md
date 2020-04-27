@@ -61,7 +61,6 @@ Run each step when executing for the first time. Some scripts need root privileg
 
 The following environment variables can be set to influence the build or update of the environment.
 
-- ST_STKERNEL_TMPDIR (default: generated)
 - ST_STBOOT_URL (default: https://stboot.9esec.dev)
 - ST_QEMU_MEM (default: 8192)
 c
