@@ -16,4 +16,13 @@ mem=${ST_QEMU_MEM:-8192}
 
 image="${root}/deploy/mixed-firmware/Syslinux_Linuxboot.img"
 
-qemu-system-x86_64 -drive if=virtio,file=${image},format=raw -net user -net nic -device virtio-rng-pci -rtc base=localtime -m ${mem} -nographic
+
+qemu-system-x86_64 \
+  -drive if=virtio,file=${image},format=raw \
+  -nographic \
+  -net user,hostfwd=tcp::2222-:2222 \
+  -net nic \
+  -object rng-random,filename=/dev/urandom,id=rng0 \
+  -device virtio-rng-pci,rng=rng0 \
+  -rtc base=localtime \
+  -m 8192

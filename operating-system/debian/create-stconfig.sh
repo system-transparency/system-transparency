@@ -45,20 +45,20 @@ fi
 echo "[INFO]: Copy nessesary files to config directory"
 mkdir -p "${root}/configs/${cfg_dir}/kernels" && cp -v "${dir}/docker/out/${kernel}" "${root}/configs/${cfg_dir}/kernels"
 mkdir -p "${root}/configs/${cfg_dir}/initrds" && cp -v "${dir}/docker/out/${initrd}" "${root}/configs/${cfg_dir}/initrds"
-mkdir -p "${root}/configs/${cfg_dir}/signing" && cp -v "${root}/keys/root.cert" "${root}/configs/${cfg_dir}/signing"
+mkdir -p "${root}/configs/${cfg_dir}/signing" && cp -v "${root}/keys/signing_keys/root.cert" "${root}/configs/${cfg_dir}/signing"
 
 echo "[INFO]: Create ${cfg_file} for debian boot configuration"
 touch "${root}/configs/${cfg_dir}/${cfg_file}"
-echo '{  
-  "boot_configs": [ 
-    { 
-      "name": "Debian Buster reproducible", 
-      "kernel": "kernels/'$kernel'", 
-      "kernel_args": "console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd", 
-      "initramfs": "initrds/'$initrd'" 
-    } 
-  ], 
-  "root_cert": "signing/root.cert" 
+echo '{
+  "boot_configs": [
+    {
+      "name": "Debian Buster reproducible",
+      "kernel": "kernels/'$kernel'",
+      "kernel_args": "console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd",
+      "initramfs": "initrds/'$initrd'"
+    }
+  ],
+  "root_cert": "signing/root.cert"
 }' > "${root}/configs/${cfg_dir}/${cfg_file}"
 
 cat "${root}/configs/${cfg_dir}/${cfg_file}"

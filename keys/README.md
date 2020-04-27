@@ -18,7 +18,14 @@
 
 ## Keys
 
-This directory contains example data only.
+This directory contains directories containing some example keys for different tasks:
+
+- `signing_keys`: Contains the keys for signing the bootball
+- `cpu_keys`: Contains the keys for using the cpu command for debugging
+  - `cpu_rsa`/ `cpu_rsa.pub`: These keys are used for connecting _to_ the machine running the `cpud` server
+  - `ssh_host_rsa_key`/ `ssh_host_rsa_key.pub`: These keys are used by the `cpud` server to connect _back to your_ machine.
+
+If these directories seem to be missing, this is because they do not exist by default but are created, by running the `./run.sh` script which in turn runs the `generate_keys_and_certs.sh` script.
 
 ### Scripts
 

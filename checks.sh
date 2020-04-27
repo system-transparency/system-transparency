@@ -24,7 +24,7 @@ function checkMISC {
         PATH=/sbin:/usr/sbin:$PATH command -v "$i" >/dev/null 2>&1 || {
             echo >&2 "$i required";
             needs_exit=true
-        } 
+        }
     done
 
     for i in "${misc_libs[@]}"
@@ -37,13 +37,13 @@ function checkMISC {
 
     if [[ ! -f "/lib/ld-linux.so.2" ]]
     then
-    echo "i386 libc required";
-    needs_exit=true
+        echo "i386 libc required";
+        needs_exit=true
     fi
 
     if $needs_exit ; then
-    echo 'Please install all missing dependencies!';
-    exit 1;
+        echo 'Please install all missing dependencies!';
+        exit 1;
     fi
 
     echo "Miscellaneous tools and dependencies OK"
@@ -110,8 +110,7 @@ function checkProvServerSettings {
                 [Nn]* ) exit 1;;
             * ) echo "Please answer yes or no.";;
             esac
-        done 
+        done
     fi
     echo "Provisioning server settings OK"
 }
-

@@ -32,7 +32,7 @@ while true; do
         [Nn]* ) break;;
         * ) echo "Please answer yes or no.";;
     esac
-done 
+done
 
 rm -f ${config_dir}/${bootball_pattern} || { echo -e "Removing old bootball files $failed"; exit 1; }
 echo "[INFO]: pack ${config} and OS boot files into bootball."
@@ -47,10 +47,13 @@ files=( $config_dir/$bootball_pattern )
 [ "${#files[@]}" -gt "1" ] && { echo -e "stconfig sign $failed : more then one bootbool files in ${config_dir}"; exit 1; }
 bootball=${files[0]}
 
+signing_key_dir="${root}/keys/signing_keys"
+
 echo "[INFO]: sign $bootball with example keys"
-stconfig sign --key="${root}/keys/signing-key-1.key" --cert="${root}/keys/signing-key-1.cert" "$bootball"|| { echo -e "stconfig sign $failed"; exit 1; }
-stconfig sign --key="${root}/keys/signing-key-2.key" --cert="${root}/keys/signing-key-2.cert" "$bootball"|| { echo -e "stconfig sign $failed"; exit 1; }
-stconfig sign --key="${root}/keys/signing-key-3.key" --cert="${root}/keys/signing-key-3.cert" "$bootball"|| { echo -e "stconfig sign $failed"; exit 1; }
+for I in 1 2 3 4 5
+do
+    stconfig sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$bootball"|| { echo -e "stconfig sign $failed"; exit 1; }
+done
 
 echo ""
 echo "[INFO]: $(realpath --relative-to=${root} "$bootball") created and signed with example keys."

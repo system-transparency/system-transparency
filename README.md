@@ -24,17 +24,17 @@ Each folder contains an own README.md describing its content and the purpose of 
 | [`stconfig/`](stconfig/#stconfig)                                                                   | scripts and files to build the bootloader's configuration tool |
 
 ## Prerequisites
-On Debian-based systems you'll need the following packages:
 
 * Linux system (tested with Ubuntu 18.04.2 LTS (Bionic Beaver) / Kernel 4.15.0-47-generic
 * Golang v 1.13 (see [install Go](https://golang.org/doc/install#install))
 	* make sure to also create a workspace at `$HOME/go` (see [test Go](https://golang.org/doc/install#testing))
 	* make sure `$HOME/go/bin` and `/usr/local/go/bin` or '/usr/bin/go are added to `PATH` environment variable
-    * you may have to enable `GO111MODULE` via `go env -w GO111MODULE=off`
+    * you may have to disable `GO111MODULE` via `go env -w GO111MODULE=off`
 * QEMU emulator (tested with version 2.11.1)
 * Server with SSH access supporting HTTPS web requests to use for your provisioning server
 * Docker for building the a reproducible debian buster kernel and initramfs
 * GCC 8
+
 
 You then need to make GCC 8 the default.
 
@@ -43,6 +43,8 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 sudo update-alternatives --config gcc
 ```
+
+Further dependency checks will be made during setup.
 
 ## Configure stboot
 To controll the printed output of stboot in the mixed firmware scenario see [syslinux.cfg](deploy/mixed-firmware/#syslinux.cfg). Many other configurations are controlles via special files like described in the DETAILS section at [system-transparency.org](https://www.system-transparency.org/)
