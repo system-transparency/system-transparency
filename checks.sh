@@ -10,7 +10,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="${dir}"
 
 misc_cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
-            "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
+            "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "parted" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
             "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath" "make" "mkfs.vfat")
 
 misc_libs=( "libelf" "libcrypto" )
@@ -61,6 +61,8 @@ function checkGCC {
 
    if [ "$currentver" -gt "$maxver" ]; then
          echo "GCC version ${currentver} is not supported. Needs version ${maxver} or earlier."
+	 echo "Hint: If you've got multiple versions of GCC installed, update-alternatives(1) might "
+	 echo "help with configuring which one should be invoked when issuing the gcc command."
          exit 1
    else
        echo "GCC supported"
