@@ -28,11 +28,6 @@ This are some draft notes to build a coreboot image for the Supermicro X11SSH (o
 sudo apt-get install -y bison build-essential curl flex git gnat libncurses5-dev m4 zlib1g-dev pkgconf libssl-dev uuid-dev
 git clone https://review.coreboot.org/coreboot
 cd coreboot
-git checkout c2ce370f30b60daf60e23182cf01eb898d35fbbd
-git fetch "https://review.coreboot.org/coreboot" refs/changes/04/32704/5 && git cherry-pick FETCH_HEAD
-git fetch "https://review.coreboot.org/coreboot" refs/changes/05/32705/7 && git cherry-pick FETCH_HEAD
-git fetch "https://review.coreboot.org/coreboot" refs/changes/44/38344/2 && git cherry-pick FETCH_HEAD
-git fetch "https://review.coreboot.org/coreboot" refs/changes/04/38404/1 && git cherry-pick FETCH_HEAD
 make crossgcc-i386 CPUS=$(nproc)
 cp ../x11ssh-tf.defconfig .config
 git submodule update --checkout --init
