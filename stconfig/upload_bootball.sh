@@ -5,15 +5,22 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
+# Source global build config file.
+if [ $# -gt 0 ]; then
+    run_config=$1; shift
+    [ -r ${run_config} ] && source ${run_config}
+fi
+
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
 failed="\e[1;5;31mfailed\e[0m"
 
-config="${dir}/prov-server-access.sh"
+prov_server=${ST_SSH_UPLOAD_SERVER:-"stboot.9esec.dev"}
+prov_server_user=${ST_SSH_UPLOAD_USER:-"provisioner"}
+prov_server_path=${ST_SSH_UPLOAD_PATH:-"/home/provisioner/www"}
 
-source ${config} || { echo -e "$failed : ${config} not found"; exit 1; }
 [ -z "$prov_server" ] && { echo -e "upload $failed : prov_server not set in $(realpath --relative-to=${root} ${config})"; exit 1; }
 [ -z "$prov_server_user" ] && { echo -e "upload $failed : prov_server_user not set in $(realpath --relative-to=${root} ${config})"; exit 1; }
 [ -z "$prov_server_path" ] && { echo -e " upload $failed : prov_server_path not set in $(realpath --relative-to=${root} ${config})"; exit 1; }

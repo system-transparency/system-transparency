@@ -189,5 +189,4 @@ fi
 
 echo ""
 echo "[INFO]: You can modify the files in stboot/data/ to your needs."
-echo "[INFO]: Most important: Edit stboot/data/provisioning-server.json if using your own server."
 

@@ -99,21 +99,3 @@ function checkDebootstrap {
     echo "Filesystem for debootstrap OK"
 }
 
-
-function checkProvServerSettings {
-    cfg="${root}/stconfig/prov-server-access.sh"
-    source ${cfg} || { echo -e "$failed : ${cfg} not found"; exit 1; }
-    if [ -z "$prov_server" ] || [ -z "$prov_server_user" ] || [ -z "$prov_server_path" ]; then
-        while true; do
-            echo "WARING: missing settings in $(realpath --relative-to=${root} ${cfg})"
-            echo "You won't be able to upload stboot.ball later without editing this file."
-            read -rp "Continue? (y/n)" yn
-            case $yn in
-                [Yy]* ) break;;
-                [Nn]* ) exit 1;;
-            * ) echo "Please answer yes or no.";;
-            esac
-        done
-    fi
-    echo "Provisioning server settings OK"
-}
