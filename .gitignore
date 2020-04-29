@@ -1,3 +1,4 @@
+/.vscode/*
 /caddy/
 /configs/*/
 /stboot/*.cpio
