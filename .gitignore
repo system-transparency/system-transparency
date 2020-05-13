@@ -1,5 +1,4 @@
 /.vscode/*
-/caddy/
 /configs/*/
 /stboot/*.cpio
 /stboot/*.cpio.gz
