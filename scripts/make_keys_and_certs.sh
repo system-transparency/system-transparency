@@ -9,8 +9,8 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
-signing_key_dir="${dir}/signing_keys"
-cpu_key_dir="${dir}/cpu_keys"
+signing_key_dir="${root}/keys/signing_keys"
+cpu_key_dir="${root}/keys/cpu_keys"
 
 mkdir -p ${signing_key_dir}
 mkdir -p ${cpu_key_dir}
@@ -47,10 +47,10 @@ echo "[INFO]: signing-key-N.cert:   The certificate corresponding to key N"
 echo "[INFO]: signing-key-N.key:    Key N's private key"
 
 # SSH key generation for cpu
+echo 
+echo "[INFO]: Generating keys for using the cpu command"
 
-echo "[INFO]: Generating ssh keys for using the cpu command"
+ssh-keygen -b 2048 -t rsa -f "${cpu_key_dir}/ssh_host_rsa_key" -q -N "" <<< y >/dev/null
+ssh-keygen -b 2048 -t rsa -f "${cpu_key_dir}/cpu_rsa" -q -N "" <<< y >/dev/null
 
-ssh-keygen -b 2048 -t rsa -f "${cpu_key_dir}/ssh_host_rsa_key" -q -N ""
-ssh-keygen -b 2048 -t rsa -f "${cpu_key_dir}/cpu_rsa" -q -N ""
-
-echo "[INFO]: Key generation for CPU command successfull!"
+echo "[INFO]: Key generation for CPU command successfull"

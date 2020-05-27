@@ -11,29 +11,9 @@ failed="\e[1;5;31mfailed\e[0m"
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="${dir}"
 
-# Source global build config file.
-run_config=${root}/run.config
-[ -r ${run_config} ] && source ${run_config}
-
-# Set up operating-system configuration.
-config=${root}/configs/debian-buster-amd64/stconfig.json
-while getopts ":c:" opt; do
-  case $opt in
-    c)
-      config=$OPTARG
-      ;;
-    \?)
-      echo "Invalid option: -${OPTARG}" >&2
-      exit 1
-      ;;
-    :)
-      echo "Option -${OPTARG} requires a path as an argument." >&2
-      exit 1
-      ;;
-  esac
-done
-
-source "${dir}/checks.sh" || { echo -e "$failed : ${cfg} not found"; exit 1; }
+# Source script with environment checks.
+checks=${root}/scripts/checks.sh
+[ -r ${checks} ] && source ${checks}
 
 echo ""
 echo "Checking dependencies ..."
@@ -45,19 +25,45 @@ echo ""
 echo "Checking environment ..."
 checkDebootstrap
 
+# Global build configuration
+global_config=${root}/run.config
+
+if [ ! -r ${global_config} ]; then 
+   bash "${root}/scripts/make_global_config.sh"
+fi
+source ${global_config}
+
+
+echo
+echo "############################################################"
+echo " Install toolchain"
+echo "############################################################"
+echo
+while true; do
+   echo "Run  (r)"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -rp ">> " x
+   case $x in
+      [Rr]* ) bash "${root}/scripts/make_toolchain.sh"; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
 
 echo
 echo "############################################################"
 echo " Generate example keys and certificates"
 echo "############################################################"
-echo "                                                      "
+echo
 while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/keys/generate-keys-and-certs.sh"; break;;
+      [Rr]* ) bash "${root}/scripts/make_keys_and_certs.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -66,16 +72,16 @@ done
 
 echo
 echo "############################################################"
-echo " Create example hostvars.json"
+echo " Create default stboot data files"
 echo "############################################################"
-echo "                                                      "
+echo
 while true; do
    echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/stboot/create_hostvars.sh"; break;;
+      [Rr]* ) bash "${root}/scripts/make_example_data.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -84,16 +90,20 @@ done
 
 echo
 echo "############################################################"
-echo " Create example data files"
+echo " Build bootloader "
 echo "############################################################"
-echo "                                                      "
+echo
 while true; do
-   echo "Run  (r)"
+   echo "Run  (1) Coreboot ROM"
+   echo "Run  (2) Image for UEFI systems"
+   echo "Run  (3) Image for mixed-firmware systems"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/stboot/data/create_example_data.sh" "${run_config}"; break;;
+      [1]* ) bash "${root}/stboot/coreboot-firmware/make_dummy.sh"; break;;
+      [2]* ) bash "${root}/stboot/uefi-firmware/make_dummy.sh"; break;;
+      [3]* ) bash "${root}/stboot/mixed-firmware/make_image.sh" "$(id -un)"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -102,16 +112,16 @@ done
 
 echo
 echo "############################################################"
-echo " Build bootloader image for mixed-firmware deployment"
+echo " Setup OS boot configuration (Root privileges required)"
 echo "############################################################"
-echo "                                                      "
+echo
 while true; do
-   echo "Run  (r) Root privileges are required"
+   echo "Run  (r) Reproducible Debian Buster"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/create_image.sh" "$(id -un)"; break;;
+      [Rr]* ) bash "${root}/operating-system/debian/make_stconfig.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -120,119 +130,21 @@ done
 
 echo
 echo "############################################################"
-echo " Setup boot configuration for reproducible Debian OS"
+echo " Use stconfig tool with example keys to create and sign a"
+echo " ST-bootball for Debian Buster"
 echo "############################################################"
-echo "                                                      "
-while true; do
-   echo "Run  (r) Root privileges may be required"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -rp ">> " x
-   case $x in
-      [Rr]* ) bash "${root}/operating-system/debian/create-stconfig.sh"; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
-echo "                                                     "
-echo "############################################################"
-echo " Build u-root command"
-echo "############################################################"
-echo "                                                     "
-while true; do
-   echo "Run  (1) update sources and build u-root command"
-   echo "Run  (2) rebuild u-root command"
-   echo "Run  (3) choose custom branch and rebuild u-root command"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -rp ">> " x
-   case $x in
-      [1]* ) bash "${root}/stboot/install_u-root.sh" -u; break;;
-      [2]* ) bash "${root}/stboot/install_u-root.sh"; break;;
-      [3]* ) bash "${root}/stboot/install_u-root.sh" -b; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
 echo
-echo "############################################################"
-echo " Build stconfig tool"
-echo "############################################################"
-echo "                                                     "
+stconfig="${root}/configs/debian-buster-amd64/stconfig.json"
 while true; do
-   echo "Run  (1) update sources and build stconfig tool"
-   echo "Run  (2) rebuild stconfig tool"
-   echo "Run  (3) choose custom branch and rebuild stconfig tool"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -rp ">> " x
-   case $x in
-      [1]* ) bash "${root}/stconfig/install_stconfig.sh" -u; break;;
-      [2]* ) bash "${root}/stconfig/install_stconfig.sh"; break;;
-      [3]* ) bash "${root}/stconfig/install_stconfig.sh" -b; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
-echo "                                                     "
-echo "############################################################"
-echo " Use u-root to create linuxboot initramfs"
-echo "############################################################"
-echo "                                                     "
-while true; do
-   echo "Run  (r)"
-   echo "Run  (c) including u-root core tools"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -rp ">> " x
-   case $x in
-      [Rr]* ) bash "${root}/stboot/make_initramfs.sh"; break;;
-      [Cc]* ) bash "${root}/stboot/make_initramfs.sh" -c; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
-echo "                                                     "
-echo "############################################################"
-echo " Include initramfs into bootloader image"
-echo "############################################################"
-echo "                                                     "
-while true; do
-   echo "Run  (r) Root privileges are required"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -rp ">> " x
-   case $x in
-      [Rr]* ) sudo bash "${root}/deploy/mixed-firmware/mv_initrd_to_image.sh"; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
-echo
-echo "############################################################"
-echo " Use stconfig tool to create and sign bootball"
-echo "############################################################"
-echo "                                                     "
-while true; do
-   echo "configuration: $(realpath --relative-to=${root} ${config})"
-   cat ${config}
+   echo "configuration: $(realpath --relative-to=${root} ${stconfig})"
+   cat ${stconfig}
    echo ""
    echo "Run  (r) with configuration"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/stconfig/create_and_sign_bootball.sh" "${config}"; break;;
+      [Rr]* ) bash "${root}/scripts/create_and_sign_bootball.sh" "${stconfig}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -243,20 +155,20 @@ echo
 echo "############################################################"
 echo " Upload bootball to provisioning server"
 echo "############################################################"
-echo "                                                     "
+echo
 bootball_pattern="stboot.ball*"
-dir=$(dirname "${config}")
+dir=$(dirname "${stconfig}")
 files=( ${dir}/$bootball_pattern )
 [ "${#files[@]}" -gt "1" ] && { echo -e "upload $failed : more then one bootbool files in $(dirname "${dir}")"; exit 1; }
 bootball=${files[0]}
 while true; do
-   echo "bootball: ${bootball}"
+   echo "bootball: $(realpath --relative-to=${root} ${bootball})"
    echo "Run  (r) with bootball"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/stconfig/upload_bootball.sh" "${run_config}" "${bootball}"; break;;
+      [Rr]* ) bash "${root}/scripts/upload_bootball.sh" "${bootball}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -264,20 +176,25 @@ while true; do
 done
 
 
-echo "                                                     "
+echo
 echo "############################################################"
-echo " Run QEMU with mixed-firmware image"
+echo " Run in QEMU "
 echo "############################################################"
-echo "                                                     "
+echo
 while true; do
-   echo "Run  (r)"
+   echo "Run  (1) Coreboot ROM"
+   echo "Run  (2) Image for UEFI systems"
+   echo "Run  (3) Image for mixed-firmware systems"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/start_qemu_mixed-firmware.sh" "${run_config}"; break;;
+      [1]* ) bash "${root}/scripts/start_qemu_coreboot-firmware.sh"; break;;
+      [2]* ) bash "${root}/scripts/start_qemu_uefi-firmware.sh"; break;;
+      [3]* ) bash "${root}/scripts/start_qemu_mixed-firmware.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
    esac
 done
+
