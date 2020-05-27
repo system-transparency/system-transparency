@@ -5,32 +5,37 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
-# Source global build config file.
-if [ $# -gt 0 ]; then
-    run_config=$1; shift
-    [ -r ${run_config} ] && source ${run_config}
-fi
-
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root="$(cd "${dir}/../" && pwd)"
 
+# import global configuration
+source ${root}/run.config
+
+data_dir="${root}/stboot/data"
 https_root_certificates_file="https-root-certificates.pem"
 network_file="network.json"
 ntp_servers_file="ntp-servers.json"
 provisioning_servers_file="provisioning-servers.json"
-stboot_url=${ST_PROVISIONING_SERVER_URL:-"https://stboot.9esec.dev"}
+
+stboot_url=${ST_PROVISIONING_SERVER_URL}
+host_ip=${ST_HOST_IP}
+host_gateway=${ST_HOST_GATEWAY}
+host_dns=${ST_HOST_DNS}
+
+mkdir -p ${data_dir}
 
 ##############################
 # https-root-certificates.pem
 ##############################
 write=true
-if [ -f "${dir}/${https_root_certificates_file}" ]; then
+if [ -f "${data_dir}/${https_root_certificates_file}" ]; then
     while true; do
        echo "[INFO]: Current ${https_root_certificates_file}:"
-       cat "${dir}/${https_root_certificates_file}"
+       cat "${data_dir}/${https_root_certificates_file}"
        read -rp "Override with default? (y/n)" yn
        case $yn in
-          [Yy]* ) rm -f "${dir}/${https_root_certificates_file}"; break;;
+          [Yy]* ) rm -f "${data_dir}/${https_root_certificates_file}"; break;;
           [Nn]* ) write=false: break;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -38,9 +43,9 @@ if [ -f "${dir}/${https_root_certificates_file}" ]; then
 fi
 
 if "${write}" ; then
+   echo
    echo "[INFO]: Create ${https_root_certificates_file}"
-   touch "${dir}/${https_root_certificates_file}"
-   echo '
+   cat >"${data_dir}/${https_root_certificates_file}" << EOL
 LetsEncrypt Authority X3 (signed by X1)
 -----BEGIN CERTIFICATE-----
 MIIFjTCCA3WgAwIBAgIRANOxciY0IzLc9AUoUSrsnGowDQYJKoZIhvcNAQELBQAw
@@ -74,22 +79,21 @@ ayLThlHLN81gSkJjVrPI0Y8xCVPB4twb1PFUd2fPM3sA1tJ83sZ5v8vgFv2yofKR
 PB0t6JzUA81mSqM3kxl5e+IZwhYAyO0OTg3/fs8HqGTNKd9BqoUwSRBzp06JMg5b
 rUCGwbCUDI0mxadJ3Bz4WxR6fyNpBK2yAinWEsikxqEt
 -----END CERTIFICATE-----
-   ' > "${dir}/${https_root_certificates_file}"
-
-   cat "${dir}/${https_root_certificates_file}"
+EOL
+   cat "${data_dir}/${https_root_certificates_file}"
 fi
 
 ##################
 # network.json
 ##################
 write=true
-if [ -f "${dir}/${network_file}" ]; then
+if [ -f "${data_dir}/${network_file}" ]; then
     while true; do
        echo "[INFO]: Current ${network_file}:"
-       cat "${dir}/${network_file}"
+       cat "${data_dir}/${network_file}"
        read -rp "Override with default? (y/n)" yn
        case $yn in
-          [Yy]* ) rm -f "${dir}/${network_file}"; break;;
+          [Yy]* ) rm -f "${data_dir}/${network_file}"; break;;
           [Nn]* ) write=false; break;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -97,49 +101,29 @@ if [ -f "${dir}/${network_file}" ]; then
 fi
 
 if "${write}"; then
-   while true; do
-      echo "[INFO]: Create ${network_file}. Choose ip configuration:"
-      echo "(1) Qemu"
-      echo "(2) empty-> DHCP"
-      echo "You can edit stboot/data/network.json for custom static IP later."
-      read -rp ">> " x
-      touch "${dir}/${network_file}"
-      if [ "${x}" = 1 ]; then
-         echo '
+   echo
+   echo "[INFO]: Create ${network_file}:"
+   cat > "${data_dir}/${network_file}" << EOL
 {
-   "host_ip":"10.0.2.15/24",
-   "gateway":"10.0.2.2/24",
-   "dns":""
+   "host_ip":"${ST_HOST_IP}",
+   "gateway":"${ST_HOST_GATEWAY}",
+   "dns":"${ST_HOST_DNS}"
 }
-         ' > "${dir}/${network_file}"
-         break
-      elif [ "${x}" = 2 ]; then
-         echo '
-{
-   "host_ip":"",
-   "gateway":"",
-   "dns":""
-}
-         ' > "${dir}/${network_file}"
-         break
-      else
-         echo "Invalid input!"
-      fi
-   done
-   cat "${dir}/${network_file}"
+EOL
+   cat "${data_dir}/${network_file}"
 fi
 
 ##################
 # ntp-servers.json
 ##################
 write=true
-if [ -f "${dir}/${ntp_servers_file}" ]; then
+if [ -f "${data_dir}/${ntp_servers_file}" ]; then
     while true; do
        echo "[INFO]: Current ${ntp_servers_file}:"
-       cat "${dir}/${ntp_servers_file}"
+       cat "${data_dir}/${ntp_servers_file}"
        read -rp "Override with default? (y/n)" yn
        case $yn in
-          [Yy]* ) rm -f "${dir}/${ntp_servers_file}"; break;;
+          [Yy]* ) rm -f "${data_dir}/${ntp_servers_file}"; break;;
           [Nn]* ) write=false; break;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -147,28 +131,27 @@ if [ -f "${dir}/${ntp_servers_file}" ]; then
 fi
 
 if "${write}"; then
+   echo
    echo "[INFO]: Create ${ntp_servers_file}"
-   touch "${dir}/${ntp_servers_file}"
-   echo '
+   cat > "${data_dir}/${ntp_servers_file}" << EOL
 [
    "0.beevik-ntp.pool.ntp.org"
 ]
-   ' > "${dir}/${ntp_servers_file}"
-
-   cat "${dir}/${ntp_servers_file}"
+EOL
+   cat "${data_dir}/${ntp_servers_file}"
 fi
 
 ##############################
 # provisioning-servers.json
 ##############################
 write=true
-if [ -f "${dir}/${provisioning_servers_file}" ]; then
+if [ -f "${data_dir}/${provisioning_servers_file}" ]; then
     while true; do
        echo "[INFO]: Current ${provisioning_servers_file}:"
-       cat "${dir}/${provisioning_servers_file}"
+       cat "${data_dir}/${provisioning_servers_file}"
        read -rp "Override with default? (y/n)" yn
        case $yn in
-          [Yy]* ) rm -f "${dir}/${provisioning_servers_file}"; break;;
+          [Yy]* ) rm -f "${data_dir}/${provisioning_servers_file}"; break;;
           [Nn]* ) write=false; break;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -176,15 +159,14 @@ if [ -f "${dir}/${provisioning_servers_file}" ]; then
 fi
 
 if "${write}"; then
+   echo
    echo "[INFO]: Create ${provisioning_servers_file}"
-   touch "${dir}/${provisioning_servers_file}"
-   cat <<EOF > "${dir}/${provisioning_servers_file}"
+   cat > "${data_dir}/${provisioning_servers_file}" << EOL
 [
    "${stboot_url}"
 ]
-EOF
-
-   cat "${dir}/${provisioning_servers_file}"
+EOL
+   cat "${data_dir}/${provisioning_servers_file}"
 fi
 
 echo ""

@@ -7,7 +7,7 @@ set -o nounset
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-root="${dir}"
+root="$(cd "${dir}/../" && pwd)"
 
 misc_cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
             "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "parted" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
@@ -70,7 +70,7 @@ function checkGCC {
 }
 
 function checkGO {
-   minver=("1" "11")
+   minver=("1" "13")
 
    command -v go >/dev/null 2>&1 || {
       echo >&2 "GO required";
