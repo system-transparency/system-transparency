@@ -144,7 +144,7 @@ while true; do
    read -rp ">> " x
    case $x in
       [1]* ) bash "${root}/stboot/coreboot-firmware/make_dummy.sh"; break;;
-      [2]* ) bash "${root}/stboot/uefi-firmware/make_dummy.sh"; break;;
+      [2]* ) bash "${root}/stboot/uefi-firmware/make_bootloader.sh"; break;;
       [3]* ) bash "${root}/stboot/mixed-firmware/make_image.sh" "$(id -un)"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
