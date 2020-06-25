@@ -19,7 +19,7 @@ initramfs_backup="${initramfs}.backup"
 config_dir="${root}/configs/debian-buster-amd64"
 config="${config_dir}/stconfig.json"
 root_cert=${ST_BOOTBALL_ROOT_CERTIFICATE}
-debian_cmdline=${ST_BOOTBALL_DEBAIN_CMDLINE}
+debian_cmdline=${ST_BOOTBALL_DEBIAN_CMDLINE}
 
 
 if [ -f "${config}" ]; then

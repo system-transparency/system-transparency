@@ -119,9 +119,9 @@ ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_CONFIG="${root}/stboot/mixed-firmware/x86_64_
 # used to sign the bootball. It will be included into the bootball.
 ST_BOOTBALL_ROOT_CERTIFICATE=${root}/keys/signing_keys/root.cert
 
-# ST_BOOTBALL_DEBAIN_CMDLINE is the kernel command line of the final
+# ST_BOOTBALL_DEBIAN_CMDLINE is the kernel command line of the final
 # operating system 
-ST_BOOTBALL_DEBAIN_CMDLINE="console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd"
+ST_BOOTBALL_DEBIAN_CMDLINE="console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd"
 
 ##############################################################################
 # Upload 
