@@ -35,10 +35,10 @@ fi
 if [ -f "${initramfs_compressed}" ]; then
     while true; do
        echo "Current Linuxboot initramfs:"
-       ls -l "$(realpath --relative-to=${root} ${initramfs_compressed})"
+       ls -l "$(realpath --relative-to="${root}" "${initramfs_compressed}")"
        read -rp "Rebuild initramfs? (y/n)" yn
        case $yn in
-          [Yy]* ) echo "[INFO]: backup existing initramfs to $(realpath --relative-to=${root} ${initramfs_backup})"; mv "${initramfs_compressed}" "${initramfs_backup}"; break;;
+          [Yy]* ) echo "[INFO]: backup existing initramfs to $(realpath --relative-to="${root}" "${initramfs_backup}")"; mv "${initramfs_compressed}" "${initramfs_backup}"; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -50,11 +50,11 @@ fi
 echo "[INFO]: check for hostvars.json"
 bash "${dir}/make_hostvars.sh"
 
-echo "[INFO]: update timstamp in hostvars.json to "$(date +%s)""
-jq '.build_timestamp = $newVal' --argjson newVal $(date +%s) ${dir}/include/hostvars.json > tmp.$$.json && mv tmp.$$.json ${dir}/include/hostvars.json || { echo "Cannot update timestamp in hostvars.json. Creating initramfs $failed";  exit 1; }
+echo "[INFO]: update timstamp in hostvars.json to $(date +%s)"
+jq '.build_timestamp = $newVal' --argjson newVal "$(date +%s)" "${dir}"/include/hostvars.json > tmp.$$.json && mv tmp.$$.json "${dir}"/include/hostvars.json || { echo "Cannot update timestamp in hostvars.json. Creating initramfs $failed";  exit 1; }
 
 
-if [ ${core_tools} = "y" ] ; then
+if [ "${core_tools}" = "y" ] ; then
     echo "[INFO]: create initramfs including all u-root core tools"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${hostvars}:etc/${hostvars_name}" \

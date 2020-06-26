@@ -30,13 +30,13 @@ if [ -f "${hostvars}" ]; then
     done
 fi
 
-echo "[INFO]: Create $(realpath --relative-to=${root} "${hostvars}")"
+echo "[INFO]: Create $(realpath --relative-to="${root}" "${hostvars}")"
 
-cat >${hostvars} <<EOL
+cat >"${hostvars}" <<EOL
 {
   "minimal_signatures_match": ${num_signatures},
   "fingerprints": [
-    "$(cut -d' ' -f1 ${fingerprint_file})"
+    "$(cut -d' ' -f1 "${fingerprint_file}")"
   ],
   "build_timestamp": 0
 }

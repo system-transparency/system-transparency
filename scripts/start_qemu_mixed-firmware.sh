@@ -16,11 +16,11 @@ mem=${ST_QEMU_MEM}
 image="${root}/stboot/mixed-firmware/STBoot_mixed_firmware.img"
 
 qemu-system-x86_64 \
-  -drive if=virtio,file=${image},format=raw \
+  -drive if=virtio,file="${image}",format=raw \
   -nographic \
   -net user,hostfwd=tcp::2222-:2222 \
   -net nic \
   -object rng-random,filename=/dev/urandom,id=rng0 \
   -device virtio-rng-pci,rng=rng0 \
   -rtc base=localtime \
-  -m ${mem}
+  -m "${mem}"

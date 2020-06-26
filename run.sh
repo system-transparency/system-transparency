@@ -13,7 +13,7 @@ root="${dir}"
 
 # Source script with environment checks.
 checks=${root}/scripts/checks.sh
-[ -r ${checks} ] && source ${checks}
+[ -r "${checks}" ] && source "${checks}"
 
 echo ""
 echo "Checking dependencies ..."
@@ -28,7 +28,7 @@ checkDebootstrap
 # Global build configuration
 global_config=${root}/run.config
 
-if [ ! -r ${global_config} ]; then 
+if [ ! -r "${global_config}" ]; then 
    bash "${root}/scripts/make_global_config.sh"
 fi
 source ${global_config}
@@ -72,7 +72,7 @@ done
 
 echo
 echo "############################################################"
-echo " Create default stboot data files"
+echo " Create default stboot configuration files"
 echo "############################################################"
 echo
 while true; do
@@ -112,7 +112,7 @@ done
 
 echo
 echo "############################################################"
-echo " Setup OS boot configuration (Root privileges required)"
+echo " Build Operating Sytem (Root privileges required)"
 echo "############################################################"
 echo
 while true; do
@@ -121,7 +121,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/operating-system/debian/make_stconfig.sh"; break;;
+      [Rr]* ) bash "${root}/operating-system/debian/make_debian.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -130,21 +130,20 @@ done
 
 echo
 echo "############################################################"
-echo " Use stconfig tool with example keys to create and sign a"
-echo " ST-bootball for Debian Buster"
+echo " Use stmanager to create a bootball with Debian Buster and"
+echo " sign with example keys"
 echo "############################################################"
 echo
-stconfig="${root}/configs/debian-buster-amd64/stconfig.json"
 while true; do
-   echo "configuration: $(realpath --relative-to=${root} ${stconfig})"
-   cat ${stconfig}
+   echo "[INFO]: You can use stmanager manually, too." 
+   echo "[INFO]: Therefor quit and try 'stmanager --help-long'"
    echo ""
-   echo "Run  (r) with configuration"
+   echo "Run  (r)"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/scripts/create_and_sign_bootball.sh" "${stconfig}"; break;;
+      [Rr]* ) bash "${root}/scripts/create_and_sign_bootball.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -157,12 +156,12 @@ echo " Upload bootball to provisioning server"
 echo "############################################################"
 echo
 bootball_pattern="stboot.ball*"
-dir=$(dirname "${stconfig}")
-files=( ${dir}/$bootball_pattern )
+dir="${root}/bootballs"
+files=( ${dir}/${bootball_pattern} )
 [ "${#files[@]}" -gt "1" ] && { echo -e "upload $failed : more then one bootbool files in $(dirname "${dir}")"; exit 1; }
 bootball=${files[0]}
 while true; do
-   echo "bootball: $(realpath --relative-to=${root} ${bootball})"
+   echo "bootball: $(realpath --relative-to="${root}" "${bootball}")"
    echo "Run  (r) with bootball"
    echo "Skip (s)"
    echo "Quit (q)"

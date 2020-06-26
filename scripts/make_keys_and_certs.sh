@@ -12,8 +12,8 @@ root="$(cd "${dir}/../" && pwd)"
 signing_key_dir="${root}/keys/signing_keys"
 cpu_key_dir="${root}/keys/cpu_keys"
 
-mkdir -p ${signing_key_dir}
-mkdir -p ${cpu_key_dir}
+mkdir -p "${signing_key_dir}"
+mkdir -p "${cpu_key_dir}"
 
 OPENSSL=openssl
 

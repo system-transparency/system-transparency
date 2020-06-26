@@ -3,26 +3,18 @@
 set -o errexit
 set -o pipefail
 set -o nounset
-# set -o xtrace
-
-failed="\e[1;5;31mfailed\e[0m"
+#set -o xtrace
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
-config_path=""
-if [[ $# -eq 0 ]] ; then
-    echo "Path to a stconfig.json must be provided"
-    exit 1
-else
-    config_path=${1}
-    [ -f "${config_path}" ] || { echo "${config_path} does not exist";  exit 1; }
-fi
+# import global configuration
+source "${root}/run.config"
 
-bootball_pattern="stboot.ball*"
-config_dir=$(dirname "${config_path}")
-config=$(basename "${config_path}")
+out_dir="${root}/bootballs/"
+
+[ -d "${out_dir}" ] || mkdir -p "${out_dir}"
 
 mac=""
 while true; do
@@ -34,27 +26,29 @@ while true; do
     esac
 done
 
-rm -f ${config_dir}/${bootball_pattern} || { echo -e "Removing old bootball files $failed"; exit 1; }
-echo "[INFO]: pack ${config} and OS boot files into bootball."
+echo "[INFO]: call 'stmanager create' to pack OS boot files into bootball."
 
-if [ -z ${mac} ]; then
-    stconfig create "${config_path}" || { echo -e "stconfig create $failed"; exit 1; }
-else
-    stconfig create --mac="${mac}" "${config_path}" || { echo -e "stconfig create $failed"; exit 1; }
-fi
+cmdline=( "--out=${ST_BOOTBALL_OUT}" "--label=${ST_BOOTBALL_LABEL}" "--kernel=${ST_BOOTBALL_OS_KERNEL}" "--cmd=${ST_BOOTBALL_OS_CMDLINE}" "--tcmd=${ST_BOOTBALL_TBOOT_ARGS}" "--cert=${ST_BOOTBALL_ROOT_CERTIFICATE}")
+[ -z "${ST_BOOTBALL_OS_INITRAMFS}" ] || cmdline+=( "--initramfs=${ST_BOOTBALL_OS_INITRAMFS}" )
+[ -z "${ST_BOOTBALL_TBOOT}" ] || cmdline+=( "--tboot=${ST_BOOTBALL_TBOOT}" )
+[ -z "${ST_BOOTBALL_ACM}" ] || cmdline+=( "--acm=${ST_BOOTBALL_ACM}" )
+[ -z "${mac}" ] || cmdline+=( "--mac=${mac}" )
+[ "${ST_BOOTBALL_ALLOW_NON_TXT}" = "y" ] && cmdline+=( "--unsave" )
 
-files=( $config_dir/$bootball_pattern )
-[ "${#files[@]}" -gt "1" ] && { echo -e "stconfig sign $failed : more then one bootbool files in ${config_dir}"; exit 1; }
-bootball=${files[0]}
+bootball_name=$(stmanager create "${cmdline[@]}")
+bootball="${ST_BOOTBALL_OUT}/${bootball_name}"
+
+echo "[INFO]: created bootball ${bootball_name}."
+
 
 signing_key_dir="${root}/keys/signing_keys"
 
-echo "[INFO]: sign $bootball with example keys"
+echo "[INFO]: call 'stmanager sign' to sign $bootball with example keys"
 for I in 1 2 3 4 5
 do
-    stconfig sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$bootball"|| { echo -e "stconfig sign $failed"; exit 1; }
+    stmanager sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$bootball"
 done
 
 echo ""
-echo "[INFO]: $(realpath --relative-to=${root} "$bootball") created and signed with example keys."
-echo "[INFO]: You can use stconfig manually, too. Try 'stconfig --help'"
+echo "[INFO]: $(realpath --relative-to="${root}" "$bootball") created and signed with example keys."
+echo "[INFO]: You can use stmanager manually, too. Try 'stmanager --help'"

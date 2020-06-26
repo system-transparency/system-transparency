@@ -27,10 +27,10 @@ mnt=$(mktemp -d -t stmnt-XXXXXXXX)
 if [ -f "${img}" ]; then
     while true; do
        echo "Current image file:"
-       ls -l "$(realpath --relative-to=${root} ${img})"
+       ls -l "$(realpath --relative-to="${root}" "${img}")"
        read -rp "Rebuild image? (y/n)" yn
        case $yn in
-          [Yy]* ) echo "[INFO]: backup existing image to $(realpath --relative-to=${root} ${img_backup})"; mv "${img}" "${img_backup}"; break;;
+          [Yy]* ) echo "[INFO]: backup existing image to $(realpath --relative-to="${root}" "${img_backup}")"; mv "${img}" "${img_backup}"; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -48,16 +48,16 @@ bash "${dir}/make_syslinux_config.sh"
 
 
 
-if [ -d ${src} ]; then 
-   echo "[INFO]: Using cached Syslinux in $(realpath --relative-to=${root} ${src})"
+if [ -d "${src}" ]; then 
+   echo "[INFO]: Using cached Syslinux in $(realpath --relative-to="${root}" "${src}")"
 else
    echo "[INFO]: Downloading Syslinux Bootloader"
    wget "${syslinux_src}/${syslinux_tar}" -P "${src}"
    tar -xf "${src}/${syslinux_tar}" -C "${src}"
 fi
 
-echo "Linuxboot kernel: $(realpath --relative-to=${root} ${lnxbt_kernel})"
-echo "Linuxboot initramfs: $(realpath --relative-to=${root} ${lnxbt_initramfs})"
+echo "Linuxboot kernel: $(realpath --relative-to="${root}" "${lnxbt_kernel}")"
+echo "Linuxboot initramfs: $(realpath --relative-to="${root}" "${lnxbt_initramfs}")"
 
 
 echo "[INFO]: Creating raw image"
@@ -73,7 +73,7 @@ echo "[INFO]: Make EXT4 filesystem for data partition"
 mkfs -t ext4 "${dev}p2" || { echo -e "Creating filesystem on 2nd psrtition $failed"; losetup -d "${dev}"; exit 1; }
 sudo partprobe -s "${dev}" || { echo -e "partprobe $failed"; losetup -d "${dev}"; exit 1; }
 echo "[INFO]: Image layout:"
-lsblk -o NAME,SIZE,TYPE,PTTYPE,PARTUUID,PARTLABEL,FSTYPE ${dev}
+lsblk -o NAME,SIZE,TYPE,PTTYPE,PARTUUID,PARTLABEL,FSTYPE "${dev}"
 
 echo ""
 echo "[INFO]: Installing Syslinux"
@@ -83,12 +83,12 @@ sudo umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "${dev}"; exi
 sudo "${src}/${syslinux_dir}/bios/linux/syslinux" --directory /syslinux/ --install "${dev}p1" || { echo -e "Writing vollume boot record $failed"; losetup -d "${dev}"; exit 1; }
 dd bs=440 count=1 conv=notrunc "if=${src}/${syslinux_dir}/bios/mbr/gptmbr.bin" "of=${dev}" || { echo -e "Writing master boot record $failed"; losetup -d "${dev}"; exit 1; }
 sudo mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; losetup -d "$dev"; exit 1; }
-sudo cp ${syslinux_config} "${mnt}/syslinux"
+sudo cp "${syslinux_config}" "${mnt}/syslinux"
 
 echo ""
 echo "[INFO]: Moving linuxboot kernel and initramfs to image"
-sudo cp ${lnxbt_kernel} ${mnt}
-sudo cp ${lnxbt_initramfs} ${mnt}
+sudo cp "${lnxbt_kernel}" "${mnt}"
+sudo cp "${lnxbt_initramfs}" "${mnt}"
 sudo umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
 
 echo ""
@@ -102,5 +102,5 @@ losetup -d "${dev}"
 rm -r -f "${mnt}"
 
 echo ""
-echo "[INFO]: $(realpath --relative-to=${root} ${img}) created."
+echo "[INFO]: $(realpath --relative-to="${root}" "${img}") created."
 

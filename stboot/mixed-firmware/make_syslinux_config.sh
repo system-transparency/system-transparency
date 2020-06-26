@@ -20,7 +20,7 @@ cmdline=${ST_MIXED_FIRMWARE_LINUXBOOT_CMDLINE}
 if [ -f "${config}" ]; then
     while true; do
        echo "Current Syslinux config:"
-       cat "$(realpath --relative-to=${root} ${config})"
+       cat "$(realpath --relative-to="${root}" "${config}")"
        read -rp "Reset Syslinux config? (y/n)" yn
        case $yn in
           [Yy]* ) break;;
@@ -31,10 +31,10 @@ if [ -f "${config}" ]; then
 fi
 
 echo 
-echo "Creating $(realpath --relative-to=${root} ${config})"
+echo "Creating $(realpath --relative-to="${root}" "${config}")"
 
 
-cat >${config} <<EOL
+cat >"${config}" <<EOL
 DEFAULT linuxboot
 
 LABEL linuxboot

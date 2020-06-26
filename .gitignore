@@ -1,7 +1,7 @@
 /.vscode/*
 /run.config
 /cache/
-/configs/*/
+/bootballs/
 /stboot/*.cpio
 /stboot/*.cpio.gz
 /stboot/*.backup

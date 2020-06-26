@@ -34,11 +34,11 @@ git checkout --quiet "${uroot_branch}"
 git status
 echo
 echo "[INFO]: install u-root for initramfs generation"
-GOPATH="${gopath}" go install ${uroot_src} 
+GOPATH="${gopath}" go install "${uroot_src}"
 echo
 echo "[INFO]: install stconfig to handle bootballs"
 GOPATH="${gopath}" go install "${uroot_src}/tools/stconfig"
-cd ${dir}
+cd "${dir}"
 
 echo
 echo "[INFO]: install cpu command for debugging"

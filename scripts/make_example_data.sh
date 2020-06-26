@@ -23,7 +23,7 @@ host_ip=${ST_HOST_IP}
 host_gateway=${ST_HOST_GATEWAY}
 host_dns=${ST_HOST_DNS}
 
-mkdir -p ${data_dir}
+mkdir -p "${data_dir}"
 
 ##############################
 # https-root-certificates.pem
@@ -105,9 +105,9 @@ if "${write}"; then
    echo "[INFO]: Create ${network_file}:"
    cat > "${data_dir}/${network_file}" << EOL
 {
-   "host_ip":"${ST_HOST_IP}",
-   "gateway":"${ST_HOST_GATEWAY}",
-   "dns":"${ST_HOST_DNS}"
+   "host_ip":"${host_ip}",
+   "gateway":"${host_gateway}",
+   "dns":"${host_dns}"
 }
 EOL
    cat "${data_dir}/${network_file}"

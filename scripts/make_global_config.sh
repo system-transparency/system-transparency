@@ -5,8 +5,6 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
-failed="\e[1;5;31mfailed\e[0m"
-
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
@@ -27,7 +25,7 @@ read -rp "Provisioning Server URL: " provisioning_server_url
 
 
 
-cat >${config} <<EOL
+cat >"${config}" <<EOL
 # System Transparency build configuration.
 
 # This file is sourced by other shell scripts, possibly run by /bin/sh
@@ -115,13 +113,42 @@ ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_CONFIG="${root}/stboot/mixed-firmware/x86_64_
 # operating system.
 ##############################################################################
 
+# ST_BOOTBALL_OUT names the output directory of the created bootball.
+ST_BOOTBALL_OUT=${root}/bootballs
+
+# ST_BOOTBALL_LABEL is the name of the bootball
+ST_BOOTBALL_LABEL="System Transparency with Debian Buster"
+
+# ST_BOOTBALL_OS_KERNEL path to the operating system's linux kernel
+ST_BOOTBALL_OS_KERNEL=${root}/operating-system/debian/docker/out/debian-buster-amd64.vmlinuz
+
+# ST_BOOTBALL_OS_INITRAMFS path to the cpio archive. This must contain the complete OS.
+ST_BOOTBALL_OS_INITRAMFS=${root}/operating-system/debian/docker/out/debian-buster-amd64.cpio.gz
+
+# ST_BOOTBALL_OS_CMDLINE is the kernel command line of the final
+# operating system 
+ST_BOOTBALL_OS_CMDLINE="console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd"
+
+# ST_BOOTBALL_TBOOT is the path to the tboot kernel to be used with the bootball
+#ST_BOOTBALL_TBOOT=${root}/tboot/tboot.gz
+ST_BOOTBALL_TBOOT=""
+
+# ST_BOOTBALL_TBOOT_ARGS is the tboot kernel's command line
+ST_BOOTBALL_TBOOT_ARGS=""
+
+# ST_BOOTBALL_ACM is the path to an authenticated code module (ACM) or to a directory containing
+# multiple ACMs. All ACMs will be present in the bootball and tboot will pick the right one for the host.
+#ST_BOOTBALL_ACM=${root}/tboot/ACM/6th_7th_gen_i5_i7-SINIT_79.bin
+ST_BOOTBALL_ACM=""
+
+# ST_BOOTBALL_ALLOW_NON_TXT controlls if the bootball schould be boot with a fallback
+# caonfiguration without tboot, when txt is not supported by the host machine.
+ST_BOOTBALL_ALLOW_NON_TXT=y
+#ST_BOOTBALL_ALLOW_NON_TXT=n
+
 # ST_BOOTBALL_ROOT_CERTIFICATE is the root certificate of the certificates
 # used to sign the bootball. It will be included into the bootball.
 ST_BOOTBALL_ROOT_CERTIFICATE=${root}/keys/signing_keys/root.cert
-
-# ST_BOOTBALL_DEBAIN_CMDLINE is the kernel command line of the final
-# operating system 
-ST_BOOTBALL_DEBAIN_CMDLINE="console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd"
 
 ##############################################################################
 # Upload 

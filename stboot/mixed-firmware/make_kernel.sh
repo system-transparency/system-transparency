@@ -28,10 +28,10 @@ keyring=${src}/gnupg/keyring.gpg
 if [ -f "${lnxbt_kernel}" ]; then
     while true; do
        echo "Current Linuxboot kernel:"
-       ls -l "$(realpath --relative-to=${root} ${lnxbt_kernel})"
+       ls -l "$(realpath --relative-to="${root}" "${lnxbt_kernel}")"
        read -rp "Rebuild kernel? (y/n)" yn
        case $yn in
-          [Yy]* ) echo "[INFO]: backup existing kernel to $(realpath --relative-to=${root} ${lnxbt_kernel_backup})"; mv "${lnxbt_kernel}" "${lnxbt_kernel_backup}"; break;;
+          [Yy]* ) echo "[INFO]: backup existing kernel to $(realpath --relative-to="${root}" "${lnxbt_kernel_backup}")"; mv "${lnxbt_kernel}" "${lnxbt_kernel_backup}"; break;;
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
@@ -39,14 +39,14 @@ if [ -f "${lnxbt_kernel}" ]; then
 fi
 
 if [ -f "${src}/${kernel_ver}.tar.xz" ]; then
-    echo "[INFO]: Using cached sources in $(realpath --relative-to=${root} ${src})"
+    echo "[INFO]: Using cached sources in $(realpath --relative-to="${root}" "${src}")"
 else
     echo "[INFO]: Downloading Linux Kernel source files"
     wget "${kernel_src}/${kernel_ver}.tar.xz" -P "${src}"
 fi
 
 if [ -f "${src}/${kernel_ver}.tar.sign" ]; then
-    echo "[INFO]: Using cached signature in $(realpath --relative-to=${root} ${src})"
+    echo "[INFO]: Using cached signature in $(realpath --relative-to="${root}" "${src}")"
 else
     echo "[INFO]: Downloading Linux Kernel source signature"
     wget "${kernel_src}/${kernel_ver}.tar.sign" -P "${src}"
@@ -55,14 +55,14 @@ fi
 [ -d "${src}/gnupg" ] || { mkdir "${src}/gnupg"; chmod 700 "${src}/gnupg"; }
 
 if [ -f "${keyring}" ]; then
-    echo "[INFO]: Using cached kernel developer keys in $(realpath --relative-to=${root} ${src})"
+    echo "[INFO]: Using cached kernel developer keys in $(realpath --relative-to="${root}" "${src}")"
 else
     echo "[INFO]: Fetching kernel developer keys"
-    if ! gpg --batch --quiet --homedir "${src}/gnupg" --auto-key-locate wkd --locate-keys ${dev_keys}; then
+    if ! gpg --batch --quiet --homedir "${src}/gnupg" --auto-key-locate wkd --locate-keys "${dev_keys}"; then
         echo -e "Fetching keys $failed"
         exit 1
     fi
-    gpg --batch --homedir "${src}/gnupg" --no-default-keyring --export ${dev_keys} > "${keyring}"
+    gpg --batch --homedir "${src}/gnupg" --no-default-keyring --export "${dev_keys}" > "${keyring}"
 fi
 
 echo "[INFO]: Verifying signature of the kernel tarball"
@@ -77,7 +77,7 @@ echo
 echo "[INFO]: Successfully verified kernel source tar ball"
 
 echo "[INFO]: Unpacking kernel source tar ball"
-[ -d "${src}/${kernel_ver}" ] && rm -rf "${src}/${kernel_ver}"
+[ -d "${src}/${kernel_ver}" ] && rm -rf "${src:?}/${kernel_ver}"
 tar -xf "${src}/${kernel_ver}.tar.xz" -C "${src}"
 
 echo "[INFO]: Build Linuxboot kernel"
@@ -85,9 +85,9 @@ echo "[INFO]: Build Linuxboot kernel"
 cp "${kernel_config}" "${src}/${kernel_ver}/.config"
 cd "${src}/${kernel_ver}"
 while true; do
-    echo "Load  $(realpath --relative-to=${root} ${kernel_config}) as .config:" 
+    echo "Load  $(realpath --relative-to="${root}" "${kernel_config}") as .config:" 
     echo "Any config changes you will make in menuconfig are saved to:"
-    echo "$(realpath --relative-to=${root} ${kernel_config_mod})"
+    echo "$(realpath --relative-to="${root}" "${kernel_config_mod}") "
     echo "However, it is recommended to just save and exit without modifications."
     read -rp "Press any key to continue" x
     case $x in
@@ -103,6 +103,6 @@ cd "${dir}"
 cp "${src}/${kernel_ver}/arch/x86/boot/bzImage" "$lnxbt_kernel"
 
 echo ""
-echo "Successfully created $(realpath --relative-to=${root} $lnxbt_kernel) ($kernel_ver)"
+echo "Successfully created $(realpath --relative-to="${root}" "$lnxbt_kernel") ($kernel_ver)"
 
 trap - EXIT

@@ -17,11 +17,9 @@ prov_server=${ST_SSH_UPLOAD_SERVER}
 prov_server_user=${ST_SSH_UPLOAD_USER}
 prov_server_path=${ST_SSH_UPLOAD_PATH}
 
-[ -z "$prov_server" ] && { echo -e "upload $failed : prov_server not set in $(realpath --relative-to=${root} ${config})"; exit 1; }
-[ -z "$prov_server_user" ] && { echo -e "upload $failed : prov_server_user not set in $(realpath --relative-to=${root} ${config})"; exit 1; }
-[ -z "$prov_server_path" ] && { echo -e " upload $failed : prov_server_path not set in $(realpath --relative-to=${root} ${config})"; exit 1; }
-
-
+[ -z "$prov_server" ] && { echo -e "upload $failed : prov_server not set in run.config"; exit 1; }
+[ -z "$prov_server_user" ] && { echo -e "upload $failed : prov_server_user not set in run.config"; exit 1; }
+[ -z "$prov_server_path" ] && { echo -e " upload $failed : prov_server_path not set in run.config"; exit 1; }
 
 bootball=""
 if [[ $# -eq 0 ]] ; then
