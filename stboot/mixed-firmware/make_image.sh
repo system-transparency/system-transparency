@@ -95,7 +95,8 @@ echo ""
 echo "[INFO]: Moving data files to image"
 ls -l "${root}/stboot/data/."
 sudo mount "${dev}p2" "${mnt}" || { echo -e "Mounting ${dev}p2 $failed"; losetup -d "$dev"; exit 1; }
-sudo cp -R "${root}/stboot/data/." "${mnt}"
+sudo mkdir -p "${mnt}/etc" "${mnt}/stboot/etc" "${mnt}/bootballs/new" "${mnt}/bootballs/invalid" "${mnt}/bootballs/know_good"
+sudo cp -R "${root}/stboot/data/." "${mnt}/stboot/etc"
 sudo umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
 
 losetup -d "${dev}"
