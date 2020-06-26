@@ -16,6 +16,7 @@ hostvars_name="hostvars.json"
 hostvars="${dir}/include/${hostvars_name}"
 fingerprint_file=${ST_ROOTCERT_FINGERPRINT_FILE}
 num_signatures=${ST_HOSTVARS_NUM_SIGNATURES}
+bootmode=${ST_HOSTVARS_BOOTMODE}
 
 if [ -f "${hostvars}" ]; then
     while true; do
@@ -38,7 +39,8 @@ cat >"${hostvars}" <<EOL
   "fingerprints": [
     "$(cut -d' ' -f1 "${fingerprint_file}")"
   ],
-  "build_timestamp": 0
+  "build_timestamp": 0,
+  "boot_mode": "${bootmode}"
 }
 EOL
 

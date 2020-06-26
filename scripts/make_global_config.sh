@@ -88,6 +88,12 @@ ST_ROOTCERT_FINGERPRINT_FILE="${root}/keys/signing_keys/rootcert.fingerprint"
 # downloaded operation system.
 ST_HOSTVARS_NUM_SIGNATURES=3
 
+# ST_HOSTVARS_BOOTMODE controlls wether the bootball is loaded from the network
+# or from local storage
+#ST_HOSTVARS_BOOTMODE=NetworkStatic
+#ST_HOSTVARS_BOOTMODE=NetworkDHCP
+ST_HOSTVARS_BOOTMODE=LocalStorage
+
 
 ##############################################################################
 # STBoot Bootloader - mixed-firmware deployment
