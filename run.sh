@@ -155,11 +155,7 @@ echo "############################################################"
 echo " Upload bootball to provisioning server"
 echo "############################################################"
 echo
-bootball_pattern="stboot.ball*"
-dir="${root}/bootballs"
-files=( ${dir}/${bootball_pattern} )
-[ "${#files[@]}" -gt "1" ] && { echo -e "upload $failed : more then one bootbool files in $(dirname "${dir}")"; exit 1; }
-bootball=${files[0]}
+bootball="${root}/bootballs/.newest-ball.stboot"
 while true; do
    echo "bootball: $(realpath --relative-to="${root}" "${bootball}")"
    echo "Run  (r) with bootball"

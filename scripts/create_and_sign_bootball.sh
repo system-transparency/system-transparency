@@ -49,6 +49,9 @@ do
     stmanager sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$bootball"
 done
 
+# hotfix for upload script
+cp "${bootball}" "${root}/bootballs/.newest-ball.stboot"
+
 echo ""
 echo "[INFO]: $(realpath --relative-to="${root}" "$bootball") created and signed with example keys."
 echo "[INFO]: You can use stmanager manually, too. Try 'stmanager --help'"
