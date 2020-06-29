@@ -36,8 +36,8 @@ echo
 echo "[INFO]: install u-root for initramfs generation"
 GOPATH="${gopath}" go install "${uroot_src}"
 echo
-echo "[INFO]: install stconfig to handle bootballs"
-GOPATH="${gopath}" go install "${uroot_src}/tools/stconfig"
+echo "[INFO]: install stmanager to handle bootballs"
+GOPATH="${gopath}" go install "${uroot_src}/tools/stmanager"
 cd "${dir}"
 
 echo
