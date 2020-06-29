@@ -54,15 +54,15 @@ fi
 
 [ -d "${src}/gnupg" ] || { mkdir "${src}/gnupg"; chmod 700 "${src}/gnupg"; }
 
-if [ -f "${keyring}" ]; then
-    echo "[INFO]: Using cached kernel developer keys in $(realpath --relative-to="${root}" "${src}")"
+if [ -s "${keyring}" ]; then
+    echo "[INFO]: Using cached kernel developer keys in $(realpath --relative-to="${root}" "${keyring}")"
 else
     echo "[INFO]: Fetching kernel developer keys"
-    if ! gpg --batch --quiet --homedir "${src}/gnupg" --auto-key-locate wkd --locate-keys "${dev_keys}"; then
+    if ! gpg --batch --quiet --homedir "${src}/gnupg" --auto-key-locate wkd --locate-keys ${dev_keys}; then
         echo -e "Fetching keys $failed"
         exit 1
     fi
-    gpg --batch --homedir "${src}/gnupg" --no-default-keyring --export "${dev_keys}" > "${keyring}"
+    gpg --batch --homedir "${src}/gnupg" --no-default-keyring --export ${dev_keys} > "${keyring}"
 fi
 
 echo "[INFO]: Verifying signature of the kernel tarball"

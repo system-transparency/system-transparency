@@ -62,47 +62,47 @@ echo "Linuxboot initramfs: $(realpath --relative-to="${root}" "${lnxbt_initramfs
 
 echo "[INFO]: Creating raw image"
 dd if=/dev/zero "of=${img}" bs=1M count=800
-losetup -f || { echo -e "Finding free loop device $failed"; exit 1; }
-dev=$(losetup -f)
-losetup "${dev}" "${img}" || { echo -e "Loop device setup $failed"; losetup -d "${dev}"; exit 1; }
-sfdisk --no-reread --no-tell-kernel "${dev}" < "${part_table}" || { echo -e "partitioning $failed"; losetup -d "${dev}"; exit 1; }
-sudo partprobe -s "${dev}" || { echo -e "partprobe $failed"; losetup -d "${dev}"; exit 1; }
+sudo losetup -f || { echo -e "Finding free loop device $failed"; exit 1; }
+dev=$(sudo losetup -f)
+sudo losetup "${dev}" "${img}" || { echo -e "Loop device setup $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo sfdisk --no-reread --no-tell-kernel "${dev}" < "${part_table}" || { echo -e "partitioning $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo partprobe -s "${dev}" || { echo -e "partprobe $failed"; sudo losetup -d "${dev}"; exit 1; }
 echo "[INFO]: Make VFAT filesystem for boot partition"
-mkfs -t vfat "${dev}p1" || { echo -e "Creating filesystem on 1st partition $failed"; losetup -d "${dev}"; exit 1; }
+sudo mkfs -t vfat "${dev}p1" || { echo -e "Creating filesystem on 1st partition $failed"; sudo losetup -d "${dev}"; exit 1; }
 echo "[INFO]: Make EXT4 filesystem for data partition"
-mkfs -t ext4 "${dev}p2" || { echo -e "Creating filesystem on 2nd psrtition $failed"; losetup -d "${dev}"; exit 1; }
-sudo partprobe -s "${dev}" || { echo -e "partprobe $failed"; losetup -d "${dev}"; exit 1; }
+sudo mkfs -t ext4 "${dev}p2" || { echo -e "Creating filesystem on 2nd psrtition $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo partprobe -s "${dev}" || { echo -e "partprobe $failed"; sudo losetup -d "${dev}"; exit 1; }
 echo "[INFO]: Image layout:"
 lsblk -o NAME,SIZE,TYPE,PTTYPE,PARTUUID,PARTLABEL,FSTYPE "${dev}"
 
 echo ""
 echo "[INFO]: Installing Syslinux"
-sudo mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; losetup -d "${dev}"; exit 1; }
-sudo mkdir  "${mnt}/syslinux" || { echo -e "Making Syslinux config directory $failed"; losetup -d "${dev}"; exit 1; }
-sudo umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "${dev}"; exit 1; }
-sudo "${src}/${syslinux_dir}/bios/linux/syslinux" --directory /syslinux/ --install "${dev}p1" || { echo -e "Writing vollume boot record $failed"; losetup -d "${dev}"; exit 1; }
-dd bs=440 count=1 conv=notrunc "if=${src}/${syslinux_dir}/bios/mbr/gptmbr.bin" "of=${dev}" || { echo -e "Writing master boot record $failed"; losetup -d "${dev}"; exit 1; }
-sudo mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; losetup -d "$dev"; exit 1; }
+sudo mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo mkdir  "${mnt}/syslinux" || { echo -e "Making Syslinux config directory $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo umount "${mnt}" || { echo -e "Unmounting $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo "${src}/${syslinux_dir}/bios/linux/syslinux" --directory /syslinux/ --install "${dev}p1" || { echo -e "Writing vollume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo dd bs=440 count=1 conv=notrunc "if=${src}/${syslinux_dir}/bios/mbr/gptmbr.bin" "of=${dev}" || { echo -e "Writing master boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
+sudo mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; sudo losetup -d "$dev"; exit 1; }
 sudo cp "${syslinux_config}" "${mnt}/syslinux"
 
 echo ""
 echo "[INFO]: Moving linuxboot kernel and initramfs to image"
 sudo cp "${lnxbt_kernel}" "${mnt}"
 sudo cp "${lnxbt_initramfs}" "${mnt}"
-sudo umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
+sudo umount "${mnt}" || { echo -e "Unmounting $failed"; sudo losetup -d "$dev"; exit 1; }
 
 echo ""
 echo "[INFO]: Moving data files to image"
 ls -l "${root}/stboot/data/."
-sudo mount "${dev}p2" "${mnt}" || { echo -e "Mounting ${dev}p2 $failed"; losetup -d "$dev"; exit 1; }
+sudo mount "${dev}p2" "${mnt}" || { echo -e "Mounting ${dev}p2 $failed"; sudo losetup -d "$dev"; exit 1; }
 sudo mkdir -p "${mnt}/etc" "${mnt}/stboot/etc" "${mnt}/stboot/bootballs/new" "${mnt}/stboot/bootballs/invalid" "${mnt}/stboot/bootballs/known_good"
 sudo cp -R "${root}/stboot/data/." "${mnt}/stboot/etc"
 echo "[INFO]: Moving bootballs to image (for LocalStorage bootmode)"
 ls -l "${root}/bootballs/."
 sudo cp -R "${root}/bootballs/." "${mnt}/stboot/bootballs/new"
-sudo umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
+sudo umount "${mnt}" || { echo -e "Unmounting $failed"; sudo losetup -d "$dev"; exit 1; }
 
-losetup -d "${dev}"
+sudo losetup -d "${dev}"
 rm -r -f "${mnt}"
 
 echo ""
