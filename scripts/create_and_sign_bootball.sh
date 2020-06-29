@@ -12,7 +12,7 @@ root="$(cd "${dir}/../" && pwd)"
 # import global configuration
 source "${root}/run.config"
 
-out_dir="${root}/bootballs/"
+out_dir="${ST_BOOTBALL_OUT}"
 
 [ -d "${out_dir}" ] || mkdir -p "${out_dir}"
 
@@ -50,7 +50,7 @@ do
 done
 
 # hotfix for upload script
-cp "${bootball}" "${root}/bootballs/.newest-ball.stboot"
+cp "${bootball}" "${root}/.newest-ball.stboot"
 
 echo ""
 echo "[INFO]: $(realpath --relative-to="${root}" "$bootball") created and signed with example keys."

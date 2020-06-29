@@ -155,7 +155,7 @@ echo "############################################################"
 echo " Upload bootball to provisioning server"
 echo "############################################################"
 echo
-bootball="${root}/bootballs/.newest-ball.stboot"
+bootball="${root}/.newest-ball.stboot"
 while true; do
    echo "bootball: $(realpath --relative-to="${root}" "${bootball}")"
    echo "Run  (r) with bootball"
