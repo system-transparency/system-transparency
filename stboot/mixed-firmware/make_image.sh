@@ -61,7 +61,7 @@ echo "Linuxboot initramfs: $(realpath --relative-to="${root}" "${lnxbt_initramfs
 
 
 echo "[INFO]: Creating raw image"
-dd if=/dev/zero "of=${img}" bs=1M count=20
+dd if=/dev/zero "of=${img}" bs=1M count=800
 losetup -f || { echo -e "Finding free loop device $failed"; exit 1; }
 dev=$(losetup -f)
 losetup "${dev}" "${img}" || { echo -e "Loop device setup $failed"; losetup -d "${dev}"; exit 1; }
@@ -95,8 +95,11 @@ echo ""
 echo "[INFO]: Moving data files to image"
 ls -l "${root}/stboot/data/."
 sudo mount "${dev}p2" "${mnt}" || { echo -e "Mounting ${dev}p2 $failed"; losetup -d "$dev"; exit 1; }
-sudo mkdir -p "${mnt}/etc" "${mnt}/stboot/etc" "${mnt}/bootballs/new" "${mnt}/bootballs/invalid" "${mnt}/bootballs/know_good"
+sudo mkdir -p "${mnt}/etc" "${mnt}/stboot/etc" "${mnt}/stboot/bootballs/new" "${mnt}/stboot/bootballs/invalid" "${mnt}/stboot/bootballs/known_good"
 sudo cp -R "${root}/stboot/data/." "${mnt}/stboot/etc"
+echo "[INFO]: Moving bootballs to image (for LocalStorage bootmode)"
+ls -l "${root}/bootballs/."
+sudo cp -R "${root}/bootballs/." "${mnt}/stboot/bootballs/new"
 sudo umount "${mnt}" || { echo -e "Unmounting $failed"; losetup -d "$dev"; exit 1; }
 
 losetup -d "${dev}"

@@ -90,28 +90,6 @@ done
 
 echo
 echo "############################################################"
-echo " Build bootloader "
-echo "############################################################"
-echo
-while true; do
-   echo "Run  (1) Coreboot ROM"
-   echo "Run  (2) Image for UEFI systems"
-   echo "Run  (3) Image for mixed-firmware systems"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -rp ">> " x
-   case $x in
-      [1]* ) bash "${root}/stboot/coreboot-firmware/make_dummy.sh"; break;;
-      [2]* ) bash "${root}/stboot/uefi-firmware/make_dummy.sh"; break;;
-      [3]* ) bash "${root}/stboot/mixed-firmware/make_image.sh" "$(id -un)"; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
-echo
-echo "############################################################"
 echo " Build Operating Sytem (Root privileges required)"
 echo "############################################################"
 echo
@@ -144,6 +122,28 @@ while true; do
    read -rp ">> " x
    case $x in
       [Rr]* ) bash "${root}/scripts/create_and_sign_bootball.sh"; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
+
+echo
+echo "############################################################"
+echo " Build bootloader "
+echo "############################################################"
+echo
+while true; do
+   echo "Run  (1) Coreboot ROM"
+   echo "Run  (2) Image for UEFI systems"
+   echo "Run  (3) Image for mixed-firmware systems"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -rp ">> " x
+   case $x in
+      [1]* ) bash "${root}/stboot/coreboot-firmware/make_dummy.sh"; break;;
+      [2]* ) bash "${root}/stboot/uefi-firmware/make_dummy.sh"; break;;
+      [3]* ) bash "${root}/stboot/mixed-firmware/make_image.sh" "$(id -un)"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
