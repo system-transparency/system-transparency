@@ -10,7 +10,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
 misc_cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
-            "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "parted" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" \
+            "wget" "dd" "losetup" "sfdisk" "partx" "partprobe" "parted" "mkfs" "mount" "umount" "shasum" "ssh" "scp" "sudo" "tree" \
             "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath" "make" "mkfs.vfat")
 
 misc_libs=( "libelf" "libcrypto" )
