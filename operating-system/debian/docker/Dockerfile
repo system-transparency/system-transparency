@@ -11,6 +11,9 @@ RUN grep snapshot /etc/apt/sources.list | sed 's/^#//g' > /tmp/sources.list && \
 	mv /tmp/sources.list /etc/apt/ && \
 	echo 'Acquire::Check-Valid-Until "0";' > /etc/apt/apt.conf.d/10no-check-valid-until
 
+# Attempt to fix failing downloads. See https://bugs.launchpad.net/ubuntu/+source/apt/+bug/1801338
+RUN printf 'Acquire::http::No-Cache true;\nAcquire::http::Pipeline-Depth "0";\n' > /etc/apt/apt.conf.d/99bugfix_launchpad_issue1801338
+
 RUN apt-get -qq update && \
 	apt-get -qqy install \
 		busybox \
