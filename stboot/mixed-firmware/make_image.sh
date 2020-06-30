@@ -34,7 +34,7 @@ if [ -f "${img}" ]; then
           [Nn]* ) exit;;
           * ) echo "Please answer yes or no.";;
        esac
-    done 
+    done
 fi
 
 echo "[INFO]: check for Linuxboot kernel"
@@ -48,7 +48,7 @@ bash "${dir}/make_syslinux_config.sh"
 
 
 
-if [ -d "${src}" ]; then 
+if [ -d "${src}" ]; then
    echo "[INFO]: Using cached Syslinux in $(realpath --relative-to="${root}" "${src}")"
 else
    echo "[INFO]: Downloading Syslinux Bootloader"
@@ -59,51 +59,83 @@ fi
 echo "Linuxboot kernel: $(realpath --relative-to="${root}" "${lnxbt_kernel}")"
 echo "Linuxboot initramfs: $(realpath --relative-to="${root}" "${lnxbt_initramfs}")"
 
+echo "[INFO]: Creating filesystems:"
 
-echo "[INFO]: Creating raw image"
-dd if=/dev/zero "of=${img}" bs=1M count=800
-sudo losetup -f || { echo -e "Finding free loop device $failed"; exit 1; }
-dev=$(sudo losetup -f)
-sudo losetup "${dev}" "${img}" || { echo -e "Loop device setup $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo sfdisk --no-reread --no-tell-kernel "${dev}" < "${part_table}" || { echo -e "partitioning $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo partprobe -s "${dev}" || { echo -e "partprobe $failed"; sudo losetup -d "${dev}"; exit 1; }
-echo "[INFO]: Make VFAT filesystem for boot partition"
-sudo mkfs -t vfat "${dev}p1" || { echo -e "Creating filesystem on 1st partition $failed"; sudo losetup -d "${dev}"; exit 1; }
-echo "[INFO]: Make EXT4 filesystem for data partition"
-sudo mkfs -t ext4 "${dev}p2" || { echo -e "Creating filesystem on 2nd psrtition $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo partprobe -s "${dev}" || { echo -e "partprobe $failed"; sudo losetup -d "${dev}"; exit 1; }
-echo "[INFO]: Image layout:"
-lsblk -o NAME,SIZE,TYPE,PTTYPE,PARTUUID,PARTLABEL,FSTYPE "${dev}"
+size_vfat=$((12*(1<<20)))
+alignment=1048576
 
-echo ""
+# mkfs.vfat requires size as an (undefined) block-count; seem to be units of 1k
+if [ -f "${img}".vfat ]; then rm "${img}".vfat; fi
+mkfs.vfat -C -n "STBOOT" "${img}".vfat $((size_vfat >> 10))
+
 echo "[INFO]: Installing Syslinux"
-sudo mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo mkdir  "${mnt}/syslinux" || { echo -e "Making Syslinux config directory $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo umount "${mnt}" || { echo -e "Unmounting $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo "${src}/${syslinux_dir}/bios/linux/syslinux" --directory /syslinux/ --install "${dev}p1" || { echo -e "Writing vollume boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo dd bs=440 count=1 conv=notrunc "if=${src}/${syslinux_dir}/bios/mbr/gptmbr.bin" "of=${dev}" || { echo -e "Writing master boot record $failed"; sudo losetup -d "${dev}"; exit 1; }
-sudo mount "${dev}p1" "${mnt}" || { echo -e "Mounting ${dev}p1 $failed"; sudo losetup -d "$dev"; exit 1; }
-sudo cp "${syslinux_config}" "${mnt}/syslinux"
+mmd -i "${img}".vfat ::syslinux
 
-echo ""
+"${src}/${syslinux_dir}/bios/mtools/syslinux" --directory /syslinux/ --install "${img}".vfat
+
+echo "[INFO]: Copying syslinux config"
+mcopy -i "${img}".vfat "${syslinux_config}" ::syslinux/
+
 echo "[INFO]: Moving linuxboot kernel and initramfs to image"
-sudo cp "${lnxbt_kernel}" "${mnt}"
-sudo cp "${lnxbt_initramfs}" "${mnt}"
-sudo umount "${mnt}" || { echo -e "Unmounting $failed"; sudo losetup -d "$dev"; exit 1; }
+mcopy -i "${img}".vfat "${lnxbt_kernel}" ::
+mcopy -i "${img}".vfat "${lnxbt_initramfs}" ::
 
-echo ""
+size_ext4=$((767*(1<<20)))
+
+if [ -f "${img}".ext4 ]; then rm "${img}".ext4; fi
+mkfs.ext4 -L "STDATA" "${img}".ext4 $((size_ext4 >> 10))
+
 echo "[INFO]: Moving data files to image"
 ls -l "${root}/stboot/data/."
-sudo mount "${dev}p2" "${mnt}" || { echo -e "Mounting ${dev}p2 $failed"; sudo losetup -d "$dev"; exit 1; }
-sudo mkdir -p "${mnt}/etc" "${mnt}/stboot/etc" "${mnt}/stboot/bootballs/new" "${mnt}/stboot/bootballs/invalid" "${mnt}/stboot/bootballs/known_good"
-sudo cp -R "${root}/stboot/data/." "${mnt}/stboot/etc"
+
+e2mkdir "${img}".ext4:/etc
+e2mkdir "${img}".ext4:/stboot
+e2mkdir "${img}".ext4:/stboot/etc
+e2mkdir "${img}".ext4:/stboot/bootballs
+e2mkdir "${img}".ext4:/stboot/bootballs/new
+e2mkdir "${img}".ext4:/stboot/bootballs/invalid
+e2mkdir "${img}".ext4:/stboot/bootballs/known_good
+
+for i in "${root}/stboot/data/*"; do
+  e2cp "$i" "${img}".ext4:/stboot/etc
+done
+
+e2ls "${img}".ext4:/stboot/etc/
+
 echo "[INFO]: Moving bootballs to image (for LocalStorage bootmode)"
 ls -l "${root}/bootballs/."
-sudo cp -R "${root}/bootballs/." "${mnt}/stboot/bootballs/new"
-sudo umount "${mnt}" || { echo -e "Unmounting $failed"; sudo losetup -d "$dev"; exit 1; }
+for i in "${root}/bootballs/*"; do
+  e2cp "$i" "${img}".ext4:/stboot/bootballs/new
+done
 
-sudo losetup -d "${dev}"
-rm -r -f "${mnt}"
+echo "[INFO]: Constructing harddisk image from generated filesystems:"
+
+offset_vfat=$(( alignment/512 ))
+offset_ext4=$(( (alignment + size_vfat + alignment)/512 ))
+
+# insert the filesystem to a new file at offset 1MB
+dd if="${img}".vfat of="${img}" conv=notrunc obs=512 status=none seek=${offset_vfat}
+dd if="${img}".ext4 of="${img}" conv=notrunc obs=512 status=none seek=${offset_ext4}
+
+# extend the file by 1MB
+truncate -s "+${alignment}" "${img}"
+
+# Cleanup
+rm "${img}".vfat
+rm "${img}".ext4
+
+echo "[INFO]: Adding partitions to harddisk image:"
+
+# apply partitioning
+parted --align optimal "${img}" mklabel gpt mkpart "STBOOT" fat32 "$((offset_vfat * 512))B" "$((offset_vfat * 512 + size_vfat))B" mkpart "STDATA" ext4 "$((offset_ext4 * 512))B" "$((offset_ext4 * 512 + size_ext4))B" set 1 boot on set 1 legacy_boot on
+
+echo ""
+echo "[INFO]: Installing MBR"
+dd bs=440 count=1 conv=notrunc if="${src}/${syslinux_dir}/bios/mbr/gptmbr.bin" of="${img}" status=none
+
+echo ""
+echo "[INFO]: Image layout:"
+parted "${img}" print
 
 echo ""
 echo "[INFO]: $(realpath --relative-to="${root}" "${img}") created."
