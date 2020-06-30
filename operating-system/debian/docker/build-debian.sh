@@ -61,6 +61,10 @@ build_debian_image() {
 		--artifactdir="$TOP/out/" \
 		"${dargs[@]}" \
 		./debos.yaml
+
+	if [ ! -z "$DEBOS_USER_ID" ]; then
+		chown -R $DEBOS_USER_ID:$DEBOS_GROUP_ID "$TOP/out"
+	fi
 }
 
 # set source date epoch
