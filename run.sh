@@ -24,6 +24,8 @@ checkMISC
 echo ""
 echo "Checking environment ..."
 checkDebootstrap
+checkSwtpmSetup
+checkSwtpm
 
 # Global build configuration
 global_config=${root}/run.config
