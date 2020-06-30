@@ -73,3 +73,5 @@ qemu-system-x86_64 \
   -chardev socket,id=chrtpm,path=/$tpm/swtpm-sock \
   -tpmdev emulator,id=tpm0,chardev=chrtpm \
   -device tpm-tis,tpmdev=tpm0
+
+rm -r $tpm/*
