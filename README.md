@@ -139,13 +139,13 @@ This directory mainly provides utilities for the ongoing development.
 #### `run.sh`
 
 This script is the global entry point to build up or update the environment.
+
 It runs a dependency check and prompts you to execute all other necessary
 scripts and thereby leads through the whole setup process. Each step can be run,
 run with special options where applicable or skipped.
 In this way you can also only renew certain parts of the environment.
 Run each step when executing for the first time.
 
-Some scripts need root privileges.
 
 The file `run.config` contains configuration variables and should be edited
 prior to the running of `run.sh`.
