@@ -96,7 +96,8 @@ e2mkdir "${img}".ext4:/stboot/bootballs/new
 e2mkdir "${img}".ext4:/stboot/bootballs/invalid
 e2mkdir "${img}".ext4:/stboot/bootballs/known_good
 
-for i in "${root}/stboot/data/*"; do
+for i in "${root}/stboot/data"/*; do
+  [ -e "$i" ] || continue
   e2cp "$i" "${img}".ext4:/stboot/etc
 done
 
@@ -104,7 +105,8 @@ e2ls "${img}".ext4:/stboot/etc/
 
 echo "[INFO]: Moving bootballs to image (for LocalStorage bootmode)"
 ls -l "${root}/bootballs/."
-for i in "${root}/bootballs/*"; do
+for i in "${root}/bootballs"/*; do
+  [ -e "$i" ] || continue
   e2cp "$i" "${img}".ext4:/stboot/bootballs/new
 done
 
