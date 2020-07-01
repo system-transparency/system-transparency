@@ -66,7 +66,7 @@ if [ "${core_tools}" = "y" ] ; then
     github.com/u-root/cpu/cmds/cpud \
     github.com/u-root/u-root/cmds/boot/stboot
 else
-    echo "[INFO]: create minimal initramf including stboot only"
+    echo "[INFO]: create minimal initramfs including stboot only"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${hostvars}:etc/${hostvars_name}" \
     -files "${dir}/include/start_cpu.elv:start_cpu.elv" \

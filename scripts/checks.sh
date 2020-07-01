@@ -100,3 +100,31 @@ function checkDebootstrap {
     echo "Filesystem for debootstrap OK"
 }
 
+function checkSwtpmSetup {
+   command -v swtpm_setup.sh >/dev/null 2>&1 || {
+      echo >&2 "swtpm_setup.sh required";
+      exit 1;
+   }
+
+   echo "swtpm_setup.sh supported"
+}
+
+function checkSwtpm {
+   minver=("0" "2")
+
+   command -v swtpm >/dev/null 2>&1 || {
+      echo >&2 "swtpm required";
+      exit 1;
+   }
+
+   ver=$(swtpm --version | cut -d ' ' -f 4 | sed 's/,//')
+   majorver="$(echo $ver | cut -d . -f 1)"
+   minorver="$(echo $ver | cut -d . -f 2)"
+
+   if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then
+         echo "swtpm version ${majorver}.${minorver} is not supported. Needs version ${minver[0]}.${minver[1]} or later."
+         exit 1
+   else
+       echo "swtpm 0.2.0 supported"
+   fi
+}

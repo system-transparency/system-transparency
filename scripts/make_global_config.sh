@@ -148,7 +148,7 @@ ST_BOOTBALL_TBOOT_ARGS=""
 ST_BOOTBALL_ACM=""
 
 # ST_BOOTBALL_ALLOW_NON_TXT controlls if the bootball schould be boot with a fallback
-# caonfiguration without tboot, when txt is not supported by the host machine.
+# configuration without tboot, when txt is not supported by the host machine.
 ST_BOOTBALL_ALLOW_NON_TXT=y
 #ST_BOOTBALL_ALLOW_NON_TXT=n
 
