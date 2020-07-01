@@ -36,16 +36,13 @@ if docker image inspect debos > /dev/null 2> /dev/null; then
 else    
    echo "[INFO]: Build docker image for debos"
    echo ""
-   sudo docker build -t ${docker_image} "${dir}/docker" 
+   docker build -t ${docker_image} "${dir}/docker"
 fi
 
 echo ""
 echo "[INFO]: Build reproducible Debian Buster via debos in a docker container"
 echo ""
-sudo docker run --cap-add=SYS_ADMIN --privileged -it -v "${root}:/system-transparency/" ${docker_image}
-
-sudo chown -c -R "$USER":"$USER" "${dir}/docker/out/"
-sudo chown -c "$USER":"$USER" "${dir}/docker/document_build.info"
+docker run --env DEBOS_USER_ID=$(id -u) --env DEBOS_GROUP_ID=$(id -g) --cap-add=SYS_ADMIN -it -v "${root}:/system-transparency/:z" ${docker_image}
 
 echo
 echo "Debian kernel created at: $(realpath --relative-to="${root}" "${kernel}")"
