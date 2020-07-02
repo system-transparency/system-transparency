@@ -18,4 +18,4 @@ echo "[INFO]: Build kernel as an efistub"
 bash ${dir}/build_efistub.sh $(id -nu)
 
 echo "[INFO]: Create boot image and include efistub"
-sudo bash ${dir}/create_image.sh $(id -nu)
+bash ${dir}/create_image.sh
