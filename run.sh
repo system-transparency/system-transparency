@@ -26,6 +26,7 @@ echo "Checking environment ..."
 checkDebootstrap
 checkSwtpmSetup
 checkSwtpm
+checkOVMF
 
 # Global build configuration
 global_config=${root}/run.config
