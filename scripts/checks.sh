@@ -16,7 +16,6 @@ misc_cmds=( "git" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
 
 misc_libs=( "libelf" "libcrypto" )
 
-
 function checkMISC {
     needs_exit=false
 
@@ -51,7 +50,7 @@ function checkMISC {
 }
 
 function checkGCC {
-   maxver="8"
+   maxver="9"
 
    command -v gcc >/dev/null 2>&1 || {
       echo >&2 "GCC required";
@@ -126,5 +125,26 @@ function checkSwtpm {
          exit 1
    else
        echo "swtpm 0.2.0 supported"
+   fi
+}
+
+ovmf_locs=( "/usr/share/OVMF/OVMF_CODE.fd" \
+            "/usr/share/edk2/ovmf/OVMF_CODE.fd" )
+
+function checkOVMF {
+
+    found=0
+
+    for i in "${ovmf_locs[@]}"
+    do
+        if [ -f "$i" ]; then
+          found=1
+        fi
+    done
+
+   if [ "$found" -gt 0 ]; then
+     echo "OVMF found"
+   else
+     echo "OVMF not found found"
    fi
 }
