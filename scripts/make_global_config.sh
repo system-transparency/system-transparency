@@ -56,23 +56,18 @@ ST_UROOT_DEV_BRANCH=stboot
 ST_PROVISIONING_SERVER_URL=${provisioning_server_url}
 
 # The following settings goes into network.json file on the data partition
-# and are used for the network setup of the host. When empty DHCP will be used.
-# DNS setting is optional.
-ST_HOST_IP=""
-ST_HOST_GATEWAY=""
+# and are used for the network setup of the host. DNS setting is optional.
+# This are default QEMU static network settings:
+ST_HOST_IP="10.0.2.15/24"
+ST_HOST_GATEWAY="10.0.2.2/24"
 ST_HOST_DNS=""
-
-# QEMU static network settings
-#ST_HOST_IP="10.0.2.15/24"
-#ST_HOST_GATEWAY="10.0.2.2/24"
-#ST_HOST_DNS=""
 
 
 ##############################################################################
 # STBoot Bootloader - common
 #
 # Following configuration is used during the creation linuxboot initramfs.
-# The STBoot bootloader is part of this initramfs.
+# The STBoot bootloader and hostvars.json are part of this initramfs.
 ##############################################################################
 
 # ST_INCLUDE_CORE_TOOLS controls if further core utilities are included beside
