@@ -37,11 +37,11 @@ if [ -f "${img}" ]; then
    done
 fi
 
-echo "[INFO]: check for Linuxboot kernel"
-bash "${dir}/make_kernel.sh"
-
 echo "[INFO]: check for Linuxboot initramfs including stboot bootloader"
 bash "${root}/stboot/make_initramfs.sh"
+
+echo "[INFO]: check for Linuxboot kernel"
+bash "${dir}/make_kernel.sh"
 
 echo "[INFO]: check for Syslinux configuration"
 bash "${dir}/make_syslinux_config.sh"
