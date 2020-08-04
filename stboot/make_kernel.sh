@@ -40,12 +40,18 @@ keyring=${src_cache}/gnupg/keyring.gpg
 # ---
 
 # Copy initramfs to build directory
-
 cp "${dir}/initramfs-linuxboot.cpio.gz" "${build_src}/initramfs-linuxboot.cpio.gz"
-
 # ---
 
 # Kernel build setup
+if [ -f "${kernel_output_file_name}" ]; then
+  if [ -z ${kernel_output_file_name##*.efi} ]; then
+    if [[ "${dir}/initramfs-linuxboot.cpio.gz" -nt "${kernel_output_file_name}" ]]; then
+      # Force rebuild as initrd changed. FIXME: Use makefile
+      rm "${kernel_output_file_name}"
+    fi
+  fi
+fi
 
 if [ -f "${kernel_output_file_name}" ]; then
     while true; do
