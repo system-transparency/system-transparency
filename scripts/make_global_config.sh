@@ -108,6 +108,19 @@ ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_CONFIG="${root}/stboot/mixed-firmware/x86_64_
 
 
 ##############################################################################
+# STBoot Bootloader - UEFI-firmware deployment
+#
+# Following configuration is used while creating the disk image for 
+# UEFI firmware systems.
+##############################################################################
+
+# ST_UEFI_FIRMWARE_EFISTUB_KERNEL_CONFIG is the linux kernel defconfig
+# loaded before the kernel is beeing built.
+ST_UEFI_FIRMWARE_EFISTUB_KERNEL_CONFIG="${root}/stboot/uefi-firmware/x86_64_x11ssh_qemu_efistub.defconfig"
+
+
+
+##############################################################################
 # STBoot Operations System Bootballs - Debian Buster
 #
 # Following configuration is used while creating the bootball with the final 

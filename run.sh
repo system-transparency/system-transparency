@@ -93,7 +93,7 @@ done
 
 echo
 echo "############################################################"
-echo " Build Operating Sytem (Root privileges required)"
+echo " Build Operating Sytem"
 echo "############################################################"
 echo
 while true; do
@@ -145,8 +145,8 @@ while true; do
    read -rp ">> " x
    case $x in
       [1]* ) bash "${root}/stboot/coreboot-firmware/make_dummy.sh"; break;;
-      [2]* ) bash "${root}/stboot/uefi-firmware/make_bootloader.sh"; break;;
-      [3]* ) bash "${root}/stboot/mixed-firmware/make_image.sh" "$(id -un)"; break;;
+      [2]* ) bash "${root}/stboot/uefi-firmware/make_image.sh"; break;;
+      [3]* ) bash "${root}/stboot/mixed-firmware/make_image.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

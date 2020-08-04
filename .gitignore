@@ -14,11 +14,10 @@
 /stboot/mixed-firmware/vmlinuz-linuxboot
 /stboot/mixed-firmware/*.backup
 /stboot/mixed-firmware/x86_64_x11ssh_qemu_linuxboot.defconfig.modified
-/stboot/uefi-firmware/efi_bootlayout.img
-/stboot/uefi-firmware/efi_bootlayout.img.backup
-/stboot/uefi-firmware/stboot_linuxboot_efistub.defconfig.modified
+/stboot/uefi-firmware/*.img
 /stboot/uefi-firmware/stboot.efi
-/stboot/uefi-firmware/stboot.efi.backup
+/stboot/uefi-firmware/*.backup
+/stboot/uefi-firmware/x86_64_x11ssh_qemu_efistub.defconfig.modified
 /operating-system/debian/docker/out
 /operating-system/debian/docker/document_build.info
 /operating-system/debian/docker/.debos-*

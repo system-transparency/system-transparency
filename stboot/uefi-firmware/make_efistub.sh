@@ -12,11 +12,13 @@ root="$(cd "${dir}/../../" && pwd)"
 # import global configuration
 source ${root}/run.config
 
-out="${dir}/vmlinuz-linuxboot"
-kernel_src="https://cdn.kernel.org/pub/linux/kernel/v4.x"
-kernel_ver="linux-4.19.6"
-kernel_config=${ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_CONFIG}
+out="${dir}/stboot.efi"
+kernel_src="https://cdn.kernel.org/pub/linux/kernel/v5.x"
+kernel_ver="linux-5.4.45"
+kernel_config=${ST_UEFI_FIRMWARE_EFISTUB_KERNEL_CONFIG}
 
 bash "${root}/stboot/make_kernel.sh" "${kernel_config}" "${out}" "${kernel_src}" "${kernel_ver}"
 
 trap - EXIT
+
+

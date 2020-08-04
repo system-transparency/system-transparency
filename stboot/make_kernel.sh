@@ -111,10 +111,10 @@ echo "[INFO]: Build Linuxboot kernel"
 cp "${kernel_config_file}" "${build_src}/${kernel_ver}/.config"
 cd "${build_src}/${kernel_ver}"
 while true; do
-    echo "Load  $(realpath --relative-to=${root} ${kernel_config_file_modified}) as .config:"
-    echo "Any config changes you will make in menuconfig are saved to:"
-    echo "$(realpath --relative-to=${root} ${kernel_config_file_modified})"
-    echo "However, it is recommended to just save and exit without modifications."
+    echo "[INFO]: Loaded $(realpath --relative-to=${root} ${kernel_config_file}) as .config:"
+    echo "[INFO]: Any config changes you make in menuconfig will be saved to:"
+    echo "[INFO]: $(realpath --relative-to=${root} ${kernel_config_file_modified})"
+    echo "[INFO]: However, it is recommended to just save and exit without modifications."
     read -rp "Press any key to continue" x
     case $x in
         * ) break;;

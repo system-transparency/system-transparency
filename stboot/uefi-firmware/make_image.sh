@@ -8,10 +8,34 @@ set -o nounset
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
-img="${dir}/efi_bootlayout.img"
 
-echo "[INFO]: Creating filesystems:"
+img="${dir}/stboot_uefi_firmware_bootlayout.img"
+img_backup="${img}.backup"
+efistub="${dir}/stboot.efi"
 
+
+if [ -f "${img}" ]; then
+    while true; do
+        echo "Current image file:"
+        ls -l "$(realpath --relative-to="${root}" "${img}")"
+        read -rp "Rebuild image? (y/n)" yn
+        case $yn in
+            [Yy]* ) echo "[INFO]: backup existing image to $(realpath --relative-to="${root}" "${img_backup}")"; mv "${img}" "${img_backup}"; break;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+   done
+fi
+
+echo "[INFO]: check for LinuxBoot initramfs including stboot bootloader"
+bash "${root}/stboot/make_initramfs.sh"
+
+echo "[INFO]: check for LinuxBoot kernel as an efistub"
+bash "${dir}/make_efistub.sh"
+
+echo "[INFO]: using kernel: $(realpath --relative-to="${root}" "${efistub}")"
+
+echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
 size_vfat=$((12*(1<<20)))
 alignment=1048576
 
@@ -23,18 +47,15 @@ echo "[INFO]: Installing STBOOT.EFI"
 mmd -i "${img}".vfat ::EFI
 mmd -i "${img}".vfat ::EFI/BOOT
 
-mcopy -i "${img}".vfat "${dir}/stboot.efi" ::/EFI/BOOT/BOOTX64.EFI
+mcopy -i "${img}".vfat "${efistub}" ::/EFI/BOOT/BOOTX64.EFI
 
-#echo "[INFO]: Moving initramfs to image"
-#mcopy -i "${img}".vfat "${lnxbt_kernel}" ::
-#mcopy -i "${img}".vfat "${lnxbt_initramfs}" ::
-
+echo "[INFO]: Creating EXT4 filesystems for STDATA partition:"
 size_ext4=$((767*(1<<20)))
 
 if [ -f "${img}".ext4 ]; then rm "${img}".ext4; fi
 mkfs.ext4 -L "STDATA" "${img}".ext4 $((size_ext4 >> 10))
 
-echo "[INFO]: Moving data files to image"
+echo "[INFO]: Copying data files to image"
 ls -l "${root}/stboot/data/."
 
 e2mkdir "${img}".ext4:/etc
@@ -52,14 +73,14 @@ done
 
 e2ls "${img}".ext4:/stboot/etc/
 
-echo "[INFO]: Moving bootballs to image (for LocalStorage bootmode)"
+echo "[INFO]: Copying bootballs to image (for LocalStorage bootmode)"
 ls -l "${root}/bootballs/."
 for i in "${root}/bootballs"/*; do
   [ -e "$i" ] || continue
   e2cp "$i" "${img}".ext4:/stboot/bootballs/new
 done
 
-echo "[INFO]: Constructing harddisk image from generated filesystems:"
+echo "[INFO]: Constructing disk image from generated filesystems:"
 
 offset_vfat=$(( alignment/512 ))
 offset_ext4=$(( (alignment + size_vfat + alignment)/512 ))
@@ -75,14 +96,14 @@ truncate -s "+${alignment}" "${img}"
 rm "${img}".vfat
 rm "${img}".ext4
 
-echo "[INFO]: Adding partitions to harddisk image:"
+echo "[INFO]: Adding partitions to disk image:"
 
 # apply partitioning
-parted --align optimal "${img}" mklabel gpt mkpart "STBOOT" fat32 "$((offset_vfat * 512))B" "$((offset_vfat * 512 + size_vfat))B" mkpart "STDATA" ext4 "$((offset_ext4 * 512))B" "$((offset_ext4 * 512 + size_ext4))B" set 1 boot on set 1 legacy_boot on
+parted -s --align optimal "${img}" mklabel gpt mkpart "STBOOT" fat32 "$((offset_vfat * 512))B" "$((offset_vfat * 512 + size_vfat))B" mkpart "STDATA" ext4 "$((offset_ext4 * 512))B" "$((offset_ext4 * 512 + size_ext4))B" set 1 boot on set 1 legacy_boot on
 
 echo ""
 echo "[INFO]: Image layout:"
-parted "${img}" print
+parted -s "${img}" print
 
 echo ""
-echo "[INFO]: $(realpath --relative-to=${root} ${img}) created."
+echo "[INFO]: $(realpath --relative-to="${root}" "${img}") created."

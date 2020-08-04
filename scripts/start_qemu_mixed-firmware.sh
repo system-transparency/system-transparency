@@ -13,7 +13,7 @@ root="$(cd "${dir}/../" && pwd)"
 source ${root}/run.config
 
 mem=${ST_QEMU_MEM}
-image="${root}/stboot/mixed-firmware/STBoot_mixed_firmware.img"
+image="${root}/stboot/mixed-firmware/stboot_mixed_firmware_bootlayout.img"
 
 i=0
 while [ -d /tmp/mytpm$i ]; do
