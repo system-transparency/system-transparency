@@ -33,7 +33,7 @@ bash "${root}/stboot/make_initramfs.sh"
 echo "[INFO]: check for LinuxBoot kernel as an efistub"
 bash "${dir}/make_efistub.sh"
 
-echo "[INFO]: using kernel: $(realpath --relative-to="${root}" "${efistub}")"
+echo "[INFO]: using efistub: $(realpath --relative-to="${root}" "${efistub}")"
 
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
 size_vfat=$((12*(1<<20)))

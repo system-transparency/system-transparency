@@ -16,8 +16,12 @@ out="${dir}/stboot.efi"
 kernel_version=${ST_UEFI_FIRMWARE_EFISTUB_KERNEL_VERSION}
 kernel_config=${ST_UEFI_FIRMWARE_EFISTUB_KERNEL_CONFIG}
 
+
+if [[ "${root}/stboot/initramfs-linuxboot.cpio.gz" -nt "${out}" ]]; then
+   # Force rebuild as initrd changed. FIXME: Use makefile
+   rm "${out}"
+fi
+
 bash "${root}/stboot/make_kernel.sh" "${kernel_config}" "${out}" "${kernel_version}"
 
 trap - EXIT
-
-

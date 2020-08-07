@@ -35,25 +35,12 @@ kernel_src_signature="${kernel_src}/${kernel_name}.tar.sign"
 # Dev keys for verification process
 
 src_cache="${root}/cache/kernel"
-build_src=$(mktemp -d -t stmnt-XXXXXXXX)
 dev_keys="torvalds@kernel.org gregkh@kernel.org"
 keyring=${src_cache}/gnupg/keyring.gpg
 
 # ---
 
-# Copy initramfs to build directory
-cp "${dir}/initramfs-linuxboot.cpio.gz" "${build_src}/initramfs-linuxboot.cpio.gz"
-# ---
-
 # Kernel build setup
-if [ -f "${kernel_output_file}" ]; then
-  if [ -z "${kernel_output_file##*.efi}" ]; then
-    if [[ "${dir}/initramfs-linuxboot.cpio.gz" -nt "${kernel_output_file}" ]]; then
-      # Force rebuild as initrd changed. FIXME: Use makefile
-      rm "${kernel_output_file}"
-    fi
-  fi
-fi
 
 if [ -f "${kernel_output_file}" ]; then
     while true; do
@@ -69,14 +56,14 @@ if [ -f "${kernel_output_file}" ]; then
 fi
 
 if [ -f "${src_cache}/${kernel_name}.tar.xz" ]; then
-    echo "[INFO]: Using cached sources in $(realpath --relative-to="${root}" "${src_cache}/${kernel_name}")"
+    echo "[INFO]: Using cached sources in $(realpath --relative-to="${root}" "${src_cache}/${kernel_name}.tar.xz")"
 else
     echo "[INFO]: Downloading Linux Kernel source files from ${src_cache}/${kernel_name}"
     wget "${kernel_src_tarball}" -P "${src_cache}"
 fi
 
 if [ -f "${src_cache}/${kernel_name}.tar.sign" ]; then
-    echo "[INFO]: Using cached signature in $(realpath --relative-to="${root}" "${src_cache}/${kernel_name}")"
+    echo "[INFO]: Using cached signature in $(realpath --relative-to="${root}" "${src_cache}/${kernel_name}.tar.sign")"
 else
     echo "[INFO]: Downloading Linux Kernel source signature"
     wget "${kernel_src_signature}" -P "${src_cache}"
@@ -85,7 +72,7 @@ fi
 [ -d "${src_cache}/gnupg" ] || { mkdir "${src_cache}/gnupg"; chmod 700 "${src_cache}/gnupg"; }
 
 if [ -f "${keyring}" ]; then
-    echo "[INFO]: Using cached kernel developer keys in $(realpath --relative-to="${root}" "${src_cache}")"
+    echo "[INFO]: Using cached kernel developer keys in $(realpath --relative-to="${root}" "${keyring}")"
 else
     echo "[INFO]: Fetching kernel developer keys"
     if ! gpg --batch --quiet --homedir "${src_cache}/gnupg" --auto-key-locate wkd --locate-keys "${dev_keys}"; then
@@ -111,13 +98,13 @@ echo "[INFO]: Successfully verified kernel source tar ball"
 # Build kernel in temporary directory
 
 echo "[INFO]: Unpacking kernel source tar ball"
-[ -d "${build_src}/${kernel_name}" ] && rm -rf "${build_src:?}/${kernel_name:?}"
-tar -xf "${src_cache}/${kernel_name}.tar.xz" -C "${build_src}"
+[ -d "${src_cache}/${kernel_name}" ] && rm -rf "${src_cache:?}/${kernel_name:?}"
+tar -xf "${src_cache}/${kernel_name}.tar.xz" -C "${src_cache}"
 
 echo "[INFO]: Build Linuxboot kernel"
 [ -f "${kernel_config_file}" ]
-cp "${kernel_config_file}" "${build_src}/${kernel_name}/.config"
-cd "${build_src}/${kernel_name}"
+cp "${kernel_config_file}" "${src_cache}/${kernel_name}/.config"
+cd "${src_cache}/${kernel_name}"
 while true; do
     echo "[INFO]: Loaded $(realpath --relative-to="${root}" "${kernel_config_file}") as .config:"
     echo "[INFO]: Any config changes you make in menuconfig will be saved to:"
@@ -135,7 +122,7 @@ cp defconfig "${kernel_config_file_modified}"
 
 make "-j$(nproc)"
 cd "${dir}"
-cp "${build_src}/${kernel_name}/arch/x86/boot/bzImage" "${kernel_output_file}"
+cp "${src_cache}/${kernel_name}/arch/x86/boot/bzImage" "${kernel_output_file}"
 
 echo ""
 echo "Successfully created $(realpath --relative-to="${root}" "${kernel_output_file}") (${kernel_name})"
