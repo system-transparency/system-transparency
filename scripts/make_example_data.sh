@@ -33,7 +33,7 @@ if [ -f "${data_dir}/${https_root_certificates_file}" ]; then
     while true; do
        echo "[INFO]: Current ${https_root_certificates_file}:"
        cat "${data_dir}/${https_root_certificates_file}"
-       read -rp "Override with default? (y/n)" yn
+       read -rp "Override with settings from run.config? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${data_dir}/${https_root_certificates_file}"; break;;
           [Nn]* ) write=false: break;;
@@ -91,7 +91,7 @@ if [ -f "${data_dir}/${network_file}" ]; then
     while true; do
        echo "[INFO]: Current ${network_file}:"
        cat "${data_dir}/${network_file}"
-       read -rp "Override with default? (y/n)" yn
+       read -rp "Override with settings from run.config? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${data_dir}/${network_file}"; break;;
           [Nn]* ) write=false; break;;
@@ -121,7 +121,7 @@ if [ -f "${data_dir}/${ntp_servers_file}" ]; then
     while true; do
        echo "[INFO]: Current ${ntp_servers_file}:"
        cat "${data_dir}/${ntp_servers_file}"
-       read -rp "Override with default? (y/n)" yn
+       read -rp "Override with settings from run.config? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${data_dir}/${ntp_servers_file}"; break;;
           [Nn]* ) write=false; break;;
@@ -149,7 +149,7 @@ if [ -f "${data_dir}/${provisioning_servers_file}" ]; then
     while true; do
        echo "[INFO]: Current ${provisioning_servers_file}:"
        cat "${data_dir}/${provisioning_servers_file}"
-       read -rp "Override with default? (y/n)" yn
+       read -rp "Override with settings from run.config? (y/n)" yn
        case $yn in
           [Yy]* ) rm -f "${data_dir}/${provisioning_servers_file}"; break;;
           [Nn]* ) write=false; break;;
@@ -168,7 +168,4 @@ if "${write}"; then
 EOL
    cat "${data_dir}/${provisioning_servers_file}"
 fi
-
-echo ""
-echo "[INFO]: You can modify the files in stboot/data/ to your needs."
 

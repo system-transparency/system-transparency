@@ -22,7 +22,7 @@ if [ -f "${hostvars}" ]; then
     while true; do
        echo "Current ${hostvars_name}:"
        cat "${hostvars}"
-       read -rp "Reset hostvars.json? (y/n)" yn
+       read -rp "Override hostvars.json settings from run.config? (y/n)" yn
        case $yn in
           [Yy]* ) break;;
           [Nn]* ) exit;;
