@@ -97,6 +97,10 @@ ST_HOSTVARS_BOOTMODE=LocalStorage
 # mixed firmware systems.
 ##############################################################################
 
+# ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_VERSION defines linux kernel version of 
+# the LinuxBoot distribution
+ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_VERSION=4.19.6
+
 # ST_LINUXBOOT_CMDLINE ends up in deploy/mixed-firmware/syslinux.cfg and
 # controlls the kernel cmdline of the linuxboot kernel. Flags to stboot
 # can be passed via uroot.uinitargs here as well.
@@ -113,6 +117,10 @@ ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_CONFIG="${root}/stboot/mixed-firmware/x86_64_
 # Following configuration is used while creating the disk image for 
 # UEFI firmware systems.
 ##############################################################################
+
+# ST_UEFI_FIRMWARE_LINUXBOOT_KERNEL_VERSION defines linux kernel version of 
+# the LinuxBoot distribution
+ST_UEFI_FIRMWARE_EFISTUB_KERNEL_VERSION=5.4.45
 
 # ST_UEFI_FIRMWARE_EFISTUB_KERNEL_CONFIG is the linux kernel defconfig
 # loaded before the kernel is beeing built.

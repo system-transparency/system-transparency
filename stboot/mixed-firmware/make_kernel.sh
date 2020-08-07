@@ -13,10 +13,9 @@ root="$(cd "${dir}/../../" && pwd)"
 source ${root}/run.config
 
 out="${dir}/vmlinuz-linuxboot"
-kernel_src="https://cdn.kernel.org/pub/linux/kernel/v4.x"
-kernel_ver="linux-4.19.6"
+kernel_version=${ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_VERSION}
 kernel_config=${ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_CONFIG}
 
-bash "${root}/stboot/make_kernel.sh" "${kernel_config}" "${out}" "${kernel_src}" "${kernel_ver}"
+bash "${root}/stboot/make_kernel.sh" "${kernel_config}" "${out}" "${kernel_version}"
 
 trap - EXIT

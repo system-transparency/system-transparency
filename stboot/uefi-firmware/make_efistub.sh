@@ -13,11 +13,10 @@ root="$(cd "${dir}/../../" && pwd)"
 source ${root}/run.config
 
 out="${dir}/stboot.efi"
-kernel_src="https://cdn.kernel.org/pub/linux/kernel/v5.x"
-kernel_ver="linux-5.4.45"
+kernel_version=${ST_UEFI_FIRMWARE_EFISTUB_KERNEL_VERSION}
 kernel_config=${ST_UEFI_FIRMWARE_EFISTUB_KERNEL_CONFIG}
 
-bash "${root}/stboot/make_kernel.sh" "${kernel_config}" "${out}" "${kernel_src}" "${kernel_ver}"
+bash "${root}/stboot/make_kernel.sh" "${kernel_config}" "${out}" "${kernel_version}"
 
 trap - EXIT
 
