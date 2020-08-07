@@ -133,6 +133,26 @@ done
 
 echo
 echo "############################################################"
+echo " Upload bootball to provisioning server"
+echo "############################################################"
+echo
+bootball="${root}/.newest-ball.stboot"
+while true; do
+   echo "bootball: $(realpath --relative-to="${root}" "${bootball}")"
+   echo "Run  (r) with bootball"
+   echo "Skip (s)"
+   echo "Quit (q)"
+   read -rp ">> " x
+   case $x in
+      [Rr]* ) bash "${root}/scripts/upload_bootball.sh" "${bootball}"; break;;
+      [Ss]* ) break;;
+      [Qq]* ) exit;;
+      * ) echo "Invalid input";;
+   esac
+done
+
+echo
+echo "############################################################"
 echo " Build bootloader "
 echo "############################################################"
 echo
@@ -152,27 +172,6 @@ while true; do
       * ) echo "Invalid input";;
    esac
 done
-
-echo
-echo "############################################################"
-echo " Upload bootball to provisioning server"
-echo "############################################################"
-echo
-bootball="${root}/.newest-ball.stboot"
-while true; do
-   echo "bootball: $(realpath --relative-to="${root}" "${bootball}")"
-   echo "Run  (r) with bootball"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -rp ">> " x
-   case $x in
-      [Rr]* ) bash "${root}/scripts/upload_bootball.sh" "${bootball}"; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
 
 echo
 echo "############################################################"

@@ -21,7 +21,7 @@ if [ -f "${config}" ]; then
     while true; do
        echo "Current Syslinux config:"
        cat "$(realpath --relative-to="${root}" "${config}")"
-       read -rp "Reset Syslinux config? (y/n)" yn
+       read -rp "Override Syslinux config settings from run.config? (y/n)" yn
        case $yn in
           [Yy]* ) break;;
           [Nn]* ) exit;;
