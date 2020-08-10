@@ -1,44 +1,22 @@
 # System Transparency Tooling
 
-This repository contains scripts, configurations files and example date to form
+This repository contains scripts, configurations files and example data to form
 a build-, test- and development environment for _System Transparency_.
 The source code of the various components resides in the appropriate repositories.
 Detailed information about the project itself can be found at https://system-transparency.org.
 
-Each folder contains an own README.md describing its content and the purpose of the files.
-
-## Table of Content
-
-| Directory                                                                                           | Description                                                    |
-| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [`/`](#scripts)                                                                                     | entry point                                                    |
-| [`configs/`](configs/#configs)                                                                      | configuration of operating systems                             |
-| [`deploy/`](deploy/#deploy)                                                                         | scripts and files to build firmware binaries                   |
-| [`deploy/coreboot-rom/`](deploy/coreboot-rom/#deploy-coreboot-rom)                                  | (work in progress)                                             |
-| [`deploy/mixed-firmware/`](deploy/mixed-firmware/#deploy-mixed-firmware)                            | disk image solution                                            |
-| [`keys/`](keys/#keys)                                                                               | example certificates and signing keys                          |
-| [`operating-system/`](operating-system/#operating-system)                                           | folders including scripts ans files to build reprodu>          |
-| [`operating-system/debian/`](operating-system/debian/#operating-system-debian)                      | reproducible debian buster                                     |
-| [`operating-system/debian/docker/`](operating-system/debian/docker/#operating-system-debian-docker) | docker environment                                             |
-| [`stboot/`](stboot/#stboot)                                                                         | scripts and files to build stboot bootloader from source       |
-| [`stboot/include/`](stboot/include/#stboot-include)                                                 | fieles to be includes into the bootloader's initramfs          |
-| [`stboot/data/`](stboot/data/#stboot-data)                                                          | fieles to be placed on a data partition of the host            |
-| [`stconfig/`](stconfig/#stconfig)                                                                   | scripts and files to build the bootloader's configuration tool |
-
 ## Prerequisites
 
-* Linux system (tested with Ubuntu 18.04.2 LTS (Bionic Beaver) / Kernel 4.15.0-47-generic
-* Golang v 1.13 (see [install Go](https://golang.org/doc/install#install))
-	* make sure to also create a workspace at `$HOME/go` (see [test Go](https://golang.org/doc/install#testing))
-	* make sure `$HOME/go/bin` and `/usr/local/go/bin` or '/usr/bin/go are added to `PATH` environment variable
-    * you may have to disable `GO111MODULE` via `go env -w GO111MODULE=off`
-* QEMU emulator (tested with version 2.11.1)
-* Server with SSH access supporting HTTPS web requests to use for your provisioning server
-* Docker for building the a reproducible debian buster kernel and initramfs
-* GCC 8
+Regarding the system components refer to https://www.system-transparency.org/operator-guide/get-system-transparency-up-and-running
+* The operator machine should run a Linux system (tested with Ubuntu 18.04.2 LTS (Bionic Beaver) / Kernel 4.15.0-47-generic
+* Further software prerequisites will be checked during setup. For details take a look at `./scripts/checks.sh`. 
 
+Regarding Golang:
+* make sure to also create a workspace at `$HOME/go` (see [test Go](https://golang.org/doc/install#testing))
+* make sure `$HOME/go/bin` and `/usr/local/go/bin` or '/usr/bin/go are added to `PATH` environment variable
+  * you may have to disable `GO111MODULE` via `go env -w GO111MODULE=off`
 
-You then need to make GCC 8 the default.
+* If the dependency checks complains about your GCC, You need to make GCC 8 the default:
 
 ```bash
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
@@ -46,107 +24,97 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /
 sudo update-alternatives --config gcc
 ```
 
-Further dependency checks will be made during setup.
+## Quick Start
 
-## Configure stboot
+```bash
+./run.sh
+```
+This will lead you through the process described below.
 
-To control the printed output of stboot in the mixed firmware scenario see
-[syslinux.cfg](deploy/mixed-firmware/#syslinux.cfg). Many other configurations
-are controlles via special files like described in the DETAILS section at
-[system-transparency.org](https://www.system-transparency.org/)
+## Build Process in Detail
+There are two main parts to build. You need an operating system which is reproducible and completely self-contained in a Linux kernel + initramfs. Then you need to build the _stboot_ bootloader depending on your deploymet scenario. Further you need some additional things likes keys to be set up and at the right place. To be able to build these components you need to build a tool chain once.
 
-## Keys
+### Tool Chain
 
-This directory contains directories containing some example keys for different tasks:
+```bash
+./scripts/make_toolchain.sh
+```
 
-- `signing_keys`: Contains the keys for signing the bootball
-- `cpu_keys`: Contains the keys for using the cpu command for debugging
-  - `cpu_rsa`/ `cpu_rsa.pub`: These keys are used for connecting _to_ the machine running the `cpud` server
-  - `ssh_host_rsa_key`/ `ssh_host_rsa_key.pub`: These keys are used by the `cpud` server to connect _back to your_ machine.
+### Keys
+The blob containing the operating system, called _bootball_ needs to be signed. You can use your own keys or create new ones with:
 
-If these directories are missing, this is because they do not exist by default
-but are created, by running the `./run.sh` script which in turn runs the
-`generate_keys_and_certs.sh` script.
+```bash
+./scripts/make_keys_and_certs.sh
+```
 
-## Deploy
+The created directory `./keys/` contains:
+- `signing_keys/`: Contains the keys for signing the bootball
+- `cpu_keys/`: Contains the keys for using the cpu command for debugging
 
-The _stboot_ bootloader can be deployed to a host in different ways.
-The subdirectories cover these solutions.
+### Configuration Files
+The components, especially the bootloader require certain configuration files to work. These files can be generated with the information inside the global configuration `run.config` by calling:
 
-In general speaking _stboot_ is part of the host's firmware and comes as a
-flavor of _linuxboot_, more precisely as part of the _u-root_ initramfs inside
-_linuxboot_.
+```bash
+./scripts/make_example_data.sh
+```
 
-See also:
+### Operating System and Bootball
+The operating systems to be used with _System Transparency_ need to be build reproducible. Currently, the only supported OS by this tooling is Debian Buster.
 
-- https://www.linuxboot.org/
-- https://github.com/u-root/u-root
+```bash
+./operating-system/debian/make_debian.sh
+```
 
-## Deploy Mixed-Firmware
+After the kernel and initramfs being created use the _stmanager_ utility to create a sign a bootball from it.
+See `stmanager --help-long` or to make use of the generated keys form `./scripts/make_keys_and_certs.sh` call:
 
-This deployment solution can be used if no direct control over the host
-default firmware is given. Since the _stboot_ bootloader uses the
-_linuxboot_ architecture it consists of a Linux kernel and an initfamfs,
-which can be treated as a usual operating system. The approach of this
-solution is to create an image including this kernel and initramfs.
-Additionally, the image contains an active boot partition with a
-separate bootloader written to it. _Syslinux_ is used here.
+```bash
+./scripts/create_and_sign_bootball.sh
+```
 
-The image can then be written to the host's hard drive. During the boot
-process of the host's default firmware the _Syslinux_ bootloader is called and
-finally hands over control to the \*stboot bootloader.
+If you want to go with the netboot feature of _stboot_ have set the corresponding parameters in `run.config` you can upload the bootball to your provisioning server with:
 
+```bash
+./scripts/upload_bootball.sh
+```
 
-## Stboot Data
+### Bootloader (stboot)
+System Transparency Boot (stboot) is [LinuxBoot](https://www.linuxboot.org/) distribution. The initial RAM filesystem (initramfs) is created by the [u-root](https://github.com/u-root/u-root) ramfs builder. Since u-root beside being a ramfs builder is also a collection of different bootloader implementations, the codebase of _stboot_ is part of u-root, too.
 
-Files in this folder are ment to be places in a data partition on the host
-machine. This partition will be mounted by the bootloader.
+Regarding deployment, we defined three real world scenarios which should at least support a high chance that we have covered a lot of hardware systems. We categorized the scenarios based on the firmware with levels. With the lowest firmware level it is possible to make the whole system stack transparent.
 
-## Operating-System
+#### Leased server with mixed-firmware scenario (FL3)
+Bringing system transparency to already existing hardware which can’t be transformed to open source firmware machines is troublesome. Therefore, we need to propose a solution which even works on those limited systems. We will use a standard Ubuntu 18.04 server edition and standard bootloader to load _stboot_. This scenario is especially helpful for a server landscape with mixed firmware like BIOS and UEFI.
 
-The operating systems to be used with _System Transparency_ need to be build
-reproducible. See http://system-transparency.org for further information.
+```bash
+./stboot/mixed-firmware/make_image.sh
+```
 
-Currently the only supported system is a reproducible _Debian_ build.
+You need to deploy the created`./stboot/mixed-firmware/stboot_mixed_firmware_bootlayout.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. The MBR is written accordingly.
 
-## Stconfig
+#### Leased server with UEFI-firmware scenario (FL2)
+In this scenario we have a closed source UEFI firmware which cannot easily be modified. In order to deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as EFI application.
 
-_Stboot_ itself is part of the _u-root_ project (https://github.com/u-root/u-root)
-and is written in Go. Since _Stboot_ is still in a beta phase at the moment,
-the code resides at https://github.com/u-root/u-root/tree/stboot branch.
+```bash
+./stboot/uefi-firmware/make_image.sh
+```
 
-One part of the _u-root_ project is the 'u-root' command to create an initramfs
-(an archive of files) to use with Linux kernels. Another part is a collection
-of bootloaders implemented in Go. _Stboot_ is one of these bootloaders.
+You need to deploy the created`./stboot/mixed-firmware/stboot_uefi_firmware_bootlayout.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. _STBOOT_ in this case is an EFI special partition containing the bootloader as an efistub.
 
-The _u-root_ project also includes some tools related to its various commands.
-_Stconfig_ is a tool for the host's operator to prepare a bootball file ('stboot.ball')
-for the provisioning server. This file is downloaded to the host during the
-_Stboot's_ bootprocess. _Stboot_ is heavily dependent on that bootball being
-prepared by this tool.
-Usually the generated bootball should work for all hosts.
-But if there is the need for a host specific bootball, you can create a unique bootball
-identified by the MAC address of the appropriate server.
-The host will look for a specific boot ball on the provisioning server first.
-If none is present, the host will download the general one.
+### Colocated server with Open Source firmware scenario (FL1)
+In this scenario we are able to place our own server in the data center. This server already contains Open Source firmware and is able to boot a Linux kernel payload after hardware initialization.
 
-See `stconfig --help-long` for inforamtion on how to parse the MAC address.
+This process is not automated yet. Please refer to [this instructions](stboot/coreboot-firmware/#deploy-coreboot-rom). Also make sure to have an _STDATA_ partition present at the hosts hard drive like in the other scenarios.
 
-See https://system-transparency.org for further information about 'stconfig.json' and 'stboot.ball'.
+## Debugging
+The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in the section of respective firmware scenario. Beside usual kernel parameters you can pass flags to _stboot_ via the special parameter `uroot.uinitargs`. 
+* To enable debug output in _stboot_ pass `-debug`
+* To see not only the LinuxBoot kernel's but also stboot's output on all defined consoles (not on the last one defined only) pass `-klog`
 
-This directory mainly provides utilities for the ongoing development.
+Examples:
 
-#### `run.sh`
+* print output to multiple consoles: `console=tty0 console=ttyS0,115200 printk.devkmsg=on uroot.uinitargs="-debug -klog"` (input is still taken from the last console defined. Furthermore, it can happen that certain messages are only displayed on the last console)
 
-This script is the global entry point to build up or update the environment.
+* print minimal output: `console=ttyS0,115200`
 
-It runs a dependency check and prompts you to execute all other necessary
-scripts and thereby leads through the whole setup process. Each step can be run,
-run with special options where applicable or skipped.
-In this way you can also only renew certain parts of the environment.
-Run each step when executing for the first time.
-
-
-The file `run.config` contains configuration variables and should be edited
-prior to the running of `run.sh`.
-
+In order to do extensive remote debugging of the host, you can use [u-root's cpu command](DEBUGGING.md).
