@@ -9,6 +9,8 @@
 /stboot/*.json
 /stboot/include/hostvars.json
 /stboot/data/*
+/stboot/coreboot-firmware/*.img
+/stboot/coreboot-firmware/*.backup
 /stboot/mixed-firmware/syslinux.cfg
 /stboot/mixed-firmware/*.img
 /stboot/mixed-firmware/vmlinuz-linuxboot
