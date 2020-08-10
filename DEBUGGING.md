@@ -1,16 +1,13 @@
-# Debugging
 
-## Using the `cpu` command
+# Remote Debugging Using the CPU Command
 
-Since the stboot image running on a server has much fewer tools and services
-than usual Linux operating systems, the `cpu` command is the best option for
-debugging a remote machine.
-It connects to the remote server, bringing all your local tools and environment
+Since the stboot image running on the host has much fewer tools and services
+than usual Linux operating systems, the `cpu` command is a well suited option for
+debugging the host remotely.
+It connects to the host, bringing all your local tools and environment
 with you.
 
-It's like magic :)
-
-### Prerequisites
+## Prerequisites
 
 These instructions expect _your system_ to be Linux-based.
 You need to have the `go` programming language installed on _your system_ and
@@ -19,7 +16,7 @@ GOPATH is set correctly (see [Prerequisites](/README.md#Prerequisites))
 It also expects you to have access to the serial console of your _remote target_.
 Your _remote target_ needs port `2222` to be accessible from the outside.
 
-### Installation
+## Installation
 
 Usually the cpu command should be installed and the cpu daemon should be included
 into the linuxboot intramfs during the setup by `run.sh` already.
@@ -50,7 +47,7 @@ $ go get github.com/u-root/cpu/cmds/cpu
 $ go get github.com/u-root/cpu/cmds/cpud
 ```
 
-### Usage
+## Usage
 
 Before accessing the remote machine trough `cpu` you first need to start the
 cpu server. To do that, go to the serial console and press <kbd>Ctrl-C</kbd>.
@@ -80,7 +77,7 @@ on the size of your environment and the power of the remote machine.
 
 Enjoy!
 
-### Testing the `cpu` command using qemu
+## Testing the `cpu` command using qemu
 
 _NOTE: Make sure you followed all the steps in section [Installation](#Installation)_
 

@@ -1,28 +1,10 @@
-## Table of Content
-
-| Directory                                                                                                 | Description                                                    |
-| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [`/`](../../#scripts)                                                                                     | entry point                                                    |
-| [`configs/`](../../configs/#configs)                                                                      | configuration of operating systems                             |
-| [`deploy/`](../#deploy)                                                                                   | scripts and files to build firmware binaries                   |
-| [`deploy/coreboot-rom/`](#deploy-coreboot-rom)                                                            | (work in progress)                                             |
-| [`deploy/mixed-firmware/`](../mixed-firmware/#deploy-mixed-firmware)                                      | disk image solution                                            |
-| [`keys/`](../../keys/#keys)                                                                               | example certificates and signing keys                          |
-| [`operating-system/`](../../operating-system/#operating-system)                                           | folders including scripts ans files to build reprodu>          |
-| [`operating-system/debian/`](../../operating-system/debian/#operating-system-debian)                      | reproducible debian buster                                     |
-| [`operating-system/debian/docker/`](../../operating-system/debian/docker/#operating-system-debian-docker) | docker environment                                             |
-| [`stboot/`](../../stboot/#stboot)                                                                         | scripts and files to build stboot bootloader from source       |
-| [`stboot/include/`](../../stboot/include/#stboot-include)                                                 | fieles to be includes into the bootloader's initramfs          |
-| [`stboot/data/`](../../stboot/data/#stboot-data)                                                          | fieles to be placed on a data partition of the host            |
-| [`stconfig/`](../../stconfig/#stconfig)                                                                   | scripts and files to build the bootloader's configuration tool |
-
-## Deploy Coreboot-ROM
+# Deploy Coreboot-ROM
 
 Work in progress ...
 
 This are some draft notes to build a coreboot image for the Supermicro X11SSH (only with system >=gcc-7)
 
-### Build Coreboot
+## Build Coreboot
 
 ```
 sudo apt-get install -y bison build-essential curl flex git gnat libncurses5-dev m4 zlib1g-dev pkgconf libssl-dev uuid-dev
@@ -34,7 +16,7 @@ git submodule update --checkout --init
 make -C util/ifdtool/
 ```
 
-### Extract the vendor firmware from the X11SSH
+## Extract the vendor firmware from the X11SSH
 
 Use Flashrom from the coreboot repo (maybe install `libpci-dev`)
 
@@ -63,7 +45,7 @@ diff bios.1 bios.3
 
 Save the dumo as `original_vendor_bios_dump.bin` in the coreboot dir
 
-### Build Coreboot continued
+## Build Coreboot continued
 
 Get ME and fd blob out of vendor firmware:
 
@@ -87,7 +69,7 @@ After running the tooling they are in
 ./build/cbfstool ./build/coreboot.rom add-payload -r COREBOOT -f vmlinuz-linuxboot -n fallback/payload -C "console=ttyS0,115200 ro" -I initramfs-linuxboot.cpio.gz
 ```
 
-### Flash X11SSH via bmc:
+## Flash X11SSH via bmc:
 
 Link to the tool: https://www.supermicro.com/en/solutions/management-software/ipmi-utilities
 At the bottom of the page you can download the SMCIPMITool.
@@ -97,7 +79,7 @@ SMCIPMITool ip user pass bios update coreboot.rom -F -N -MER
 SMCIPMITool ip user pass ipmi power reset/up/down/staus
 ```
 
-### Flash X11SSH manually (alternatively)
+## Flash X11SSH manually (alternatively)
 
 ```
 sudo ./flashrom -p ch341a_spi --ifd -i bios -w ../coreboot/build/coreboot.rom
