@@ -1,1 +1,0 @@
-# StBoot EFISTUB

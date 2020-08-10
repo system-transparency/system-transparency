@@ -104,7 +104,14 @@ You need to deploy the created`./stboot/mixed-firmware/stboot_uefi_firmware_boot
 #### Colocated server with Open Source firmware scenario (FL1)
 In this scenario we are able to place our own server in the data center. This server already contains Open Source firmware and is able to boot a Linux kernel payload after hardware initialization.
 
-This process is not automated yet. Please refer to [this instructions](stboot/coreboot-firmware/#deploy-coreboot-rom). Also make sure to have an _STDATA_ partition present at the hosts hard drive like in the other scenarios.
+This process is not automated yet. Only the _STDATA_ partition can be generated using:
+
+```
+./stboot/coreboot-firware/make_image.sh
+```
+
+To build and flash the coreboot-rom including _stboot_ as a payload, please refer to [this instructions](stboot/coreboot-firmware/#deploy-coreboot-rom). 
+You need to deploy the created`./stboot/coreboot-firmware/stdata.img` to the hard drive of your host. It contains a _STDATA_ partition only.
 
 ## Debugging
 The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in the section of respective firmware scenario. Beside usual kernel parameters you can pass flags to _stboot_ via the special parameter `uroot.uinitargs`. 
