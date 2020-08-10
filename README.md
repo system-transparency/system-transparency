@@ -16,7 +16,7 @@ Regarding Golang:
 * make sure `$HOME/go/bin` and `/usr/local/go/bin` or '/usr/bin/go are added to `PATH` environment variable
   * you may have to disable `GO111MODULE` via `go env -w GO111MODULE=off`
 
-* If the dependency checks complains about your GCC, You need to make GCC 8 the default:
+If the dependency checks complains about your GCC, You need to make GCC 8 the default:
 
 ```bash
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
@@ -101,7 +101,7 @@ In this scenario we have a closed source UEFI firmware which cannot easily be mo
 
 You need to deploy the created`./stboot/mixed-firmware/stboot_uefi_firmware_bootlayout.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. _STBOOT_ in this case is an EFI special partition containing the bootloader as an efistub.
 
-### Colocated server with Open Source firmware scenario (FL1)
+#### Colocated server with Open Source firmware scenario (FL1)
 In this scenario we are able to place our own server in the data center. This server already contains Open Source firmware and is able to boot a Linux kernel payload after hardware initialization.
 
 This process is not automated yet. Please refer to [this instructions](stboot/coreboot-firmware/#deploy-coreboot-rom). Also make sure to have an _STDATA_ partition present at the hosts hard drive like in the other scenarios.
