@@ -66,9 +66,13 @@ ST_HOST_DNS=""
 ##############################################################################
 # STBoot Bootloader - common
 #
-# Following configuration is used during the creation linuxboot initramfs.
-# The STBoot bootloader and hostvars.json are part of this initramfs.
+# Following configuration is used during the creation linuxboot kernel and 
+# initramfs. The stboot bootloader and hostvars.json are part of this initramfs.
 ##############################################################################
+
+# ST_LINUXBOOT_CMDLINE controlls the kernel cmdline of the linuxboot kernel.
+# Flags to stboot can be passed via uroot.uinitargs here as well.
+ST_LINUXBOOT_CMDLINE="console=ttyS0,115200 uroot.uinitargs='-debug'"
 
 # ST_INCLUDE_CORE_TOOLS controls if further core utilities are included beside
 # the bootloader. This is usefull for debugging purposes. If a initramfs with
@@ -100,11 +104,6 @@ ST_HOSTVARS_BOOTMODE=LocalStorage
 # ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_VERSION defines linux kernel version of 
 # the LinuxBoot distribution
 ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_VERSION=4.19.6
-
-# ST_LINUXBOOT_CMDLINE ends up in deploy/mixed-firmware/syslinux.cfg and
-# controlls the kernel cmdline of the linuxboot kernel. Flags to stboot
-# can be passed via uroot.uinitargs here as well.
-ST_MIXED_FIRMWARE_LINUXBOOT_CMDLINE='console=ttyS0,115200 uroot.uinitargs="-debug"'
 
 # ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_CONFIG is the linux kernel defconfig
 # loaded before the kernel is beeing built.

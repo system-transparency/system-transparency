@@ -102,11 +102,15 @@ echo "[INFO]: Unpacking kernel source tar ball"
 tar -xf "${src_cache}/${kernel_name}.tar.xz" -C "${src_cache}"
 
 echo "[INFO]: Build Linuxboot kernel"
-[ -f "${kernel_config_file}" ]
-cp "${kernel_config_file}" "${src_cache}/${kernel_name}/.config"
+if [ -f "${kernel_config_file}.patch" ]; then
+    cfg=${kernel_config_file}.patch
+elif [ -f "${kernel_config_file}" ]; then
+    cfg=${kernel_config_file}
+fi
+cp "${cfg}" "${src_cache}/${kernel_name}/.config"
 cd "${src_cache}/${kernel_name}"
 while true; do
-    echo "[INFO]: Loaded $(realpath --relative-to="${root}" "${kernel_config_file}") as .config:"
+    echo "[INFO]: Loaded $(realpath --relative-to="${root}" "${cfg}") as .config:"
     echo "[INFO]: Any config changes you make in menuconfig will be saved to:"
     echo "[INFO]: $(realpath --relative-to="${root}" "${kernel_config_file_modified}")"
     echo "[INFO]: However, it is recommended to just save and exit without modifications."

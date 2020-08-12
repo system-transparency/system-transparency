@@ -15,7 +15,7 @@ source ${root}/run.config
 config=${dir}/syslinux.cfg
 kernel="../vmlinuz-linuxboot"
 initramfs="../initramfs-linuxboot.cpio.gz"
-cmdline=${ST_MIXED_FIRMWARE_LINUXBOOT_CMDLINE}
+cmdline=${ST_LINUXBOOT_CMDLINE}
 
 if [ -f "${config}" ]; then
     while true; do

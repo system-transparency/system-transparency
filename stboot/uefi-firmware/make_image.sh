@@ -13,7 +13,6 @@ img="${dir}/stboot_uefi_firmware_bootlayout.img"
 img_backup="${img}.backup"
 efistub="${dir}/stboot.efi"
 
-
 if [ -f "${img}" ]; then
     while true; do
         echo "Current image file:"
