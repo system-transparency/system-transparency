@@ -74,4 +74,4 @@ qemu-system-x86_64 \
   -tpmdev emulator,id=tpm0,chardev=chrtpm \
   -device tpm-tis,tpmdev=tpm0
 
-rm -r $tpm/*
+rm -r ${tpm:?}/*
