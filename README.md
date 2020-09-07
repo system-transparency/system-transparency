@@ -29,7 +29,27 @@ sudo update-alternatives --config gcc
 ```bash
 ./run.sh
 ```
-This will lead you through the process described below.
+This will lead you through the process described in [Build Process in Detail].
+
+## Features
+
+* Configuration data
+    * Hostvars
+    * Data partition
+* Time validation
+* TXT self test
+* multiple boot modes for loading System Transparency _Bootballs_ 
+    * Network DHCP
+    * Nework static IP
+    * Local storage
+* Signature verification
+    * Root certificate validation
+    * Multiple signature verification of _Bootballs_
+* Measured boot
+    * Extend PCRs with measurement of operation system
+* Reboot on error
+* Configurable Debug output
+* Optional remote debugging capabilities
 
 ## Build Process in Detail
 There are two main parts to build. You need an operating system which is reproducible and completely self-contained in a Linux kernel + initramfs. Then you need to build the _stboot_ bootloader depending on your deploymet scenario. Further you need some additional things likes keys to be set up and at the right place. To be able to build these components you need to build a tool chain once.
