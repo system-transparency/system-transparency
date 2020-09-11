@@ -29,27 +29,72 @@ sudo update-alternatives --config gcc
 ```bash
 ./run.sh
 ```
-This will lead you through the process described in [Build Process in Detail].
+This will lead you through the process described in [Build Process in Detail](#Build-Process-in-Detail).
 
 ## Features
 
-* Configuration data
-    * Hostvars
-    * Data partition
-* Time validation
-* TXT self test
-* multiple boot modes for loading System Transparency _Bootballs_ 
-    * Network DHCP
-    * Nework static IP
-    * Local storage
-* Signature verification
-    * Root certificate validation
-    * Multiple signature verification of _Bootballs_
-* Measured boot
-    * Extend PCRs with measurement of operation system
-* Reboot on error
-* Configurable Debug output
-* Optional remote debugging capabilities
+### Configuration data
+Hostvars: Cirtical data included into the initramfs
+* Integer controlling the minimum number of signatures that must pass verification
+* String array of allowed fingerprints of root certificates for signature verification
+* Build timestamp
+* Custom type indicating the [boot mode](#Multiple-boot-modes-for-loading-System-Transparency-_Bootballs_)
+
+Data partition: Further data supposed to be on disk
+* HTTPS root certificate
+* Network settings
+    * IP address
+    * Gateway
+    * DNS Server
+* NTP Server URL list
+* Provisioning Server URL list
+
+### Time validation
+Proper system time is important for certificate validation. Therefore the system time is validated using NTP Servers. If no NTP Server is available the timestamp in hostvars is used for the validation of the system time.
+
+### TXT self test
+Stboot uses https://github.com/9elements/converged-security-suite to run a self test on TXT compatibility.
+
+### Multiple boot modes for loading System Transparency _Bootballs_ 
+Network DHCP:
+* Configure network dynamically via DHCP
+* Download bootball from a provisioning server
+    * Request the file from the provisioning servers in the order of the URL list in hostvars
+    * Take the first match
+    
+Nework static IP:
+* Configure network dynamically via DHCP
+* Download bootball from a provisioning server
+    * Request the file from the provisioning servers in the order of the URL list in hostvars
+    * Take the first match
+    
+Local storage: 
+Requires operator to place new bootballs in `DATA-PARTITION/stboot/bootballs/new/` and move successfully boot ones to `DATA-PARTITIONstboot/bootballs/known_good/`.
+* Try verifying and then booting these files first, in reverse alphabetical order: `DATA-PARTITION/stboot/bootballs/new/*.stboot` (close to "standard ls").
+* If signature verification fails on a file, move the file here: `DATA-PARTITION/stboot/bootballs/invalid/`.
+* If no files in `DATA-PARTITION/new/` can be verified, try these files, in reverse alphabetical order: `DATA-PARTITION/stboot/bootballs/known_good/*.stboot`.
+* If one of these fail, move it into `/invalid` ,too.
+ (close to "standard ls")
+* Save the path to the bootball which will be booted into `DATA-PARTITION/stboot/bootballs/current-ball.stboot` file
+
+
+### Signature verification
+A bootball includes one or more Signatures of the included boot files (kernel, initramfs, et al.) together with the corresponding certificates.
+The root certificate is also included. The singnature verification after downloading the bootball then works as follows:
+* Validate the root certificate with the fingerprints in hostvars
+* Check that the certificates are signed by the root certificate
+* Verify the signature of the boot files
+   * Make sure there is no double signature
+* The bootball will be used if minimum the number of signatures indicated in hosvars passed the verification
+
+### Measured boot
+* Extend PCRs with measurement of operation system
+
+### Reboot on error
+* Whenever an error occures during bootup, the system will reboot.
+
+### Debugging
+See [debugging section](#Debugging)
 
 ## Build Process in Detail
 There are two main parts to build. You need an operating system which is reproducible and completely self-contained in a Linux kernel + initramfs. Then you need to build the _stboot_ bootloader depending on your deploymet scenario. Further you need some additional things likes keys to be set up and at the right place. To be able to build these components you need to build a tool chain once.
