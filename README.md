@@ -38,7 +38,7 @@ Hostvars: Cirtical data included into the initramfs
 * Integer controlling the minimum number of signatures that must pass verification
 * String array of allowed fingerprints of root certificates for signature verification
 * Build timestamp
-* Custom type indicating the [boot mode](#Multiple-boot-modes-for-loading-System-Transparency-_Bootballs_)
+* Custom type indicating the [boot mode](#Multiple-boot-modes-for-loading-System-Transparency-Bootballs)
 
 Data partition: Further data supposed to be on disk
 * HTTPS root certificate
@@ -55,7 +55,7 @@ Proper system time is important for certificate validation. Therefore the system
 ### TXT self test
 Stboot uses https://github.com/9elements/converged-security-suite to run a self test on TXT compatibility.
 
-### Multiple boot modes for loading System Transparency _Bootballs_ 
+### Multiple boot modes for loading System Transparency Bootballs
 Network DHCP:
 * Configure network dynamically via DHCP
 * Download bootball from a provisioning server
