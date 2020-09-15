@@ -126,6 +126,35 @@ ST_UEFI_FIRMWARE_EFISTUB_KERNEL_VERSION=5.4.45
 ST_UEFI_FIRMWARE_EFISTUB_KERNEL_CONFIG="${root}/stboot/uefi-firmware/x86_64_x11ssh_qemu_efistub.defconfig"
 
 
+##############################################################################
+# STBoot Operations System Bootballs - General
+#
+# Following configuration is used while creating the bootball with the final 
+# operating system.
+##############################################################################
+
+# ST_BOOTBALL_ROOT_CERTIFICATE is the root certificate of the certificates
+# used to sign the bootball. It will be included into the bootball.
+ST_BOOTBALL_ROOT_CERTIFICATE=${root}/keys/signing_keys/root.cert
+
+# ST_BOOTBALL_TBOOT is the path to the tboot kernel to be used with the bootball
+ST_BOOTBALL_TBOOT=${root}/operating-system/tboot.gz
+
+# ST_BOOTBALL_TBOOT_ARGS is the tboot kernel's command line
+ST_BOOTBALL_TBOOT_ARGS=""
+
+# ST_BOOTBALL_ACM is the path to an authenticated code module (ACM) or to a directory containing
+# multiple ACMs. All ACMs will be present in the bootball and tboot will pick the right one for the host.
+ST_BOOTBALL_ACM=${root}/cache/ACMs/
+
+# ST_BOOTBALL_ALLOW_NON_TXT controlls if the bootball schould be boot with a fallback
+# configuration without tboot, when txt is not supported by the host machine.
+ST_BOOTBALL_ALLOW_NON_TXT=n
+#ST_BOOTBALL_ALLOW_NON_TXT=y
+
+# ST_BOOTBALL_OUT names the output directory of the created bootball.
+ST_BOOTBALL_OUT=${root}/bootballs
+
 
 ##############################################################################
 # STBoot Operations System Bootballs - Debian Buster
@@ -133,9 +162,6 @@ ST_UEFI_FIRMWARE_EFISTUB_KERNEL_CONFIG="${root}/stboot/uefi-firmware/x86_64_x11s
 # Following configuration is used while creating the bootball with the final 
 # operating system.
 ##############################################################################
-
-# ST_BOOTBALL_OUT names the output directory of the created bootball.
-ST_BOOTBALL_OUT=${root}/bootballs
 
 # ST_BOOTBALL_LABEL is the name of the bootball
 ST_BOOTBALL_LABEL="System Transparency with Debian Buster"
@@ -150,26 +176,6 @@ ST_BOOTBALL_OS_INITRAMFS=${root}/operating-system/debian/docker/out/debian-buste
 # operating system 
 ST_BOOTBALL_OS_CMDLINE="console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd"
 
-# ST_BOOTBALL_TBOOT is the path to the tboot kernel to be used with the bootball
-#ST_BOOTBALL_TBOOT=${root}/tboot/tboot.gz
-ST_BOOTBALL_TBOOT=""
-
-# ST_BOOTBALL_TBOOT_ARGS is the tboot kernel's command line
-ST_BOOTBALL_TBOOT_ARGS=""
-
-# ST_BOOTBALL_ACM is the path to an authenticated code module (ACM) or to a directory containing
-# multiple ACMs. All ACMs will be present in the bootball and tboot will pick the right one for the host.
-#ST_BOOTBALL_ACM=${root}/tboot/ACM/6th_7th_gen_i5_i7-SINIT_79.bin
-ST_BOOTBALL_ACM=""
-
-# ST_BOOTBALL_ALLOW_NON_TXT controlls if the bootball schould be boot with a fallback
-# configuration without tboot, when txt is not supported by the host machine.
-ST_BOOTBALL_ALLOW_NON_TXT=y
-#ST_BOOTBALL_ALLOW_NON_TXT=n
-
-# ST_BOOTBALL_ROOT_CERTIFICATE is the root certificate of the certificates
-# used to sign the bootball. It will be included into the bootball.
-ST_BOOTBALL_ROOT_CERTIFICATE=${root}/keys/signing_keys/root.cert
 
 ##############################################################################
 # Upload 
@@ -196,6 +202,7 @@ ST_SSH_UPLOAD_PATH=${ssh_upload_path}
 
 # ST_QEMU_MEM is the amount of RAM for qemu guests, in megabytes.
 ST_QEMU_MEM=2048
+
 EOL
 
 echo 

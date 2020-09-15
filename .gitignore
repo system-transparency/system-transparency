@@ -22,6 +22,7 @@
 /stboot/uefi-firmware/*.backup
 /stboot/uefi-firmware/x86_64_x11ssh_qemu_efistub.defconfig.modified
 /stboot/uefi-firmware/x86_64_x11ssh_qemu_efistub.defconfig.patch
+/operating-system/tboot.*
 /operating-system/debian/docker/out
 /operating-system/debian/docker/document_build.info
 /operating-system/debian/docker/.debos-*

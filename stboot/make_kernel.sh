@@ -16,6 +16,8 @@ root="$(cd "${dir}/../" && pwd)"
 
 # Config variables and arguments
 
+src_cache="${root}/cache/kernel"
+
 kernel_config_file=$1
 kernel_config_file_modified="${kernel_config_file}.modified"
 
@@ -34,7 +36,6 @@ kernel_src_signature="${kernel_src}/${kernel_name}.tar.sign"
 
 # Dev keys for verification process
 
-src_cache="${root}/cache/kernel"
 dev_keys="torvalds@kernel.org gregkh@kernel.org"
 keyring=${src_cache}/gnupg/keyring.gpg
 

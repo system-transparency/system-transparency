@@ -19,6 +19,8 @@ if [ -z "${gopath}" ]; then
     exit 1
 fi
 
+#TODO: check if GOPATH/bin is in PATH
+
 uroot_repo="github.com/u-root/u-root"
 uroot_src="${gopath}/src/${uroot_repo}"
 uroot_branch=${ST_UROOT_DEV_BRANCH}
@@ -43,3 +45,7 @@ cd "${dir}"
 echo
 echo "[INFO]: install cpu command for debugging"
 GOPATH="${gopath}" go get -u -v "${cpu_repo}/cmds/cpu" "${cpu_repo}/cmds/cpud"
+
+echo
+echo "[INFO]: install ACM grebber"
+GOPATH="${gopath}" go get -u -v github.com/system-transparency/sinit-acm-grebber
