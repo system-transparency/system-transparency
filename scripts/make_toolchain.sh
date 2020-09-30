@@ -28,7 +28,7 @@ cpu_repo="github.com/u-root/cpu"
 
 echo "[INFO]: unsing GOPATH ${gopath}"
 
-GOPATH="${gopath}" go get -u -v github.com/u-root/u-root
+GO111MODULE=off GOPATH="${gopath}" go get -u -v github.com/u-root/u-root
 
 cd "${uroot_src}"
 echo "[INFO]: switch to branch ${uroot_branch}"
@@ -36,16 +36,20 @@ git checkout --quiet "${uroot_branch}"
 git status
 echo
 echo "[INFO]: install u-root for initramfs generation"
-GOPATH="${gopath}" go install "${uroot_src}"
+echo "[INFO]: GO111MODULE=off"
+GO111MODULE=off GOPATH="${gopath}" go install "${uroot_src}"
 echo
 echo "[INFO]: install stmanager to handle bootballs"
-GOPATH="${gopath}" go install "${uroot_src}/tools/stmanager"
+echo "[INFO]: GO111MODULE=off"
+GO111MODULE=off GOPATH="${gopath}" go install "${uroot_src}/tools/stmanager"
 cd "${dir}"
 
 echo
 echo "[INFO]: install cpu command for debugging"
-GOPATH="${gopath}" go get -u -v "${cpu_repo}/cmds/cpu" "${cpu_repo}/cmds/cpud"
+echo "[INFO]: GO111MODULE=auto"
+GO111MODULE=auto GOPATH="${gopath}" go get -u -v "${cpu_repo}/cmds/cpu" "${cpu_repo}/cmds/cpud"
 
 echo
 echo "[INFO]: install ACM grebber"
-GOPATH="${gopath}" go get -u -v github.com/system-transparency/sinit-acm-grebber
+echo "[INFO]: GO111MODULE=auto"
+GO111MODULE=auto GOPATH="${gopath}" go get -u -v github.com/system-transparency/sinit-acm-grebber
