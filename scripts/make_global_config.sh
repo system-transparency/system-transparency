@@ -74,10 +74,19 @@ ST_HOST_DNS=""
 # Flags to stboot can be passed via uroot.uinitargs here as well.
 ST_LINUXBOOT_CMDLINE="console=ttyS0,115200 uroot.uinitargs='-debug'"
 
-# ST_INCLUDE_CORE_TOOLS controls if further core utilities are included beside
-# the bootloader. This is usefull for debugging purposes. If a initramfs with
-# minimal footprint is needed, set to 'n'.
-ST_INCLUDE_CORE_TOOLS=y
+# ST_LINUXBOOT_VARIANT determines the content of the initramfs. Possible values
+# are: minimal, debug and full.
+#
+# minimal: The only executables included in the initramss are its init routine
+# and the stboot binary.
+#
+# debug: in addition to minimal it includes a shell(elvish), the cpud command
+# from the u-root repositore for debugging, a elvish script to bring up
+# network, keys used with cpud and a elvish script to launch a remote debugging
+# session via cpud.
+#
+# full: in addition to debug all core utilities of u-root.
+ST_LINUXBOOT_VARIANT=minimal
 
 # ST_ROOTCERT_FINGERPRINT_FILE must contain the fingerprint of the root
 # certificate of the signing keys.

@@ -22,7 +22,7 @@ hostvars_name="hostvars.json"
 hostvars="${dir}/include/${hostvars_name}"
 cpu_keys="${root}/keys/cpu_keys"
 
-core_tools=${ST_INCLUDE_CORE_TOOLS}
+variant=${ST_LINUXBOOT_VARIANT}
 
 gopath=$(go env GOPATH)
 if [ -z "${gopath}" ]; then
@@ -53,8 +53,27 @@ bash "${dir}/make_hostvars.sh"
 echo "[INFO]: update timstamp in hostvars.json to $(date +%s)"
 jq '.build_timestamp = $newVal' --argjson newVal "$(date +%s)" "${dir}"/include/hostvars.json > tmp.$$.json && mv tmp.$$.json "${dir}"/include/hostvars.json || { echo "Cannot update timestamp in hostvars.json. Creating initramfs $failed";  exit 1; }
 
-
-if [ "${core_tools}" = "y" ] ; then
+case $variant in
+"minimal" )
+    echo "[INFO]: create minimal initramfs including stboot only"
+    GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -defaultsh="" -o "${initramfs}" \
+    -files "${hostvars}:etc/${hostvars_name}" \
+    github.com/u-root/u-root/cmds/core/init \
+    github.com/u-root/u-root/cmds/boot/stboot
+    ;;
+"debug" )
+    echo "[INFO]: create initramfs including debugging tools"
+    GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
+    -files "${hostvars}:etc/${hostvars_name}" \
+    -files "${dir}/include/start_cpu.elv:start_cpu.elv" \
+    -files "${cpu_keys}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
+    -files "${cpu_keys}/cpu_rsa.pub:cpucpio -idv < tree.cpio_rsa.pub" \
+    github.com/u-root/u-root/cmds/core/init \
+    github.com/u-root/u-root/cmds/core/elvish \
+    github.com/u-root/cpu/cmds/cpud \
+    github.com/u-root/u-root/cmds/boot/stboot
+    ;;
+"full" )
     echo "[INFO]: create initramfs including all u-root core tools"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${hostvars}:etc/${hostvars_name}" \
@@ -65,17 +84,8 @@ if [ "${core_tools}" = "y" ] ; then
     core \
     github.com/u-root/cpu/cmds/cpud \
     github.com/u-root/u-root/cmds/boot/stboot
-else
-    echo "[INFO]: create minimal initramfs including stboot only"
-    GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
-    -files "${hostvars}:etc/${hostvars_name}" \
-    -files "${dir}/include/start_cpu.elv:start_cpu.elv" \
-    -files "${cpu_keys}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
-    -files "${cpu_keys}/cpu_rsa.pub:cpu_rsa.pub" \
-    github.com/u-root/u-root/cmds/core/init \
-    github.com/u-root/u-root/cmds/core/elvish \
-    github.com/u-root/cpu/cmds/cpud \
-    github.com/u-root/u-root/cmds/boot/stboot
-fi
+    ;;
+* ) echo "Unknows value in ST_LINUXBOOT_VARIANT";;
+esac
 
 gzip -f "${initramfs}"
