@@ -11,10 +11,10 @@ set -o nounset
 # set -o xtrace
 
 failed="\e[1;5;31mfailed\e[0m"
-root="$(cd "${dir}/../../" && pwd)"
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root="$(cd "${dir}/../../" && pwd)"
 
 mnt="/tmp/mnt_stimg"
 img="${dir}/Syslinux_Linuxboot.img"
