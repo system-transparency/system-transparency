@@ -178,6 +178,48 @@ ST_BOOTBALL_OS_CMDLINE="console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/syste
 
 
 ##############################################################################
+# STBoot Operations System Bootballs - Ubuntu 18.04 LTS (Bionic)
+#
+# Following configuration is used while creating the bootball with the final 
+# operating system.
+##############################################################################
+
+# ST_BOOTBALL_LABEL is the name of the bootball
+ST_BOOTBALL_LABEL_UBUNTU18="System Transparency with Ubuntu 18.04 LTS (Bionic Beaver)"
+
+# ST_BOOTBALL_OS_KERNEL path to the operating system's linux kernel
+ST_BOOTBALL_OS_KERNEL_UBUNTU18=${root}/operating-system/ubuntu18/docker/out/vmlinuz-4.15.0-20-generic
+
+# ST_BOOTBALL_OS_INITRAMFS path to the cpio archive. This must contain the complete OS.
+ST_BOOTBALL_OS_INITRAMFS_UBUNTU18=${root}/operating-system/ubuntu18/docker/out/linux-image-4.15.0-20.cpio.gz
+
+# ST_BOOTBALL_OS_CMDLINE is the kernel command line of the final
+# operating system 
+ST_BOOTBALL_OS_CMDLINE_UBUNTU18="console=tty0 console=ttyS0 rw rdinit=/lib/systemd/systemd"
+
+
+##############################################################################
+# STBoot Operations System Bootballs - Ubuntu 20.04 LTS (Focal Fossa)
+#
+# Following configuration is used while creating the bootball with the final 
+# operating system.
+##############################################################################
+
+# ST_BOOTBALL_LABEL is the name of the bootball
+ST_BOOTBALL_LABEL_UBUNTU20="System Transparency with Ubuntu 20.04 LTS (Focal)"
+
+# ST_BOOTBALL_OS_KERNEL path to the operating system's linux kernel
+ST_BOOTBALL_OS_KERNEL_UBUNTU20=${root}/operating-system/ubuntu18/docker/out/vmlinuz-5.4.0-26-generic
+
+# ST_BOOTBALL_OS_INITRAMFS path to the cpio archive. This must contain the complete OS.
+ST_BOOTBALL_OS_INITRAMFS_UBUNTU20=${root}/operating-system/ubuntu18/docker/out/linux-image-5.4.0-26-generic.cpio.gz
+
+# ST_BOOTBALL_OS_CMDLINE is the kernel command line of the final
+# operating system 
+ST_BOOTBALL_OS_CMDLINE_UBUNTU20="console=tty0 console=ttyS0 rw rdinit=/lib/systemd/systemd"
+
+
+##############################################################################
 # Upload 
 #
 # The script upoad_bootball.sh uses this data during uplaod.

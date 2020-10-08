@@ -11,7 +11,7 @@ root="$(cd "${dir}/../../" && pwd)"
 
 kernel="${dir}/docker/out/vmlinuz-5.4.0-26-generic"
 kernel_backup="${kernel}.backup"
-initramfs="${dir}/docker/out/linux-image-5.4.0-26-genericz"
+initramfs="${dir}/docker/out/linux-image-5.4.0-26-generic"
 initramfs_backup="${initramfs}.backup"
 docker_image="debos"
 
@@ -20,7 +20,7 @@ if [ -f "${kernel}" ] && [ -f "${initramfs}" ]; then
        echo "Current Ubuntu 20.04 LTS:"
        ls -l "$(realpath --relative-to="${root}" "${kernel}")"
        ls -l "$(realpath --relative-to="${root}" "${initramfs}")"
-       read -rp "Rebuild Ubuntu 18.04 LTS? (y/n)" yn
+       read -rp "Rebuild Ubuntu 20.04 LTS? (y/n)" yn
        case $yn in
           [Yy]* ) echo "[INFO]: backup existing files to $(realpath --relative-to="${root}" "$(dirname "${kernel}")")"; mv "${kernel}" "${kernel_backup}"; mv "${initramfs}" "${initramfs_backup}"; break;;
           [Nn]* ) exit;;
@@ -40,7 +40,7 @@ else
 fi
 
 echo ""
-echo "[INFO]: Build Ubuntu 18.04 LTS via debos in a docker container"
+echo "[INFO]: Build Ubuntu 20.04 LTS via debos in a docker container"
 echo ""
 docker run --env DEBOS_USER_ID=$(id -u) --env DEBOS_GROUP_ID=$(id -g) --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --security-opt label:disable -it -v "${root}:/system-transparency/:z" ${docker_image}
 
