@@ -15,6 +15,11 @@ initramfs="${dir}/docker/out/debian-buster-amd64.cpio.gz"
 initramfs_backup="${initramfs}.backup"
 docker_image="debos"
 
+echo "[INFO]: check tboot and ACMs"
+bash "${dir}/../make_tboot.sh"
+bash "${dir}/../make_acms.sh"
+
+echo ""
 if [ -f "${kernel}" ] && [ -f "${initramfs}" ]; then
     while true; do
        echo "Current Debian Buster:"

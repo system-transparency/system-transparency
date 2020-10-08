@@ -17,13 +17,13 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 mnt="/tmp/mnt_stimg"
-img="${dir}/Syslinux_Linuxboot.img"
+img="${dir}/../stboot_mixed_firmware_bootlayout.img"
 
 mkdir -p "${mnt}_boot" || { echo -e "mkdir $failed"; exit 1; }
 # offset: sfdisk -d ${img}
 # ...
-# deploy/mixed-firmware/Syslinux_Linuxboot.img1 : start=        2048, size=       24576, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=B48F8501-978A-F644-9509-7D1146C867"
-# deploy/mixed-firmware/Syslinux_Linuxboot.img2 : start=       26624, size=       14303, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=0CC2C552-FACE-4745-B9F2-B90257BBD6"
+# stboot_mixed_firmware_bootlayout.img1 : start=        2048, size=       24577, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, uuid=AA42752A-0BC3-4948-BA85-284313A49965, name="STBOOT", attrs="LegacyBIOSBootable"
+# stboot_mixed_firmware_bootlayout.img2 : start=       28672, size=     1570817, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=4DCFBA35-047C-4B07-ACEB-EE208D76B779, name="STDATA"
 #
 # 1st partition:
 # 2048 blocks * 512 bytes per block -> 1048576 

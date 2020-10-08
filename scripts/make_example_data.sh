@@ -92,7 +92,7 @@ if [ -f "${data_dir}/${network_file}" ]; then
        echo "[INFO]: Current ${network_file}:"
        cat "${data_dir}/${network_file}"
        read -rp "Override with settings from run.config? (y/n)" yn
-       case $yn inwith
+       case $yn in
           [Yy]* ) rm -f "${data_dir}/${network_file}"; break;;
           [Nn]* ) write=false; break;;
           * ) echo "Please answer yes or no.";;
