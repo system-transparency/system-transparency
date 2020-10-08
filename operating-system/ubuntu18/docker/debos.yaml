@@ -1,0 +1,63 @@
+{{- $architecture := or .architecture "amd64" -}}
+{{- $suite := or .suite "bionic" -}}
+{{ $image := or .image (printf "linux-image-4.15.0-20-generic") }}
+
+architecture: {{ $architecture }}
+
+actions:
+# Bootstrap the base system
+  - action: debootstrap
+    keyring-file: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+    suite: {{ $suite }}
+    components:
+      - main
+    mirror: http://archive.ubuntu.com/ubuntu
+    variant: minbase
+
+# Install packages 
+  - action: apt
+    description: Install some packages
+    packages:
+      - adduser
+      - sudo
+      - lshw
+      - usbutils
+      - util-linux
+      - bash
+      - pciutils
+      - iproute2
+      - netplan.io
+      - isc-dhcp-client
+      - udev
+      - nano
+      - linux-firmware
+      - linux-image-4.15.0-20-generic
+      - openssh-server
+      - python3
+      - systemd
+
+# Copy files into the new system
+  - action: overlay
+    source: overlays
+    destination: overlays
+
+
+# Configure programs and clean up build artifacts
+  - action: run
+    chroot: true
+    script: run-in-chroot.sh
+
+# Set hostname of the image
+  - action: run
+    chroot: true
+    command: echo ubuntu > /etc/hostname
+
+# This packs reproducibly
+  - action: run
+    chroot: false
+    script: pack-reproducible.sh {{ $image }}
+
+# This will pack normally
+#  - action: pack
+#    file: {{ $image }}
+#    compression: gz
