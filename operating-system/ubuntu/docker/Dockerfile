@@ -50,4 +50,4 @@ WORKDIR /usr/share/debootstrap/
 RUN cat /tmp/debootstrap-buster.patch | patch -p1
 
 WORKDIR /
-ENTRYPOINT /system-transparency/operating-system/ubuntu/docker/build-debian.sh
+ENTRYPOINT ["/system-transparency/operating-system/ubuntu/docker/build-debian.sh"]

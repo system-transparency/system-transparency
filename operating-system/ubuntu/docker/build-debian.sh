@@ -10,6 +10,21 @@ export TZ=UTC
 
 set -e
 
+
+# This  variable determines the Ubuntu Version which will be 
+# build by selecting the correct yaml file for debos.
+UBUNTU_VERSION=$1
+
+if [ $UBUNTU_VERSION -eq 20 ]
+then
+	UBUNTU_DEBOS="Ubuntu20.yaml"
+fi
+
+if [ $UBUNTU_VERSION -eq 18 ]
+then
+	UBUNTU_DEBOS="Ubuntu18.yaml"
+fi
+
 cd "$(dirname "$0")"
 TOP=$(pwd)
 export TOP
@@ -60,7 +75,7 @@ build_debian_image() {
 		"--environ-var=TZ:$TZ" \
 		--artifactdir="$TOP/out/" \
 		"${dargs[@]}" \
-		./debos.yaml
+		./$UBUNTU_DEBOS 
 
 	if [ ! -z "$DEBOS_USER_ID" ]; then
 		chown -R $DEBOS_USER_ID:$DEBOS_GROUP_ID "$TOP/out"
