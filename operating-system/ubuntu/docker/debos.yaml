@@ -1,0 +1,46 @@
+{{- $architecture := or .architecture "amd64" -}}
+{{- $suite := or .suite "focal" -}}
+{{ $image := or .image (printf "linux-image-5.4.0-26-generic") }}
+
+architecture: {{ $architecture }}
+
+actions:
+  - action: debootstrap
+    keyring-file: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+    suite: {{ $suite }}
+    components:
+      - main
+    mirror: http://archive.ubuntu.com/ubuntu
+    variant: minbase
+    keyring: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+  - action: apt
+    description: Install some packages
+    packages:
+      - adduser
+      - linux-firmware
+      - linux-image-5.4.0-26-generic
+      - openssh-server
+      - python3
+      - systemd
+
+  - action: run
+    chroot: true
+    script: run-in-chroot.sh
+
+  - action: overlay
+    source: overlays/add_example_root
+
+  - action: run
+    chroot: true
+    command: echo debian > /etc/hostname
+
+# This packs reproducibly
+  - action: run
+    chroot: false
+    script: pack-reproducible.sh {{ $image }}
+
+# This will pack normally
+#  - action: pack
+#    file: {{ $image }}
+#    compression: gz

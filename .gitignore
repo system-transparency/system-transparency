@@ -26,6 +26,9 @@
 /operating-system/debian/docker/out
 /operating-system/debian/docker/document_build.info
 /operating-system/debian/docker/.debos-*
+/operating-system/ubuntu/docker/out
+/operating-system/ubuntu/docker/document_build.info
+/operating-system/ubuntu/docker/.debos-*
 /keys/signing_keys/*
 /keys/cpu_keys/*
 /.notes/
