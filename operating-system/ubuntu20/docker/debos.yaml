@@ -5,6 +5,7 @@
 architecture: {{ $architecture }}
 
 actions:
+# Bootstrap the base system
   - action: debootstrap
     keyring-file: /usr/share/keyrings/ubuntu-archive-keyring.gpg
     suite: {{ $suite }}
@@ -12,28 +13,44 @@ actions:
       - main
     mirror: http://archive.ubuntu.com/ubuntu
     variant: minbase
-    keyring: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 
+# Install packages 
   - action: apt
     description: Install some packages
     packages:
       - adduser
+      - sudo
+      - lshw
+      - usbutils
+      - util-linux
+      - bash
+      - pciutils
+      - iproute2
+      - netplan.io
+      - isc-dhcp-client
+      - udev
+      - nano
       - linux-firmware
       - linux-image-5.4.0-26-generic
       - openssh-server
       - python3
       - systemd
 
+# Copy files into the new system
+  - action: overlay
+    source: overlays
+    destination: overlays
+
+
+# Configure programs and clean up build artifacts
   - action: run
     chroot: true
     script: run-in-chroot.sh
 
-  - action: overlay
-    source: overlays/add_example_root
-
+# Set hostname of the image
   - action: run
     chroot: true
-    command: echo debian > /etc/hostname
+    command: echo ubuntu > /etc/hostname
 
 # This packs reproducibly
   - action: run
@@ -44,3 +61,4 @@ actions:
 #  - action: pack
 #    file: {{ $image }}
 #    compression: gz
+

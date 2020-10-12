@@ -11,7 +11,7 @@ root="$(cd "${dir}/../../" && pwd)"
 
 kernel="${dir}/docker/out/vmlinuz-5.4.0-26-generic"
 kernel_backup="${kernel}.backup"
-initramfs="${dir}/docker/out/linux-image-5.4.0-26-generic"
+initramfs="${dir}/docker/out/initrd.img-5.4.0-26-generic"
 initramfs_backup="${initramfs}.backup"
 docker_image="debos"
 

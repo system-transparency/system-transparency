@@ -15,8 +15,22 @@ rm /var/lib/systemd/catalog/database
 # remove systemd machine id
 rm /etc/machine-id
 
-# FIXME: remove this password
-echo 'root:$5$iog/g/SUY7Pm0L$vjoNOFeV5OHSZyxNDsLmZpI0XorPu8iZixBLvLBP6S5' | chpasswd -e
+# Copy netplan file to correct location
+cp -r /overlays/netplan /etc
+
+# delete overlays directory
+rm -Rf /overlays
+
+# Add standard user, add admin to sudo group and set password
+useradd admin -m -s /bin/bash
+usermod -a -G sudo admin
+echo 'admin:$1$1isJmq7P$8eXDgvusVClLkgsBaZDGW1' | chpasswd -e
+
+# Enable password authentication for ssh server
+sed -i  's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+
+#Enable ssh server
+systemctl enable ssh
 
 # remove initrd as its not needed nor reproducible
 rm -rf /var/lib/initramfs-tools/*
