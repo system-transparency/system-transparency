@@ -15,8 +15,8 @@ source ${root}/run.config
 hostvars_name="hostvars.json"
 hostvars="${dir}/include/${hostvars_name}"
 fingerprint_file=${ST_ROOTCERT_FINGERPRINT_FILE}
-num_signatures=${ST_HOSTVARS_NUM_SIGNATURES}
-bootmode=${ST_HOSTVARS_BOOTMODE}
+num_signatures=${ST_NUM_SIGNATURES}
+bootmode=${ST_BOOTMETHOD}
 
 if [ -f "${hostvars}" ]; then
     while true; do

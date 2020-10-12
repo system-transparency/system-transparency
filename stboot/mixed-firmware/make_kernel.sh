@@ -13,8 +13,8 @@ root="$(cd "${dir}/../../" && pwd)"
 source ${root}/run.config
 
 out="${dir}/vmlinuz-linuxboot"
-kernel_version=${ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_VERSION}
-kernel_config=${ST_MIXED_FIRMWARE_LINUXBOOT_KERNEL_CONFIG}
+kernel_version=${ST_MBR_BOOTLOADER_KERNEL_VERSION}
+kernel_config=${ST_MBR_BOOTLOADER_KERNEL_CONFIG}
 
 bash "${root}/stboot/make_kernel.sh" "${kernel_config}" "${out}" "${kernel_version}"
 

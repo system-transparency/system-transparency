@@ -13,8 +13,8 @@ root="$(cd "${dir}/../../" && pwd)"
 source ${root}/run.config
 
 out="${dir}/stboot.efi"
-kernel_version=${ST_UEFI_FIRMWARE_EFISTUB_KERNEL_VERSION}
-kernel_config=${ST_UEFI_FIRMWARE_EFISTUB_KERNEL_CONFIG}
+kernel_version=${ST_EFI_EXECUTABLE_EFISTUB_KERNEL_VERSION}
+kernel_config=${ST_EFI_EXECUTABLE_EFISTUB_KERNEL_CONFIG}
 cmdline=${ST_LINUXBOOT_CMDLINE}
 
 

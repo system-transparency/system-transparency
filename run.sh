@@ -31,9 +31,8 @@ checkOVMF
 # Global build configuration
 global_config=${root}/run.config
 
-if [ ! -r "${global_config}" ]; then 
-   bash "${root}/scripts/make_global_config.sh"
-fi
+bash "${root}/scripts/make_global_config.sh"
+
 source ${global_config}
 
 
