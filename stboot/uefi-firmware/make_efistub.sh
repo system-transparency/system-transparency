@@ -31,6 +31,6 @@ sed -i "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"${cmdline}\"/" "${kernel_config}.pa
 
 echo "[INFO]: $(realpath --relative-to="${root}" "${kernel_config}.patch" created.)"
 
-bash "${root}/stboot/make_kernel.sh" "${kernel_config}" "${out}" "${kernel_version}"
+bash "${root}/stboot/make_kernel.sh" "${root}/${kernel_config}" "${out}" "${kernel_version}"
 
 trap - EXIT
