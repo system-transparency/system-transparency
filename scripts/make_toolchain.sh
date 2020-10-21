@@ -39,7 +39,7 @@ echo "[INFO]: install u-root for initramfs generation"
 echo "[INFO]: GO111MODULE=off"
 GO111MODULE=off GOPATH="${gopath}" go install "${uroot_src}"
 echo
-echo "[INFO]: install stmanager to handle bootballs"
+echo "[INFO]: install stmanager to handle OS packages"
 echo "[INFO]: GO111MODULE=off"
 GO111MODULE=off GOPATH="${gopath}" go install "${uroot_src}/tools/stmanager"
 cd "${dir}"

@@ -38,7 +38,7 @@ Hostvars: Cirtical data included into the initramfs
 * Integer controlling the minimum number of signatures that must pass verification
 * String array of allowed fingerprints of root certificates for signature verification
 * Build timestamp
-* Custom type indicating the [boot mode](#Multiple-boot-modes-for-loading-System-Transparency-Bootballs)
+* Custom type indicating the [boot mode](#Multiple-boot-modes-for-loading-System-Transparency-OS-packages)
 
 Data partition: Further data supposed to be on disk
 * HTTPS root certificate
@@ -55,37 +55,38 @@ Proper system time is important for certificate validation. Therefore the system
 ### TXT self test
 Stboot uses https://github.com/9elements/converged-security-suite to run a self test on TXT compatibility.
 
-### Multiple boot modes for loading System Transparency Bootballs
+### Multiple boot modes for loading System Transparency OS packages
 Network DHCP:
 * Configure network dynamically via DHCP
-* Download bootball from a provisioning server
+* Download OS package from a provisioning server
     * Request the file from the provisioning servers in the order of the URL list in hostvars
     * Take the first match
     
 Nework static IP:
 * Configure network dynamically via DHCP
-* Download bootball from a provisioning server
+* Download OS package from a provisioning server
     * Request the file from the provisioning servers in the order of the URL list in hostvars
     * Take the first match
     
 Local storage: 
-Requires operator to place new bootballs in `DATA-PARTITION/stboot/bootballs/new/` and move successfully boot ones to `DATA-PARTITIONstboot/bootballs/known_good/`.
-* Try verifying and then booting these files first, in reverse alphabetical order: `DATA-PARTITION/stboot/bootballs/new/*.stboot` (close to "standard ls").
-* If signature verification fails on a file, move the file here: `DATA-PARTITION/stboot/bootballs/invalid/`.
-* If no files in `DATA-PARTITION/new/` can be verified, try these files, in reverse alphabetical order: `DATA-PARTITION/stboot/bootballs/known_good/*.stboot`.
+Requires operator to place new OS packages in `DATA-PARTITION/stboot/os-pkgs/new/` and move successfully boot ones to `DATA-PARTITIONstboot/os-pkgs/known_good/`.
+* Try verifying and then booting these files first, in reverse alphabetical order: `DATA-PARTITION/stboot/os-pkgs/new/*.zip
+` (close to "standard ls").
+* If signature verification fails on a file, move the file here: `DATA-PARTITION/stboot/os-pkgs/invalid/`.
+* If no files in `DATA-PARTITION/new/` can be verified, try these files, in reverse alphabetical order: `DATA-PARTITION/stboot/os-pkgs/known_good/*.zip`.
 * If one of these fail, move it into `/invalid` ,too.
  (close to "standard ls")
-* Save the path to the bootball which will be booted into `DATA-PARTITION/stboot/bootballs/current-ball.stboot` file
+* Save the path to the OS package which will be booted into `DATA-PARTITION/stboot/os-pkgs/current-ospkg.zip` file
 
 
 ### Signature verification
-A bootball includes one or more Signatures of the included boot files (kernel, initramfs, et al.) together with the corresponding certificates.
-The root certificate is also included. The singnature verification after downloading the bootball then works as follows:
+A OS package includes one or more Signatures of the included boot files (kernel, initramfs, et al.) together with the corresponding certificates.
+The root certificate is also included. The singnature verification after downloading the OS package then works as follows:
 * Validate the root certificate with the fingerprints in hostvars
 * Check that the certificates are signed by the root certificate
 * Verify the signature of the boot files
    * Make sure there is no double signature
-* The bootball will be used if minimum the number of signatures indicated in hosvars passed the verification
+* The OS package will be used if minimum the number of signatures indicated in hosvars passed the verification
 
 ### Measured boot
 * Extend PCRs with measurement of operation system
@@ -106,14 +107,14 @@ There are two main parts to build. You need an operating system which is reprodu
 ```
 
 ### Keys
-The blob containing the operating system, called _bootball_ needs to be signed. You can use your own keys or create new ones with:
+The blob containing the operating system, called _OS package_ needs to be signed. You can use your own keys or create new ones with:
 
 ```bash
 ./scripts/make_keys_and_certs.sh
 ```
 
 The created directory `./keys/` contains:
-- `signing_keys/`: Contains the keys for signing the bootball
+- `signing_keys/`: Contains the keys for signing the OS package
 - `cpu_keys/`: Contains the keys for using the cpu command for debugging
 
 ### Configuration Files
@@ -123,24 +124,24 @@ The components, especially the bootloader require certain configuration files to
 ./scripts/make_example_data.sh
 ```
 
-### Operating System and Bootball
+### Operating System and OS package
 The operating systems to be used with _System Transparency_ need to be build reproducible. Currently, the only supported OS by this tooling is Debian Buster.
 
 ```bash
 ./operating-system/debian/make_debian.sh
 ```
 
-After the kernel and initramfs being created use the _stmanager_ utility to create a sign a bootball from it.
+After the kernel and initramfs being created use the _stmanager_ utility to create a sign a OS package from it.
 See `stmanager --help-long` or to make use of the generated keys form `./scripts/make_keys_and_certs.sh` call:
 
 ```bash
-./scripts/create_and_sign_bootball.sh
+./scripts/create_and_sign_os_package.sh
 ```
 
-If you want to go with the netboot feature of _stboot_ have set the corresponding parameters in `run.config` you can upload the bootball to your provisioning server with:
+If you want to go with the netboot feature of _stboot_ have set the corresponding parameters in `run.config` you can upload the OS package to your provisioning server with:
 
 ```bash
-./scripts/upload_bootball.sh
+./scripts/upload_os_package.sh
 ```
 
 ### Bootloader (stboot)

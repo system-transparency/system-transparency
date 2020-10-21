@@ -38,10 +38,10 @@ ls -l "${root}/stboot/data/."
 e2mkdir "${img}".ext4:/etc
 e2mkdir "${img}".ext4:/stboot
 e2mkdir "${img}".ext4:/stboot/etc
-e2mkdir "${img}".ext4:/stboot/bootballs
-e2mkdir "${img}".ext4:/stboot/bootballs/new
-e2mkdir "${img}".ext4:/stboot/bootballs/invalid
-e2mkdir "${img}".ext4:/stboot/bootballs/known_good
+e2mkdir "${img}".ext4:/stboot/os-pkgs
+e2mkdir "${img}".ext4:/stboot/os-pkgs/new
+e2mkdir "${img}".ext4:/stboot/os-pkgs/invalid
+e2mkdir "${img}".ext4:/stboot/os-pkgs/known_good
 
 for i in "${root}/stboot/data"/*; do
   [ -e "$i" ] || continue
@@ -50,11 +50,11 @@ done
 
 e2ls "${img}".ext4:/stboot/etc/
 
-echo "[INFO]: Copying bootballs to image (for LocalStorage bootmode)"
-ls -l "${root}/bootballs/."
-for i in "${root}/bootballs"/*; do
+echo "[INFO]: Copying OS packages to image (for LocalStorage bootmode)"
+ls -l "${root}/os-packages/."
+for i in "${root}/os-packages"/*; do
   [ -e "$i" ] || continue
-  e2cp "$i" "${img}".ext4:/stboot/bootballs/new
+  e2cp "$i" "${img}".ext4:/stboot/os-pkgs/new
 done
 
 echo "[INFO]: Constructing disk image from generated filesystems:"

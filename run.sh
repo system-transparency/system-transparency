@@ -110,7 +110,7 @@ done
 
 echo
 echo "############################################################"
-echo " Use stmanager to create a bootball with Debian Buster and"
+echo " Use stmanager to create a OS package with Debian Buster and"
 echo " sign with example keys"
 echo "############################################################"
 echo
@@ -123,7 +123,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/scripts/create_and_sign_bootball.sh"; break;;
+      [Rr]* ) bash "${root}/scripts/create_and_sign_os_package.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -132,18 +132,18 @@ done
 
 echo
 echo "############################################################"
-echo " Upload bootball to provisioning server"
+echo " Upload OS package to provisioning server"
 echo "############################################################"
 echo
-bootball="${root}/.newest-ball.stboot"
+os_package="${root}/.newest-ospkg.zip"
 while true; do
-   echo "bootball: $(realpath --relative-to="${root}" "${bootball}")"
-   echo "Run  (r) with bootball"
+   echo "OS package: $(realpath --relative-to="${root}" "${os_package}")"
+   echo "Run  (r) with OS package"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/scripts/upload_bootball.sh" "${bootball}"; break;;
+      [Rr]* ) bash "${root}/scripts/upload_os_package.sh" "${os_package}"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

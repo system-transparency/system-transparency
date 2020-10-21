@@ -21,16 +21,16 @@ prov_server_path=${ST_SSH_UPLOAD_PATH}
 [ -z "$prov_server_user" ] && { echo -e "upload $failed : prov_server_user not set in run.config"; exit 1; }
 [ -z "$prov_server_path" ] && { echo -e " upload $failed : prov_server_path not set in run.config"; exit 1; }
 
-bootball=""
+os_package=""
 if [[ $# -eq 0 ]] ; then
-    echo "Path to a stboot.ball file must be provided"
+    echo "Path to a OS package zip file must be provided"
     exit 1
 else
-    bootball="${1}"
-    [ -f "${bootball}" ] || { echo "${bootball} does not exist";  exit 1; }
+    os_package="${1}"
+    [ -f "${os_package}" ] || { echo "${os_package} does not exist";  exit 1; }
 fi
 
-echo "[INFO]: upload ${bootball} to ${prov_server_path}/ball.stboot at ${prov_server}"
-scp "$bootball" "${prov_server_user}@${prov_server}:${prov_server_path}/ball.stboot" || { echo -e "upload via scp $failed"; exit 1; }
-echo "[INFO]: successfully uploaded bootball"
+echo "[INFO]: upload ${os_package} to ${prov_server_path}/ospkg.zip at ${prov_server}"
+scp "$os_package" "${prov_server_user}@${prov_server}:${prov_server_path}/ospkg.zip" || { echo -e "upload via scp $failed"; exit 1; }
+echo "[INFO]: successfully uploaded OS package"
 

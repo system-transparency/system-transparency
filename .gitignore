@@ -1,8 +1,8 @@
 /.vscode/*
 /run.config
 /cache/
-/bootballs/
-/.newest-ball.stboot
+/os-packages/
+/.newest-ospkg.zip
 /stboot/*.cpio
 /stboot/*.cpio.gz
 /stboot/*.backup
