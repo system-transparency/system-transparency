@@ -6,9 +6,7 @@
 set -o errexit
 set -o pipefail
 set -o nounset
-# set -o xtrace
-
-failed="\e[1;5;31mfailed\e[0m"
+#set -o xtrace
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -36,7 +34,8 @@ kernel_src_signature="${kernel_src}/${kernel_name}.tar.sign"
 
 # Dev keys for verification process
 
-dev_keys="torvalds@kernel.org gregkh@kernel.org"
+dev_key_1="torvalds@kernel.org"
+dev_key_2="gregkh@kernel.org"
 keyring=${src_cache}/gnupg/keyring.gpg
 
 # ---
@@ -76,11 +75,10 @@ if [ -f "${keyring}" ]; then
     echo "[INFO]: Using cached kernel developer keys in $(realpath --relative-to="${root}" "${keyring}")"
 else
     echo "[INFO]: Fetching kernel developer keys"
-    if ! gpg --batch --quiet --homedir "${src_cache}/gnupg" --auto-key-locate wkd --locate-keys "${dev_keys}"; then
-        echo -e "Fetching keys $failed"
+    if ! gpg -v --batch --homedir "${src_cache}/gnupg" --auto-key-locate wkd --locate-keys ${dev_key_1} ${dev_key_2}; then
         exit 1
     fi
-    gpg --batch --homedir "${src_cache}/gnupg" --no-default-keyring --export "${dev_keys}" > "${keyring}"
+    gpg --batch --homedir "${src_cache}/gnupg" --no-default-keyring --export ${dev_key_1} ${dev_key_2} > "${keyring}"
 fi
 
 echo "[INFO]: Verifying signature of the kernel tarball"
@@ -88,17 +86,16 @@ count=$(xz -cd "${src_cache}/${kernel_name}.tar.xz" \
 	   | gpgv --homedir "${src_cache}/gnupg" "--keyring=${keyring}" --status-fd=1 "${src_cache}/${kernel_name}.tar.sign" - \
            | grep -c -E '^\[GNUPG:\] (GOODSIG|VALIDSIG)')
 if [[ "${count}" -lt 2 ]]; then
-    echo -e "Verifying kernel tarball $failed"
     exit 1
 fi
 echo
-echo "[INFO]: Successfully verified kernel source tar ball"
+echo "[INFO]: Successfully verified kernel source tarball"
 
 # ---
 
 # Build kernel in temporary directory
 
-echo "[INFO]: Unpacking kernel source tar ball"
+echo "[INFO]: Unpacking kernel source tarball"
 [ -d "${src_cache}/${kernel_name}" ] && rm -rf "${src_cache:?}/${kernel_name:?}"
 tar -xf "${src_cache}/${kernel_name}.tar.xz" -C "${src_cache}"
 
