@@ -7,7 +7,7 @@
 /stboot/*.cpio.gz
 /stboot/*.backup
 /stboot/*.json
-/stboot/include/hostvars.json
+/stboot/include/security_configuration.json
 /stboot/data/*
 /stboot/coreboot-firmware/*.img
 /stboot/coreboot-firmware/*.backup

@@ -34,7 +34,7 @@ This will lead you through the process described in [Build Process in Detail](#B
 ## Features
 
 ### Configuration data
-Hostvars: Cirtical data included into the initramfs
+security_configuration.json: Cirtical data included into the initramfs
 * Integer controlling the minimum number of signatures that must pass verification
 * String array of allowed fingerprints of root certificates for signature verification
 * Build timestamp
@@ -50,7 +50,7 @@ Data partition: Further data supposed to be on disk
 * Provisioning Server URL list
 
 ### Time validation
-Proper system time is important for certificate validation. Therefore the system time is validated using NTP Servers. If no NTP Server is available the timestamp in hostvars is used for the validation of the system time.
+Proper system time is important for certificate validation. Therefore the system time is validated using NTP Servers. If no NTP Server is available the timestamp in security_configuration.json is used for the validation of the system time.
 
 ### TXT self test
 Stboot uses https://github.com/9elements/converged-security-suite to run a self test on TXT compatibility.
@@ -59,13 +59,13 @@ Stboot uses https://github.com/9elements/converged-security-suite to run a self 
 Network DHCP:
 * Configure network dynamically via DHCP
 * Download OS package from a provisioning server
-    * Request the file from the provisioning servers in the order of the URL list in hostvars
+    * Request the file from the provisioning servers in the order of the URL list in security_configuration.json
     * Take the first match
     
 Nework static IP:
 * Configure network dynamically via DHCP
 * Download OS package from a provisioning server
-    * Request the file from the provisioning servers in the order of the URL list in hostvars
+    * Request the file from the provisioning servers in the order of the URL list in security_configuration.json
     * Take the first match
     
 Local storage: 
@@ -82,7 +82,7 @@ Requires operator to place new OS packages in `DATA-PARTITION/stboot/os-pkgs/new
 ### Signature verification
 A OS package includes one or more Signatures of the included boot files (kernel, initramfs, et al.) together with the corresponding certificates.
 The root certificate is also included. The singnature verification after downloading the OS package then works as follows:
-* Validate the root certificate with the fingerprints in hostvars
+* Validate the root certificate with the fingerprints in security_configuration.json
 * Check that the certificates are signed by the root certificate
 * Verify the signature of the boot files
    * Make sure there is no double signature

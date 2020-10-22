@@ -12,17 +12,17 @@ root="$(cd "${dir}/../" && pwd)"
 # import global configuration
 source ${root}/run.config
 
-hostvars_name="hostvars.json"
-hostvars="${dir}/include/${hostvars_name}"
+security_config_name="security_configuration.json"
+security_config="${dir}/include/${security_config_name}"
 fingerprint_file=${ST_ROOTCERT_FINGERPRINT_FILE}
 num_signatures=${ST_NUM_SIGNATURES}
 bootmode=${ST_BOOTMETHOD}
 
-if [ -f "${hostvars}" ]; then
+if [ -f "${security_config}" ]; then
     while true; do
-       echo "Current ${hostvars_name}:"
-       cat "${hostvars}"
-       read -rp "Override hostvars.json settings from run.config? (y/n)" yn
+       echo "Current ${security_config_name}:"
+       cat "${security_config}"
+       read -rp "Override security_configuration.json settings from run.config? (y/n)" yn
        case $yn in
           [Yy]* ) break;;
           [Nn]* ) exit;;
@@ -31,9 +31,9 @@ if [ -f "${hostvars}" ]; then
     done
 fi
 
-echo "[INFO]: Create $(realpath --relative-to="${root}" "${hostvars}")"
+echo "[INFO]: Create $(realpath --relative-to="${root}" "${security_config}")"
 
-cat >"${hostvars}" <<EOL
+cat >"${security_config}" <<EOL
 {
   "minimal_signatures_match": ${num_signatures},
   "fingerprints": [
