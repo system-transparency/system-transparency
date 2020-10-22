@@ -9,7 +9,7 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
-img="${dir}/stdata.img"
+img="${dir}/stboot_coreboot_installation.img"
 img_backup="${img}.backup"
 
 if [ -f "${img}" ]; then
@@ -33,7 +33,7 @@ if [ -f "${img}".ext4 ]; then rm "${img}".ext4; fi
 mkfs.ext4 -L "STDATA" "${img}".ext4 $((size_ext4 >> 10))
 
 echo "[INFO]: Copying data files to image"
-ls -l "${root}/stboot/data/."
+ls -l "${root}/stboot-installation/data/."
 
 e2mkdir "${img}".ext4:/etc
 e2mkdir "${img}".ext4:/stboot
@@ -43,7 +43,7 @@ e2mkdir "${img}".ext4:/stboot/os-pkgs/new
 e2mkdir "${img}".ext4:/stboot/os-pkgs/invalid
 e2mkdir "${img}".ext4:/stboot/os-pkgs/known_good
 
-for i in "${root}/stboot/data"/*; do
+for i in "${root}/stboot-installation/data"/*; do
   [ -e "$i" ] || continue
   e2cp "$i" "${img}".ext4:/stboot/etc
 done
@@ -84,4 +84,4 @@ echo "[INFO]: $(realpath --relative-to="${root}" "${img}") created."
 
 echo ""
 echo "[INFO]: Creation of coreboot-rom not automated yet."
-echo "[INFO]: Plese follow the steps in stboot/coreboot-firmware/README.md"
+echo "[INFO]: Plese follow the steps in stboot-installation/coreboot-payload/README.md"

@@ -69,7 +69,7 @@ Nework static IP:
     * Take the first match
     
 Local storage: 
-Requires operator to place new OS packages in `DATA-PARTITION/stboot/os-pkgs/new/` and move successfully boot ones to `DATA-PARTITIONstboot/os-pkgs/known_good/`.
+Requires operator to place new OS packages in `DATA-PARTITION/stboot/os-pkgs/new/` and move successfully boot ones to `DATA-PARTITION/stboot/os-pkgs/known_good/`.
 * Try verifying and then booting these files first, in reverse alphabetical order: `DATA-PARTITION/stboot/os-pkgs/new/*.zip
 ` (close to "standard ls").
 * If signature verification fails on a file, move the file here: `DATA-PARTITION/stboot/os-pkgs/invalid/`.
@@ -149,35 +149,35 @@ System Transparency Boot (stboot) is [LinuxBoot](https://www.linuxboot.org/) dis
 
 Regarding deployment, we defined three real world scenarios which should at least support a high chance that we have covered a lot of hardware systems. We categorized the scenarios based on the firmware with levels. With the lowest firmware level it is possible to make the whole system stack transparent.
 
-#### Leased server with mixed-firmware scenario (FL3)
+#### Leased server with MBR bootloader installation
 Bringing system transparency to already existing hardware which can’t be transformed to open source firmware machines is troublesome. Therefore, we need to propose a solution which even works on those limited systems. We will use a standard Ubuntu 18.04 server edition and standard bootloader to load _stboot_. This scenario is especially helpful for a server landscape with mixed firmware like BIOS and UEFI.
 
 ```bash
-./stboot/mixed-firmware/make_image.sh
+./stboot-installation/mbr-bootloader/make_image.sh
 ```
 
-You need to deploy the created`./stboot/mixed-firmware/stboot_mixed_firmware_bootlayout.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. The MBR is written accordingly.
+You need to deploy the created`./stboot-installation/mbr-bootloader/stboot_mbr_installation.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. The MBR is written accordingly.
 
-#### Leased server with UEFI-firmware scenario (FL2)
+#### Leased server with EFI executable installation
 In this scenario we have a closed source UEFI firmware which cannot easily be modified. In order to deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as EFI application.
 
 ```bash
-./stboot/uefi-firmware/make_image.sh
+./stboot-installation/efi-executable/make_image.sh
 ```
 
-You need to deploy the created`./stboot/mixed-firmware/stboot_uefi_firmware_bootlayout.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. _STBOOT_ in this case is an EFI special partition containing the bootloader as an efistub.
+You need to deploy the created`./stboot-installation/efi-executable/stboot_efi_installation.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. _STBOOT_ in this case is an EFI special partition containing the bootloader as an efistub.
 
-#### Colocated server with Open Source firmware scenario (FL1)
+#### Colocated server with coreboot payload installation
 In this scenario we are able to place our own server in the data center. This server already contains Open Source firmware and is able to boot a Linux kernel payload after hardware initialization.
 
 This process is not automated yet. Only the _STDATA_ partition can be generated using:
 
 ```
-./stboot/coreboot-firware/make_image.sh
+./stboot-installation/coreboot-payload/make_image.sh
 ```
 
-To build and flash the coreboot-rom including _stboot_ as a payload, please refer to [this instructions](stboot/coreboot-firmware/#deploy-coreboot-rom). 
-You need to deploy the created`./stboot/coreboot-firmware/stdata.img` to the hard drive of your host. It contains a _STDATA_ partition only.
+To build and flash the coreboot-rom including _stboot_ as a payload, please refer to [this instructions](stboot-installation/coreboot-payload/#deploy-coreboot-rom). 
+You need to deploy the created`./stboot-installation/coreboot-payload/*.img` to the hard drive of your host. It contains a _STDATA_ partition only.
 
 ## Debugging
 The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in the section of respective firmware scenario. Beside usual kernel parameters you can pass flags to _stboot_ via the special parameter `uroot.uinitargs`. 

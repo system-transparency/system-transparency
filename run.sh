@@ -156,16 +156,16 @@ echo " Build bootloader "
 echo "############################################################"
 echo
 while true; do
-   echo "Run  (1) Coreboot ROM"
-   echo "Run  (2) Image for UEFI systems"
-   echo "Run  (3) Image for mixed-firmware systems"
+   echo "Run  (1) coreboot payload installation"
+   echo "Run  (2) EFI executable installation"
+   echo "Run  (3) MBR bootloader installation"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [1]* ) bash "${root}/stboot/coreboot-firmware/make_dummy.sh"; break;;
-      [2]* ) bash "${root}/stboot/uefi-firmware/make_image.sh"; break;;
-      [3]* ) bash "${root}/stboot/mixed-firmware/make_image.sh"; break;;
+      [1]* ) bash "${root}/stboot-installation/coreboot-payload/make_dummy.sh"; break;;
+      [2]* ) bash "${root}/stboot-installation/efi-executable/make_image.sh"; break;;
+      [3]* ) bash "${root}/stboot-installation/mbr-bootloader/make_image.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
@@ -178,16 +178,16 @@ echo " Run in QEMU "
 echo "############################################################"
 echo
 while true; do
-   echo "Run  (1) Coreboot ROM"
-   echo "Run  (2) Image for UEFI systems"
-   echo "Run  (3) Image for mixed-firmware systems"
+   echo "Run  (1) coreboot payload installation"
+   echo "Run  (2) EFI executable installation"
+   echo "Run  (3) MBR bootloader installation"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [1]* ) bash "${root}/scripts/start_qemu_coreboot-firmware.sh"; break;;
-      [2]* ) bash "${root}/scripts/start_qemu_uefi-firmware.sh"; break;;
-      [3]* ) bash "${root}/scripts/start_qemu_mixed-firmware.sh"; break;;
+      [1]* ) bash "${root}/scripts/start_qemu_coreboot_payload.sh"; break;;
+      [2]* ) bash "${root}/scripts/start_qemu_efi_executable.sh"; break;;
+      [3]* ) bash "${root}/scripts/start_qemu_mbr_bootloader.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

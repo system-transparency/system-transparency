@@ -16,6 +16,6 @@ out="${dir}/vmlinuz-linuxboot"
 kernel_version=${ST_MBR_BOOTLOADER_KERNEL_VERSION}
 kernel_config=${ST_MBR_BOOTLOADER_KERNEL_CONFIG}
 
-bash "${root}/stboot/make_kernel.sh" "${root}/${kernel_config}" "${out}" "${kernel_version}"
+bash "${root}/stboot-installation/make_kernel.sh" "${root}/${kernel_config}" "${out}" "${kernel_version}"
 
 trap - EXIT

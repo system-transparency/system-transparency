@@ -12,7 +12,7 @@ root="$(cd "${dir}/../" && pwd)"
 # import global configuration
 source ${root}/run.config
 
-data_dir="${root}/stboot/data"
+data_dir="${root}/stboot-installation/data"
 https_root_certificates_file="https-root-certificates.pem"
 network_file="network.json"
 ntp_servers_file="ntp-servers.json"

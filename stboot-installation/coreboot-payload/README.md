@@ -60,10 +60,7 @@ The coreboot image is in build/coreboot.rom
 
 LinuxBoot payload integration:
 
-Copy the linuxboot kernel and initramfs including stboot here (e.g from the mixed-firmware workflow)
-After running the tooling they are in
-`deploy/mixed-firmware/vmlinuz-linuxboot`
-`stboot/initramfs-linuxboot.cpio.gz`
+Copy the linuxboot kernel and initramfs including stboot here (e.g from the MBR bootloader workflow)
 
 ```
 ./build/cbfstool ./build/coreboot.rom add-payload -r COREBOOT -f vmlinuz-linuxboot -n fallback/payload -C "console=ttyS0,115200 ro" -I initramfs-linuxboot.cpio.gz

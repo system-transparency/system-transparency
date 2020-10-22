@@ -83,7 +83,7 @@ _NOTE: Make sure you followed all the steps in section [Installation](#Installat
 
 Run `./run.sh` to generate all keys and make sure the newest stboot kernel and image has been built.
 
-Run `./start_qemu_mixed-firmware.sh`, wait 6 seconds then press <kbd>Ctrl-C</kbd> to enter the shell.
+Run `./start_qemu_*.sh`, wait 6 seconds then press <kbd>Ctrl-C</kbd> to enter the shell.
 
 Inside the shell run `elvish start_cpu.elv` to start the `cpud` server,
 then open another terminal.

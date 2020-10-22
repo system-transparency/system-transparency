@@ -18,10 +18,10 @@ kernel_config=${ST_EFI_EXECUTABLE_EFISTUB_KERNEL_CONFIG}
 cmdline=${ST_LINUXBOOT_CMDLINE}
 
 
-if [[ "${root}/stboot/initramfs-linuxboot.cpio.gz" -nt "${out}" ]]; then
-   # Force rebuild as initrd changed. FIXME: Use makefile
-   rm "${out}"
-fi
+# if [[ "${root}/stboot-installation/initramfs-linuxboot.cpio.gz" -nt "${out}" ]]; then
+#    # Force rebuild as initrd changed. FIXME: Use makefile
+#    rm "${out}"
+# fi
 
 echo "[INFO]: Patching kernel configuration to include configured command line:"
 echo "[INFO]: cmdline: ${cmdline}"
@@ -31,6 +31,6 @@ sed -i "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"${cmdline}\"/" "${kernel_config}.pa
 
 echo "[INFO]: $(realpath --relative-to="${root}" "${kernel_config}.patch" created.)"
 
-bash "${root}/stboot/make_kernel.sh" "${root}/${kernel_config}" "${out}" "${kernel_version}"
+bash "${root}/stboot-installation/make_kernel.sh" "${root}/${kernel_config}" "${out}" "${kernel_version}"
 
 trap - EXIT
