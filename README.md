@@ -117,13 +117,6 @@ The created directory `./keys/` contains:
 - `signing_keys/`: Contains the keys for signing the OS package
 - `cpu_keys/`: Contains the keys for using the cpu command for debugging
 
-### Configuration Files
-The components, especially the bootloader require certain configuration files to work. These files can be generated with the information inside the global configuration `run.config` by calling:
-
-```bash
-./scripts/make_example_data.sh
-```
-
 ### Operating System and OS package
 The operating systems to be used with _System Transparency_ need to be build reproducible. Currently, the only supported OS by this tooling is Debian Buster.
 

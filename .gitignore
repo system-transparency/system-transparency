@@ -8,7 +8,7 @@
 /stboot-installation/*.backup
 /stboot-installation/*.json
 /stboot-installation/include/security_configuration.json
-/stboot-installation/data/*
+/stboot-installation/data/host_configuration.json
 /stboot-installation/coreboot-payload/*.img
 /stboot-installation/coreboot-payload/*.backup
 /stboot-installation/mbr-bootloader/syslinux.cfg

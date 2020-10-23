@@ -25,6 +25,9 @@ if [ -f "${img}" ]; then
    done
 fi
 
+echo "[INFO]: check for Host configuration"
+bash "${root}/stboot-installation/make_host_config.sh"
+
 echo "[INFO]: Creating EXT4 filesystems for STDATA partition:"
 size_ext4=$((767*(1<<20)))
 alignment=1048576

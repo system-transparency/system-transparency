@@ -42,6 +42,9 @@ bash "${dir}/make_kernel.sh"
 echo "[INFO]: check for Syslinux configuration"
 bash "${dir}/make_syslinux_config.sh"
 
+echo "[INFO]: check for Host configuration"
+bash "${root}/stboot-installation/make_host_config.sh"
+
 
 if [ -d "${src}" ]; then
    echo "[INFO]: Using cached Syslinux in $(realpath --relative-to=${root} ${src})"

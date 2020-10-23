@@ -32,6 +32,9 @@ bash "${root}/stboot-installation/make_initramfs.sh"
 echo "[INFO]: check for LinuxBoot kernel as an efistub"
 bash "${dir}/make_efistub.sh"
 
+echo "[INFO]: check for Host configuration"
+bash "${root}/stboot-installation/make_host_config.sh"
+
 echo "[INFO]: using efistub: $(realpath --relative-to="${root}" "${efistub}")"
 
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"

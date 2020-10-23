@@ -74,24 +74,6 @@ done
 
 echo
 echo "############################################################"
-echo " Create default stboot configuration files"
-echo "############################################################"
-echo
-while true; do
-   echo "Run  (r)"
-   echo "Skip (s)"
-   echo "Quit (q)"
-   read -rp ">> " x
-   case $x in
-      [Rr]* ) bash "${root}/scripts/make_example_data.sh"; break;;
-      [Ss]* ) break;;
-      [Qq]* ) exit;;
-      * ) echo "Invalid input";;
-   esac
-done
-
-echo
-echo "############################################################"
 echo " Build Operating Sytem"
 echo "############################################################"
 echo
