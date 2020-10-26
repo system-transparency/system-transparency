@@ -12,24 +12,14 @@ root="$(cd "${dir}/../../" && pwd)"
 img="${dir}/stboot_efi_installation.img"
 img_backup="${img}.backup"
 
+
 if [ -f "${img}" ]; then
-    while true; do
-        echo "Current image file:"
-        ls -l "$(realpath --relative-to="${root}" "${img}")"
-        read -rp "Rebuild image? (y/n)" yn
-        case $yn in
-            [Yy]* ) echo "[INFO]: backup existing image to $(realpath --relative-to="${root}" "${img_backup}")"; mv "${img}" "${img_backup}"; break;;
-            [Nn]* ) exit;;
-            * ) echo "Please answer yes or no.";;
-        esac
-   done
+    echo
+    echo "[INFO]: backup existing image to $(realpath --relative-to="${root}" "${img_backup}")"
+    mv "${img}" "${img_backup}"
 fi
 
-echo "[INFO]: check for LinuxBoot initramfs including stboot bootloader"
-bash "${root}/stboot-installation/make_initramfs.sh"
-
-echo "[INFO]: check for LinuxBoot kernel as an efistub"
-bash "${dir}/make_efistub.sh"
+bash "${dir}/make_kernel.sh"
 
 bash "${root}/stboot-installation/build_host_config.sh"
 

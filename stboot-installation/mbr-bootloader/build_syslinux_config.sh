@@ -14,8 +14,6 @@ source ${root}/run.config
 
 config=${dir}/syslinux.cfg
 kernel="../vmlinuz-linuxboot"
-initramfs="../initramfs-linuxboot.cpio.gz"
-cmdline=${ST_LINUXBOOT_CMDLINE}
 
 echo 
 echo "[INFO]: Creating $(realpath --relative-to="${root}" "${config}")"
@@ -25,8 +23,6 @@ DEFAULT linuxboot
 
 LABEL linuxboot
 	KERNEL ${kernel}
-	APPEND ${cmdline}
-	INITRD ${initramfs}
 EOL
 
 cat "$(realpath --relative-to="${root}" "${config}")"

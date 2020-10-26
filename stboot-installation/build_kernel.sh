@@ -17,6 +17,7 @@ root="$(cd "${dir}/../" && pwd)"
 kernel_config_file=$1
 kernel_config_file_modified="${kernel_config_file}.modified"
 kernel_output_file=$2
+kernel_output_file_backup="${kernel_output_file}.backup"
 kernel_version=$3
 major=$(echo "${kernel_version}" | head -c1)
 kernel_src="https://cdn.kernel.org/pub/linux/kernel/v${major}.x"
@@ -29,8 +30,14 @@ dev_key_1="torvalds@kernel.org"
 dev_key_2="gregkh@kernel.org"
 keyring=${kernel_cache}/gnupg/keyring.gpg
 
+if [ -f "${kernel_output_file}" ]; then
+    echo
+    echo "[INFO]: backup existing kernel to $(realpath --relative-to="${root}" "${kernel_output_file_backup}")"
+    mv "${kernel_output_file}" "${kernel_output_file_backup}"
+fi
 
 if [ -d "${kernel_cache}/${kernel_name}" ]; then
+    echo
     echo "[INFO]: Using cached sources in $(realpath --relative-to="${root}" "${kernel_cache}/${kernel_name}")"
 else
     # sources
@@ -78,9 +85,11 @@ if [ -f "${kernel_config_file}.patch" ]; then
 elif [ -f "${kernel_config_file}" ]; then
     cfg=${kernel_config_file}
 fi
+
 cp "${cfg}" "${kernel_cache}/${kernel_name}/.config"
 cd "${kernel_cache}/${kernel_name}"
 while true; do
+    echo
     echo "[INFO]: Loaded $(realpath --relative-to="${root}" "${cfg}") as .config:"
     echo "[INFO]: Any config changes you make in menuconfig will be saved to:"
     echo "[INFO]: $(realpath --relative-to="${root}" "${kernel_config_file_modified}")"

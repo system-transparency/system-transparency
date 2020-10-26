@@ -16,7 +16,6 @@ syslinux_dir="syslinux-6.03"
 syslinux_cache="${root}/cache/syslinux/"
 syslinux_config="${dir}/syslinux.cfg"
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
-lnxbt_initramfs="${root}/stboot-installation/initramfs-linuxboot.cpio.gz"
 host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
 
 
@@ -29,7 +28,6 @@ else
 fi
 
 echo "[INFO]: Using kernel: $(realpath --relative-to="${root}" "${lnxbt_kernel}")"
-echo "[INFO]: Using initramfs: $(realpath --relative-to="${root}" "${lnxbt_initramfs}")"
 
 echo
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
@@ -48,9 +46,8 @@ mmd -i "${img}".vfat ::syslinux
 echo "[INFO]: Copying syslinux config"
 mcopy -i "${img}".vfat "${syslinux_config}" ::syslinux/
 
-echo "[INFO]: Copying linuxboot kernel and initramfs to image"
+echo "[INFO]: Copying linuxboot kernel to image"
 mcopy -i "${img}".vfat "${lnxbt_kernel}" ::
-mcopy -i "${img}".vfat "${lnxbt_initramfs}" ::
 
 echo "[INFO]: Copying host cofiguration"
 mcopy -i "${img}".vfat "${host_config}" ::

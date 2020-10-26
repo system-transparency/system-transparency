@@ -28,16 +28,9 @@ fi
 
 
 if [ -f "${initramfs_compressed}" ]; then
-    while true; do
-       echo "Current Linuxboot initramfs:"
-       ls -l "$(realpath --relative-to="${root}" "${initramfs_compressed}")"
-       read -rp "Rebuild initramfs? (y/n)" yn
-       case $yn in
-          [Yy]* ) echo "[INFO]: backup existing initramfs to $(realpath --relative-to="${root}" "${initramfs_backup}")"; mv "${initramfs_compressed}" "${initramfs_backup}"; break;;
-          [Nn]* ) exit;;
-          * ) echo "Please answer yes or no.";;
-       esac
-    done 
+    echo
+    echo "[INFO]: backup existing initramfs to $(realpath --relative-to="${root}" "${initramfs_backup}")"
+    mv "${initramfs_compressed}" "${initramfs_backup}"
 fi
 
 bash "${dir}/build_security_config.sh"

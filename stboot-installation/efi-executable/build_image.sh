@@ -10,7 +10,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 img="${dir}/stboot_efi_installation.img"
-efistub="${dir}/stboot.efi"
+efistub="${dir}/linuxboot.efi"
 host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
 
 
