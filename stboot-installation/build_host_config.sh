@@ -33,4 +33,6 @@ cat >"${host_config}" <<EOL
 }
 EOL
 
+cat "$(realpath --relative-to="${root}" "${host_config}")"
+
 

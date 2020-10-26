@@ -40,8 +40,7 @@ if [ -f "${initramfs_compressed}" ]; then
     done 
 fi
 
-echo "[INFO]: check for security_configuration.json"
-bash "${dir}/make_security_config.sh"
+bash "${dir}/build_security_config.sh"
 
 echo "[INFO]: update timstamp in security_configuration.json to $(date +%s)"
 jq '.build_timestamp = $newVal' --argjson newVal "$(date +%s)" "${dir}"/files-initramfs/security_configuration.json > tmp.$$.json && mv tmp.$$.json "${dir}"/files-initramfs/security_configuration.json || { echo "Cannot update timestamp in security_configuration.json. Creating initramfs $failed";  exit 1; }

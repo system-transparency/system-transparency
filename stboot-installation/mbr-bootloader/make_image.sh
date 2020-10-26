@@ -32,10 +32,8 @@ bash "${root}/stboot-installation/make_initramfs.sh"
 echo "[INFO]: check for LinuxBoot kernel"
 bash "${dir}/make_kernel.sh"
 
-echo "[INFO]: check for Syslinux configuration"
-bash "${dir}/make_syslinux_config.sh"
+bash "${dir}/build_syslinux_config.sh"
 
-echo "[INFO]: check for Host configuration"
-bash "${root}/stboot-installation/make_host_config.sh"
+bash "${root}/stboot-installation/build_host_config.sh"
 
 bash "${dir}/build_image.sh"

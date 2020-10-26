@@ -18,8 +18,7 @@ initramfs="../initramfs-linuxboot.cpio.gz"
 cmdline=${ST_LINUXBOOT_CMDLINE}
 
 echo 
-echo "Creating $(realpath --relative-to="${root}" "${config}")"
-
+echo "[INFO]: Creating $(realpath --relative-to="${root}" "${config}")"
 
 cat >"${config}" <<EOL
 DEFAULT linuxboot
@@ -29,3 +28,5 @@ LABEL linuxboot
 	APPEND ${cmdline}
 	INITRD ${initramfs}
 EOL
+
+cat "$(realpath --relative-to="${root}" "${config}")"

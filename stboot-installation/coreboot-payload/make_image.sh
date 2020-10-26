@@ -25,7 +25,6 @@ if [ -f "${img}" ]; then
    done
 fi
 
-echo "[INFO]: check for Host configuration"
-bash "${root}/stboot-installation/make_host_config.sh"
+bash "${root}/stboot-installation/build_host_config.sh"
 
 bash "${dir}/build_image.sh"

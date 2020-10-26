@@ -32,4 +32,5 @@ cat >"${security_config}" <<EOL
 }
 EOL
 
+cat "$(realpath --relative-to="${root}" "${security_config}")"
 
