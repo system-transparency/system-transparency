@@ -13,9 +13,6 @@ root="$(cd "${dir}/../../" && pwd)"
 source ${root}/run.config
 
 config=${dir}/syslinux.cfg
-kernel="../vmlinuz-linuxboot"
-initramfs="../initramfs-linuxboot.cpio.gz"
-cmdline=${ST_LINUXBOOT_CMDLINE}
 
 if [ -f "${config}" ]; then
     while true; do
@@ -30,15 +27,4 @@ if [ -f "${config}" ]; then
     done 
 fi
 
-echo 
-echo "Creating $(realpath --relative-to="${root}" "${config}")"
-
-
-cat >"${config}" <<EOL
-DEFAULT linuxboot
-
-LABEL linuxboot
-	KERNEL ${kernel}
-	APPEND ${cmdline}
-	INITRD ${initramfs}
-EOL
+bash "${dir}/build_syslinux_config.sh"

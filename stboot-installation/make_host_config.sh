@@ -15,12 +15,6 @@ source ${root}/run.config
 host_config_name="host_configuration.json"
 host_config="${dir}/files-stboot-partition/${host_config_name}"
 
-host_ip=${ST_HOST_IP}
-host_gateway=${ST_HOST_GATEWAY}
-host_dns=${ST_HOST_DNS}
-provisioning_url=${ST_PROVISIONING_SERVER_URL}
-
-
 if [ -f "${host_config}" ]; then
     while true; do
        echo "Current ${host_config_name}:"
@@ -34,16 +28,6 @@ if [ -f "${host_config}" ]; then
     done
 fi
 
-echo "[INFO]: Create $(realpath --relative-to="${root}" "${host_config}")"
-
-cat >"${host_config}" <<EOL
-{
-   "host_ip":"${host_ip}",
-   "gateway":"${host_gateway}",
-   "dns":"${host_dns}",
-   "provisioning_urls": ["${provisioning_url}"],
-   "ntp_urls": ["0.beevik-ntp.pool.ntp.org"]
-}
-EOL
+bash "${dir}/build_host_config.sh"
 
 
