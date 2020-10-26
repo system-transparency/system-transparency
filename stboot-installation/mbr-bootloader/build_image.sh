@@ -13,19 +13,19 @@ img="${dir}/stboot_mbr_installation.img"
 syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
 syslinux_tar="syslinux-6.03.tar.xz"
 syslinux_dir="syslinux-6.03"
+syslinux_cache="${root}/cache/syslinux/"
 syslinux_config="${dir}/syslinux.cfg"
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
 lnxbt_initramfs="${root}/stboot-installation/initramfs-linuxboot.cpio.gz"
 host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
-src="${root}/cache/syslinux/"
 
 
-if [ -d "${src}" ]; then
-   echo "[INFO]: Using cached Syslinux in $(realpath --relative-to=${root} ${src})"
+if [ -d "${syslinux_cache}" ]; then
+   echo "[INFO]: Using cached Syslinux in $(realpath --relative-to=${root} ${syslinux_cache})"
 else
    echo "[INFO]: Downloading Syslinux Bootloader"
-   wget "${syslinux_src}/${syslinux_tar}" -P "${src}"
-   tar -xf "${src}/${syslinux_tar}" -C "${src}"
+   wget "${syslinux_src}/${syslinux_tar}" -P "${syslinux_cache}"
+   tar -xf "${syslinux_cache}/${syslinux_tar}" -C "${syslinux_cache}"
 fi
 
 echo "[INFO]: Using kernel: $(realpath --relative-to="${root}" "${lnxbt_kernel}")"
@@ -43,7 +43,7 @@ mkfs.vfat -C -n "STBOOT" "${img}".vfat $((size_vfat >> 10))
 echo "[INFO]: Installing Syslinux"
 mmd -i "${img}".vfat ::syslinux
 
-"${src}/${syslinux_dir}/bios/mtools/syslinux" --directory /syslinux/ --install "${img}".vfat
+"${syslinux_cache}/${syslinux_dir}/bios/mtools/syslinux" --directory /syslinux/ --install "${img}".vfat
 
 echo "[INFO]: Copying syslinux config"
 mcopy -i "${img}".vfat "${syslinux_config}" ::syslinux/
@@ -100,7 +100,7 @@ parted -s --align optimal "${img}" mklabel gpt mkpart "STBOOT" fat32 "$((offset_
 
 echo ""
 echo "[INFO]: Installing MBR"
-dd bs=440 count=1 conv=notrunc if="${src}/${syslinux_dir}/bios/mbr/gptmbr.bin" of="${img}" status=none
+dd bs=440 count=1 conv=notrunc if="${syslinux_cache}/${syslinux_dir}/bios/mbr/gptmbr.bin" of="${img}" status=none
 
 echo ""
 echo "[INFO]: Image layout:"
