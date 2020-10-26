@@ -13,7 +13,7 @@ root="$(cd "${dir}/../" && pwd)"
 source ${root}/run.config
 
 host_config_name="host_configuration.json"
-host_config="${dir}/data/${host_config_name}"
+host_config="${dir}/files-stboot-partition/${host_config_name}"
 
 host_ip=${ST_HOST_IP}
 host_gateway=${ST_HOST_GATEWAY}

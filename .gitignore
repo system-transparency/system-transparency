@@ -7,8 +7,8 @@
 /stboot-installation/*.cpio.gz
 /stboot-installation/*.backup
 /stboot-installation/*.json
-/stboot-installation/include/security_configuration.json
-/stboot-installation/data/host_configuration.json
+/stboot-installation/files-initramfs/security_configuration.json
+/stboot-installation/files-stboot-partition/host_configuration.json
 /stboot-installation/coreboot-payload/*.img
 /stboot-installation/coreboot-payload/*.backup
 /stboot-installation/mbr-bootloader/syslinux.cfg

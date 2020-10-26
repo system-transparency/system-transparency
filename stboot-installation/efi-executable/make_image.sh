@@ -12,6 +12,7 @@ root="$(cd "${dir}/../../" && pwd)"
 img="${dir}/stboot_efi_installation.img"
 img_backup="${img}.backup"
 efistub="${dir}/stboot.efi"
+host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
 
 if [ -f "${img}" ]; then
     while true; do
@@ -37,6 +38,7 @@ bash "${root}/stboot-installation/make_host_config.sh"
 
 echo "[INFO]: using efistub: $(realpath --relative-to="${root}" "${efistub}")"
 
+echo
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
 size_vfat=$((12*(1<<20)))
 alignment=1048576
@@ -51,29 +53,22 @@ mmd -i "${img}".vfat ::EFI/BOOT
 
 mcopy -i "${img}".vfat "${efistub}" ::/EFI/BOOT/BOOTX64.EFI
 
+echo "[INFO]: Copying host cofiguration"
+mcopy -i "${img}".vfat "${host_config}" ::
+
+echo
 echo "[INFO]: Creating EXT4 filesystems for STDATA partition:"
 size_ext4=$((767*(1<<20)))
 
 if [ -f "${img}".ext4 ]; then rm "${img}".ext4; fi
 mkfs.ext4 -L "STDATA" "${img}".ext4 $((size_ext4 >> 10))
 
-echo "[INFO]: Copying data files to image"
-ls -l "${root}/stboot-installation/data/."
-
-e2mkdir "${img}".ext4:/etc
 e2mkdir "${img}".ext4:/stboot
 e2mkdir "${img}".ext4:/stboot/etc
 e2mkdir "${img}".ext4:/stboot/os_pkgs
 e2mkdir "${img}".ext4:/stboot/os_pkgs/new
 e2mkdir "${img}".ext4:/stboot/os_pkgs/invalid
 e2mkdir "${img}".ext4:/stboot/os_pkgs/known_good
-
-for i in "${root}/stboot-installation/data"/*; do
-  [ -e "$i" ] || continue
-  e2cp "$i" "${img}".ext4:/stboot/etc
-done
-
-e2ls "${img}".ext4:/stboot/etc/
 
 echo "[INFO]: Copying OS packages to image (for LocalStorage bootmode)"
 ls -l "${root}/os-packages/."

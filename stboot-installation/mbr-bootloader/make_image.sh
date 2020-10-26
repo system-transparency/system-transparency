@@ -17,6 +17,7 @@ syslinux_dir="syslinux-6.03"
 syslinux_config="${dir}/syslinux.cfg"
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
 lnxbt_initramfs="${root}/stboot-installation/initramfs-linuxboot.cpio.gz"
+host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
 src="${root}/cache/syslinux/"
 
 
@@ -57,6 +58,7 @@ fi
 echo "[INFO]: using kernel: $(realpath --relative-to="${root}" "${lnxbt_kernel}")"
 echo "[INFO]: using initramfs: $(realpath --relative-to="${root}" "${lnxbt_initramfs}")"
 
+echo
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
 size_vfat=$((12*(1<<20)))
 alignment=1048576
@@ -77,29 +79,22 @@ echo "[INFO]: Copying linuxboot kernel and initramfs to image"
 mcopy -i "${img}".vfat "${lnxbt_kernel}" ::
 mcopy -i "${img}".vfat "${lnxbt_initramfs}" ::
 
+echo "[INFO]: Copying host cofiguration"
+mcopy -i "${img}".vfat "${host_config}" ::
+
+echo
 echo "[INFO]: Creating EXT4 filesystems for STDATA partition:"
 size_ext4=$((767*(1<<20)))
 
 if [ -f "${img}".ext4 ]; then rm "${img}".ext4; fi
 mkfs.ext4 -L "STDATA" "${img}".ext4 $((size_ext4 >> 10))
 
-echo "[INFO]: Copying data files to image"
-ls -l "${root}/stboot-installation/data/."
-
-e2mkdir "${img}".ext4:/etc
 e2mkdir "${img}".ext4:/stboot
 e2mkdir "${img}".ext4:/stboot/etc
 e2mkdir "${img}".ext4:/stboot/os_pkgs
 e2mkdir "${img}".ext4:/stboot/os_pkgs/new
 e2mkdir "${img}".ext4:/stboot/os_pkgs/invalid
 e2mkdir "${img}".ext4:/stboot/os_pkgs/known_good
-
-for i in "${root}/stboot-installation/data"/*; do
-  [ -e "$i" ] || continue
-  e2cp "$i" "${img}".ext4:/stboot/etc
-done
-
-e2ls "${img}".ext4:/stboot/etc/
 
 echo "[INFO]: Copying OS packages to image (for LocalStorage bootmode)"
 ls -l "${root}/os-packages/."

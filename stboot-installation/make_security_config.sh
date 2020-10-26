@@ -13,7 +13,7 @@ root="$(cd "${dir}/../" && pwd)"
 source ${root}/run.config
 
 security_config_name="security_configuration.json"
-security_config="${dir}/include/${security_config_name}"
+security_config="${dir}/files-initramfs/${security_config_name}"
 fingerprint_file=${ST_ROOTCERT_FINGERPRINT_FILE}
 num_signatures=${ST_NUM_SIGNATURES}
 bootmode=${ST_BOOTMETHOD}

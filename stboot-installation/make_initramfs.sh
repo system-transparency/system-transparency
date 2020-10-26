@@ -19,7 +19,9 @@ initramfs="${dir}/${initramfs_name}"
 initramfs_compressed="${initramfs}.gz"
 initramfs_backup="${initramfs_compressed}.backup"
 security_config_name="security_configuration.json"
-security_config="${dir}/include/${security_config_name}"
+security_config="${dir}/files-initramfs/${security_config_name}"
+https_roots_name="https_roots.pem"
+https_roots="${dir}/files-initramfs/${https_roots_name}"
 cpu_keys="${root}/keys/cpu_keys"
 
 variant=${ST_LINUXBOOT_VARIANT}
@@ -51,13 +53,14 @@ echo "[INFO]: check for security_configuration.json"
 bash "${dir}/make_security_config.sh"
 
 echo "[INFO]: update timstamp in security_configuration.json to $(date +%s)"
-jq '.build_timestamp = $newVal' --argjson newVal "$(date +%s)" "${dir}"/include/security_configuration.json > tmp.$$.json && mv tmp.$$.json "${dir}"/include/security_configuration.json || { echo "Cannot update timestamp in security_configuration.json. Creating initramfs $failed";  exit 1; }
+jq '.build_timestamp = $newVal' --argjson newVal "$(date +%s)" "${dir}"/files-initramfs/security_configuration.json > tmp.$$.json && mv tmp.$$.json "${dir}"/files-initramfs/security_configuration.json || { echo "Cannot update timestamp in security_configuration.json. Creating initramfs $failed";  exit 1; }
 
 case $variant in
 "minimal" )
     echo "[INFO]: create minimal initramfs including stboot only"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -defaultsh="" -o "${initramfs}" \
     -files "${security_config}:etc/${security_config_name}" \
+    -files "${https_roots}:etc/${https_roots_name}" \
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/boot/stboot
     ;;
@@ -65,7 +68,8 @@ case $variant in
     echo "[INFO]: create initramfs including debugging tools"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${security_config}:etc/${security_config_name}" \
-    -files "${dir}/include/start_cpu.elv:start_cpu.elv" \
+    -files "${https_roots}:etc/${https_roots_name}" \
+    -files "${dir}/files-initramfs/start_cpu.elv:start_cpu.elv" \
     -files "${cpu_keys}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
     -files "${cpu_keys}/cpu_rsa.pub:cpucpio -idv < tree.cpio_rsa.pub" \
     github.com/u-root/u-root/cmds/core/init \
@@ -77,8 +81,9 @@ case $variant in
     echo "[INFO]: create initramfs including all u-root core tools"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${security_config}:etc/${security_config_name}" \
-    -files "${dir}/include/netsetup.elv:root/netsetup.elv" \
-    -files "${dir}/include/start_cpu.elv:start_cpu.elv" \
+    -files "${https_roots}:etc/${https_roots_name}" \
+    -files "${dir}/files-initramfs/netsetup.elv:root/netsetup.elv" \
+    -files "${dir}/files-initramfs/start_cpu.elv:start_cpu.elv" \
     -files "${cpu_keys}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
     -files "${cpu_keys}/cpu_rsa.pub:cpu_rsa.pub" \
     core \
