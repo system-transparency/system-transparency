@@ -17,11 +17,11 @@
 /stboot-installation/mbr-bootloader/*.backup
 /stboot-installation/mbr-bootloader/x86_64_x11ssh_qemu_linuxboot.defconfig.modified
 /stboot-installation/mbr-bootloader/x86_64_x11ssh_qemu_linuxboot.defconfig.patch
-/stboot-installation/efi-executable/*.img
-/stboot-installation/efi-executable/stboot.efi
-/stboot-installation/efi-executable/*.backup
-/stboot-installation/efi-executable/x86_64_x11ssh_qemu_efistub.defconfig.modified
-/stboot-installation/efi-executable/x86_64_x11ssh_qemu_efistub.defconfig.patch
+/stboot-installation/efi-application/*.img
+/stboot-installation/efi-application/stboot.efi
+/stboot-installation/efi-application/*.backup
+/stboot-installation/efi-application/x86_64_x11ssh_qemu_efistub.defconfig.modified
+/stboot-installation/efi-application/x86_64_x11ssh_qemu_efistub.defconfig.patch
 /operating-system/tboot.*
 /operating-system/debian/docker/out
 /operating-system/debian/docker/document_build.info

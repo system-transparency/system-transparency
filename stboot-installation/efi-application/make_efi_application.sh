@@ -13,8 +13,8 @@ root="$(cd "${dir}/../../" && pwd)"
 source ${root}/run.config
 
 kernel_out="${dir}/linuxboot.efi"
-kernel_version=${ST_EFI_EXECUTABLE_EFISTUB_KERNEL_VERSION}
-kernel_config=${ST_EFI_EXECUTABLE_EFISTUB_KERNEL_CONFIG}
+kernel_version=${ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION}
+kernel_config=${ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG}
 cmdline=${ST_LINUXBOOT_CMDLINE}
 
 bash "${root}/stboot-installation/build_initramfs.sh"

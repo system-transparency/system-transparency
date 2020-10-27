@@ -13,7 +13,7 @@ root="$(cd "${dir}/../" && pwd)"
 source ${root}/run.config
 
 mem=${ST_QEMU_MEM}
-image="${root}/stboot-installation/efi-executable/stboot_efi_installation.img"
+image="${root}/stboot-installation/efi-application/stboot_efi_installation.img"
 
 ovmf=""
 for i in /usr/share/OVMF/OVMF_CODE.fd /usr/share/edk2/ovmf/OVMF_CODE.fd

@@ -151,14 +151,14 @@ Bringing system transparency to already existing hardware which can’t be trans
 
 You need to deploy the created`./stboot-installation/mbr-bootloader/stboot_mbr_installation.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. The MBR is written accordingly.
 
-#### Leased server with EFI executable installation
+#### Leased server with EFI application installation
 In this scenario we have a closed source UEFI firmware which cannot easily be modified. In order to deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as EFI application.
 
 ```bash
-./stboot-installation/efi-executable/make_image.sh
+./stboot-installation/efi-application/make_image.sh
 ```
 
-You need to deploy the created`./stboot-installation/efi-executable/stboot_efi_installation.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. _STBOOT_ in this case is an EFI special partition containing the bootloader as an efistub.
+You need to deploy the created`./stboot-installation/efi-application/stboot_efi_installation.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. _STBOOT_ in this case is an EFI special partition containing the bootloader as an efistub.
 
 #### Colocated server with coreboot payload installation
 In this scenario we are able to place our own server in the data center. This server already contains Open Source firmware and is able to boot a Linux kernel payload after hardware initialization.

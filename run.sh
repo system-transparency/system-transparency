@@ -139,14 +139,14 @@ echo "############################################################"
 echo
 while true; do
    echo "Run  (1) coreboot payload installation"
-   echo "Run  (2) EFI executable installation"
+   echo "Run  (2) EFI application installation"
    echo "Run  (3) MBR bootloader installation"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
       [1]* ) bash "${root}/stboot-installation/coreboot-payload/make_dummy.sh"; break;;
-      [2]* ) bash "${root}/stboot-installation/efi-executable/make_efi_executable.sh"; break;;
+      [2]* ) bash "${root}/stboot-installation/efi-application/make_efi_application.sh"; break;;
       [3]* ) bash "${root}/stboot-installation/mbr-bootloader/make_mbr_bootloader.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
@@ -161,14 +161,14 @@ echo "############################################################"
 echo
 while true; do
    echo "Run  (1) coreboot payload installation"
-   echo "Run  (2) EFI executable installation"
+   echo "Run  (2) EFI application installation"
    echo "Run  (3) MBR bootloader installation"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
       [1]* ) bash "${root}/scripts/start_qemu_coreboot_payload.sh"; break;;
-      [2]* ) bash "${root}/scripts/start_qemu_efi_executable.sh"; break;;
+      [2]* ) bash "${root}/scripts/start_qemu_efi_application.sh"; break;;
       [3]* ) bash "${root}/scripts/start_qemu_mbr_bootloader.sh"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
