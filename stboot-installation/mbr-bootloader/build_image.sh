@@ -10,6 +10,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 img="${dir}/stboot_mbr_installation.img"
+img_backup="${img}.backup"
 syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
 syslinux_tar="syslinux-6.03.tar.xz"
 syslinux_dir="syslinux-6.03"
@@ -17,6 +18,12 @@ syslinux_cache="${root}/cache/syslinux/"
 syslinux_config="${dir}/syslinux.cfg"
 lnxbt_kernel="${dir}/vmlinuz-linuxboot"
 host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
+
+if [ -f "${img}" ]; then
+    echo
+    echo "[INFO]: backup existing image to $(realpath --relative-to="${root}" "${img_backup}")"
+    mv "${img}" "${img_backup}"
+fi
 
 
 if [ -d "${syslinux_cache}" ]; then
@@ -105,3 +112,5 @@ parted -s "${img}" print
 
 echo ""
 echo "[INFO]: $(realpath --relative-to="${root}" "${img}") created."
+
+trap - EXIT

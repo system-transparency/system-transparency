@@ -29,3 +29,5 @@ mkdir -p "${mnt}_data" || { echo -e "mkdir $failed"; exit 1; }
 # 28672 blocks * 512 bytes per block -> 14680064 
 mount -o loop,offset=14680064 "${img}" "${mnt}_data" || { echo -e "mount 2nd partition $failed"; exit 1; }
 echo "[INFO]: mounted 2st partition of $(realpath --relative-to=${root} ${img}) at ${mnt}_data"
+
+trap - EXIT

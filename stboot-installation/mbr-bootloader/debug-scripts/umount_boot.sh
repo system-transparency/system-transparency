@@ -21,3 +21,5 @@ img="${dir}/Syslinux_Linuxboot.img"
 echo "[INFO]: unmount $(realpath --relative-to=${root} ${img})"
 umount "${mnt}_boot" || { echo -e "umount $failed"; exit 1; }
 rm -r -f "${mnt}_boot" || { echo -e "cleanup tmpdir $failed"; exit 1; }
+
+trap - EXIT

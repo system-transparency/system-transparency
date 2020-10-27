@@ -26,3 +26,5 @@ LABEL linuxboot
 EOL
 
 cat "$(realpath --relative-to="${root}" "${config}")"
+
+trap - EXIT

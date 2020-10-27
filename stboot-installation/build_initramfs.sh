@@ -16,6 +16,8 @@ source ${root}/run.config
 
 initramfs_name="initramfs-linuxboot.cpio"
 initramfs="${dir}/${initramfs_name}"
+initramfs_compressed="${initramfs}.gz"
+initramfs_backup="${initramfs_compressed}.backup"
 security_config_name="security_configuration.json"
 security_config="${dir}/files-initramfs/${security_config_name}"
 https_roots_name="https_roots.pem"
@@ -29,6 +31,12 @@ if [ -z "${gopath}" ]; then
     echo "GOPATH is not set!"
     echo "Please refer to https://golang.org/cmd/go/#hdr-GOPATH_environment_variable1"
     echo -e "creating initramfs $failed"; exit 1;
+fi
+
+if [ -f "${initramfs_compressed}" ]; then
+    echo
+    echo "[INFO]: backup existing initramfs to $(realpath --relative-to="${root}" "${initramfs_backup}")"
+    mv "${initramfs_compressed}" "${initramfs_backup}"
 fi
 
 case $variant in

@@ -10,7 +10,21 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 img="${dir}/stboot_coreboot_installation.img"
+img_backup="${img}.backup"
 host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
+
+if [ -f "${img}" ]; then
+    while true; do
+        echo "Current image file:"
+        ls -l "$(realpath --relative-to="${root}" "${img}")"
+        read -rp "Rebuild image? (y/n)" yn
+        case $yn in
+            [Yy]* ) echo "[INFO]: backup existing image to $(realpath --relative-to="${root}" "${img_backup}")"; mv "${img}" "${img_backup}"; break;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+   done
+fi
 
 echo
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
@@ -74,7 +88,4 @@ parted -s "${img}" print
 echo ""
 echo "[INFO]: $(realpath --relative-to="${root}" "${img}") created."
 
-
-echo ""
-echo "[INFO]: Creation of coreboot-rom not automated yet."
-echo "[INFO]: Plese follow the steps in stboot-installation/coreboot-payload/README.md"
+trap -EXIT

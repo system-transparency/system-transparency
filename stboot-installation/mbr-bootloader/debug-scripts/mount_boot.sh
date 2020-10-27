@@ -29,3 +29,5 @@ mkdir -p "${mnt}_boot" || { echo -e "mkdir $failed"; exit 1; }
 # 2048 blocks * 512 bytes per block -> 1048576 
 mount -o loop,offset=1048576 "${img}" "${mnt}_boot" || { echo -e "mount 1st partition $failed"; exit 1; }
 echo "[INFO]: mounted 1st partition of $(realpath --relative-to=${root} ${img}) at ${mnt}_boot"
+
+trap - EXIT
