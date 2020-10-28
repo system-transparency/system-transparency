@@ -113,9 +113,9 @@ The blob containing the operating system, called _OS package_ needs to be signed
 ./scripts/make_keys_and_certs.sh
 ```
 
-The created directory `./keys/` contains:
-- `signing_keys/`: Contains the keys for signing the OS package
-- `cpu_keys/`: Contains the keys for using the cpu command for debugging
+Created directorys:
+- `out/keys/signing_keys/`: Contains the keys for signing the OS package
+- `out/keys/cpu_keys/`: Contains the keys for using the cpu command for debugging
 
 ### Operating System and OS package
 The operating systems to be used with _System Transparency_ need to be build reproducible. Currently, the only supported OS by this tooling is Debian Buster.

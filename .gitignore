@@ -16,6 +16,4 @@
 /operating-system/ubuntu*/docker/.debos-*
 /out/
 /tboot/
-/keys/signing_keys/*
-/keys/cpu_keys/*
 /.notes/

@@ -21,7 +21,7 @@ initramfs_compressed="${initramfs}.gz"
 initramfs_backup="${initramfs_compressed}.backup"
 security_config="${out}/security_configuration.json"
 https_roots="${dir}/initramfs-includes/https_roots.pem"
-cpu_keys="${root}/keys/cpu_keys"
+cpu_keys="${out}/keys/cpu_keys"
 
 variant=${ST_LINUXBOOT_VARIANT}
 

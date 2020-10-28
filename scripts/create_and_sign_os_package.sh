@@ -53,7 +53,7 @@ os_pkg="${out_dir}/${os_pkg_name}"
 echo "[INFO]: created OS package ${os_pkg_name}."
 
 
-signing_key_dir="${root}/keys/signing_keys"
+signing_key_dir="${root}/out/keys/signing_keys"
 
 echo "[INFO]: call 'stmanager sign' to sign $os_pkg with example keys"
 for I in 1 2 3 4 5
