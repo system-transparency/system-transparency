@@ -51,8 +51,8 @@ e2mkdir "${img}".ext4:/stboot/os-pkgs/invalid
 e2mkdir "${img}".ext4:/stboot/os-pkgs/known_good
 
 echo "[INFO]: Copying OS packages to image (for LocalStorage bootmode)"
-ls -l "${root}/os-packages/."
-for i in "${root}/os-packages"/*; do
+ls -l "${root}/out/os-packages/."
+for i in "${root}/out/os-packages"/*; do
   [ -e "$i" ] || continue
   e2cp "$i" "${img}".ext4:/stboot/os-pkgs/new
 done
