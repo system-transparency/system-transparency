@@ -44,10 +44,10 @@ echo "[INFO]: GO111MODULE=off"
 GO111MODULE=off GOPATH="${gopath}" go install "${uroot_src}/tools/stmanager"
 cd "${dir}"
 
-# echo
-# echo "[INFO]: install cpu command for debugging"
-# echo "[INFO]: GO111MODULE=auto"
-# GO111MODULE=auto GOPATH="${gopath}" go get -u -v "${cpu_repo}/cmds/cpu" "${cpu_repo}/cmds/cpud"
+echo
+echo "[INFO]: install cpu command for debugging"
+echo "[INFO]: GO111MODULE=auto"
+GO111MODULE=auto GOPATH="${gopath}" go get -u -v "${cpu_repo}/cmds/cpu" "${cpu_repo}/cmds/cpud"
 
 echo
 echo "[INFO]: install ACM grebber"
