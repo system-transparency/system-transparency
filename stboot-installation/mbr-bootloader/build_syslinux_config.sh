@@ -9,11 +9,11 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
-# import global configuration
-source ${root}/run.config
+out="${root}/out/stboot-installation/mbr-bootloader"
+config="${out}/syslinux.cfg"
+kernel="../linuxboot.vmlinuz"
 
-config=${dir}/syslinux.cfg
-kernel="../vmlinuz-linuxboot"
+if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
 echo 
 echo "[INFO]: Creating $(realpath --relative-to="${root}" "${config}")"

@@ -9,22 +9,19 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
-img="${dir}/stboot_coreboot_installation.img"
+out="${root}/out/stboot-installation/coreboot-payload"
+name="stboot_coreboot_installation.img"
+img="${out}/${name}"
 img_backup="${img}.backup"
-host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
+host_config="${root}/out/stboot-installation/host_configuration.json"
 
 if [ -f "${img}" ]; then
-    while true; do
-        echo "Current image file:"
-        ls -l "$(realpath --relative-to="${root}" "${img}")"
-        read -rp "Rebuild image? (y/n)" yn
-        case $yn in
-            [Yy]* ) echo "[INFO]: backup existing image to $(realpath --relative-to="${root}" "${img_backup}")"; mv "${img}" "${img_backup}"; break;;
-            [Nn]* ) exit;;
-            * ) echo "Please answer yes or no.";;
-        esac
-   done
+    echo
+    echo "[INFO]: backup existing image to $(realpath --relative-to="${root}" "${img_backup}")"
+    mv "${img}" "${img_backup}"
 fi
+
+if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
 echo
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"

@@ -10,14 +10,12 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
-failed="\e[1;5;31mfailed\e[0m"
-
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-root="$(cd "${dir}/../../" && pwd)"
+root="$(cd "${dir}/../../../" && pwd)"
 
 mnt="/tmp/mnt_stimg"
-img="${dir}/../stboot_mbr_installation.img"
+img="${root}/out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img"
 
 mkdir -p "${mnt}_data" || { echo -e "mkdir $failed"; exit 1; }
 # offset: sfdisk -d ${img}
@@ -27,7 +25,7 @@ mkdir -p "${mnt}_data" || { echo -e "mkdir $failed"; exit 1; }
 #
 # 2nd partition: 
 # 28672 blocks * 512 bytes per block -> 14680064 
-mount -o loop,offset=14680064 "${img}" "${mnt}_data" || { echo -e "mount 2nd partition $failed"; exit 1; }
+mount -o loop,offset=14680064 "${img}" "${mnt}_data"
 echo "[INFO]: mounted 2st partition of $(realpath --relative-to=${root} ${img}) at ${mnt}_data"
 
 trap - EXIT

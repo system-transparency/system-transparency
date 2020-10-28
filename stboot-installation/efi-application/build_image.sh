@@ -9,10 +9,12 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
-img="${dir}/stboot_efi_installation.img"
+out="${root}/out/stboot-installation/efi-application"
+name="stboot_efi_installation.img"
+img="${out}/${name}"
 img_backup="${img}.backup"
-efistub="${dir}/linuxboot.efi"
-host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
+linuxboot_kernel="${out}/linuxboot.efi"
+host_config="${root}/out/stboot-installation/host_configuration.json"
 
 if [ -f "${img}" ]; then
     echo
@@ -20,7 +22,9 @@ if [ -f "${img}" ]; then
     mv "${img}" "${img_backup}"
 fi
 
-echo "[INFO]: Using efistub: $(realpath --relative-to="${root}" "${efistub}")"
+if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
+
+echo "[INFO]: Using kernel: $(realpath --relative-to="${root}" "${linuxboot_kernel}")"
 
 echo
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
@@ -35,7 +39,7 @@ echo "[INFO]: Installing STBOOT.EFI"
 mmd -i "${img}".vfat ::EFI
 mmd -i "${img}".vfat ::EFI/BOOT
 
-mcopy -i "${img}".vfat "${efistub}" ::/EFI/BOOT/BOOTX64.EFI
+mcopy -i "${img}".vfat "${linuxboot_kernel}" ::/EFI/BOOT/BOOTX64.EFI
 
 echo "[INFO]: Copying host cofiguration"
 mcopy -i "${img}".vfat "${host_config}" ::

@@ -9,15 +9,17 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
-img="${dir}/stboot_mbr_installation.img"
+out="${root}/out/stboot-installation/mbr-bootloader"
+name="stboot_mbr_installation.img"
+img="${out}/${name}"
 img_backup="${img}.backup"
 syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
 syslinux_tar="syslinux-6.03.tar.xz"
 syslinux_dir="syslinux-6.03"
 syslinux_cache="${root}/cache/syslinux/"
-syslinux_config="${dir}/syslinux.cfg"
-lnxbt_kernel="${dir}/vmlinuz-linuxboot"
-host_config="${root}/stboot-installation/files-stboot-partition/host_configuration.json"
+syslinux_config="${out}/syslinux.cfg"
+linuxboot_kernel="${out}/linuxboot.vmlinuz"
+host_config="${root}/out/stboot-installation/host_configuration.json"
 
 if [ -f "${img}" ]; then
     echo
@@ -25,6 +27,7 @@ if [ -f "${img}" ]; then
     mv "${img}" "${img_backup}"
 fi
 
+if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
 if [ -d "${syslinux_cache}" ]; then
    echo "[INFO]: Using cached Syslinux in $(realpath --relative-to=${root} ${syslinux_cache})"
@@ -34,7 +37,7 @@ else
    tar -xf "${syslinux_cache}/${syslinux_tar}" -C "${syslinux_cache}"
 fi
 
-echo "[INFO]: Using kernel: $(realpath --relative-to="${root}" "${lnxbt_kernel}")"
+echo "[INFO]: Using kernel: $(realpath --relative-to="${root}" "${linuxboot_kernel}")"
 
 echo
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
@@ -54,7 +57,7 @@ echo "[INFO]: Copying syslinux config"
 mcopy -i "${img}".vfat "${syslinux_config}" ::syslinux/
 
 echo "[INFO]: Copying linuxboot kernel to image"
-mcopy -i "${img}".vfat "${lnxbt_kernel}" ::
+mcopy -i "${img}".vfat "${linuxboot_kernel}" ::
 
 echo "[INFO]: Copying host cofiguration"
 mcopy -i "${img}".vfat "${host_config}" ::

@@ -12,13 +12,16 @@ root="$(cd "${dir}/../" && pwd)"
 # import global configuration
 source ${root}/run.config
 
-host_config_name="host_configuration.json"
-host_config="${dir}/files-stboot-partition/${host_config_name}"
+out="${root}/out/stboot-installation"
+name="host_configuration.json"
+host_config="${out}/${name}"
 
 host_ip=${ST_HOST_IP}
 host_gateway=${ST_HOST_GATEWAY}
 host_dns=${ST_HOST_DNS}
 provisioning_url=${ST_PROVISIONING_SERVER_URL}
+
+if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
 echo
 echo "[INFO]: Creating $(realpath --relative-to="${root}" "${host_config}")"

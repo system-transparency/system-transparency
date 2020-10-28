@@ -23,7 +23,7 @@ CONFIG_CGROUP_BPF=y
 CONFIG_SYSFS_DEPRECATED=y
 CONFIG_RELAY=y
 CONFIG_BLK_DEV_INITRD=y
-CONFIG_INITRAMFS_SOURCE="../../../stboot-installation/initramfs-linuxboot.cpio.gz"
+CONFIG_INITRAMFS_SOURCE="../../../out/stboot-installation/initramfs-linuxboot.cpio.gz"
 CONFIG_CC_OPTIMIZE_FOR_SIZE=y
 # CONFIG_MULTIUSER is not set
 # CONFIG_SYSFS_SYSCALL is not set

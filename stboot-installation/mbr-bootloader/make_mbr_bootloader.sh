@@ -14,7 +14,7 @@ root="$(cd "${dir}/../../" && pwd)"
 # import global configuration
 source ${root}/run.config
 
-kernel_out="${dir}/vmlinuz-linuxboot"
+kernel_out="${root}/out/stboot-installation/mbr-bootloader/linuxboot.vmlinuz"
 kernel_version=${ST_MBR_BOOTLOADER_KERNEL_VERSION}
 kernel_config=${ST_MBR_BOOTLOADER_KERNEL_CONFIG}
 cmdline=${ST_LINUXBOOT_CMDLINE}
@@ -23,7 +23,7 @@ cmdline=${ST_LINUXBOOT_CMDLINE}
 bash "${root}/stboot-installation/build_security_config.sh"
 
 echo "[INFO]: update timstamp in security_configuration.json to $(date +%s)"
-jq '.build_timestamp = $newVal' --argjson newVal "$(date +%s)" "${root}/stboot-installation/files-initramfs/security_configuration.json" > tmp.$$.json && mv tmp.$$.json "${root}/stboot-installation/files-initramfs/security_configuration.json" || { echo "Cannot update timestamp in security_configuration.json. Creating initramfs $failed";  exit 1; }
+jq '.build_timestamp = $newVal' --argjson newVal "$(date +%s)" "${root}/out/stboot-installation/security_configuration.json" > tmp.$$.json && mv tmp.$$.json "${root}/out/stboot-installation/security_configuration.json" || { echo "Cannot update timestamp in security_configuration.json.";  exit 1; }
 
 bash "${root}/stboot-installation/build_initramfs.sh"
 
