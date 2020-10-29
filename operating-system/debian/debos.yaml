@@ -6,6 +6,7 @@ architecture: {{ $architecture }}
 
 actions:
   - action: debootstrap
+    description: Install Debian base system
     suite: {{ $suite }}
     components:
       - main
@@ -15,7 +16,7 @@ actions:
     variant: minbase
 
   - action: apt
-    description: Install some packages
+    description: Install packages
     packages:
       - adduser
       - firmware-linux
@@ -25,21 +26,30 @@ actions:
       - systemd
 
   - action: run
+    description: Clean up irreproducible data
     chroot: true
-    script: run-in-chroot.sh
+    script: debos_cleanup_irreproducible_data.sh
 
   - action: overlay
-    source: overlays/add_example_root
+    description: Overlay - Add example file
+    source: debos-overlays/
 
   - action: run
+    description: Set hostname
     chroot: true
     command: echo debian > /etc/hostname
 
   - action: run
-    chroot: false
-    script: pack-reproducible.sh {{ $image }}
+    description: Set root password
+    chroot: true
+    command: echo 'root:$5$iog/g/SUY7Pm0L$vjoNOFeV5OHSZyxNDsLmZpI0XorPu8iZixBLvLBP6S5' | chpasswd -e
 
-# since pack is not supporting reproducible builds, we pack manual
+  - action: run
+    description: Pack reproducibly
+    chroot: false
+    script: debos_pack_reproducibly.sh {{ $image }}
+
+# since pack is not supporting reproducible builds, we pack manually
 #  - action: pack
 #    file: {{ $image }}
 #    compression: gz

@@ -53,3 +53,15 @@ echo
 echo "[INFO]: install ACM grebber"
 echo "[INFO]: GO111MODULE=auto"
 GO111MODULE=auto GOPATH="${gopath}" go get -u -v github.com/system-transparency/sinit-acm-grebber
+
+echo
+docker_image=debos-debian
+if docker image inspect ${docker_image} > /dev/null 2> /dev/null; then
+   echo "[INFO]: Using following docker image for building Debian OS"
+   docker images ${docker_image}
+   echo "[INFO]: In order to update, delete it or update manually."
+else    
+   echo "[INFO]: Build docker image for building Debian OS via debos"
+   echo ""
+   docker build -t ${docker_image} "${root}/operating-system/debian"
+fi

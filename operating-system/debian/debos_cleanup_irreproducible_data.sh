@@ -1,5 +1,9 @@
 #!/bin/sh
 
+set -o errexit
+set -o nounset
+# set -o xtrace
+
 # remove ssh keys
 rm -f /etc/ssh/ssh_host*
 
@@ -15,9 +19,8 @@ rm /var/lib/systemd/catalog/database
 # remove systemd machine id
 rm /etc/machine-id
 
-# FIXME: remove this password
-echo 'root:$5$iog/g/SUY7Pm0L$vjoNOFeV5OHSZyxNDsLmZpI0XorPu8iZixBLvLBP6S5' | chpasswd -e
-
 # remove initrd as its not needed nor reproducible
 rm -rf /var/lib/initramfs-tools/*
 rm /boot/initrd.img*
+
+trap - EXIT
