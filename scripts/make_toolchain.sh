@@ -65,3 +65,15 @@ else
    echo ""
    docker build -t ${docker_image} "${root}/operating-system/debian"
 fi
+
+echo
+docker_image=debos-ubuntu
+if docker image inspect ${docker_image} > /dev/null 2> /dev/null; then
+   echo "[INFO]: Using following docker image for building Ubuntu OS"
+   docker images ${docker_image}
+   echo "[INFO]: In order to update, delete it or update manually."
+else    
+   echo "[INFO]: Build docker image for building Ubuntu OS via debos"
+   echo ""
+   docker build -t ${docker_image} "${root}/operating-system/ubuntu"
+fi

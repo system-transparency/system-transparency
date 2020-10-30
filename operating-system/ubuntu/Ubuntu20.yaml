@@ -1,12 +1,13 @@
 {{- $architecture := or .architecture "amd64" -}}
 {{- $suite := or .suite "bionic" -}}
-{{ $image := or .image (printf "linux-image-4.15.0-20-generic") }}
+{{ $image := or .image (printf "ubuntu-%s-%s" $suite $architecture) }}
 
 architecture: {{ $architecture }}
 
 actions:
 # Bootstrap the base system
   - action: debootstrap
+    description: Install Ubuntu base system
     keyring-file: /usr/share/keyrings/ubuntu-archive-keyring.gpg
     suite: {{ $suite }}
     components:
@@ -14,9 +15,8 @@ actions:
     mirror: http://archive.ubuntu.com/ubuntu
     variant: minbase
 
-# Install packages 
   - action: apt
-    description: Install some packages
+    description: Install packages
     packages:
       - adduser
       - sudo
@@ -31,33 +31,42 @@ actions:
       - udev
       - nano
       - linux-firmware
-      - linux-image-4.15.0-20-generic
+      - linux-image-5.4.0-26-generic
       - openssh-server
       - python3
       - systemd
 
-# Copy files into the new system
-  - action: overlay
-    source: overlays
-    destination: overlays
-
-
-# Configure programs and clean up build artifacts
   - action: run
+    description: Clean up some irreproducible data
     chroot: true
-    script: run-in-chroot.sh
+    script: debos_cleanup_some_irreproducible_data.sh
 
-# Set hostname of the image
+  - action: overlay
+    description: Overlay - Add files to system
+    source: debos-overlaysadd_standard_user
+
   - action: run
+    description: Set hostname
     chroot: true
     command: echo ubuntu > /etc/hostname
 
-# This packs reproducibly
   - action: run
-    chroot: false
-    script: pack-reproducible.sh {{ $image }}
+    description: Add standard user
+    chroot: true
+    script: debos_add_standard_user.sh
 
-# This will pack normally
+  - action: run
+    description: Enable SSH
+    chroot: true
+    script: debos_enable_ssh.sh
+
+  - action: run
+    description: Pack reproducibly
+    chroot: false
+    script: debos_pack_reproducibly.sh {{ $image }}
+
+# Since pack is not supporting reproducible builds, we pack manually
 #  - action: pack
 #    file: {{ $image }}
 #    compression: gz
+

@@ -78,12 +78,16 @@ echo " Build Operating Sytem"
 echo "############################################################"
 echo
 while true; do
-   echo "Run  (r) Reproducible Debian Buster"
+   echo "Run  (1) Reproducible Debian Buster"
+   echo "Run  (2) Reproducible Ubuntu Bionic"
+   echo "Run  (3) Reproducible Ubuntu Focal"
    echo "Skip (s)"
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/operating-system/debian/make_debian.sh"; break;;
+      [1]* ) bash "${root}/operating-system/debian/make_debian.sh"; break;;
+      [2]* ) bash "${root}/operating-system/ubuntu/make_ubuntu.sh" "18"; break;;
+      [3]* ) bash "${root}/operating-system/ubuntu/make_ubuntu.sh" "20"; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;
