@@ -33,7 +33,7 @@ fi
 echo ""
 echo "[INFO]: Build reproducible Debian Buster via debos in a docker container"
 echo ""
-docker run --env DEBOS_USER_ID="$(id -u)" --env DEBOS_GROUP_ID="$(id -g)" --cap-add=SYS_ADMIN --security-opt apparmor:unconfined -it --volume "${root}:/system-transparency-root:z" ${docker_image}
+docker run --network=host --env DEBOS_USER_ID="$(id -u)" --env DEBOS_GROUP_ID="$(id -g)" --cap-add=SYS_ADMIN --security-opt apparmor:unconfined -it --volume "${root}:/system-transparency-root:z" ${docker_image}
 
 echo
 echo "Debian kernel created at: $(realpath --relative-to="${root}" "${kernel}")"

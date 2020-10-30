@@ -63,7 +63,7 @@ if docker image inspect ${docker_image} > /dev/null 2> /dev/null; then
 else    
    echo "[INFO]: Build docker image for building Debian OS via debos"
    echo ""
-   docker build -t ${docker_image} "${root}/operating-system/debian"
+   docker build --network=host -t ${docker_image} "${root}/operating-system/debian"
 fi
 
 echo
@@ -75,5 +75,5 @@ if docker image inspect ${docker_image} > /dev/null 2> /dev/null; then
 else    
    echo "[INFO]: Build docker image for building Ubuntu OS via debos"
    echo ""
-   docker build -t ${docker_image} "${root}/operating-system/ubuntu"
+   docker build --network=host -t ${docker_image} "${root}/operating-system/ubuntu"
 fi
