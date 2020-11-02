@@ -54,7 +54,7 @@ EOF
 fi
 
 # Note: TPM1 needs to access tcsd as root..
-swtpm_setup.sh --tpmstate $tpm --tpm2 \
+swtpm_setup --tpmstate $tpm --tpm2 \
   --create-ek-cert --create-platform-cert --lock-nvram
 
 echo "Starting $tpm"

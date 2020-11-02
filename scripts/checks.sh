@@ -100,12 +100,12 @@ function checkDebootstrap {
 }
 
 function checkSwtpmSetup {
-   command -v swtpm_setup.sh >/dev/null 2>&1 || {
-      echo >&2 "swtpm_setup.sh required";
+   command -v swtpm_setup >/dev/null 2>&1 || {
+      echo >&2 "swtpm_setup required";
       exit 1;
    }
 
-   echo "swtpm_setup.sh supported"
+   echo "swtpm_setup supported"
 }
 
 function checkSwtpm {
