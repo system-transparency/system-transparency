@@ -40,6 +40,7 @@ echo ""
 echo "[INFO]: Building tboot"
 echo ""
 cd "${cache}/code"
+sed "s/-Wno-missing-field-initializers$/-Wno-missing-field-initializers -Wno-error=address-of-packed-member/g" -i Config.mk
 make dist --no-print-directory
 cd "${dir}"
 cp "${cache}/code/dist/boot/tboot.gz" "${tboot}"
