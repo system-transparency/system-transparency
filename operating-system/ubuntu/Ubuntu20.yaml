@@ -1,5 +1,5 @@
 {{- $architecture := or .architecture "amd64" -}}
-{{- $suite := or .suite "bionic" -}}
+{{- $suite := or .suite "focal" -}}
 {{ $image := or .image (printf "ubuntu-%s-%s" $suite $architecture) }}
 
 architecture: {{ $architecture }}
