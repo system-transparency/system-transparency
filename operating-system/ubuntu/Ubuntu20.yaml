@@ -43,7 +43,7 @@ actions:
 
   - action: overlay
     description: Overlay - Add files to system
-    source: debos-overlaysadd_standard_user
+    source: debos-overlays
 
   - action: run
     description: Set hostname
