@@ -12,10 +12,13 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
+# import global configuration
+source ${root}/run.config
+
 # Config variables and arguments
 
 kernel_config=$1
-kernel_config_modified="${kernel_config}.modified"
+kernel_config_modified="$(dirname "${kernel_config}")/user_modified.defconfig"
 kernel=$2
 out="$(dirname "${kernel}")"
 kernel_backup="${kernel}.backup"
@@ -26,6 +29,7 @@ version_dir="linux-${version}"
 tarball="${src_url}/${version_dir}.tar.xz"
 signature="${src_url}/${tarball}.tar.sign"
 cache="${root}/cache/kernel"
+modify_config=${ST_CUSTOMIZE_KERNEL_CONFIG}
 
 dev_key_1="torvalds@kernel.org"
 dev_key_2="gregkh@kernel.org"
@@ -89,23 +93,26 @@ elif [ -f "${kernel_config}" ]; then
     cfg=${kernel_config}
 fi
 
-cp "${cfg}" "${cache}/${version_dir}/.config"
+echo "[INFO]: Using $(realpath --relative-to="${root}" "${cfg}") for kernel configuration"
+cp "${cfg}" "${cache}/${version_dir}/arch/x86/configs/linuxboot_defconfig"
 cd "${cache}/${version_dir}"
-while true; do
-    echo
-    echo "[INFO]: Loaded $(realpath --relative-to="${root}" "${cfg}") as .config:"
-    echo "[INFO]: Any config changes you make in menuconfig will be saved to:"
-    echo "[INFO]: $(realpath --relative-to="${root}" "${kernel_config_modified}")"
-    echo "[INFO]: However, it is recommended to just save and exit without modifications."
-    read -rp "Press any key to continue" x
-    case $x in
-        * ) break;;
-    esac
-done
+make ARCH=x86_64 linuxboot_defconfig
 
-make menuconfig
-make savedefconfig
-cp defconfig "${kernel_config_modified}"
+if [ "${modify_config}" == "y" ]; then
+    while true; do
+        echo
+        echo "[INFO]: Any config changes you make in menuconfig will be saved to:"
+        echo "[INFO]: $(realpath --relative-to="${root}" "${kernel_config_modified}")"
+        read -rp "Press any key to continue" x
+        case $x in
+            * ) break;;
+        esac
+    done
+
+    make menuconfig
+    make savedefconfig
+    cp defconfig "${kernel_config_modified}"
+fi
 
 make "-j$(nproc)"
 cd "${dir}"
