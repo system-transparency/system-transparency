@@ -16,7 +16,7 @@ cd "$ROOTDIR" || exit 1
 
 echo "moving kernel to ${kernel_out}"
 touch -hcd "@$SOURCE_DATE_EPOCH" "$ROOTDIR"/boot/vmlinuz*
-mv "$ROOTDIR"/boot/vmlinuz* "${kernel_out}"
+mv "$ROOTDIR"/boot/vmlinuz* ${kernel_out}
 
 echo "creating ${archive_out} ..."
 find . | while read -r line ; do touch -hcd "@$SOURCE_DATE_EPOCH" "$line" ; done
