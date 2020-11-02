@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash 
 
 # Add standard user, add admin to sudo group and set password
 useradd admin -m -s /bin/bash

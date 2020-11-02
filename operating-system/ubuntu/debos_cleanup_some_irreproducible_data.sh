@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # remove ssh keys
 # rm -f /etc/ssh/ssh_host*
