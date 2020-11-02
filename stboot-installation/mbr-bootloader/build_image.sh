@@ -32,6 +32,7 @@ if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 if [ -d "${syslinux_cache}" ]; then
    echo "[INFO]: Using cached Syslinux in $(realpath --relative-to=${root} ${syslinux_cache})"
 else
+   mkdir -p "${syslinux_cache}"
    echo "[INFO]: Downloading Syslinux Bootloader"
    wget "${syslinux_src}/${syslinux_tar}" -P "${syslinux_cache}"
    tar -xf "${syslinux_cache}/${syslinux_tar}" -C "${syslinux_cache}"

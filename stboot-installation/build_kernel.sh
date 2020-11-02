@@ -27,7 +27,7 @@ major=$(echo "${version}" | head -c1)
 src_url="https://cdn.kernel.org/pub/linux/kernel/v${major}.x"
 version_dir="linux-${version}"
 tarball="${src_url}/${version_dir}.tar.xz"
-signature="${src_url}/${tarball}.tar.sign"
+signature="${src_url}/${version_dir}.tar.sign"
 cache="${root}/cache/kernel"
 modify_config=${ST_CUSTOMIZE_KERNEL_CONFIG}
 
@@ -47,15 +47,17 @@ if [ -d "${cache}/${version_dir}" ]; then
     echo
     echo "[INFO]: Using cached sources in $(realpath --relative-to="${root}" "${cache}/${version_dir}")"
 else
+    mkdir -p "${cache}"
     # sources
-    echo "[INFO]: Downloading Linux Kernel source files from ${cache}/${version_dir}"
-    rm -f "${tarball}"
+    echo "[INFO]: Downloading Linux Kernel source files from ${src_url}/${version_dir}"
+    rm -f "${cache}/${version_dir}.tar.xz"
     wget "${tarball}" -P "${cache}"
     # signature
     if [ -f "${cache}/${version_dir}.tar.sign" ]; then
         echo "[INFO]: Using cached signature in $(realpath --relative-to="${root}" "${cache}/${version_dir}.tar.sign")"
     else
         echo "[INFO]: Downloading Linux Kernel source signature"
+        rm -f "${cache}/${version_dir}.tar.sign"
         wget "${signature}" -P "${cache}"
     fi
     # developer keys

@@ -25,9 +25,10 @@ if [ -f "${tboot}" ]; then
     mv "${tboot}" "${tboot_backup}"
 fi
 
-if [ -f "${cache}/code/Makefile" ]; then
-    echo "[INFO]: Using cached sources in $(realpath --relative-to="${root}" "${cache}/tboot")"
+if [ -d "${cache}/code" ]; then
+    echo "[INFO]: Using cached sources in $(realpath --relative-to="${root}" "${cache}")"
 else
+    mkdir -p "${cache}"
     echo "[INFO]: Cloning tboot sources from ${src_url}"
     cd "${cache}"
     hg clone "${src_url}"
