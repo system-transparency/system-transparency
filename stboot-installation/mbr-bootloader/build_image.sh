@@ -17,9 +17,8 @@ syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
 syslinux_tar="syslinux-6.03.tar.xz"
 syslinux_dir="syslinux-6.03"
 syslinux_cache="${root}/cache/syslinux/"
-syslinux_config="${out}/syslinux.cfg"
-linuxboot_kernel="${out}/linuxboot.vmlinuz"
-host_config="${root}/out/stboot-installation/host_configuration.json"
+boot_filesystem="${out}/boot_partition.vfat"
+data_filesystem="${out}/../data_partition.ext4"
 
 if [ -f "${img}" ]; then
     echo
@@ -30,76 +29,32 @@ fi
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
 if [ -d "${syslinux_cache}" ]; then
-   echo "[INFO]: Using cached Syslinux in $(realpath --relative-to=${root} ${syslinux_cache})"
+    echo "[INFO]: Using cached Syslinux in $(realpath --relative-to="${root}" "${syslinux_cache}")"
 else
-   mkdir -p "${syslinux_cache}"
-   echo "[INFO]: Downloading Syslinux Bootloader"
-   wget "${syslinux_src}/${syslinux_tar}" -P "${syslinux_cache}"
-   tar -xf "${syslinux_cache}/${syslinux_tar}" -C "${syslinux_cache}"
+    mkdir -p "${syslinux_cache}"
+    echo
+    echo "[INFO]: Downloading Syslinux Bootloader"
+    wget "${syslinux_src}/${syslinux_tar}" -P "${syslinux_cache}"
+    tar -xf "${syslinux_cache}/${syslinux_tar}" -C "${syslinux_cache}"
 fi
 
-echo "[INFO]: Using kernel: $(realpath --relative-to="${root}" "${linuxboot_kernel}")"
-
 echo
-echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
-size_vfat=$((12*(1<<20)))
+echo "[INFO]: Constructing disk image from filesystems:"
+echo "[INFO]: Using : $(realpath --relative-to="${root}" "${boot_filesystem}")"
+echo "[INFO]: Using : $(realpath --relative-to="${root}" "${data_filesystem}")"
+
 alignment=1048576
-
-# mkfs.vfat requires size as an (undefined) block-count; seem to be units of 1k
-if [ -f "${img}".vfat ]; then rm "${img}".vfat; fi
-mkfs.vfat -C -n "STBOOT" "${img}".vfat $((size_vfat >> 10))
-
-echo "[INFO]: Installing Syslinux"
-mmd -i "${img}".vfat ::syslinux
-
-"${syslinux_cache}/${syslinux_dir}/bios/mtools/syslinux" --directory /syslinux/ --install "${img}".vfat
-
-echo "[INFO]: Copying syslinux config"
-mcopy -i "${img}".vfat "${syslinux_config}" ::syslinux/
-
-echo "[INFO]: Copying linuxboot kernel to image"
-mcopy -i "${img}".vfat "${linuxboot_kernel}" ::
-
-echo "[INFO]: Copying host cofiguration"
-mcopy -i "${img}".vfat "${host_config}" ::
-
-echo
-echo "[INFO]: Creating EXT4 filesystems for STDATA partition:"
+size_vfat=$((12*(1<<20)))
 size_ext4=$((767*(1<<20)))
-
-if [ -f "${img}".ext4 ]; then rm "${img}".ext4; fi
-mkfs.ext4 -L "STDATA" "${img}".ext4 $((size_ext4 >> 10))
-
-e2mkdir "${img}".ext4:/stboot
-e2mkdir "${img}".ext4:/stboot/etc
-e2mkdir "${img}".ext4:/stboot/os_pkgs
-e2mkdir "${img}".ext4:/stboot/os_pkgs/new
-e2mkdir "${img}".ext4:/stboot/os_pkgs/invalid
-e2mkdir "${img}".ext4:/stboot/os_pkgs/known_good
-
-echo "[INFO]: Copying OS packages to image (for LocalStorage bootmode)"
-ls -l "${root}/out/os-packages/."
-for i in "${root}/out/os-packages"/*; do
-  [ -e "$i" ] || continue
-  e2cp "$i" "${img}".ext4:/stboot/os_pkgs/new
-done
-
-echo
-echo "[INFO]: Constructing disk image from generated filesystems:"
-
 offset_vfat=$(( alignment/512 ))
 offset_ext4=$(( (alignment + size_vfat + alignment)/512 ))
 
 # insert the filesystem to a new file at offset 1MB
-dd if="${img}".vfat of="${img}" conv=notrunc obs=512 status=none seek=${offset_vfat}
-dd if="${img}".ext4 of="${img}" conv=notrunc obs=512 status=none seek=${offset_ext4}
+dd if="${boot_filesystem}" of="${img}" conv=notrunc obs=512 status=none seek=${offset_vfat}
+dd if="${data_filesystem}" of="${img}" conv=notrunc obs=512 status=none seek=${offset_ext4}
 
 # extend the file by 1MB
 truncate -s "+${alignment}" "${img}"
-
-# Cleanup
-rm "${img}".vfat
-rm "${img}".ext4
 
 echo "[INFO]: Adding partitions to disk image:"
 

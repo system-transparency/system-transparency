@@ -5,8 +5,6 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
-failed="\e[1;5;31mfailed\e[0m"
-
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
@@ -38,6 +36,10 @@ bash "${root}/stboot-installation/build_kernel.sh" "${root}/${kernel_config}" "$
 bash "${dir}/build_syslinux_config.sh"
 
 bash "${root}/stboot-installation/build_host_config.sh"
+
+bash "${dir}/build_boot_filesystem.sh"
+
+bash "${root}/stboot-installation/build_data_filesystem.sh"
 
 bash "${dir}/build_image.sh"
 

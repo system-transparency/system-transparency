@@ -13,7 +13,8 @@ out="${root}/out/stboot-installation/coreboot-payload"
 name="stboot_coreboot_installation.img"
 img="${out}/${name}"
 img_backup="${img}.backup"
-host_config="${root}/out/stboot-installation/host_configuration.json"
+boot_filesystem="${out}/boot_partition.vfat"
+data_filesystem="${out}/../data_partition.ext4"
 
 if [ -f "${img}" ]; then
     echo
@@ -24,41 +25,13 @@ fi
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
 echo
-echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
-size_vfat=$((12*(1<<20)))
-alignment=1048576
-
-# mkfs.vfat requires size as an (undefined) block-count; seem to be units of 1k
-if [ -f "${img}".vfat ]; then rm "${img}".vfat; fi
-mkfs.vfat -C -n "STBOOT" "${img}".vfat $((size_vfat >> 10))
-
-echo "[INFO]: Copying host cofiguration"
-mcopy -i "${img}".vfat "${host_config}" ::
-
-echo
-echo "[INFO]: Creating EXT4 filesystems for STDATA partition:"
-size_ext4=$((767*(1<<20)))
-alignment=1048576
-
-if [ -f "${img}".ext4 ]; then rm "${img}".ext4; fi
-mkfs.ext4 -L "STDATA" "${img}".ext4 $((size_ext4 >> 10))
-
-e2mkdir "${img}".ext4:/stboot
-e2mkdir "${img}".ext4:/stboot/etc
-e2mkdir "${img}".ext4:/stboot/os-pkgs
-e2mkdir "${img}".ext4:/stboot/os-pkgs/new
-e2mkdir "${img}".ext4:/stboot/os-pkgs/invalid
-e2mkdir "${img}".ext4:/stboot/os-pkgs/known_good
-
-echo "[INFO]: Copying OS packages to image (for LocalStorage bootmode)"
-ls -l "${root}/out/os-packages/."
-for i in "${root}/out/os-packages"/*; do
-  [ -e "$i" ] || continue
-  e2cp "$i" "${img}".ext4:/stboot/os-pkgs/new
-done
-
 echo "[INFO]: Constructing disk image from generated filesystems:"
+echo "[INFO]: Using : $(realpath --relative-to="${root}" "${boot_filesystem}")"
+echo "[INFO]: Using : $(realpath --relative-to="${root}" "${data_filesystem}")"
 
+alignment=1048576
+size_vfat=$((12*(1<<20)))
+size_ext4=$((767*(1<<20)))
 offset_vfat=$(( alignment/512 ))
 offset_ext4=$(( (alignment + size_vfat + alignment)/512 ))
 

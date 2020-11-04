@@ -29,6 +29,10 @@ bash "${root}/stboot-installation/build_kernel.sh" "${root}/${kernel_config}" "$
 
 bash "${root}/stboot-installation/build_host_config.sh"
 
+bash "${dir}/build_boot_filesystem.sh"
+
+bash "${root}/stboot-installation/build_data_filesystem.sh"
+
 bash "${dir}/build_image.sh"
 
 trap - EXIT
