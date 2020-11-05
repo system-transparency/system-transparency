@@ -79,7 +79,7 @@ echo "############################################################"
 echo
 while true; do
    echo "Run  (1) Reproducible Debian Buster"
-   echo "Run  (2) Reproducible Ubuntu Bionic"
+   echo "Run  (2) Reproducible Ubuntu Bionic (latest)"
    echo "Run  (3) Reproducible Ubuntu Focal"
    echo "Skip (s)"
    echo "Quit (q)"

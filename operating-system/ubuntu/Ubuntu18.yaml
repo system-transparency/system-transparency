@@ -18,6 +18,7 @@ actions:
     description: Install packages
     packages:
       - adduser
+      - perl
       - sudo
       - lshw
       - usbutils
@@ -30,7 +31,6 @@ actions:
       - udev
       - nano
       - linux-firmware
-      - linux-image-4.15.0-20-generic
       - openssh-server
       - python3
       - systemd
@@ -43,6 +43,11 @@ actions:
   - action: overlay
     description: Overlay - Add files to system
     source: debos-overlays
+
+  - action: run
+    description: Update Ubuntu to latest
+    chroot: true
+    script: debos_update_ubuntu.sh 18
 
   - action: run
     description: Set hostname
@@ -59,6 +64,15 @@ actions:
     chroot: true
     script: debos_enable_ssh.sh
 
+# Install newest kernel
+  - action: apt
+    description: Update kernel
+    packages:
+      - linux-image-5.4.0-51-generic 
+      - linux-modules-5.4.0-51-generic
+      - linux-firmware
+
+# This packs reproducibly
   - action: run
     description: Pack reproducibly
     chroot: false
