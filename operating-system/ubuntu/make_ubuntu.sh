@@ -9,11 +9,12 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
+common="${root}/operating-system/common"
 ubuntu_version=$1
 
-bash "${root}/operating-system/build_tboot.sh"
+bash "${common}/build_tboot.sh"
 
-bash "${root}/operating-system/get_acms.sh"
+bash "${common}/get_acms.sh"
 
 bash "${dir}/build_os_artefacts.sh" "${ubuntu_version}"
 
