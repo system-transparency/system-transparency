@@ -9,13 +9,15 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
+common="${root}/stboot-installation/common"
+
 # TODO: build coreboot 
 
-bash "${root}/stboot-installation/build_host_config.sh"
+bash "${common}/build_host_config.sh"
 
 bash "${dir}/build_boot_filesystem.sh"
 
-bash "${root}/stboot-installation/build_data_filesystem.sh"
+bash "${common}/build_data_filesystem.sh"
 
 bash "${dir}/build_image.sh"
 

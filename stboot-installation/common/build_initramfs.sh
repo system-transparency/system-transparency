@@ -9,7 +9,7 @@ failed="\e[1;5;31mfailed\e[0m"
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-root="$(cd "${dir}/../" && pwd)"
+root="$(cd "${dir}/../../" && pwd)"
 
 # import global configuration
 source ${root}/run.config
@@ -20,7 +20,8 @@ initramfs="${out}/${name}"
 initramfs_compressed="${initramfs}.gz"
 initramfs_backup="${initramfs_compressed}.backup"
 security_config="${out}/security_configuration.json"
-https_roots="${dir}/initramfs-includes/https_roots.pem"
+include_dir="${root}/stboot-installation/initramfs-includes"
+https_roots="${include_dir}/https_roots.pem"
 cpu_keys="${out}/keys/cpu_keys"
 
 variant=${ST_LINUXBOOT_VARIANT}
@@ -56,8 +57,8 @@ case $variant in
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
-    -files "${dir}/initramfs-includes/netsetup.elv:root/netsetup.elv" \
-    -files "${dir}/initramfs-includes/start_cpu.elv:start_cpu.elv" \
+    -files "${include_dir}/netsetup.elv:root/netsetup.elv" \
+    -files "${include_dir}/start_cpu.elv:start_cpu.elv" \
     -files "${cpu_keys}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
     -files "${cpu_keys}/cpu_rsa.pub:cpucpio -idv < tree.cpio_rsa.pub" \
     github.com/u-root/u-root/cmds/core/init \
@@ -71,8 +72,8 @@ case $variant in
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
-    -files "${dir}/initramfs-includes/netsetup.elv:root/netsetup.elv" \
-    -files "${dir}/initramfs-includes/start_cpu.elv:start_cpu.elv" \
+    -files "${include_dir}/netsetup.elv:root/netsetup.elv" \
+    -files "${include_dir}/start_cpu.elv:start_cpu.elv" \
     -files "${cpu_keys}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
     -files "${cpu_keys}/cpu_rsa.pub:cpu_rsa.pub" \
     core \
