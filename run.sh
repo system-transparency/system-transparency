@@ -96,8 +96,8 @@ done
 
 echo
 echo "############################################################"
-echo " Use stmanager to create a OS package with Debian Buster and"
-echo " sign with example keys"
+echo " Use stmanager to create a OS package and sign it with"
+echo " example keys"
 echo "############################################################"
 echo
 while true; do
