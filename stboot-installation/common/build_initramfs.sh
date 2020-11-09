@@ -22,7 +22,7 @@ initramfs_backup="${initramfs_compressed}.backup"
 security_config="${out}/security_configuration.json"
 include_dir="${root}/stboot-installation/initramfs-includes"
 https_roots="${include_dir}/https_roots.pem"
-cpu_keys="${out}/keys/cpu_keys"
+cpu_keys="${root}/out/keys/cpu_keys"
 
 variant=${ST_LINUXBOOT_VARIANT}
 

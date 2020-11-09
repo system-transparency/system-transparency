@@ -10,7 +10,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
 signing_key_dir="${root}/out/keys/signing_keys"
-cpu_key_dir="${root}out/keys/cpu_keys"
+cpu_key_dir="${root}/out/keys/cpu_keys"
 
 mkdir -p "${signing_key_dir}"
 mkdir -p "${cpu_key_dir}"
