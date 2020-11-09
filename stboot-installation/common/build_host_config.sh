@@ -31,8 +31,7 @@ cat >"${host_config}" <<EOL
    "host_ip":"${host_ip}",
    "gateway":"${host_gateway}",
    "dns":"${host_dns}",
-   "provisioning_urls": ["${provisioning_url}"],
-   "ntp_urls": ["0.beevik-ntp.pool.ntp.org"]
+   "provisioning_urls": ["${provisioning_url}"]
 }
 EOL
 
