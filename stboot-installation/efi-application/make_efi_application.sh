@@ -20,9 +20,6 @@ cmdline=${ST_LINUXBOOT_CMDLINE}
 
 bash "${common}/build_security_config.sh"
 
-echo "[INFO]: update timstamp in security_configuration.json to $(date +%s)"
-jq '.build_timestamp = $newVal' --argjson newVal "$(date +%s)" "${root}/out/stboot-installation/security_configuration.json" > tmp.$$.json && mv tmp.$$.json "${root}/out/stboot-installation/security_configuration.json" || { echo "Cannot update timestamp in security_configuration.json.";  exit 1; }
-
 bash "${common}/build_initramfs.sh"
 
 echo

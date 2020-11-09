@@ -27,6 +27,15 @@ e2mkdir "${fs}":/stboot/os_pkgs/new
 e2mkdir "${fs}":/stboot/os_pkgs/invalid
 e2mkdir "${fs}":/stboot/os_pkgs/known_good
 
+echo
+echo "[INFO]: Writing UNIX timestamp"
+timestamp_file="${out}/system_time_fix"
+date +%s > "${timestamp_file}"
+cat "${timestamp_file}"
+e2cp "${timestamp_file}" "${fs}":/stboot/etc
+rm "${timestamp_file}"
+
+echo
 echo "[INFO]: Copying OS packages to image (for local boot method)"
 ls -l "${root}/out/os-packages/."
 for i in "${root}/out/os-packages"/*; do

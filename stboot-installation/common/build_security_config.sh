@@ -30,7 +30,6 @@ cat >"${security_config}" <<EOL
   "fingerprints": [
     "$(cut -d' ' -f1 "${fingerprint_file}")"
   ],
-  "build_timestamp": 0,
   "boot_mode": "${bootmode}"
 }
 EOL
