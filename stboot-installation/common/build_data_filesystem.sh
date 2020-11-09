@@ -23,9 +23,8 @@ mkfs.ext4 -L "STDATA" "${fs}" $((size_ext4 >> 10))
 e2mkdir "${fs}":/stboot
 e2mkdir "${fs}":/stboot/etc
 e2mkdir "${fs}":/stboot/os_pkgs
-e2mkdir "${fs}":/stboot/os_pkgs/new
-e2mkdir "${fs}":/stboot/os_pkgs/invalid
-e2mkdir "${fs}":/stboot/os_pkgs/known_good
+e2mkdir "${fs}":/stboot/os_pkgs/local
+e2mkdir "${fs}":/stboot/os_pkgs/cache
 
 echo
 echo "[INFO]: Writing UNIX timestamp"
@@ -40,7 +39,7 @@ echo "[INFO]: Copying OS packages to image (for local boot method)"
 ls -l "${root}/out/os-packages/."
 for i in "${root}/out/os-packages"/*; do
   [ -e "$i" ] || continue
-  e2cp "$i" "${fs}":/stboot/os_pkgs/new
+  e2cp "$i" "${fs}":/stboot/os_pkgs/local
 done
 
 trap - EXIT
