@@ -13,6 +13,8 @@ root="$(cd "${dir}/../" && pwd)"
 source "${root}/run.config"
 
 out="${root}/out/os-packages"
+local_boot_order_file_name="local_boot_order"
+local_boot_order_file="${out}/${local_boot_order_file_name}"
 os_pkg_label="${ST_OS_PKG_LABEL}"
 os_pkg_kernel="${ST_OS_PKG_KERNEL}"
 os_pkg_initramfs="${ST_OS_PKG_INITRAMFS}"
@@ -58,6 +60,26 @@ for I in 1 2 3 4 5
 do
     stmanager sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$os_pkg"
 done
+
+# local boot order configuration
+echo
+echo "[INFO]: Checking ${local_boot_order_file_name} file"
+if [ -f "${local_boot_order_file}" ]; then
+    echo "[INFO]: Current ${local_boot_order_file_name}"
+    cat "${local_boot_order_file}"
+    while true; do
+        echo 
+        read -rp "Reset ${local_boot_order_file_name} to default (revers alphabetical order)? (y/n)" yn
+        case $yn in
+            [Yy]* ) rm "${local_boot_order_file}"; break;;
+            [Nn]* ) break;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done 
+fi
+if [ ! -f "${local_boot_order_file}" ]; then 
+    bash "${root}/stboot-installation/common/build_default_local_boot_order.sh"
+fi
 
 # hotfix for upload script
 cp "${os_pkg}" "${root}/.newest-ospkg.zip"

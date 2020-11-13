@@ -12,7 +12,7 @@ root="$(cd "${dir}/../" && pwd)"
 misc_cmds=( "git"  "hg" "openssl" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
             "wget" "dd" "mmd" "mcopy" "mkfs.vfat" "mkfs.ext4" "e2mkdir" "e2ls" "e2cp" "parted" \
             "mkfs" "mount" "umount" "shasum" "ssh" "scp" "tree" "truncate" \
-            "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath" "make" "mkfs.vfat")
+            "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath" "make" "mkfs.vfat" "tac")
 
 misc_libs=( "libelf" "libcrypto" )
 
