@@ -25,7 +25,6 @@ os_pkg_tboot="${ST_OS_PKG_TBOOT}"
 os_pkg_tboot_args="${ST_OS_PKG_TBOOT_ARGS}"
 os_pkg_acm="${ST_OS_PKG_ACM}"
 os_pkg_signing_root="${ST_OS_PKG_SIGNING_ROOT}"
-os_pkg_allow_non_txt="${ST_OS_PKG_ALLOW_NON_TXT}"
 
 if [ -z "${ST_OS_PKG_NAME}" ]; then os_pkg_name="os-pkg-$(date +"%Y-%m-%d-%H-%M-%S").zip"; fi
 output_path="${out}/${os_pkg_name}"
@@ -39,7 +38,6 @@ stmanager_create_args=( "--out=${output_path}" "--label=${os_pkg_label}" "--kern
 [ -z "${os_pkg_initramfs}" ] || stmanager_create_args+=( "--initramfs=${os_pkg_initramfs}" )
 [ -z "${os_pkg_tboot}" ] || stmanager_create_args+=( "--tboot=${os_pkg_tboot}" )
 [ -z "${os_pkg_acm}" ] || stmanager_create_args+=( "--acm=${os_pkg_acm}" )
-[ "${os_pkg_allow_non_txt}" = "y" ] && stmanager_create_args+=( "--unsave" )
 
 os_pkg_name=$(stmanager create "${stmanager_create_args[@]}")
 os_pkg="${out}/${os_pkg_name}"
