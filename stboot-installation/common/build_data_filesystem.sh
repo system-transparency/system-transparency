@@ -9,15 +9,22 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
+# import global configuration
+source ${root}/run.config
+
 out="${root}/out/stboot-installation"
 name="data_partition.ext4"
 fs="${out}/${name}"
 local_boot_order_file_name="local_boot_order"
 local_boot_order_file="${root}/out/os-packages/${local_boot_order_file_name}"
+os_pkg_dir="${root}/out/os-packages"
+size_ext4="${ST_DATA_PARTITION_SZIZE}"
+
+# if empty set to size of os_pkg_dir + 100MB
+if [ -z "${size_ext4}" ]; then size_ext4=$(( $(du -b "${os_pkg_dir}" | cut -f1) +(100*(1<<20)) )); fi
 
 echo
 echo "[INFO]: Creating EXT4 filesystems for STDATA partition:"
-size_ext4=$((767*(1<<20)))
 
 if [ -f "${fs}" ]; then rm "${fs}"; fi
 mkfs.ext4 -L "STDATA" "${fs}" $((size_ext4 >> 10))
@@ -40,7 +47,7 @@ echo
 echo "[INFO]: Copying OS packages to image (for local boot method)"
 ls -l "${root}/out/os-packages/."
 e2cp "${local_boot_order_file}" "${fs}":/stboot/etc
-for i in "${root}/out/os-packages"/*; do
+for i in "${os_pkg_dir}"/*; do
   [ -e "$i" ] || continue
   e2cp "$i" "${fs}":/stboot/os_pkgs/local
 done
