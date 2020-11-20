@@ -16,6 +16,7 @@ out="${root}/out/stboot-installation"
 name="host_configuration.json"
 host_config="${out}/${name}"
 
+network_mode=${ST_NETWORK_MODE}
 host_ip=${ST_HOST_IP}
 host_gateway=${ST_HOST_GATEWAY}
 host_dns=${ST_HOST_DNS}
@@ -28,6 +29,7 @@ echo "[INFO]: Creating $(realpath --relative-to="${root}" "${host_config}")"
 
 cat >"${host_config}" <<EOL
 {
+   "network_mode":"${network_mode}",
    "host_ip":"${host_ip}",
    "gateway":"${host_gateway}",
    "dns":"${host_dns}",

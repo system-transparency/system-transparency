@@ -17,7 +17,7 @@ name="security_configuration.json"
 security_config="${out}/${name}"
 fingerprint_file=${ST_ROOTCERT_FINGERPRINT_FILE}
 num_signatures=${ST_NUM_SIGNATURES}
-bootmode=${ST_BOOTMETHOD}
+boot_mode=${ST_BOOT_MODE}
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
@@ -30,7 +30,7 @@ cat >"${security_config}" <<EOL
   "fingerprints": [
     "$(cut -d' ' -f1 "${fingerprint_file}")"
   ],
-  "boot_mode": "${bootmode}"
+  "boot_mode": "${boot_mode}"
 }
 EOL
 

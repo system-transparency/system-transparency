@@ -30,7 +30,7 @@ else
     [ -f "${os_package}" ] || { echo "${os_package} does not exist";  exit 1; }
 fi
 
-echo "[INFO]: upload ${os_package} to ${prov_server_path}/ospkg.zip at ${prov_server}"
+echo "[INFO]: upload $(realpath --relative-to="${root}" "${os_package}") to ${prov_server_path}/ospkg.zip at ${prov_server}"
 scp "$os_package" "${prov_server_user}@${prov_server}:${prov_server_path}/ospkg.zip" || { echo -e "upload via scp $failed"; exit 1; }
 echo "[INFO]: successfully uploaded OS package"
 
