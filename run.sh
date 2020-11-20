@@ -149,7 +149,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [1]* ) bash "${root}/stboot-installation/coreboot-payload/make_dummy.sh"; break;;
+      [1]* ) bash "${root}/stboot-installation/coreboot-payload/make_coreboot_payload.sh"; break;;
       [2]* ) bash "${root}/stboot-installation/efi-application/make_efi_application.sh"; break;;
       [3]* ) bash "${root}/stboot-installation/mbr-bootloader/make_mbr_bootloader.sh"; break;;
       [Ss]* ) break;;
