@@ -33,7 +33,7 @@ cat >"${host_config}" <<EOL
    "host_ip":"${host_ip}",
    "gateway":"${host_gateway}",
    "dns":"${host_dns}",
-   "provisioning_urls": ["${provisioning_url}"]
+   "provisioning_urls": [${provisioning_url}]
 }
 EOL
 
