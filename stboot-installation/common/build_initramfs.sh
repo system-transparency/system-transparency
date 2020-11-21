@@ -57,7 +57,7 @@ case $variant in
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
-    -files "${include_dir}/netsetup.elv:root/netsetup.elv" \
+    -files "${include_dir}/netsetup.elv:netsetup.elv" \
     -files "${include_dir}/start_cpu.elv:start_cpu.elv" \
     -files "${cpu_keys}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
     -files "${cpu_keys}/cpu_rsa.pub:cpucpio -idv < tree.cpio_rsa.pub" \
@@ -72,7 +72,7 @@ case $variant in
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
-    -files "${include_dir}/netsetup.elv:root/netsetup.elv" \
+    -files "${include_dir}/netsetup.elv:netsetup.elv" \
     -files "${include_dir}/start_cpu.elv:start_cpu.elv" \
     -files "${cpu_keys}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key" \
     -files "${cpu_keys}/cpu_rsa.pub:cpu_rsa.pub" \
