@@ -29,7 +29,7 @@ echo "cmdline: ${cmdline}"
 cp "${kernel_config}" "${kernel_config}.patch"
 sed -i "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"${cmdline}\"/" "${kernel_config}.patch"
 
-bash "${common}/build_kernel.sh" "${root}/${kernel_config}" "${kernel_out}" "${kernel_version}"
+bash "${common}/build_kernel.sh" "${root}/${kernel_config}.patch" "${kernel_out}" "${kernel_version}"
 
 bash "${dir}/build_syslinux_config.sh"
 
