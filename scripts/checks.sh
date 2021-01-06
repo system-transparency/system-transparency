@@ -50,23 +50,23 @@ function checkMISC {
 }
 
 function checkGCC {
-   maxver="9"
+   #maxver="9"
 
    command -v gcc >/dev/null 2>&1 || {
       echo >&2 "GCC required";
       exit 1;
    }
 
-   currentver="$(gcc -dumpversion | cut -d . -f 1)"
+   #currentver="$(gcc -dumpversion | cut -d . -f 1)"
 
-   if [ "$currentver" -gt "$maxver" ]; then
-         echo "GCC version ${currentver} is not supported. Needs version ${maxver} or earlier."
-	 echo "Hint: If you've got multiple versions of GCC installed, update-alternatives(1) might "
-	 echo "help with configuring which one should be invoked when issuing the gcc command."
-         exit 1
-   else
-       echo "GCC supported"
-   fi
+   #if [ "$currentver" -gt "$maxver" ]; then
+   #      echo "GCC version ${currentver} is not supported. Needs version ${maxver} or earlier."
+   #      echo "Hint: If you've got multiple versions of GCC installed, update-alternatives(1) might "
+   #      echo "help with configuring which one should be invoked when issuing the gcc command."
+   #      exit 1
+   #else
+   #    echo "GCC supported"
+   #fi
 }
 
 function checkGO {
