@@ -146,3 +146,21 @@ function checkOVMF {
      echo "OVMF not found found"
    fi
 }
+
+function run_full_check {
+   echo ""
+   echo "Checking dependencies ..."
+   checkGCC
+   checkGO
+   checkMISC
+
+   echo ""
+   echo "Checking environment ..."
+   checkDebootstrap
+   checkSwtpmSetup
+   checkSwtpm
+   checkOVMF
+}
+
+# run all checks if script is not sourced
+[[ $_ != $0 ]] && run_full_check
