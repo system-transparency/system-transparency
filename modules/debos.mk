@@ -22,4 +22,4 @@ ubuntu: check
 	docker build --network=host -q -t $(image):$(tag) $(top)/operating-system/ubuntu;
 	@echo "[debos] Using docker image "$(shell docker images -q $(image):$(tag))" for building Ubuntu OS";
 
-.PHONY: all
+.PHONY: all ubuntu debian check

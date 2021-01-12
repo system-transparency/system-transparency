@@ -41,7 +41,7 @@ check:
 olddefconfig:
 	$(scripts)/make_global_config.sh
 
-toolchain: u-root debos-debian debos-ubuntu
+toolchain: u-root debos
 
 ifeq ($(strip $(ST_UROOT_DEV_BRANCH)),)
 u-root_branch := stboot
@@ -59,6 +59,9 @@ endif
 	$(MAKE) -f modules/u-root.mk \
 		build=$(build) branch=$(u-root_branch) gopath=$(gopath)
 
+debos:
+	$(MAKE) -f modules/debos.mk
+
 debos-debian:
 	$(MAKE) -f modules/debos.mk debian
 
@@ -69,15 +72,15 @@ keygen:
 	@echo Generate example keys and certificates
 	$(scripts)/make_keys_and_certs.sh
 
-debian: toolchain
+debian: debos-debian
 	@echo Build debian
 	$(os)/debian/make_debian.sh
 
-ubuntu-18: toolchain
+ubuntu-18: debos-ubuntu
 	@echo Build ubuntu
 	$(os)/ubuntu/make_ubuntu.sh "18"
 
-ubuntu-20: toolchain
+ubuntu-20: debos-ubuntu
 	@echo Build ubuntu
 	$(os)/ubuntu/make_ubuntu.sh "20"
 
@@ -90,19 +93,30 @@ sign:
 upload: $(NEWEST-OSPKG)
 	$(scripts)/upload_os_package.sh $(NEWEST-OSPGK)
 
-mbr_bootloader:
+mbr_bootloader: $(DOTCONFIG) u-root
 	@echo Generating MBR BOOTLOADER
-	$(stboot-installation)/mbr-bootloader/make_mbr_bootloader.sh
+	$(MAKE) -f $(stboot-installation)/mbr-bootloader/makefile \
+		ST_MBR_BOOTLOADER_KERNEL_VERSION=$(ST_MBR_BOOTLOADER_KERNEL_VERSION) \
+		ST_MBR_BOOTLOADER_KERNEL_CONFIG=$(ST_MBR_BOOTLOADER_KERNEL_CONFIG)
 
-efi_application:
+efi_application: $(DOTCONFIG) u-root
 	@echo Generating EFI APPLICATION
-	$(stboot-installation)/efi-application/make_efi_application.sh
+	$(MAKE) -f $(stboot-installation)/efi-application/makefile
 
 run-mbr:
 	$(scripts)/start_qemu_mbr_bootloader.sh
 
 run-efi:
 	$(scripts)/start_qemu_efi_application.sh
+
+$(DOTCONFIG):
+	@echo
+	@echo Error: run.config file missing.
+	@echo        Please provide a config file of run \'make olddefconfig\'
+	@echo        to generate a default config.
+	@echo
+	@exit 1
+
 
 clean:
 	rm -rf $(obj)
