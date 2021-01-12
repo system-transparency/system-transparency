@@ -7,7 +7,6 @@ Detailed information about the project itself can be found at https://system-tra
 
 ## Prerequisites
 
-Regarding the system components refer to https://www.system-transparency.org/operator-guide/get-system-transparency-up-and-running
 * The operator machine should run a Linux system (tested with Ubuntu 18.04.2 LTS (Bionic Beaver) / Kernel 4.15.0-47-generic
 * Further software prerequisites will be checked during setup. For details take a look at `./scripts/checks.sh`. 
 
