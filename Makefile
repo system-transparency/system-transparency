@@ -2,9 +2,12 @@ top := $(CURDIR)
 obj ?= $(top)/out
 build ?= $(top)/cache
 
+gopath ?= $(build)/go
 scripts := $(top)/scripts
 os := $(top)/operating-system
 stboot-installation := $(top)/stboot-installation
+
+u-root ?= $(gopath)/bin/u-root
 
 # reproducible builds
 LANG:=C
@@ -41,6 +44,22 @@ olddefconfig:
 toolchain:
 	@echo Install toolchain
 	$(scripts)/make_toolchain.sh
+
+ifeq ($(strip $(ST_UROOT_DEV_BRANCH)),)
+u-root_branch := stboot
+else
+u-root_branch := $(ST_UROOT_DEV_BRANCH)
+endif
+
+u-root: $(u-root)
+
+ifneq ($(strip $(HAVE_DOTCONFIG)),)
+$(u-root): $(DOTCONFIG)
+else
+$(u-root):
+endif
+	$(MAKE) -f modules/u-root.mk \
+		build=$(build) branch=$(u-root_branch) gopath=$(gopath)
 
 keygen:
 	@echo Generate example keys and certificates
