@@ -20,6 +20,8 @@ local_boot_order_file="${root}/out/os-packages/${local_boot_order_file_name}"
 os_pkg_dir="${root}/out/os-packages"
 size_ext4="${ST_DATA_PARTITION_SZIZE}"
 
+if [ ! -d "${os_pkg_dir}" ]; then mkdir -p "${os_pkg_dir}"; fi
+
 # if empty set to size of os_pkg_dir + 100MB
 if [ -z "${size_ext4}" ]; then size_ext4=$(( $(du -b "${os_pkg_dir}" | cut -f1) +(100*(1<<20)) )); fi
 
