@@ -35,6 +35,8 @@ bash "${dir}/build_syslinux_config.sh"
 
 bash "${common}/build_host_config.sh"
 
+bash "${dir}/fetch_syslinux.sh"
+
 bash "${dir}/build_boot_filesystem.sh"
 
 bash "${common}/build_data_filesystem.sh"
