@@ -26,12 +26,7 @@ cpu_keys="${root}/out/keys/cpu_keys"
 
 variant=${ST_LINUXBOOT_VARIANT}
 
-gopath=$(go env GOPATH)
-if [ -z "${gopath}" ]; then
-    echo "GOPATH is not set!"
-    echo "Please refer to https://golang.org/cmd/go/#hdr-GOPATH_environment_variable1"
-    echo -e "creating initramfs $failed"; exit 1;
-fi
+gopath="${root}/cache/go"
 
 if [ -f "${initramfs_compressed}" ]; then
     echo
@@ -45,7 +40,7 @@ case $variant in
 "minimal" )
     echo
     echo "[INFO]: creating minimal initramfs including stboot only"
-    GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -defaultsh="" -o "${initramfs}" \
+    GOPATH="${gopath}" ${gopath}/bin/u-root -build=bb -uinitcmd=stboot -defaultsh="" -o "${initramfs}" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
     github.com/u-root/u-root/cmds/core/init \
