@@ -30,8 +30,12 @@ echo "[INFO]: Using : $(realpath --relative-to="${root}" "${boot_filesystem}")"
 echo "[INFO]: Using : $(realpath --relative-to="${root}" "${data_filesystem}")"
 
 alignment=1048576
-size_vfat=$((12*(1<<20)))
-size_ext4=$((767*(1<<20)))
+#size_vfat=$((12*(1<<20)))
+size_vfat=$(du -b "${boot_filesystem}" | cut -f1)
+#size_ext4=$((767*(1<<20)))
+size_ext4=$(du -b "${data_filesystem}" | cut -f1)
+
+
 offset_vfat=$(( alignment/512 ))
 offset_ext4=$(( (alignment + size_vfat + alignment)/512 ))
 

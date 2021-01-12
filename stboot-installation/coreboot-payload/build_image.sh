@@ -30,21 +30,20 @@ echo "[INFO]: Using : $(realpath --relative-to="${root}" "${boot_filesystem}")"
 echo "[INFO]: Using : $(realpath --relative-to="${root}" "${data_filesystem}")"
 
 alignment=1048576
-size_vfat=$((12*(1<<20)))
-size_ext4=$((767*(1<<20)))
+#size_vfat=$((12*(1<<20)))
+size_vfat=$(du -b "${boot_filesystem}" | cut -f1)
+#size_ext4=$((767*(1<<20)))
+size_ext4=$(du -b "${data_filesystem}" | cut -f1)
+
 offset_vfat=$(( alignment/512 ))
 offset_ext4=$(( (alignment + size_vfat + alignment)/512 ))
 
 # insert the filesystem to a new file at offset 1MB
-dd if="${img}".vfat of="${img}" conv=notrunc obs=512 status=none seek=${offset_vfat}
-dd if="${img}".ext4 of="${img}" conv=notrunc obs=512 status=none seek=${offset_ext4}
+dd if="${boot_filesystem}" of="${img}" conv=notrunc obs=512 status=none seek=${offset_vfat}
+dd if="${data_filesystem}" of="${img}" conv=notrunc obs=512 status=none seek=${offset_ext4}
 
 # extend the file by 1MB
 truncate -s "+${alignment}" "${img}"
-
-# Cleanup
-rm "${img}".vfat
-rm "${img}".ext4
 
 echo "[INFO]: Adding partitions to disk image:"
 
@@ -58,4 +57,4 @@ parted -s "${img}" print
 echo ""
 echo "[INFO]: $(realpath --relative-to="${root}" "${img}") created."
 
-trap -EXIT
+trap - EXIT
