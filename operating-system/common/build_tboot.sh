@@ -41,6 +41,11 @@ echo ""
 echo "[INFO]: Building tboot"
 echo ""
 cd "${cache}/code"
+currentver="$(gcc -dumpversion | cut -d . -f 1)"
+if [ "$currentver" -ge "9" ]; then
+    export CFLAGS="-Wno-error=address-of-packed-member"
+    export TBOOT_CFLAGS="$CFLAGS"
+fi
 make dist --no-print-directory
 cd "${dir}"
 cp "${cache}/code/dist/boot/tboot.gz" "${tboot}"
