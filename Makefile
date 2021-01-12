@@ -41,9 +41,7 @@ check:
 olddefconfig:
 	$(scripts)/make_global_config.sh
 
-toolchain:
-	@echo Install toolchain
-	$(scripts)/make_toolchain.sh
+toolchain: u-root debos-debian debos-ubuntu
 
 ifeq ($(strip $(ST_UROOT_DEV_BRANCH)),)
 u-root_branch := stboot
@@ -60,6 +58,12 @@ $(u-root):
 endif
 	$(MAKE) -f modules/u-root.mk \
 		build=$(build) branch=$(u-root_branch) gopath=$(gopath)
+
+debos-debian:
+	$(MAKE) -f modules/debos.mk debian
+
+debos-ubuntu:
+	$(MAKE) -f modules/debos.mk ubuntu
 
 keygen:
 	@echo Generate example keys and certificates
