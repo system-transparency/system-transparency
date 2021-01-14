@@ -1,13 +1,11 @@
 top := $(CURDIR)
 obj ?= $(top)/out
-build ?= $(top)/cache
+cache ?= $(top)/cache
 
-gopath ?= $(build)/go
+gopath ?= $(cache)/go
 scripts := $(top)/scripts
 os := $(top)/operating-system
 stboot-installation := $(top)/stboot-installation
-
-u-root ?= $(gopath)/bin/u-root
 
 # reproducible builds
 LANG:=C
@@ -41,23 +39,27 @@ check:
 olddefconfig:
 	$(scripts)/make_global_config.sh
 
-toolchain: u-root debos
+toolchain: go-tools debos
 
-ifeq ($(strip $(ST_UROOT_DEV_BRANCH)),)
-u-root_branch := stboot
-else
-u-root_branch := $(ST_UROOT_DEV_BRANCH)
+u-root_bin := $(gopath)/bin/u-root
+stmanager_bin := $(gopath)/bin/stmanager
+cpu_bin := $(gopath)/bin/cpu
+sinit-acm-grebber_bin := $(gopath)/bin/sinit-acm-grebber
+go-tools := $(u-root_bin) $(stmanager_bin) $(cpu_bin) $(sinit-acm-grebber_bin)
+
+go-tools-env := gopath=$(gopath)
+ifneq ($(strip $(ST_UROOT_DEV_BRANCH)),)
+go-tools-env += UROOT_BRANCH=$(ST_UROOT_DEV_BRANCH)
 endif
 
-u-root: $(u-root)
-
-ifneq ($(strip $(HAVE_DOTCONFIG)),)
-$(u-root): $(DOTCONFIG)
-else
-$(u-root):
-endif
-	$(MAKE) -f modules/u-root.mk \
-		build=$(build) branch=$(u-root_branch) gopath=$(gopath)
+u-root: $(u-root_bin)
+stmanager: $(stmanager_bin)
+cpu: $(cpu_bin)
+sinit-acm-grebber: $(sinit-acm-grebber_bin)
+go-tools:
+	$(MAKE) -f modules/go.mk $(go-tools-env)
+$(go-tools):
+	$(MAKE) -f modules/go.mk $@ $(go-tools-env)
 
 debos:
 	$(MAKE) -f modules/debos.mk
@@ -93,7 +95,7 @@ sign:
 upload: $(NEWEST-OSPKG)
 	$(scripts)/upload_os_package.sh $(NEWEST-OSPGK)
 
-mbr_bootloader: $(DOTCONFIG) u-root
+mbr_bootloader: $(DOTCONFIG) go-tools
 	@echo Generating MBR BOOTLOADER
 	$(MAKE) -f $(stboot-installation)/mbr-bootloader/makefile \
 		ST_MBR_BOOTLOADER_KERNEL_VERSION=$(ST_MBR_BOOTLOADER_KERNEL_VERSION) \
@@ -123,6 +125,6 @@ clean:
 	rm -f run.config
 
 distclean: clean
-	rm -rf $(build)
+	rm -rf $(cache)
 
-.PHONY: all check olddefconfig toolchain keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload mbr_bootloader efi_application run-mbr run-efi clean distclean
+.PHONY: all check olddefconfig toolchain go-tools u-root stmanager cpu sinit-acm-grebber keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload mbr_bootloader efi_application run-mbr run-efi clean distclean
