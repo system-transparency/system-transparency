@@ -1,10 +1,6 @@
 u-root_package := github.com/u-root/u-root
-u-root_bin := $(gopath)/bin/u-root
-stmanager_bin := $(gopath)/bin/stmanager
 sinit-acm-grebber_package := github.com/system-transparency/sinit-acm-grebber
-sinit-acm-grebber_bin := $(gopath)/bin/sinit-acm-grebber
 cpu_package := github.com/u-root/cpu
-cpu_bin := $(gopath)/bin/cpu
 
 ARCH := amd64
 UROOT_BRANCH ?= stboot
@@ -13,7 +9,7 @@ go_version=$(shell go version | sed -nr 's/.*go([0-9]+\.[0-9]+.?[0-9]?).*/\1/p' 
 go_version_major=$(shell echo $(go_version) |  sed -nr 's/^([0-9]+)\.([0-9]+)\.?([0-9]*)$$/\1/p')
 go_version_minor=$(shell echo $(go_version) |  sed -nr 's/^([0-9]+)\.([0-9]+)\.?([0-9]*)$$/\2/p')
 
-all: $(u-root_bin) $(stmanager_bin) $(cpu_bin) $(sinit-acm-grebber_bin)
+all: u-root stmanager cpu sinit-acm-grebber
 
 version:
 ifeq ("$(go_version)","")
@@ -36,20 +32,20 @@ checkout: get
 	@echo [Go] Checkout branch \"$(UROOT_BRANCH)\"
 	git -C $(gopath)/src/$(u-root_package) checkout --quiet $(UROOT_BRANCH)
 
-$(u-root_bin): checkout
+u-root: checkout
 	@echo [Go] Install u-root
 	GOPATH=$(gopath) go install $(u-root_package)
 
-$(stmanager_bin): checkout
+stmanager: checkout
 	@echo [Go] Install stmanager
 	GOPATH=$(gopath) go install $(u-root_package)/tools/stmanager
 
-$(cpu_bin):
+cpu:
 	@echo [Go] Install cpu command for debugging
 	GO111MODULE=auto GOPATH=$(gopath) go get -u $(cpu_package)/cmds/cpu{,d}
 
-$(sinit-acm-grebber_bin):
+sinit-acm-grebber:
 	@echo [Go] Install ACM grebber
 	GO111MODULE=auto GOPATH=$(gopath) go get -u $(sinit-acm-grebber_package)
 
-.PHONY: all checkout get version
+.PHONY: all checkout get version u-root stmanager cpu sinit-acm-grebber

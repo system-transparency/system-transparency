@@ -69,21 +69,13 @@ olddefconfig:
 
 toolchain: go-tools debos tboot
 
-u-root_bin := $(gopath)/bin/u-root
-stmanager_bin := $(gopath)/bin/stmanager
-cpu_bin := $(gopath)/bin/cpu
-sinit-acm-grebber_bin := $(gopath)/bin/sinit-acm-grebber
-go-tools := $(u-root_bin) $(stmanager_bin) $(cpu_bin) $(sinit-acm-grebber_bin)
-
+go-tools := u-root stmanager cpu sinit-acm-grebber
 go-tools-env := gopath=$(gopath)
 ifneq ($(strip $(ST_UROOT_DEV_BRANCH)),)
 go-tools-env += UROOT_BRANCH=$(ST_UROOT_DEV_BRANCH)
 endif
+$(cache)/go/bin/u-root: u-root
 
-u-root: $(u-root_bin)
-stmanager: $(stmanager_bin)
-cpu: $(cpu_bin)
-sinit-acm-grebber: $(sinit-acm-grebber_bin)
 go-tools:
 	$(MAKE) -f modules/go.mk $(go-tools-env)
 $(go-tools):
