@@ -80,7 +80,7 @@ Requires operator to place new OS packages in `DATA-PARTITION/stboot/os-pkgs/new
 
 ### Signature verification
 A OS package includes one or more Signatures of the included boot files (kernel, initramfs, et al.) together with the corresponding certificates.
-The root certificate is also included. The singnature verification after downloading the OS package then works as follows:
+The root certificate is also included. The signature verification after downloading the OS package then works as follows:
 * Validate the root certificate with the fingerprints in security_configuration.json
 * Check that the certificates are signed by the root certificate
 * Verify the signature of the boot files
