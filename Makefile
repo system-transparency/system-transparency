@@ -93,8 +93,7 @@ check:
 	@echo Checking dependencies
 	$(scripts)/checks.sh
 
-default: olddefconfig
-olddefconfig:
+default:
 	$(scripts)/make_global_config.sh
 
 toolchain: go-tools debos tboot
@@ -171,7 +170,7 @@ run-efi:
 $(DOTCONFIG):
 	@echo
 	@echo Error: run.config file missing.
-	@echo        Please provide a config file of run \'make olddefconfig\'
+	@echo        Please provide a config file of run \'make default\'
 	@echo        to generate a default config.
 	@echo
 	@exit 1
@@ -186,4 +185,4 @@ clean:
 distclean: clean
 	rm -rf $(cache)
 
-.PHONY: all help check olddefconfig toolchain go-tools u-root stmanager cpu sinit-acm-grebber keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload mbr_bootloader efi_application run-mbr run-efi clean distclean
+.PHONY: all help check default toolchain go-tools u-root stmanager cpu sinit-acm-grebber keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload mbr_bootloader efi_application run-mbr run-efi clean distclean
