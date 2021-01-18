@@ -19,6 +19,8 @@ name="initramfs-linuxboot.cpio"
 initramfs="${out}/${name}"
 initramfs_compressed="${initramfs}.gz"
 initramfs_backup="${initramfs_compressed}.backup"
+signing_root="${ST_SIGNING_ROOT}"
+signing_root_name="ospkg_signing_root.pem"
 security_config="${out}/security_configuration.json"
 include_dir="${root}/stboot-installation/initramfs-includes"
 https_roots="${include_dir}/https_roots.pem"
@@ -47,6 +49,7 @@ case $variant in
     echo "[INFO]: creating minimal initramfs including stboot only"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -defaultsh="" -o "${initramfs}" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
+    -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/boot/stboot
@@ -56,6 +59,7 @@ case $variant in
     echo "[INFO]: creating initramfs including debugging tools"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
+    -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
     -files "${include_dir}/netsetup.elv:netsetup.elv" \
     -files "${include_dir}/start_cpu.elv:start_cpu.elv" \
@@ -71,6 +75,7 @@ case $variant in
     echo "[INFO]: creating initramfs including all u-root core tools"
     GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
+    -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
     -files "${include_dir}/netsetup.elv:netsetup.elv" \
     -files "${include_dir}/start_cpu.elv:start_cpu.elv" \

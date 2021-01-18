@@ -25,9 +25,6 @@ echo "[INFO]: create a CA and a set of 5 signing keys, certified by it"
 # Self-sign root certificate
 "${OPENSSL}" req -new -key "${signing_key_dir}/root.key" -batch -subj '/CN=Test Root CA' -out "${signing_key_dir}/root.cert" -x509 -days 1024
 
-# Root certificate fingerprint
-"${OPENSSL}" base64 -d -in "${signing_key_dir}/root.cert" -out /tmp/rootcert
-shasum -a 256 -b /tmp/rootcert > "${signing_key_dir}/rootcert.fingerprint"
 for I in 1 2 3 4 5
 do
   # Gen signing key
