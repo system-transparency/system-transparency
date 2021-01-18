@@ -1,6 +1,8 @@
 top := $(CURDIR)
-obj ?= $(top)/out
+out ?= $(top)/out
+out-dirs += $(out)
 cache ?= $(top)/cache
+common := $(top)/stboot-installation/common
 
 gopath ?= $(cache)/go
 scripts := $(top)/scripts
@@ -28,7 +30,30 @@ ifneq ($(strip $(HAVE_DOTCONFIG)),)
 include $(DOTCONFIG)
 endif
 
-NEWEST-OSPGK := $(top)/.newest-ospkgs.zip
+### CONFIG_DEP: function for dependency subconfig generation
+# If a target depends on specific configuration variables, it should be
+# rebuild when the variable changes. The function generates a target
+# subconfig with the suffix ".config". when it is added as dependecy to
+# the concerned target, it will trigger a rebuild as soon as a variable
+# changes.
+#
+# Usage example:
+# target "example_target" depends on the file "additional_file" and the
+# variables "ST_EXAMPLE1" and "ST_EXAMPLE2".
+#
+# $(eval $(call CONFIG_DEP,example_target,ST_EXAMPLE1|ST_EXAMPLE2))
+# example_target: %: %.config (additional_file
+# 	(target build instructions)
+
+define CONFIG_DEP
+$(1).config: $(DOTCONFIG)
+	mkdir -p `dirname $$@`
+	grep -E "^$2" $(DOTCONFIG) | sort >> $$@.temp
+	rsync -c $$@.temp $$@
+	rm $$@.temp
+endef
+
+include $(top)/stboot-installation/mbr-bootloader/makefile
 
 all: mbr_bootloader
 
@@ -92,14 +117,11 @@ sign:
 	@echo Sign OS package
 	$(scripts)/create_and_sign_os_package.sh
 
+NEWEST-OSPGK := $(top)/.newest-ospkgs.zip
 upload: $(NEWEST-OSPKG)
 	$(scripts)/upload_os_package.sh $(NEWEST-OSPGK)
 
-mbr_bootloader: $(DOTCONFIG) go-tools
-	@echo Generating MBR BOOTLOADER
-	$(MAKE) -f $(stboot-installation)/mbr-bootloader/makefile \
-		ST_MBR_BOOTLOADER_KERNEL_VERSION=$(ST_MBR_BOOTLOADER_KERNEL_VERSION) \
-		ST_MBR_BOOTLOADER_KERNEL_CONFIG=$(ST_MBR_BOOTLOADER_KERNEL_CONFIG)
+mbr_bootloader: $(mbr-image)
 
 efi_application: $(DOTCONFIG) u-root
 	@echo Generating EFI APPLICATION
@@ -119,9 +141,11 @@ $(DOTCONFIG):
 	@echo
 	@exit 1
 
+$(out-dirs):
+	mkdir -p $@
 
 clean:
-	rm -rf $(obj)
+	rm -rf $(out)
 	rm -f run.config
 
 distclean: clean
