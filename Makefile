@@ -64,6 +64,7 @@ check:
 	@echo Checking dependencies
 	$(scripts)/checks.sh
 
+default: olddefconfig
 olddefconfig:
 	$(scripts)/make_global_config.sh
 
@@ -111,6 +112,15 @@ ubuntu-20: debos-ubuntu sinit-acm-grebber
 
 ubuntu: ubuntu-18
 
+ifneq ($(strip $(ST_SIGNING_ROOT)),)
+$(patsubst "%",%,$(ST_SIGNING_ROOT)):
+	@echo
+	@echo Error: $(ST_SIGNING_ROOT) file missing.
+	@echo        Please provide keys or run \'make keygen\'
+	@echo        to generate example keys and certificates.
+	@echo
+	@exit 1
+endif
 sign: stmanager
 	@echo Sign OS package
 	$(scripts)/create_and_sign_os_package.sh
