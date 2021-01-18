@@ -1,3 +1,4 @@
+u-root := $(gopath)/bin/u-root
 u-root_package := github.com/u-root/u-root
 sinit-acm-grebber_package := github.com/system-transparency/sinit-acm-grebber
 cpu_package := github.com/u-root/cpu
@@ -32,9 +33,15 @@ checkout: get
 	@echo [Go] Checkout branch \"$(UROOT_BRANCH)\"
 	git -C $(gopath)/src/$(u-root_package) checkout --quiet $(UROOT_BRANCH)
 
-u-root: checkout
+u-root $(gopath)/bin/u-root.checksum: checkout
 	@echo [Go] Install u-root
 	GOPATH=$(gopath) go install $(u-root_package)
+	# create checksum file as timestamp reference
+	tmp_file=`mktemp`; \
+	sha256sum $(u-root) > $$tmp_file; \
+	rsync -c $$tmp_file $(u-root).checksum; \
+	rm $$tmp_file;
+
 
 stmanager: checkout
 	@echo [Go] Install stmanager

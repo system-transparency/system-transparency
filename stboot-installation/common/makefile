@@ -17,7 +17,7 @@ $(data_partition): % : %.config $(os-out) $(os-out_dirs) $(os-out_files)
 	$(common)/build_data_filesystem.sh
 
 $(eval $(call CONFIG_DEP,$(initramfs),ST_LINUXBOOT_VARIANT))
-$(initramfs): % : %.config $(cache)/go/bin/u-root $(security_config) $(patsubst "%",%,$(ST_SIGNING_ROOT))
+$(initramfs): % : %.config $(cache)/go/bin/u-root.checksum $(security_config) $(patsubst "%",%,$(ST_SIGNING_ROOT))
 	@echo "\ngenerating: $@"
 	$(common)/build_initramfs.sh
 

@@ -98,16 +98,15 @@ default:
 
 toolchain: go-tools debos tboot
 
-go-tools := u-root stmanager cpu sinit-acm-grebber
+go-targets := u-root stmanager cpu sinit-acm-grebber
+go-targets += $(cache)/go/bin/u-root.checksum
 go-tools-env := gopath=$(gopath)
 ifneq ($(strip $(ST_UROOT_DEV_BRANCH)),)
 go-tools-env += UROOT_BRANCH=$(ST_UROOT_DEV_BRANCH)
 endif
-$(cache)/go/bin/u-root: u-root
-
-go-tools:
+go-targets:
 	$(MAKE) -f modules/go.mk $(go-tools-env)
-$(go-tools):
+$(go-targets):
 	$(MAKE) -f modules/go.mk $@ $(go-tools-env)
 
 debos: tboot
@@ -157,9 +156,9 @@ NEWEST-OSPGK := $(top)/.newest-ospkgs.zip
 upload: $(NEWEST-OSPKG)
 	$(scripts)/upload_os_package.sh $(NEWEST-OSPGK)
 
-mbr_bootloader: check $(mbr_image)
+mbr_bootloader: $(mbr_image)
 
-efi_application: check $(efi_image)
+efi_application: $(efi_image)
 
 run-mbr:
 	$(scripts)/start_qemu_mbr_bootloader.sh
