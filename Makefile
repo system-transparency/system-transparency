@@ -60,6 +60,35 @@ include $(top)/stboot-installation/common/makefile
 include $(top)/stboot-installation/mbr-bootloader/makefile
 include $(top)/stboot-installation/efi-application/makefile
 
+help:
+	@echo
+	@echo  '*** system-transparency targets ***'
+	@echo  '  Use "make [target] V=1" for extra build debug information'
+	@echo  '*** Build image'
+	@echo  '  all                - Build all image formats'
+	@echo  '  mbr_bootloader     - Build MBR boatloader image'
+	@echo  '  efi_application    - Build EFI aplication image'
+	@echo  '*** Install toolchain'
+	@echo  '  go-tools           - Build and update Golang tools'
+	@echo  '  tboot              - Build tboot'
+	@echo  '  debos              - Create all docker debos environments'
+	@echo  '  debos-debian       - Create docker debos environment for debian'
+	@echo  '  debos-ubuntu	     - Create docker debos environment for ubuntu'
+	@echo  '*** Build Operating Sytem'
+	@echo  '  debian             - Build reproducible Debian Buster'
+	@echo  '  ubuntu/ubuntu-18   - Build reproducible Ubuntu Bionic (latest)'
+	@echo  '  ubuntu-20          - Build reproducible Ubuntu Focal'
+	@echo  '  sign               - Sign OS packages'
+	@echo  '  upload             - Upload OS package to provisioning server'
+	@echo  '*** Run in QEMU'
+	@echo  '  run-mbr            - Run MBR bootloader'
+	@echo  '  run-efi            - Run EFI application'
+	@echo  '*** MISC'
+	@echo  '  default            - Generate default run.config'
+	@echo  '  check              - Check for missing dependencies'
+	@echo  '  keygen             - Generate example keys and certificates'
+	@echo
+
 check:
 	@echo Checking dependencies
 	$(scripts)/checks.sh
@@ -157,4 +186,4 @@ clean:
 distclean: clean
 	rm -rf $(cache)
 
-.PHONY: all check olddefconfig toolchain go-tools u-root stmanager cpu sinit-acm-grebber keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload mbr_bootloader efi_application run-mbr run-efi clean distclean
+.PHONY: all help check olddefconfig toolchain go-tools u-root stmanager cpu sinit-acm-grebber keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload mbr_bootloader efi_application run-mbr run-efi clean distclean
