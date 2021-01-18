@@ -31,6 +31,7 @@ include $(DOTCONFIG)
 endif
 
 ### CONFIG_DEP: function for dependency subconfig generation
+#
 # If a target depends on specific configuration variables, it should be
 # rebuild when the variable changes. The function generates a target
 # subconfig with the suffix ".config". when it is added as dependecy to
@@ -53,9 +54,11 @@ $(1).config: $(DOTCONFIG)
 	rm $$@.temp
 endef
 
-include $(top)/stboot-installation/mbr-bootloader/makefile
+all: mbr_bootloader efi_application
 
-all: mbr_bootloader
+include $(top)/stboot-installation/common/makefile
+include $(top)/stboot-installation/mbr-bootloader/makefile
+include $(top)/stboot-installation/efi-application/makefile
 
 check:
 	@echo Checking dependencies
@@ -64,7 +67,7 @@ check:
 olddefconfig:
 	$(scripts)/make_global_config.sh
 
-toolchain: go-tools debos
+toolchain: go-tools debos tboot
 
 u-root_bin := $(gopath)/bin/u-root
 stmanager_bin := $(gopath)/bin/stmanager
@@ -86,7 +89,7 @@ go-tools:
 $(go-tools):
 	$(MAKE) -f modules/go.mk $@ $(go-tools-env)
 
-debos:
+debos: tboot
 	$(MAKE) -f modules/debos.mk
 
 debos-debian:
@@ -99,21 +102,24 @@ keygen:
 	@echo Generate example keys and certificates
 	$(scripts)/make_keys_and_certs.sh
 
-debian: debos-debian
+tboot:
+	$(os)/common/build_tboot.sh
+
+debian: debos-debian sinit-acm-grebber
 	@echo Build debian
 	$(os)/debian/make_debian.sh
 
-ubuntu-18: debos-ubuntu
+ubuntu-18: debos-ubuntu sinit-acm-grebber
 	@echo Build ubuntu
 	$(os)/ubuntu/make_ubuntu.sh "18"
 
-ubuntu-20: debos-ubuntu
+ubuntu-20: debos-ubuntu sinit-acm-grebber
 	@echo Build ubuntu
 	$(os)/ubuntu/make_ubuntu.sh "20"
 
 ubuntu: ubuntu-18
 
-sign:
+sign: stmanager
 	@echo Sign OS package
 	$(scripts)/create_and_sign_os_package.sh
 
@@ -121,11 +127,9 @@ NEWEST-OSPGK := $(top)/.newest-ospkgs.zip
 upload: $(NEWEST-OSPKG)
 	$(scripts)/upload_os_package.sh $(NEWEST-OSPGK)
 
-mbr_bootloader: $(mbr-image)
+mbr_bootloader: check $(mbr_image)
 
-efi_application: $(DOTCONFIG) u-root
-	@echo Generating EFI APPLICATION
-	$(MAKE) -f $(stboot-installation)/efi-application/makefile
+efi_application: check $(efi_image)
 
 run-mbr:
 	$(scripts)/start_qemu_mbr_bootloader.sh
