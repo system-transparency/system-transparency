@@ -10,19 +10,6 @@ Detailed information about the project itself can be found at https://system-tra
 * The operator machine should run a Linux system (tested with Ubuntu 18.04.2 LTS (Bionic Beaver) / Kernel 4.15.0-47-generic
 * Further software prerequisites will be checked during setup. For details take a look at `./scripts/checks.sh`. 
 
-Regarding Golang:
-* make sure to also create a workspace at `$HOME/go` (see [test Go](https://golang.org/doc/install#testing))
-* make sure `$HOME/go/bin` and `/usr/local/go/bin` or '/usr/bin/go are added to `PATH` environment variable
-  * you may have to disable `GO111MODULE` via `go env -w GO111MODULE=off`
-
-If the dependency checks complains about your GCC, You need to make GCC 8 the default:
-
-```bash
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
-sudo update-alternatives --config gcc
-```
-
 ## Quick Start
 
 ```bash

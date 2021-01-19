@@ -12,14 +12,7 @@ root="$(cd "${dir}/../" && pwd)"
 # import global configuration
 source ${root}/run.config
 
-gopath="$(go env GOPATH)"
-if [ -z "${gopath}" ]; then
-    echo "GOPATH is not set!"
-    echo "Please refer to https://golang.org/cmd/go/#hdr-GOPATH_environment_variable1"
-    exit 1
-fi
-
-#TODO: check if GOPATH/bin is in PATH
+gopath="${root}/cache/go"
 
 uroot_repo="github.com/u-root/u-root"
 uroot_src="${gopath}/src/${uroot_repo}"

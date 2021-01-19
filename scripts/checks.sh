@@ -87,8 +87,6 @@ function checkGO {
    else
        echo "GO supported"
    fi
-
-   echo "$PATH"|grep -q "$(go env GOPATH)/bin" || { echo "$(go env GOPATH)/bin must be added to PATH"; exit 1; }
 }
 
 function checkDebootstrap {

@@ -9,6 +9,7 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
+gopath="${root}/cache/go"
 cache="${root}/cache/ACMs"
 
 if [ -d "${cache}" ]; then
@@ -19,7 +20,7 @@ else
     echo ""
     echo "[INFO]: Grebbing all available ACMs from Intel"
     echo ""
-    sinit-acm-grebber -of "${cache}"
+    ${gopath}/bin/sinit-acm-grebber -of "${cache}"
 
     echo "ACMs saved at: $(realpath --relative-to="${root}" "${cache}")"
 fi

@@ -9,6 +9,8 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
+gopath="${root}/cache/go"
+
 # import global configuration
 source "${root}/run.config"
 
@@ -31,14 +33,14 @@ output_path="${out}/${os_pkg_name}"
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
-echo "[INFO]: call 'stmanager create' to pack boot files into an OS package."
+echo "[INFO]: call '${gopath}/bin/stmanager create' to pack boot files into an OS package."
 
 stmanager_create_args=( "--out=${output_path}" "--label=${os_pkg_label}" "--kernel=${os_pkg_kernel}" "--cmd=${os_pkg_cmdline}" "--tcmd=${os_pkg_tboot_args}")
 [ -z "${os_pkg_initramfs}" ] || stmanager_create_args+=( "--initramfs=${os_pkg_initramfs}" )
 [ -z "${os_pkg_tboot}" ] || stmanager_create_args+=( "--tboot=${os_pkg_tboot}" )
 [ -z "${os_pkg_acm}" ] || stmanager_create_args+=( "--acm=${os_pkg_acm}" )
 
-os_pkg_name=$(stmanager create "${stmanager_create_args[@]}")
+os_pkg_name=$(${gopath}/bin/stmanager create "${stmanager_create_args[@]}")
 os_pkg="${out}/${os_pkg_name}"
 
 echo "[INFO]: created OS package ${os_pkg_name}"
@@ -49,7 +51,7 @@ signing_key_dir="${root}/out/keys/signing_keys"
 echo "[INFO]: call 'stmanager sign' to sign $os_pkg with example keys"
 for I in 1 2 3 4 5
 do
-    stmanager sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$os_pkg"
+    ${gopath}/bin/stmanager sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$os_pkg"
 done
 
 # local boot order configuration
@@ -77,5 +79,5 @@ cp "${os_pkg}" "${root}/.newest-ospkg.zip"
 
 echo ""
 echo "[INFO]: $(realpath --relative-to="${root}" "$os_pkg") created and signed with example keys."
-echo "[INFO]: You can use stmanager manually, too. Try 'stmanager --help'"
+echo "[INFO]: You can use stmanager manually, too. Try '${gopath}/bin/stmanager --help'"
 echo "[INFO]: Edit ${local_boot_order_file} to change boot order for local boot method"
