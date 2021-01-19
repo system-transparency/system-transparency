@@ -7,7 +7,7 @@ efi_boot_partition := $(efi-out)/boot_partition.vfat
 efi_kernel := $(efi-out)/linuxboot.efi
 
 
-efi-image $(efi_image): $(efi_boot_partition) $(data_partition)
+efi-application-installation $(efi_image): $(efi_boot_partition) $(data_partition)
 	@echo "[stboot] Build EFI application image"
 	$(efi)/build_image.sh $(OUTREDIRECT)
 	@echo "[stboot] Done EFI application image"
@@ -23,8 +23,8 @@ $(efi_kernel): % : %.config $(initramfs)
 	$(common)/build_kernel.sh "$(ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG)" "$@" "$(ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION)" $(OUTREDIRECT)
 	@echo "[stboot] Done EFI kernel"
 
-efi-run:
+run-efi-application:
 	@echo "[stboot] Run EFI application image"
 	$(scripts)/start_qemu_efi_application.sh
 
-.PHONY: efi-image efi-run
+.PHONY: efi-application-installation run-efi-application

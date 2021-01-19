@@ -32,6 +32,7 @@ define go_update
         # use rsync to only update if hash changes (-c flag)
 	rsync -c $(2).temp $(2)
 	rm $(2).temp
+	echo [Go] Done $(1)
 endef
 
 ifneq ($(strip $(ST_UROOT_DEV_BRANCH)),)

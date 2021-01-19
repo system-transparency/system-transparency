@@ -39,7 +39,7 @@ ifneq ($(strip $(HAVE_DOTCONFIG)),)
 include $(DOTCONFIG)
 endif
 
-all: mbr-image efi-image
+all: mbr-bootloader-installation efi-application-installation
 
 ifneq ($(strip $(ST_SIGNING_ROOT)),)
 root_cert := $(patsubst "%",%,$(ST_SIGNING_ROOT))
@@ -94,39 +94,41 @@ help:
 	@echo
 	@echo  '*** system-transparency targets ***'
 	@echo  '  Use "make [target] V=1" for extra build debug information'
+	@echo  '  default-config               - Generate default run.config'
+	@echo  '  check                        - Check for missing dependencies'
+	@echo  '  keygen                       - Generate example keys and certificates'
+	@echo  '  clean                        - Remove build artifacts'
+	@echo  '  distclean                    - Remove build artifacts, cache and config file'
 	@echo  '*** Build image'
-	@echo  '  all                - Build all image formats'
-	@echo  '  mbr-image          - Build MBR boatloader image'
-	@echo  '  efi-image          - Build EFI application image'
+	@echo  '  all                          - Build all installation options'
+	@echo  '  mbr-bootloader-installation  - Build MBR bootloader installation option'
+	@echo  '  efi-application-installation - Build EFI application installation option'
 	@echo  '*** Install toolchain'
-	@echo  '  go-tools           - Build/Update Golang tools'
-	@echo  '  tboot              - Build tboot'
-	@echo  '  debos              - Create all docker debos environments'
-	@echo  '  debos-debian       - Create docker debos environment for debian'
-	@echo  '  debos-ubuntu	     - Create docker debos environment for ubuntu'
+	@echo  '  toolchain                    - Build/Update toolchain'
+	@echo  '  go-tools                     - Build/Update Golang tools'
+	@echo  '  debos                        - Create all docker debos environments'
+	@echo  '  debos-debian                 - Create docker debos environment for debian'
+	@echo  '  debos-ubuntu	               - Create docker debos environment for ubuntu'
 	@echo  '*** Build Operating Sytem'
-	@echo  '  debian             - Build reproducible Debian Buster'
-	@echo  '  ubuntu/ubuntu-18   - Build reproducible Ubuntu Bionic (latest)'
-	@echo  '  ubuntu-20          - Build reproducible Ubuntu Focal'
-	@echo  '  sign               - Sign OS packages'
-	@echo  '  upload             - Upload OS package to provisioning server'
+	@echo  '  tboot                        - Build tboot'
+	@echo  '  debian                       - Build reproducible Debian Buster'
+	@echo  '  ubuntu-18                    - Build reproducible Ubuntu Bionic (latest)'
+	@echo  '  ubuntu-20                    - Build reproducible Ubuntu Focal'
+	@echo  '  sign                         - Sign OS package'
+	@echo  '  upload                       - Upload OS package to provisioning server'
 	@echo  '*** Run in QEMU'
-	@echo  '  mbr-run            - Run MBR bootloader'
-	@echo  '  efi-run            - Run EFI application'
-	@echo  '*** MISC'
-	@echo  '  default            - Generate default run.config'
-	@echo  '  check              - Check for missing dependencies'
-	@echo  '  keygen             - Generate example keys and certificates'
-	@echo
+	@echo  '  run-mbr-bootloader           - Run MBR bootloader'
+	@echo  '  run-efi-application          - Run EFI application'
 
 check:
 	@echo Checking dependencies
 	$(scripts)/checks.sh
+	@echo Done checking dependencies
 
-default:
+default-config:
 	$(scripts)/make_global_config.sh
 
-toolchain: go-tools debos tboot
+toolchain: go-tools debos
 
 keygen:
 	@echo Generate example keys and certificates
@@ -153,8 +155,6 @@ ubuntu-20 $(ubuntu-20_kernel) $(ubunut-20_initramfs): debos-ubuntu $(sinit-acm-g
 	$(os)/ubuntu/make_ubuntu.sh "20"
 	@echo Done Ubuntu Focal
 
-ubuntu: ubuntu-18
-
 sign: $(stmanager_bin) $(os_kernel) $(os_initramfs)
 	@echo Sign OS package
 	$(scripts)/create_and_sign_os_package.sh
@@ -178,9 +178,9 @@ $(out-dirs):
 
 clean:
 	rm -rf $(out)
-	rm -f run.config
 
 distclean: clean
 	rm -rf $(cache)
+	rm -f run.config
 
 .PHONY: all help check default toolchain keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload clean distclean

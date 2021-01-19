@@ -8,7 +8,7 @@ mbr_kernel := $(mbr-out)/linuxboot.vmlinuz
 syslinux := $(cache)/syslinux/syslinux-6.03/bios/mtools/syslinux
 syslinux_config := $(mbr-out)/syslinux.cfg
 
-mbr-image $(mbr_image): $(mbr_boot_partition) $(data_partition)
+mbr-bootloader-installation $(mbr_image): $(mbr_boot_partition) $(data_partition)
 	@echo "[stboot] Build MBR bootloader image"
 	$(mbr)/build_image.sh $(OUTREDIRECT)
 	@echo "[stboot] Done MBR bootloader image"
@@ -34,8 +34,8 @@ $(syslinux_config):
 	$(mbr)/build_syslinux_config.sh $(OUTREDIRECT)
 	@echo "[stboot] Done syslinux configuration"
 
-mbr-run:
+run-mbr-bootloader:
 	@echo "[stboot] Run MBR bootloader image"
 	$(scripts)/start_qemu_mbr_bootloader.sh
 
-.PHONY: mbr-image mbr-run
+.PHONY: mbr-bootloader-installation run-mbr-bootloader
