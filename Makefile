@@ -3,12 +3,19 @@ out ?= $(top)/out
 out-dirs += $(out)
 cache ?= $(top)/cache
 common := $(top)/stboot-installation/common
-
 gopath ?= $(cache)/go
 scripts := $(top)/scripts
 os := $(top)/operating-system
 stboot-installation := $(top)/stboot-installation
+
 tboot := $(out)/tboot/tboot.gz
+newest-ospkg := $(top)/.newest-ospkgs.zip
+debian_kernel := $(out)/operating-system/debian-buster-amd64.vmlinuz
+debian_initramfs := $(out)/operating-system/debian-buster-amd64.cpio.gz
+ubuntu-18_kernel := $(out)/operating-system/ubuntu-bionic-amd64.vmlinuz
+ubuntu-18_initramfs := $(out)/operating-system/ubuntu-bionic-amd64.cpio.gz
+ubuntu-20_kernel := $(out)/operating-system/ubuntu-focal-amd64.vmlinuz
+ubuntu-20_initramfs := $(out)/operating-system/ubuntu-focal-amd64.cpio.gz
 
 # reproducible builds
 LANG:=C
@@ -30,6 +37,25 @@ HAVE_DOTCONFIG := $(wildcard $(DOTCONFIG))
 
 ifneq ($(strip $(HAVE_DOTCONFIG)),)
 include $(DOTCONFIG)
+endif
+
+all: mbr-image efi-image
+
+ifneq ($(strip $(ST_SIGNING_ROOT)),)
+root_cert := $(patsubst "%",%,$(ST_SIGNING_ROOT))
+$(root_cert):
+	@echo
+	@echo Error: $@ file missing.
+	@echo        Please provide keys or run \'make keygen\'
+	@echo        to generate example keys and certificates.
+	@echo
+	@exit 1
+endif
+ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
+os_kernel := $(top)/$(patsubst "%",%,$(ST_OS_PKG_KERNEL))
+endif
+ifneq ($(strip $(ST_OS_PKG_INITRAMFS)),)
+os_initramfs := $(top)/$(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
 endif
 
 ### CONFIG_DEP: function for dependency subconfig generation
@@ -56,7 +82,6 @@ $(1).config: $(DOTCONFIG)
 	rm $$@.temp
 endef
 
-all: mbr-image efi-image
 
 include $(top)/modules/go.mk
 include $(top)/modules/debos.mk
@@ -113,43 +138,32 @@ tboot $(tboot):
 	$(os)/common/build_tboot.sh
 	@echo Done tboot
 
-debian: debos-debian sinit-acm-grebber
+debian $(debian_kernel) $(debian_initramfs): debos-debian $(sinit-acm-grebber_bin)
 	@echo Build Debian Buster
 	$(os)/debian/make_debian.sh
 	@echo Done Debian Buster
 
-ubuntu-18: debos-ubuntu sinit-acm-grebber
-	@echo Build Ubuntu Bionic (latest)
+ubuntu-18 $(ubuntu-18_kernel) $(ubunut-18_initramfs): debos-ubuntu $(sinit-acm-grebber_bin)
+	@echo 'Build Ubuntu Bionic (latest)'
 	$(os)/ubuntu/make_ubuntu.sh "18"
 	@echo Done Ubuntu Bionic (latest)
 
-ubuntu-20: debos-ubuntu sinit-acm-grebber
+ubuntu-20 $(ubuntu-20_kernel) $(ubunut-20_initramfs): debos-ubuntu $(sinit-acm-grebber_bin)
 	@echo Build Ubuntu Focal
 	$(os)/ubuntu/make_ubuntu.sh "20"
 	@echo Done Ubuntu Focal
 
 ubuntu: ubuntu-18
 
-ifneq ($(strip $(ST_SIGNING_ROOT)),)
-$(patsubst "%",%,$(ST_SIGNING_ROOT)):
-	@echo
-	@echo Error: $(ST_SIGNING_ROOT) file missing.
-	@echo        Please provide keys or run \'make keygen\'
-	@echo        to generate example keys and certificates.
-	@echo
-	@exit 1
-endif
-sign: $(stmanager)
+sign: $(stmanager_bin) $(os_kernel) $(os_initramfs)
 	@echo Sign OS package
 	$(scripts)/create_and_sign_os_package.sh
 	@echo Done sign OS package
 
-NEWEST-OSPGK := $(top)/.newest-ospkgs.zip
-upload: $(NEWEST-OSPKG)
+upload: $(newest-ospkg)
 	@echo Upload OS package
-	$(scripts)/upload_os_package.sh $(NEWEST-OSPGK)
+	$(scripts)/upload_os_package.sh $<
 	@echo Done OS package
-
 
 $(DOTCONFIG):
 	@echo
