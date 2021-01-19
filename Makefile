@@ -131,44 +131,44 @@ default-config:
 toolchain: go-tools debos
 
 keygen:
-	@echo Generate example keys and certificates
+	@echo [stboot] Generate example keys and certificates
 	$(scripts)/make_keys_and_certs.sh $(OUTREDIRECT)
-	@echo Done example keys and certificates
+	@echo [stboot] Done example keys and certificates
 
 tboot $(tboot):
 	@echo Build tboot
 	$(os)/common/build_tboot.sh
-	@echo Done tboot
+	@echo [stboot] Done tboot
 
 acm: $(sinit-acm-grebber_bin)
 	@echo Get ACM
 	$(os)/common/get_acms.sh
-	@echo Done ACM
+	@echo [stboot] Done ACM
 
 debian $(debian_kernel) $(debian_initramfs): debos-debian $(tboot) acm
 	@echo Build Debian Buster
 	$(os)/debian/build_os_artefacts.sh
-	@echo Done Debian Buster
+	@echo [stboot] Done Debian Buster
 
 ubuntu-18 $(ubuntu-18_kernel) $(ubunut-18_initramfs): debos-ubuntu $(tboot) acm
-	@echo 'Build Ubuntu Bionic (latest)'
+	@echo '[stboot] Build Ubuntu Bionic (latest)'
 	$(os)/ubuntu/build_os_artefacts.sh "18"
-	@echo 'Done Ubuntu Bionic (latest)'
+	@echo '[stboot] Done Ubuntu Bionic (latest)'
 
 ubuntu-20 $(ubuntu-20_kernel) $(ubunut-20_initramfs): debos-ubuntu $(tboot) acm
-	@echo Build Ubuntu Focal
+	@echo [stboot] Build Ubuntu Focal
 	$(os)/ubuntu/build_os_artefacts.sh "20"
-	@echo Done Ubuntu Focal
+	@echo [stboot] Done Ubuntu Focal
 
 sign: $(stmanager_bin) $(os_kernel) $(os_initramfs)
-	@echo Sign OS package
+	@echo [stboot] Sign OS package
 	$(scripts)/create_and_sign_os_package.sh
-	@echo Done sign OS package
+	@echo [stboot] Done sign OS package
 
 upload: $(newest-ospkg)
-	@echo Upload OS package
+	@echo [stboot] Upload OS package
 	$(scripts)/upload_os_package.sh $<
-	@echo Done OS package
+	@echo [stboot] Done OS package
 
 $(DOTCONFIG):
 	@echo
