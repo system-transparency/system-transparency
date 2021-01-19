@@ -23,7 +23,7 @@ $(efi_kernel): % : %.config $(initramfs)
 	$(common)/build_kernel.sh "$(ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG)" "$@" "$(ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION)" $(OUTREDIRECT)
 	@echo "[stboot] Done EFI kernel"
 
-run-efi-application:
+run-efi-application: $(DOTCONFIG) $(efi_image)
 	@echo "[stboot] Run EFI application image"
 	$(scripts)/start_qemu_efi_application.sh
 

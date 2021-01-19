@@ -140,19 +140,24 @@ tboot $(tboot):
 	$(os)/common/build_tboot.sh
 	@echo Done tboot
 
-debian $(debian_kernel) $(debian_initramfs): debos-debian $(sinit-acm-grebber_bin)
+acm: $(sinit-acm-grebber_bin)
+	@echo Get ACM
+	$(os)/common/get_acms.sh
+	@echo Done ACM
+
+debian $(debian_kernel) $(debian_initramfs): debos-debian $(tboot) acm
 	@echo Build Debian Buster
-	$(os)/debian/make_debian.sh
+	$(os)/debian/build_os_artefacts.sh
 	@echo Done Debian Buster
 
-ubuntu-18 $(ubuntu-18_kernel) $(ubunut-18_initramfs): debos-ubuntu $(sinit-acm-grebber_bin)
+ubuntu-18 $(ubuntu-18_kernel) $(ubunut-18_initramfs): debos-ubuntu $(tboot) acm
 	@echo 'Build Ubuntu Bionic (latest)'
-	$(os)/ubuntu/make_ubuntu.sh "18"
-	@echo Done Ubuntu Bionic (latest)
+	$(os)/ubuntu/build_os_artefacts.sh "18"
+	@echo 'Done Ubuntu Bionic (latest)'
 
-ubuntu-20 $(ubuntu-20_kernel) $(ubunut-20_initramfs): debos-ubuntu $(sinit-acm-grebber_bin)
+ubuntu-20 $(ubuntu-20_kernel) $(ubunut-20_initramfs): debos-ubuntu $(tboot) acm
 	@echo Build Ubuntu Focal
-	$(os)/ubuntu/make_ubuntu.sh "20"
+	$(os)/ubuntu/build_os_artefacts.sh "20"
 	@echo Done Ubuntu Focal
 
 sign: $(stmanager_bin) $(os_kernel) $(os_initramfs)
@@ -183,4 +188,4 @@ distclean: clean
 	rm -rf $(cache)
 	rm -f run.config
 
-.PHONY: all help check default toolchain keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload clean distclean
+.PHONY: all help check default toolchain keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean

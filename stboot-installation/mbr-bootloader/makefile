@@ -34,7 +34,7 @@ $(syslinux_config):
 	$(mbr)/build_syslinux_config.sh $(OUTREDIRECT)
 	@echo "[stboot] Done syslinux configuration"
 
-run-mbr-bootloader:
+run-mbr-bootloader: $(DOTCONFIG) $(mbr_image)
 	@echo "[stboot] Run MBR bootloader image"
 	$(scripts)/start_qemu_mbr_bootloader.sh
 
