@@ -56,6 +56,9 @@ endef
 
 all: mbr_bootloader efi_application
 
+include $(top)/modules/go.mk
+include $(top)/modules/debos.mk
+
 include $(top)/stboot-installation/common/makefile
 include $(top)/stboot-installation/mbr-bootloader/makefile
 include $(top)/stboot-installation/efi-application/makefile
@@ -69,7 +72,7 @@ help:
 	@echo  '  mbr_bootloader     - Build MBR boatloader image'
 	@echo  '  efi_application    - Build EFI aplication image'
 	@echo  '*** Install toolchain'
-	@echo  '  go-tools           - Build and update Golang tools'
+	@echo  '  go-tools           - Build/Update Golang tools'
 	@echo  '  tboot              - Build tboot'
 	@echo  '  debos              - Create all docker debos environments'
 	@echo  '  debos-debian       - Create docker debos environment for debian'
@@ -97,26 +100,6 @@ default:
 	$(scripts)/make_global_config.sh
 
 toolchain: go-tools debos tboot
-
-go-targets := u-root stmanager cpu sinit-acm-grebber
-go-targets += $(cache)/go/bin/u-root.checksum
-go-tools-env := gopath=$(gopath)
-ifneq ($(strip $(ST_UROOT_DEV_BRANCH)),)
-go-tools-env += UROOT_BRANCH=$(ST_UROOT_DEV_BRANCH)
-endif
-go-targets:
-	$(MAKE) -f modules/go.mk $(go-tools-env)
-$(go-targets):
-	$(MAKE) -f modules/go.mk $@ $(go-tools-env)
-
-debos: tboot
-	$(MAKE) -f modules/debos.mk
-
-debos-debian:
-	$(MAKE) -f modules/debos.mk debian
-
-debos-ubuntu:
-	$(MAKE) -f modules/debos.mk ubuntu
 
 keygen:
 	@echo Generate example keys and certificates
@@ -148,7 +131,7 @@ $(patsubst "%",%,$(ST_SIGNING_ROOT)):
 	@echo
 	@exit 1
 endif
-sign: stmanager
+sign: $(stmanager)
 	@echo Sign OS package
 	$(scripts)/create_and_sign_os_package.sh
 
