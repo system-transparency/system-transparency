@@ -8,6 +8,7 @@ gopath ?= $(cache)/go
 scripts := $(top)/scripts
 os := $(top)/operating-system
 stboot-installation := $(top)/stboot-installation
+tboot := $(out)/tboot/tboot.gz
 
 # reproducible builds
 LANG:=C
@@ -20,6 +21,7 @@ ifneq ($(V),1)
 ifneq ($(Q),)
 .SILENT:
 MAKEFLAGS += -s
+OUTREDIRECT :=  > /dev/null
 endif
 endif
 
@@ -54,7 +56,7 @@ $(1).config: $(DOTCONFIG)
 	rm $$@.temp
 endef
 
-all: mbr_bootloader efi_application
+all: mbr-image efi-image
 
 include $(top)/modules/go.mk
 include $(top)/modules/debos.mk
@@ -69,8 +71,8 @@ help:
 	@echo  '  Use "make [target] V=1" for extra build debug information'
 	@echo  '*** Build image'
 	@echo  '  all                - Build all image formats'
-	@echo  '  mbr_bootloader     - Build MBR boatloader image'
-	@echo  '  efi_application    - Build EFI aplication image'
+	@echo  '  mbr-image          - Build MBR boatloader image'
+	@echo  '  efi-image          - Build EFI application image'
 	@echo  '*** Install toolchain'
 	@echo  '  go-tools           - Build/Update Golang tools'
 	@echo  '  tboot              - Build tboot'
@@ -84,8 +86,8 @@ help:
 	@echo  '  sign               - Sign OS packages'
 	@echo  '  upload             - Upload OS package to provisioning server'
 	@echo  '*** Run in QEMU'
-	@echo  '  run-mbr            - Run MBR bootloader'
-	@echo  '  run-efi            - Run EFI application'
+	@echo  '  mbr-run            - Run MBR bootloader'
+	@echo  '  efi-run            - Run EFI application'
 	@echo  '*** MISC'
 	@echo  '  default            - Generate default run.config'
 	@echo  '  check              - Check for missing dependencies'
@@ -103,22 +105,28 @@ toolchain: go-tools debos tboot
 
 keygen:
 	@echo Generate example keys and certificates
-	$(scripts)/make_keys_and_certs.sh
+	$(scripts)/make_keys_and_certs.sh $(OUTREDIRECT)
+	@echo Done example keys and certificates
 
-tboot:
+tboot $(tboot):
+	@echo Build tboot
 	$(os)/common/build_tboot.sh
+	@echo Done tboot
 
 debian: debos-debian sinit-acm-grebber
-	@echo Build debian
+	@echo Build Debian Buster
 	$(os)/debian/make_debian.sh
+	@echo Done Debian Buster
 
 ubuntu-18: debos-ubuntu sinit-acm-grebber
-	@echo Build ubuntu
+	@echo Build Ubuntu Bionic (latest)
 	$(os)/ubuntu/make_ubuntu.sh "18"
+	@echo Done Ubuntu Bionic (latest)
 
 ubuntu-20: debos-ubuntu sinit-acm-grebber
-	@echo Build ubuntu
+	@echo Build Ubuntu Focal
 	$(os)/ubuntu/make_ubuntu.sh "20"
+	@echo Done Ubuntu Focal
 
 ubuntu: ubuntu-18
 
@@ -134,20 +142,14 @@ endif
 sign: $(stmanager)
 	@echo Sign OS package
 	$(scripts)/create_and_sign_os_package.sh
+	@echo Done sign OS package
 
 NEWEST-OSPGK := $(top)/.newest-ospkgs.zip
 upload: $(NEWEST-OSPKG)
+	@echo Upload OS package
 	$(scripts)/upload_os_package.sh $(NEWEST-OSPGK)
+	@echo Done OS package
 
-mbr_bootloader: $(mbr_image)
-
-efi_application: $(efi_image)
-
-run-mbr:
-	$(scripts)/start_qemu_mbr_bootloader.sh
-
-run-efi:
-	$(scripts)/start_qemu_efi_application.sh
 
 $(DOTCONFIG):
 	@echo
@@ -167,4 +169,4 @@ clean:
 distclean: clean
 	rm -rf $(cache)
 
-.PHONY: all help check default toolchain go-tools u-root stmanager cpu sinit-acm-grebber keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload mbr_bootloader efi_application run-mbr run-efi clean distclean
+.PHONY: all help check default toolchain keygen debian ubuntu-18 ubuntu-20 ubuntu sign upload clean distclean

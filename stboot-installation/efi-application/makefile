@@ -6,15 +6,25 @@ efi_image:= $(efi-out)/stboot_efi_installation.img
 efi_boot_partition := $(efi-out)/boot_partition.vfat
 efi_kernel := $(efi-out)/linuxboot.efi
 
-$(efi_image): $(efi_boot_partition) $(data_partition)
-	@echo "\ngenerating: $@"
-	$(efi)/build_image.sh
+
+efi-image $(efi_image): $(efi_boot_partition) $(data_partition)
+	@echo "[stboot] Build EFI application image"
+	$(efi)/build_image.sh $(OUTREDIRECT)
+	@echo "[stboot] Done EFI application image"
 
 $(efi_boot_partition): $(host_config) $(efi_kernel)
-	@echo "\ngenerating: $@"
-	$(efi)/build_boot_filesystem.sh
+	@echo "[stboot] Build EFI partition"
+	$(efi)/build_boot_filesystem.sh $(OUTREDIRECT)
+	@echo "[stboot] Done EFI partition"
 
 $(eval $(call CONFIG_DEP,$(efi_kernel),ST_LINUXBOOT_CMDLINE|ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG|ST_CUSTOMIZE_KERNEL_CONFIG|ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION))
 $(efi_kernel): % : %.config $(initramfs)
-	@echo "\ngenerating: $@" 
-	$(common)/build_kernel.sh "$(ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG)" "$@" "$(ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION)"
+	@echo "[stboot] Build EFI kernel"
+	$(common)/build_kernel.sh "$(ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG)" "$@" "$(ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION)" $(OUTREDIRECT)
+	@echo "[stboot] Done EFI kernel"
+
+efi-run:
+	@echo "[stboot] Run EFI application image"
+	$(scripts)/start_qemu_efi_application.sh
+
+.PHONY: efi-image efi-run

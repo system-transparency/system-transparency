@@ -8,23 +8,34 @@ mbr_kernel := $(mbr-out)/linuxboot.vmlinuz
 syslinux := $(cache)/syslinux/syslinux-6.03/bios/mtools/syslinux
 syslinux_config := $(mbr-out)/syslinux.cfg
 
-$(mbr_image): $(mbr_boot_partition) $(data_partition)
-	@echo "\ngenerating: $@"
-	$(mbr)/build_image.sh
+mbr-image $(mbr_image): $(mbr_boot_partition) $(data_partition)
+	@echo "[stboot] Build MBR bootloader image"
+	$(mbr)/build_image.sh $(OUTREDIRECT)
+	@echo "[stboot] Done MBR bootloader image"
 
 $(mbr_boot_partition): $(syslinux_config) $(host_config) $(syslinux) $(mbr_kernel)
-	@echo "\ngenerating: $@"
-	$(mbr)/build_boot_filesystem.sh
+	@echo "[stboot] Build MBR boot partition"
+	$(mbr)/build_boot_filesystem.sh $(OUTREDIRECT)
+	@echo "[stboot] Done MBR boot partition"
 
 $(eval $(call CONFIG_DEP,$(mbr_kernel),ST_LINUXBOOT_CMDLINE|ST_MBR_BOOTLOADER_KERNEL_CONFIG|ST_CUSTOMIZE_KERNEL_CONFIG|ST_MBR_BOOTLOADER_KERNEL_VERSION))
 $(mbr_kernel): % : %.config $(initramfs)
-	@echo "\ngenerating: $@" 
-	$(common)/build_kernel.sh "$(ST_MBR_BOOTLOADER_KERNEL_CONFIG)" "$@" "$(ST_MBR_BOOTLOADER_KERNEL_VERSION)"
+	@echo "[stboot] Build MBR kernel"
+	$(common)/build_kernel.sh "$(ST_MBR_BOOTLOADER_KERNEL_CONFIG)" "$@" "$(ST_MBR_BOOTLOADER_KERNEL_VERSION)" $(OUTREDIRECT)
+	@echo "[stboot] Done MBR kernel"
 
 $(syslinux):
-	@echo "\ngenerating: $@" 
-	$(mbr)/fetch_syslinux.sh
+	@echo "[stboot] Fetch syslinux"
+	$(mbr)/fetch_syslinux.sh $(OUTREDIRECT)
+	@echo "[stboot] Done syslinux"
 
 $(syslinux_config):
-	@echo "\ngenerating: $@" 
-	$(mbr)/build_syslinux_config.sh
+	@echo "[stboot] Generating syslinux configuration"
+	$(mbr)/build_syslinux_config.sh $(OUTREDIRECT)
+	@echo "[stboot] Done syslinux configuration"
+
+mbr-run:
+	@echo "[stboot] Run MBR bootloader image"
+	$(scripts)/start_qemu_mbr_bootloader.sh
+
+.PHONY: mbr-image mbr-run
