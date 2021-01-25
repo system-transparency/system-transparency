@@ -17,6 +17,7 @@ ubuntu-18_kernel := $(out)/operating-system/ubuntu-bionic-amd64.vmlinuz
 ubuntu-18_initramfs := $(out)/operating-system/ubuntu-bionic-amd64.cpio.gz
 ubuntu-20_kernel := $(out)/operating-system/ubuntu-focal-amd64.vmlinuz
 ubuntu-20_initramfs := $(out)/operating-system/ubuntu-focal-amd64.cpio.gz
+initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
 
 # reproducible builds
 LANG:=C
@@ -92,6 +93,7 @@ endef
 
 include $(top)/modules/go.mk
 include $(top)/modules/debos.mk
+include $(top)/modules/linux.mk
 
 include $(top)/stboot-installation/common/makefile
 include $(top)/stboot-installation/mbr-bootloader/makefile
