@@ -3,7 +3,6 @@ os-out = $(top)/out/os-packages/
 out-dirs += $(st-out) $(os-out)
 
 data_partition := $(st-out)/data_partition.ext4
-initramfs := $(st-out)/initramfs-linuxboot.cpio.gz
 host_config := $(st-out)/host_configuration.json
 security_config := $(st-out)/security_configuration.json
 
