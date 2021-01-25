@@ -137,32 +137,32 @@ keygen:
 
 tboot $(tboot):
 	@echo Build tboot
-	$(os)/common/build_tboot.sh
+	$(os)/common/build_tboot.sh $(OUTREDIRECT)
 	@echo [stboot] Done tboot
 
 acm: $(sinit-acm-grebber_bin)
 	@echo Get ACM
-	$(os)/common/get_acms.sh
+	$(os)/common/get_acms.sh $(OUTREDIRECT)
 	@echo [stboot] Done ACM
 
 debian $(debian_kernel) $(debian_initramfs): debos-debian $(tboot) acm
 	@echo Build Debian Buster
-	$(os)/debian/build_os_artefacts.sh
+	$(os)/debian/build_os_artefacts.sh $(OUTREDIRECT)
 	@echo [stboot] Done Debian Buster
 
-ubuntu-18 $(ubuntu-18_kernel) $(ubunut-18_initramfs): debos-ubuntu $(tboot) acm
+ubuntu-18 $(ubuntu-18_kernel) $(ubuntu-18_initramfs): debos-ubuntu $(tboot) acm
 	@echo '[stboot] Build Ubuntu Bionic (latest)'
-	$(os)/ubuntu/build_os_artefacts.sh "18"
+	$(os)/ubuntu/build_os_artefacts.sh "18" $(OUTREDIRECT)
 	@echo '[stboot] Done Ubuntu Bionic (latest)'
 
-ubuntu-20 $(ubuntu-20_kernel) $(ubunut-20_initramfs): debos-ubuntu $(tboot) acm
+ubuntu-20 $(ubuntu-20_kernel) $(ubuntu-20_initramfs): debos-ubuntu $(tboot) acm
 	@echo [stboot] Build Ubuntu Focal
-	$(os)/ubuntu/build_os_artefacts.sh "20"
+	$(os)/ubuntu/build_os_artefacts.sh "20" $(OUTREDIRECT)
 	@echo [stboot] Done Ubuntu Focal
 
 sign: $(stmanager_bin) $(os_kernel) $(os_initramfs)
 	@echo [stboot] Sign OS package
-	$(scripts)/create_and_sign_os_package.sh
+	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package
 
 upload: $(newest-ospkg)
@@ -173,7 +173,7 @@ upload: $(newest-ospkg)
 $(DOTCONFIG):
 	@echo
 	@echo Error: run.config file missing.
-	@echo        Please provide a config file of run \'make default\'
+	@echo        Please provide a config file of run \'make default-config\'
 	@echo        to generate a default config.
 	@echo
 	@exit 1
