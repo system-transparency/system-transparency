@@ -115,7 +115,7 @@ $(1).config: $(DOTCONFIG)
 	rm $$@.temp
 endef
 
-all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-installation
+all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-installation coreboot-payload-installation
 
 $(DOTCONFIG):
 	$(error $(NO_DOTCONFIG_ERROR))
@@ -134,44 +134,49 @@ endif
 include $(top)/modules/go.mk
 include $(top)/modules/debos.mk
 include $(top)/modules/linux.mk
+include $(top)/modules/coreboot.mk
 
 include $(top)/stboot-installation/common/makefile
 include $(top)/stboot-installation/mbr-bootloader/makefile
 include $(top)/stboot-installation/efi-application/makefile
+include $(top)/stboot-installation/coreboot-payload/makefile
 
 help:
 	@echo
 	@echo  '*** system-transparency targets ***'
 	@echo  '  Use "make [target] V=1" for extra build debug information'
-	@echo  '  default-config               - Generate default run.config'
-	@echo  '  check                        - Check for missing dependencies'
-	@echo  '  keygen                       - Generate example keys and certificates'
-	@echo  '  clean                        - Remove build artifacts'
-	@echo  '  distclean                    - Remove build artifacts, cache and config file'
+	@echo  '  default-config                - Generate default run.config'
+	@echo  '  check                         - Check for missing dependencies'
+	@echo  '  keygen                        - Generate example keys and certificates'
+	@echo  '  clean                         - Remove build artifacts'
+	@echo  '  distclean                     - Remove build artifacts, cache and config file'
 	@echo  '*** Build image'
-	@echo  '  all                          - Build all installation options'
-	@echo  '  mbr-bootloader-installation  - Build MBR bootloader installation option'
-	@echo  '  efi-application-installation - Build EFI application installation option'
+	@echo  '  all                           - Build all installation options'
+	@echo  '  mbr-bootloader-installation   - Build MBR bootloader installation option'
+	@echo  '  efi-application-installation  - Build EFI application installation option'
+	@echo  '  coreboot-payload-installation - Build coreboot payload installation option'
 	@echo  '*** Build kernel'
-	@echo  '  kernel                       - Build all kernels'
-	@echo  '  mbr-kernel                   - Build MBR bootloader kernel'
-	@echo  '  efi-kernel                   - Build EFI application kernel'
+	@echo  '  kernel                        - Build all kernels'
+	@echo  '  mbr-kernel                    - Build MBR bootloader kernel'
+	@echo  '  efi-kernel                    - Build EFI application kernel'
+	@echo  '  coreboot-kernel               - Build coreboot payload kernel'
 	@echo  '*** Install toolchain'
-	@echo  '  toolchain                    - Build/Update toolchain'
-	@echo  '  go-tools                     - Build/Update Golang tools'
-	@echo  '  debos                        - Create all docker debos environments'
-	@echo  '  debos-debian                 - Create docker debos environment for debian'
-	@echo  '  debos-ubuntu	               - Create docker debos environment for ubuntu'
+	@echo  '  toolchain                     - Build/Update toolchain'
+	@echo  '  go-tools                      - Build/Update Golang tools'
+	@echo  '  debos                         - Create all docker debos environments'
+	@echo  '  debos-debian                  - Create docker debos environment for debian'
+	@echo  '  debos-ubuntu	                - Create docker debos environment for ubuntu'
 	@echo  '*** Build Operating Sytem'
-	@echo  '  tboot                        - Build tboot'
-	@echo  '  debian                       - Build reproducible Debian Buster'
-	@echo  '  ubuntu-18                    - Build reproducible Ubuntu Bionic (latest)'
-	@echo  '  ubuntu-20                    - Build reproducible Ubuntu Focal'
-	@echo  '  sign                         - Sign OS package'
-	@echo  '  upload                       - Upload OS package to provisioning server'
+	@echo  '  tboot                         - Build tboot'
+	@echo  '  debian                        - Build reproducible Debian Buster'
+	@echo  '  ubuntu-18                     - Build reproducible Ubuntu Bionic (latest)'
+	@echo  '  ubuntu-20                     - Build reproducible Ubuntu Focal'
+	@echo  '  sign                          - Sign OS package'
+	@echo  '  upload                        - Upload OS package to provisioning server'
 	@echo  '*** Run in QEMU'
-	@echo  '  run-mbr-bootloader           - Run MBR bootloader'
-	@echo  '  run-efi-application          - Run EFI application'
+	@echo  '  run-mbr-bootloader            - Run MBR bootloader'
+	@echo  '  run-efi-application           - Run EFI application'
+	@echo  '  run-coreboot-payload          - Run coreboot payload'
 
 check:
 	@echo [stboot] Checking dependencies
@@ -209,14 +214,14 @@ $(ubuntu-18_kernel) $(ubuntu-18_initramfs):
 	$(error $(call NO_OS,ubuntu-18,Ubuntu Bionic (latest)))
 ubuntu-18: $(tboot) acm
 	@echo '[stboot] Build Ubuntu Bionic (latest)'
-	$(os)/ubuntu/build_os_artefacts.sh "18" $(OUTREDIRECT)
+	$(os)/ubuntu/build_os_artefacts.sh "18"
 	@echo '[stboot] Done Ubuntu Bionic (latest)'
 
 $(ubuntu-20_kernel) $(ubuntu-20_initramfs):
 	$(error $(call NO_OS,ubuntu-20,Ubuntu Focal))
 ubuntu-20: $(tboot) acm
 	@echo [stboot] Build Ubuntu Focal
-	$(os)/ubuntu/build_os_artefacts.sh "20" $(OUTREDIRECT)
+	$(os)/ubuntu/build_os_artefacts.sh "20"
 	@echo [stboot] Done Ubuntu Focal
 
 sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(OS_KERNEL) $(OS_INITRAMFS) $(stmanager_bin)

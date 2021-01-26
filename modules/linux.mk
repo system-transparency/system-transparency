@@ -1,8 +1,6 @@
-mbr-kernel_dir := $(cache)/mbr-kernel
-mbr-kernel := $(out)/stboot-installation/mbr-bootloader/linuxboot.vmlinuz
 tarball_dir := $(cache)/tarball
-gpg_dir := $(cache)/gnupg
-gpg_keyring := $(gpg_dir)/keyring.gpg
+kernel_gpg_dir := $(cache)/gnupg/linux
+kernel_gpg_keyring := $(kernel_gpg_dir)/keyring.gpg
 kernel_mirror := https://cdn.kernel.org/pub/linux/kernel
 kernel_image := arch/x86/boot/bzImage
 kernel_dev_1 := torvalds@kernel.org
@@ -26,11 +24,11 @@ $1_kernel_mirror_path := $(kernel_mirror)/v6.x
 endif
 endef
 
-$(gpg_keyring):
-	mkdir -p -m 700 "$(gpg_dir)"
+$(kernel_gpg_keyring):
+	mkdir -p -m 700 "$(kernel_gpg_dir)"
 	echo "[linux] Fetch Linux kernel developer keys"
-	gpg -q --batch --homedir "$(gpg_dir)" --auto-key-locate wkd --locate-keys $(kernel_dev_1) $(kernel_dev_2) $(OUTREDIRECT)
-	gpg -q --batch --homedir "$(gpg_dir)" --no-default-keyring --export $(kernel_dev_1) $(kernel_dev_2) > $(gpg_keyring)
+	gpg -q --batch --homedir "$(kernel_gpg_dir)" --auto-key-locate wkd --locate-keys $(kernel_dev_1) $(kernel_dev_2) $(OUTREDIRECT)
+	gpg -q --batch --homedir "$(kernel_gpg_dir)" --no-default-keyring --export $(kernel_dev_1) $(kernel_dev_2) > $@
 
 # fetch linux tarball
 $(tarball_dir)/linux-%.tar.xz:
@@ -69,13 +67,14 @@ $(tarball_dir)/linux-%.tar.checksum: $(tarball_dir)/linux-%.tar.xz $(tarball_dir
 	  echo "[linux] sha256 missmatch $($*_kernel_tarball)"; \
 	  echo "[linux] Moving $($*_kernel_tarball) to .invalid.$($*_kernel_tarball)"; \
 	  mv $(tarball_dir)/$($*_kernel_tarball) $(tarball_dir)/.invalid.$($*_kernel_tarball); \
+	  mv $(tarball_dir)/$($*_kernel_sha) $(tarball_dir)/.invalid.$($*_kernel_sha); \
 	  echo [linux] Rerun to download $($*_kernel_tarball); \
 	  exit 1; \
 	fi
 	touch $@
 
 # verify linux tarball
-$(tarball_dir)/linux-%.tar.xz.valid:  $(tarball_dir)/linux-%.tar.xz $(tarball_dir)/linux-%.tar.sign $(tarball_dir)/linux-%.tar.checksum $(gpg_keyring)
+$(tarball_dir)/linux-%.tar.xz.valid:  $(tarball_dir)/linux-%.tar.xz $(tarball_dir)/linux-%.tar.sign $(tarball_dir)/linux-%.tar.checksum $(kernel_gpg_keyring)
 	$(eval $*_kernel_tarball := linux-$*.tar.xz)
 	$(eval $*_kernel_sign := linux-$*.tar.sign)
 	if ! xz -t $(tarball_dir)/$($*_kernel_tarball); then \
@@ -84,7 +83,7 @@ $(tarball_dir)/linux-%.tar.xz.valid:  $(tarball_dir)/linux-%.tar.xz $(tarball_di
 	fi
 	@echo "[linux] Verify $($*_kernel_tarball)"
 	if [[ "`xz -cd $(tarball_dir)/$($*_kernel_tarball) | \
-		gpgv -q --homedir "$(gpg_dir)" "--keyring=$(gpg_keyring)" --status-fd=1 $(tarball_dir)/$($*_kernel_sign) - | \
+		gpgv -q --homedir "$(kernel_gpg_dir)" "--keyring=$(kernel_gpg_keyring)" --status-fd=1 $(tarball_dir)/$($*_kernel_sign) - | \
 		grep -c -E '^\[GNUPG:\] (GOODSIG|VALIDSIG)';`" -lt 2 ]]; then \
 	  echo "[linux] Verification of $($*_kernel_tarball) failed"; \
 	  exit 1; \
