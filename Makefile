@@ -182,8 +182,7 @@ $(ubuntu-20_kernel) $(ubuntu-20_initramfs): $(tboot) acm
 	$(os)/ubuntu/build_os_artefacts.sh "20" $(OUTREDIRECT)
 	@echo [stboot] Done Ubuntu Focal
 
-sign: $(DOTCONFIG) $(os_kernel) $(os_initramfs) $(stmanager_bin)
-	mkdir -p $(out)/keys/signing-keys
+sign: $(DOTCONFIG) $(root_cert) $(os_kernel) $(os_initramfs) $(stmanager_bin)
 	@echo [stboot] Sign OS package
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package
