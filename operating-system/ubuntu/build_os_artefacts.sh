@@ -22,7 +22,7 @@ if [ "${version}" = 20 ]; then initramfs_name="ubuntu-focal-amd64.cpio.gz"; fi
 initramfs="${out}/${initramfs_name}"
 initramfs_backup="${initramfs}.backup"
 initramfs_backup="${initramfs}.backup"
-docker_image="debos-ubuntu"
+docker_image="debos-ubuntu:system-transparency"
 
 echo ""
 if [ -f "${kernel}" ]; then  

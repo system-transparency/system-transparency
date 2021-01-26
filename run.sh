@@ -47,7 +47,7 @@ while true; do
    echo "Quit (q)"
    read -rp ">> " x
    case $x in
-      [Rr]* ) bash "${root}/scripts/make_toolchain.sh"; break;;
+      [Rr]* ) make -s -j$(nproc) -C "${root}" toolchain; break;;
       [Ss]* ) break;;
       [Qq]* ) exit;;
       * ) echo "Invalid input";;

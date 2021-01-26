@@ -16,7 +16,7 @@ kernel_backup="${kernel}.backup"
 initramfs_name="debian-buster-amd64.cpio.gz"
 initramfs="${out}/${initramfs_name}"
 initramfs_backup="${initramfs}.backup"
-docker_image="debos-debian"
+docker_image="debos-debian:system-transparency"
 
 echo ""
 if [ -f "${kernel}" ]; then  

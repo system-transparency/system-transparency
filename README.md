@@ -13,9 +13,12 @@ Detailed information about the project itself can be found at https://system-tra
 ## Quick Start
 
 ```bash
+# GNU make targets
+make help
+# (alternative)
 ./run.sh
 ```
-This will lead you through the process described in [Build Process in Detail](#Build-Process-in-Detail).
+`run.sh` script will lead you through the process described in [Build Process in Detail](#Build-Process-in-Detail).
 
 ## Features
 
