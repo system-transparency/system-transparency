@@ -4,6 +4,7 @@ out-dirs += $(out)
 cache ?= $(top)/cache
 common := $(top)/stboot-installation/common
 gopath ?= $(cache)/go
+acm-dir := $(cache)/ACMs
 scripts := $(top)/scripts
 os := $(top)/operating-system
 stboot-installation := $(top)/stboot-installation
@@ -45,9 +46,9 @@ ifneq ($(strip $(ST_SIGNING_ROOT)),)
 root_cert := $(patsubst "%",%,$(ST_SIGNING_ROOT))
 $(root_cert):
 	@echo
-	@echo Error: $@ file missing.
-	@echo        Please provide keys or run \'make keygen\'
-	@echo        to generate example keys and certificates.
+	@echo 'Error: $@ file missing.'
+	@echo '       Please provide keys or run "make keygen"'
+	@echo '       to generate example keys and certificates.'
 	@echo
 	@exit 1
 endif
@@ -121,9 +122,9 @@ help:
 	@echo  '  run-efi-application          - Run EFI application'
 
 check:
-	@echo Checking dependencies
+	@echo [stboot] Checking dependencies
 	$(scripts)/checks.sh
-	@echo Done checking dependencies
+	@echo [stboot] Done checking dependencies
 
 default-config:
 	$(scripts)/make_global_config.sh
@@ -136,31 +137,53 @@ keygen:
 	@echo [stboot] Done example keys and certificates
 
 tboot $(tboot):
-	@echo Build tboot
+	@echo [stboot] Build tboot
 	$(os)/common/build_tboot.sh $(OUTREDIRECT)
 	@echo [stboot] Done tboot
 
 acm: $(sinit-acm-grebber_bin)
-	@echo Get ACM
+	@echo [stboot] Get ACM
 	$(os)/common/get_acms.sh $(OUTREDIRECT)
 	@echo [stboot] Done ACM
 
-debian $(debian_kernel) $(debian_initramfs): debos-debian $(tboot) acm
-	@echo Build Debian Buster
+$(debian_kernel) $(debian_initramfs):
+	@echo
+	@echo 'Error: $@ file missing.'
+	@echo '       Run "make debian"'
+	@echo '       to build Debian Buster.'
+	@echo
+	@exit 1
+debian: $(tboot) acm
+	@echo [stboot] Build Debian Buster
 	$(os)/debian/build_os_artefacts.sh $(OUTREDIRECT)
 	@echo [stboot] Done Debian Buster
 
-ubuntu-18 $(ubuntu-18_kernel) $(ubuntu-18_initramfs): debos-ubuntu $(tboot) acm
+$(ubuntu-18_kernel) $(ubuntu-18_initramfs):
+	@echo
+	@echo 'Error: $@ file missing.'
+	@echo '       Run "make ubuntu-18"'
+	@echo '       to build Ubuntu Bionic (latest).'
+	@echo
+	@exit 1
+ubuntu-18: $(tboot) acm
 	@echo '[stboot] Build Ubuntu Bionic (latest)'
 	$(os)/ubuntu/build_os_artefacts.sh "18" $(OUTREDIRECT)
 	@echo '[stboot] Done Ubuntu Bionic (latest)'
 
-ubuntu-20 $(ubuntu-20_kernel) $(ubuntu-20_initramfs): debos-ubuntu $(tboot) acm
+ubuntu-20: $(ubuntu-20_kernel) $(ubuntu-20_initramfs)
+	@echo
+	@echo 'Error: $@ file missing.'
+	@echo '       Run "make ubuntu-20"'
+	@echo '       to build Ubuntu Focal.'
+	@echo
+	@exit 1
+$(ubuntu-20_kernel) $(ubuntu-20_initramfs): $(tboot) acm
 	@echo [stboot] Build Ubuntu Focal
 	$(os)/ubuntu/build_os_artefacts.sh "20" $(OUTREDIRECT)
 	@echo [stboot] Done Ubuntu Focal
 
-sign: $(stmanager_bin) $(os_kernel) $(os_initramfs)
+sign: $(DOTCONFIG) $(os_kernel) $(os_initramfs) $(stmanager_bin)
+	mkdir -p $(out)/keys/signing-keys
 	@echo [stboot] Sign OS package
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package
@@ -172,9 +195,9 @@ upload: $(newest-ospkg)
 
 $(DOTCONFIG):
 	@echo
-	@echo Error: run.config file missing.
-	@echo        Please provide a config file of run \'make default-config\'
-	@echo        to generate a default config.
+	@echo 'Error: run.config file missing.'
+	@echo '       Please provide a config file of run "make default-config"'
+	@echo '       to generate a default config.'
 	@echo
 	@exit 1
 
