@@ -41,30 +41,51 @@ endif
 MAKEFLAGS += -j$(shell nproc)
 
 DOTCONFIG ?= $(top)/run.config
-HAVE_DOTCONFIG := $(wildcard $(DOTCONFIG))
 
-ifneq ($(strip $(HAVE_DOTCONFIG)),)
+ifneq ($(strip $(wildcard $(DOTCONFIG))),)
 include $(DOTCONFIG)
 endif
 
-all: mbr-bootloader-installation efi-application-installation
+# error if configfile is required
+define NO_DOTCONFIG_ERROR
+file run.config missing:
 
-ifneq ($(strip $(ST_SIGNING_ROOT)),)
-root_cert := $(patsubst "%",%,$(ST_SIGNING_ROOT))
-$(root_cert):
-	@echo
-	@echo 'Error: $@ file missing.'
-	@echo '       Please provide keys or run "make keygen"'
-	@echo '       to generate example keys and certificates.'
-	@echo
-	@exit 1
+*** Please provide a config file of run "make default-config"
+*** to generate the default configuration.
+
+endef
+
+ROOT_CERT := $(patsubst "%",%,$(ST_SIGNING_ROOT))
+ifeq ($(strip $(ROOTCERT)),)
+ROOT_CERT := $(out)/keys/signing_keys/root.cert
 endif
-ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
-os_kernel := $(top)/$(patsubst "%",%,$(ST_OS_PKG_KERNEL))
-endif
-ifneq ($(strip $(ST_OS_PKG_INITRAMFS)),)
-os_initramfs := $(top)/$(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
-endif
+
+IDs = 1 2 3 4 5
+TYPEs = key cert
+KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(ROOT_CERT))signing-key-$(ID).$(TYPE)))
+
+# error if keys/cert are required
+define NO_KEY_CERT
+
+$@ file missing.
+
+*** Please provide keys and certificates and or run "make keygen"
+*** to generate example keys and certificates.
+
+endef
+
+## error if OS packages are missing
+# args:
+# $1 = target
+# $2 = full name
+define NO_OS
+
+$@ file missing.
+
+*** Run "make $1" to build $2.
+
+endef
+
 
 ### CONFIG_DEP: function for dependency subconfig generation
 #
@@ -73,6 +94,10 @@ endif
 # subconfig with the suffix ".config". when it is added as dependecy to
 # the concerned target, it will trigger a rebuild as soon as a variable
 # changes.
+#
+# args:
+# $1 = target
+# $2 = configuration dependency pattern
 #
 # Usage example:
 # target "example_target" depends on the file "additional_file" and the
@@ -90,6 +115,21 @@ $(1).config: $(DOTCONFIG)
 	rm $$@.temp
 endef
 
+all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-installation
+
+$(DOTCONFIG):
+	$(error $(NO_DOTCONFIG_ERROR))
+
+$(ROOT_CERT) $(KEYS_CERTS):
+	$(error $(NO_KEY_CERT))
+
+ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
+OS_KERNEL := $(top)/$(patsubst "%",%,$(ST_OS_PKG_KERNEL))
+endif
+
+ifneq ($(strip $(ST_OS_PKG_INITRAMFS)),)
+OS_INITRAMFS := $(top)/$(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
+endif
 
 include $(top)/modules/go.mk
 include $(top)/modules/debos.mk
@@ -159,42 +199,27 @@ acm: $(sinit-acm-grebber_bin)
 	@echo [stboot] Done ACM
 
 $(debian_kernel) $(debian_initramfs):
-	@echo
-	@echo 'Error: $@ file missing.'
-	@echo '       Run "make debian"'
-	@echo '       to build Debian Buster.'
-	@echo
-	@exit 1
+	$(error $(call NO_OS,debian,Debian Buster))
 debian: $(tboot) acm
 	@echo [stboot] Build Debian Buster
 	$(os)/debian/build_os_artefacts.sh $(OUTREDIRECT)
 	@echo [stboot] Done Debian Buster
 
 $(ubuntu-18_kernel) $(ubuntu-18_initramfs):
-	@echo
-	@echo 'Error: $@ file missing.'
-	@echo '       Run "make ubuntu-18"'
-	@echo '       to build Ubuntu Bionic (latest).'
-	@echo
-	@exit 1
+	$(error $(call NO_OS,ubuntu-18,Ubuntu Bionic (latest)))
 ubuntu-18: $(tboot) acm
 	@echo '[stboot] Build Ubuntu Bionic (latest)'
 	$(os)/ubuntu/build_os_artefacts.sh "18" $(OUTREDIRECT)
 	@echo '[stboot] Done Ubuntu Bionic (latest)'
 
-ubuntu-20: $(ubuntu-20_kernel) $(ubuntu-20_initramfs)
-	@echo
-	@echo 'Error: $@ file missing.'
-	@echo '       Run "make ubuntu-20"'
-	@echo '       to build Ubuntu Focal.'
-	@echo
-	@exit 1
-$(ubuntu-20_kernel) $(ubuntu-20_initramfs): $(tboot) acm
+$(ubuntu-20_kernel) $(ubuntu-20_initramfs):
+	$(error $(call NO_OS,ubuntu-20,Ubuntu Focal))
+ubuntu-20: $(tboot) acm
 	@echo [stboot] Build Ubuntu Focal
 	$(os)/ubuntu/build_os_artefacts.sh "20" $(OUTREDIRECT)
 	@echo [stboot] Done Ubuntu Focal
 
-sign: $(DOTCONFIG) $(root_cert) $(os_kernel) $(os_initramfs) $(stmanager_bin)
+sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(OS_KERNEL) $(OS_INITRAMFS) $(stmanager_bin)
 	@echo [stboot] Sign OS package
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package
@@ -203,14 +228,6 @@ upload: $(newest-ospkg)
 	@echo [stboot] Upload OS package
 	$(scripts)/upload_os_package.sh $<
 	@echo [stboot] Done OS package
-
-$(DOTCONFIG):
-	@echo
-	@echo 'Error: run.config file missing.'
-	@echo '       Please provide a config file of run "make default-config"'
-	@echo '       to generate a default config.'
-	@echo
-	@exit 1
 
 $(out-dirs):
 	mkdir -p $@
@@ -222,4 +239,4 @@ distclean: clean
 	rm -rf $(cache)
 	rm -f run.config
 
-.PHONY: all help check default toolchain keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean
+.PHONY: all _all help check default toolchain keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean
