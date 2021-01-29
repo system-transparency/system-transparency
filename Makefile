@@ -150,7 +150,7 @@ keygen:
 
 tboot $(tboot):
 	@echo [stboot] Build tboot
-	$(os)/common/build_tboot.sh $(OUTREDIRECT)
+	$(os)/common/build_tboot.sh MAKE=$(MAKE) $(OUTREDIRECT)
 	@echo [stboot] Done tboot
 
 acm: $(sinit-acm-grebber_bin)
