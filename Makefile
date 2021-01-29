@@ -23,6 +23,9 @@ LANG:=C
 LC_ALL:=C
 TZ:=UTC0
 
+# use bash (nix/NixOS friendly)
+SHELL := /usr/bin/env bash -euo pipefail -c
+
 # Make is silent per default, but 'make V=1' will show all compiler calls.
 Q:=@
 ifneq ($(V),1)
