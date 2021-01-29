@@ -36,6 +36,9 @@ OUTREDIRECT :=  > /dev/null
 endif
 endif
 
+# Make uses maximal available job threads by default
+MAKEFLAGS += -j$(shell nproc)
+
 DOTCONFIG ?= $(top)/run.config
 HAVE_DOTCONFIG := $(wildcard $(DOTCONFIG))
 
