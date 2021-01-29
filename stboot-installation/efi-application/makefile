@@ -6,8 +6,9 @@ efi_image:= $(efi-out)/stboot_efi_installation.img
 efi_boot_partition := $(efi-out)/boot_partition.vfat
 efi_kernel := $(efi-out)/linuxboot.efi
 
+efi-application-installation: $(efi_image)
 
-efi-application-installation $(efi_image): $(efi_boot_partition) $(data_partition)
+$(efi_image): $(efi_boot_partition) $(data_partition)
 	@echo "[stboot] Build EFI application image"
 	$(efi)/build_image.sh $(OUTREDIRECT)
 	@echo "[stboot] Done EFI application image"
