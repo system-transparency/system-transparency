@@ -32,6 +32,7 @@ endif
 # Make uses maximal available job threads by default
 MAKEFLAGS += -j$(shell nproc)
 
+BOARD ?= qemu
 DOTCONFIG ?= $(top)/run.config
 
 ifneq ($(strip $(wildcard $(DOTCONFIG))),)
@@ -141,7 +142,7 @@ help:
 	@echo
 	@echo  '*** system-transparency targets ***'
 	@echo  '  Use "make [target] V=1" for extra build debug information'
-	@echo  '  default-config               - Generate default run.config'
+	@echo  '  default-config BOARD=<target>- Generate default configuration (see contrib/boards)'
 	@echo  '  check                        - Check for missing dependencies'
 	@echo  '  clean                        - Remove build artifacts'
 	@echo  '  distclean                    - Remove build artifacts, cache and config file'
@@ -184,7 +185,25 @@ check:
 	@echo [stboot] Done checking dependencies
 
 default-config:
-	$(scripts)/make_global_config.sh
+	if [[ ! -d contrib/boards/$(BOARD) ]]; then \
+	  echo '[stboot] Target board "$(BOARD)" not found'; \
+	  echo -e '\n  Avaiable examples boards are:'; \
+	  for board in `ls contrib/boards/`; do \
+	    echo  "  - $$board"; \
+	  done; \
+	  echo; \
+	  exit 1; \
+	fi
+	echo [stboot] Apply default configuration for $(BOARD)
+	if [[ -f $(DOTCONFIG) ]]; then \
+	  if diff $(DOTCONFIG) contrib/boards/$(BOARD)/example_config $(OUTREDIRECT); then \
+	    echo [stboot] configuration already up-to-date; \
+	  else \
+	    echo [stboot] moving old config to $(notdir $(DOTCONFIG)).old; \
+	    mv $(DOTCONFIG) $(DOTCONFIG).old; \
+	  fi \
+	fi
+	rsync -c contrib/boards/$(BOARD)/example_config $(DOTCONFIG)
 
 toolchain: go-tools debos
 

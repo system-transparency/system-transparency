@@ -1,0 +1,191 @@
+# System Transparency build configuration.
+
+# This file is sourced by other shell scripts, possibly run by /bin/sh
+# (which might not be bash, nor dash).
+
+##############################################################################
+# Installation
+#
+# Following configuration is used during the installation of the tools.
+##############################################################################
+
+# Since u-root does not support go modules yet and by default the insatllation
+# uses code from the master branch, ST_UROOT_DEV_BRANCH is checked out after 
+# downloading source code and before installation. 
+ST_UROOT_DEV_BRANCH=stboot
+
+
+##############################################################################
+# STBoot Data
+#
+# Following configuration is used in various files of the 
+# STBoot data partition.
+##############################################################################
+
+# ST_PROVISIONING_SERVER_URL is a list of provisioning server URLs
+# which determines where OS packages are being fetched from. 
+# Example: '"http://a.server.com", "https://b.server.com"'
+ST_PROVISIONING_SERVER_URL=
+
+# The following settings goes into network.json file on the data partition
+# and are used for the network setup of the host. DNS setting is optional.
+# Network modes are 'static' or 'dhcp'
+# This are default QEMU static network settings:
+ST_NETWORK_MODE="static"
+ST_HOST_IP="10.0.2.15/24"
+ST_HOST_GATEWAY="10.0.2.2/24"
+ST_HOST_DNS=""
+
+
+##############################################################################
+# STBoot Bootloader - common
+#
+# Following configuration is used during the creation linuxboot kernel and 
+# initramfs. The stboot bootloader and security_configuration.json are part 
+# of this initramfs.
+##############################################################################
+
+# ST_LINUXBOOT_CMDLINE controlls the kernel cmdline of the linuxboot kernel.
+# Flags to stboot can be passed via uroot.uinitargs here as well.
+ST_LINUXBOOT_CMDLINE="console=ttyS0,115200 uroot.uinitargs='-debug'"
+
+# ST_LINUXBOOT_VARIANT determines the content of the initramfs. Possible values
+# are: minimal, debug and full.
+#
+# minimal: The only executables included in the initramfs are its init routine
+# and the stboot binary.
+#
+# debug: in addition to minimal it includes a shell(elvish), the cpud command
+# from the u-root repositore for debugging, a elvish script to bring up
+# network, keys used with cpud and a elvish script to launch a remote debugging
+# session via cpud.
+#
+# full: in addition to debug all core utilities of u-root.
+ST_LINUXBOOT_VARIANT=minimal
+
+# ST_SIGNING_ROOT is the PEM encoded root certificate of the certificates
+# used to sign the OS package.
+ST_SIGNING_ROOT="out/keys/signing_keys/root.cert"
+
+# ST_NUM_SIGNATURES defines the minimum number of signatures that must be valid
+# in order to boot the operation system.
+ST_NUM_SIGNATURES=2
+
+# ST_BOOT_MODE controlls wether the OS package is loaded from the network
+# or from local storage
+#ST_BOOT_MODE=network
+ST_BOOT_MODE=local
+
+#ST_USE_PKG_CACHE controlls wether OS packages loaded via network will be 
+# cached on the data partition. Only relevant if ST_BOOT_MODE=network.
+ST_USE_PKG_CACHE=false
+
+# ST_KERNEL_VERSION defines the fallback linux kernel version of
+# the LinuxBoot distribution for all installations, for the case it is not
+# explicitly defined in this configuration
+#
+ST_KERNEL_VERSION=5.10.10
+
+# Size of the data partition in bytes. If empty, the size is set to match the
+# size of all nessesary files copied to the partition plus 100MB.
+ST_DATA_PARTITION_SZIZE=""
+
+
+##############################################################################
+# STBoot Bootloader - MBR bootloader installation
+#
+# Following configuration is used while creating the disk image for 
+# mixed firmware systems.
+##############################################################################
+
+# ST_MBR_BOOTLOADER_KERNEL_VERSION defines linux kernel version of 
+# the LinuxBoot distribution
+ST_MBR_BOOTLOADER_KERNEL_VERSION=4.19.6
+
+# ST_MBR_BOOTLOADER_KERNEL_CONFIG is the linux kernel defconfig
+# loaded before the kernel is beeing built.
+ST_MBR_BOOTLOADER_KERNEL_CONFIG="contrib/boards/qemu/mbr_linuxboot.defconfig"
+
+
+##############################################################################
+# STBoot Bootloader - EFI application installation
+#
+# Following configuration is used while creating the disk image for 
+# UEFI firmware systems.
+##############################################################################
+
+# ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION defines linux kernel version of 
+# the LinuxBoot distribution
+ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION=5.4.45
+
+# ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG is the linux kernel defconfig
+# loaded before the kernel is beeing built.
+ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG="contrib/boards/qemu/mbr_linuxboot.defconfig"
+
+
+##############################################################################
+# STBoot OS packages - General
+#
+# Following configuration is used while creating the OS package with the final 
+# operating system. They are passed to the stmanager utility
+##############################################################################
+
+# ST_OS_PKG_TBOOT is the path to the tboot kernel to be used with the OS package
+ST_OS_PKG_TBOOT="out/tboot/tboot.gz"
+
+# ST_OS_PKG_TBOOT_ARGS is the tboot kernel's command line
+ST_OS_PKG_TBOOT_ARGS=""
+
+# ST_OS_PKG_ACM is the path to an authenticated code module (ACM) or to a
+# directory containing multiple ACMs. All ACMs will be present in the OS package
+# and tboot will pick the right one for the host.
+ST_OS_PKG_ACM="cache/ACMs/"
+
+# ST_OS_PKG_NAME sets the name of the ZIP archive. File extension ".zip" will
+# be added if missing. If left empty, os-pkg-yyy-mm-dd-hh-mm-ss.zip will be
+# used.
+ST_OS_PKG_NAME=""
+
+# ST_OS_PKG_LABEL is a field inside the OS package describing it's content
+ST_OS_PKG_LABEL="System Transparency Test OS"
+
+# ST_OS_PKG_KERNEL path to the operating system's linux kernel
+#ST_OS_PKG_KERNEL="out/operating-system/debian-buster-amd64.vmlinuz"
+ST_OS_PKG_KERNEL="out/operating-system/ubuntu-bionic-amd64.vmlinuz"
+#ST_OS_PKG_KERNEL="out/operating-system/ubuntu-focal-amd64.vmlinuz"
+
+# ST_OS_PKG_INITRAMFS path to the cpio archive. This must contain the complete OS.
+#ST_OS_PKG_INITRAMFS="out/operating-system/debian-buster-amd64.cpio.gz"
+ST_OS_PKG_INITRAMFS="out/operating-system/ubuntu-bionic-amd64.cpio.gz"
+#ST_OS_PKG_INITRAMFS="out/operating-system/ubuntu-focal-amd64.cpio.gz"
+
+# ST_OS_PKG_CMDLINE is the kernel command line of the final
+# operating system 
+ST_OS_PKG_CMDLINE="console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd"
+
+
+##############################################################################
+# Upload 
+#
+# The script upoad_os_package.sh uses this data during uplaod.
+# Upload is done via scp, so make sure ssh key are setup right on the server.
+##############################################################################
+
+# SSH settings used in sripts/upload_os_package.sh
+# to copy files to your provisioning server.
+# ST_SSH_UPLOAD_SERVER is the domain of the provisioning server.
+ST_SSH_UPLOAD_SERVER=
+
+# ST_SSH_UPLOAD_USER is the username at the provisioning server.
+ST_SSH_UPLOAD_USER=
+
+# ST_SSH_UPLOAD_PATH is the web root of the provisioning server.
+ST_SSH_UPLOAD_PATH=
+
+
+##############################################################################
+# Testing
+##############################################################################
+
+# ST_QEMU_MEM is the amount of RAM for qemu guests, in megabytes.
+ST_QEMU_MEM=4096
