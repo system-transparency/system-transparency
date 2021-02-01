@@ -1,0 +1,47 @@
+---
+
+name: Testing
+
+on:
+  - push
+
+jobs:
+  ubuntu-latest_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install \
+          git make flex bison bc rsync wget gpg libelf-dev \
+          dosfstools mtools e2tools parted udev
+          DEBIAN_FRONTEND=noninteractive sudo apt-get clean
+
+      - name: Install Golang 1.13
+        run: |
+          go_tmp_dir=`mktemp -d`
+          wget -P $go_tmp_dir https://dl.google.com/go/go1.13.9.linux-amd64.tar.gz
+          export GOROOT=/usr/local/go-1.13
+          sudo mkdir -p $GOROOT
+          sudo tar xf $go_tmp_dir/go1.13.9.linux-amd64.tar.gz -C $GOROOT --strip 1
+          export PATH=$GOROOT/bin:$PATH
+          rm -r $go_tmp_dir
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build default-config
+        run: |
+          make default-config
+
+      - name: Generate keys and certificates
+        run: |
+          make keygen
+
+      - name: Build MBR bootloader installation
+        run: |
+          make mbr-bootloader-installation
+
+      - name: Build EFI application installation
+        run: |
+          make efi-application-installation
