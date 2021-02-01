@@ -116,12 +116,12 @@ $1-kernel_target := $$($1-kernel_dir)/$(kernel_image)
 
 kernel $1-kernel: $2
 
-$2: $$($1-kernel_target)
+$2: $$($1-kernel_target) $(DOTCONFIG)
 	mkdir -p `dirname $2`
 	rsync -c $$($1-kernel_target) $2
 	@echo "[$1-linux] Done kernel"
 
-$$($1-kernel_target): $(DOTCONFIG) $$($1-kernel_dir)/.config  $(initramfs)
+$$($1-kernel_target): $$($1-kernel_dir)/.config  $(initramfs)
 	@echo "[$1-linux] Make kernel $$($1-kernel_version)"
 	$$(MAKE) -C $$($1-kernel_dir) $$(KERNEL_MAKE_FLAGS) bzImage
 
@@ -144,6 +144,22 @@ $$($1-kernel_dir)/.unpack: $(tarball_dir)/$$($1-kernel_tarball).valid
 	fi
 	touch $$@
 
-.PHONY: $1-kernel
+$1-kernel-updatedefconfig: $(DOTCONFIG) $$($1-kernel_dir)/.config
+	@echo [$1-linux] Update defconfig $4
+	$$(MAKE) -C $$($1-kernel_dir) $(KERNEL_MAKE_FLAGS) savedefconfig
+	if [[ -f $4 ]]; then \
+	  if diff $$($1-kernel_dir)/defconfig $4 $(OUTREDIRECT); then \
+	    echo [$1-linux] defconfig already up-to-date; \
+          else \
+	    echo [$1-linux] Move old defconfig $(notdir $4) to $(notdir $4).old; \
+	    mv $4{,.old}; \
+	  fi \
+	fi
+	rsync -c $$($1-kernel_dir)/defconfig $4; \
+
+$1-kernel-%: $(DOTCONFIG) $$($1-kernel_dir)/.config
+	$$(MAKE) -C $$($1-kernel_dir) $(KERNEL_MAKE_FLAGS) $$*
+
+.PHONY: $1-kernel $1-kernel-%
 
 endef
