@@ -9,6 +9,7 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
+MAKE=${MAKE:-make}
 
 out="${root}/out/tboot"
 name="tboot.gz"
@@ -46,7 +47,7 @@ if [ "$currentver" -ge "9" ]; then
     export CFLAGS="-Wno-error=address-of-packed-member"
     export TBOOT_CFLAGS="$CFLAGS"
 fi
-make dist --no-print-directory
+${MAKE} dist --no-print-directory
 cd "${dir}"
 cp "${cache}/code/dist/boot/tboot.gz" "${tboot}"
 
