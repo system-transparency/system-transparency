@@ -8,8 +8,6 @@ kernel_image := arch/x86/boot/bzImage
 kernel_dev_1 := torvalds@kernel.org
 kernel_dev_2 := gregkh@kernel.org
 
-ST_KERNEL_VERSION ?= 5.10.10
-
 KERNEL_MAKE_FLAGS = \
 	ARCH=x86_64
 
@@ -123,7 +121,7 @@ $2: $$($1-kernel_target)
 	rsync -c $$($1-kernel_target) $2
 	@echo "[$1-linux] Done kernel"
 
-$$($1-kernel_target): $$($1-kernel_dir)/.config  $(initramfs)
+$$($1-kernel_target): $(DOTCONFIG) $$($1-kernel_dir)/.config  $(initramfs)
 	@echo "[$1-linux] Make kernel $$($1-kernel_version)"
 	$$(MAKE) -C $$($1-kernel_dir) $$(KERNEL_MAKE_FLAGS) bzImage
 

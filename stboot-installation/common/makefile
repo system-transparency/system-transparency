@@ -17,7 +17,7 @@ $(data_partition): % : %.config $(os-out) $(os-out_dirs) $(os-out_files)
 	@echo "[stboot] Done data partition"
 
 $(eval $(call CONFIG_DEP,$(initramfs),ST_LINUXBOOT_VARIANT))
-$(initramfs): % : %.config $(u-root_bin) $(security_config) $(patsubst "%",%,$(ST_SIGNING_ROOT))
+$(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT)
 	@echo "[stboot] Build initramfs"
 	$(common)/build_initramfs.sh $(OUTREDIRECT)
 	@echo "[stboot] Done initramfs"
