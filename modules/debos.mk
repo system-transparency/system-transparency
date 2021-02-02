@@ -7,18 +7,18 @@ docker-check:
 	  exit 1; \
 	fi
 
-debos: debos-debian debos-ubuntu
+setup-debos: setup-debos-debian setup-debos-ubuntu
 
-debos-debian: docker-check
+setup-debos-debian: docker-check
 	@echo "[debos] Build docker image for Debian OS";
 	docker build --network=host -q -t $@:$(debos-tag) $(top)/operating-system/debian;
 	@echo "[debos] Using docker image "$(shell docker images -q $@:$(debos-tag))" for building Debian OS";
 	@echo "[debos] Done docker image for Debian OS";
 
-debos-ubuntu: docker-check
+setup-debos-ubuntu: docker-check
 	@echo "[debos] Build docker image for Ubuntu OS";
 	docker build --network=host -q -t $@:$(debos-tag) $(top)/operating-system/ubuntu;
 	@echo "[debos] Using docker image "$(shell docker images -q $@:$(debos-tag))" for building Ubuntu OS";
 	@echo "[debos] Done docker image for Ubuntu OS";
 
-.PHONY: debos debos-ubuntu debos-debian docker-check
+.PHONY: setup-debos setup-debos-ubuntu setup-debos-debian docker-check
