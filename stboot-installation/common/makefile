@@ -3,7 +3,6 @@ os-out = $(top)/out/os-packages/
 out-dirs += $(st-out) $(os-out)
 
 data_partition := $(st-out)/data_partition.ext4
-initramfs := $(st-out)/initramfs-linuxboot.cpio.gz
 host_config := $(st-out)/host_configuration.json
 security_config := $(st-out)/security_configuration.json
 
@@ -18,7 +17,7 @@ $(data_partition): % : %.config $(os-out) $(os-out_dirs) $(os-out_files)
 	@echo "[stboot] Done data partition"
 
 $(eval $(call CONFIG_DEP,$(initramfs),ST_LINUXBOOT_VARIANT))
-$(initramfs): % : %.config $(u-root_bin) $(security_config) $(patsubst "%",%,$(ST_SIGNING_ROOT))
+$(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT)
 	@echo "[stboot] Build initramfs"
 	$(common)/build_initramfs.sh $(OUTREDIRECT)
 	@echo "[stboot] Done initramfs"
