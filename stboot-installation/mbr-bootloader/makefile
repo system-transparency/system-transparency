@@ -20,7 +20,7 @@ $(mbr_boot_partition): $(syslinux_config) $(host_config) $(syslinux) $(mbr_kerne
 	$(mbr)/build_boot_filesystem.sh $(OUTREDIRECT)
 	@echo "[stboot] Done MBR boot partition"
 
-$(eval $(call CONFIG_DEP,$(mbr-kernel),ST_LINUXBOOT_CMDLINE|ST_MBR_BOOTLOADER_KERNEL_CONFIG|ST_MBR_BOOTLOADER_KERNEL_VERSION))
+$(eval $(call CONFIG_DEP,$(mbr_kernel),ST_LINUXBOOT_CMDLINE|ST_MBR_BOOTLOADER_KERNEL_CONFIG|ST_MBR_BOOTLOADER_KERNEL_VERSION))
 $(eval $(call KERNEL_TARGET,mbr,$(mbr_kernel),$(ST_MBR_BOOTLOADER_KERNEL_VERSION),$(ST_MBR_BOOTLOADER_KERNEL_CONFIG)))
 $(mbr_kernel): % : %.config
 

@@ -1,5 +1,3 @@
-mbr-kernel_dir := $(cache)/mbr-kernel
-mbr-kernel := $(out)/stboot-installation/mbr-bootloader/linuxboot.vmlinuz
 tarball_dir := $(cache)/tarball
 gpg_dir := $(cache)/gnupg
 gpg_keyring := $(gpg_dir)/keyring.gpg
@@ -8,9 +6,7 @@ kernel_image := arch/x86/boot/bzImage
 kernel_dev_1 := torvalds@kernel.org
 kernel_dev_2 := gregkh@kernel.org
 
-KERNEL_MAKE_FLAGS = \
-	ARCH=x86_64
-
+KERNEL_MAKE_FLAGS := ARCH=x86_64
 
 define KERNEL_MIRROR_PATH
 ifeq ($(findstring x2.6.,x$1),x2.6.)
@@ -114,9 +110,9 @@ $1-kernel_tarball_sign=linux-$$($1-kernel_version).tar.sign
 $1-kernel_dir := $(cache)/linux/$1-kernel-$$(subst .,_,$$($1-kernel_version))
 $1-kernel_target := $$($1-kernel_dir)/$(kernel_image)
 
-kernel $1-kernel: $2
+kernel $1-kernel: $(DOTCONFIG) $2
 
-$2: $$($1-kernel_target) $(DOTCONFIG)
+$2: $$($1-kernel_target)
 	mkdir -p `dirname $2`
 	rsync -c $$($1-kernel_target) $2
 	@echo "[$1-linux] Done kernel"
@@ -144,7 +140,7 @@ $$($1-kernel_dir)/.unpack: $(tarball_dir)/$$($1-kernel_tarball).valid
 	fi
 	touch $$@
 
-$1-kernel-updatedefconfig: $(DOTCONFIG) $$($1-kernel_dir)/.config
+$1-kernel-updatedefconfig: $$($1-kernel_dir)/.config $(DOTCONFIG)
 	@echo [$1-linux] Update defconfig $4
 	$$(MAKE) -C $$($1-kernel_dir) $(KERNEL_MAKE_FLAGS) savedefconfig
 	if [[ -f $4 ]]; then \
