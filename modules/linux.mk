@@ -121,11 +121,16 @@ $$($1-kernel_target): $$($1-kernel_dir)/.config  $(initramfs)
 	@echo "[$1-linux] Make kernel $$($1-kernel_version)"
 	$$(MAKE) -C $$($1-kernel_dir) $$(KERNEL_MAKE_FLAGS) bzImage
 
-$$($1-kernel_dir)/.config: $$($1-kernel_dir)/.unpack $$(patsubst "%",%,$4)
+$$($1-kernel_dir)/.config: $$($1-kernel_dir)/.unpack $(patsubst "%",%,$4)
 	@echo "[$1-linux] Configure kernel $$($1-kernel_version)"
-ifneq ($$(strip $4),)
-	echo "[$1-linux] Use configuration file $4"
-	cp $4 $$($1-kernel_dir)/.config
+ifneq ($(strip $4),)
+	echo "[$1-linux] Use configuration file $(patsubst "%",%,$4)"
+	cp $4 $$@.tmp
+ifneq ($(strip $(ST_LINUXBOOT_CMDLINE)),)
+	echo "[$1-linux] override CMDLINE with ST_LINUXBOOT_CMDLINE='$(ST_LINUXBOOT_CMDLINE)'"
+	sed -ie "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"$(subst $\",,$(ST_LINUXBOOT_CMDLINE))\"/" $$@.tmp
+endif
+	mv $$@.tmp $$@
 endif
 	$$(MAKE) -C $$($1-kernel_dir) $(KERNEL_MAKE_FLAGS) olddefconfig
 
