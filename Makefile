@@ -8,7 +8,6 @@ acm-dir := $(cache)/ACMs
 scripts := $(top)/scripts
 stboot-installation := $(top)/stboot-installation
 
-tboot := $(out)/tboot/tboot.gz
 newest-ospkg := $(top)/.newest-ospkgs.zip
 initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
 
