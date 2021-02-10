@@ -5,86 +5,175 @@ debos-base := $(debos-base-image):$(debos-base-tag)
 
 # DEBOS_DEBUG=1 adds additional arguments for debugging debos
 ifeq ($(DEBOS_DEBUG),1)
-debos-debug-args := --verbose --debug-shell
+  debos-debug-args := --verbose --debug-shell
 endif
 
-#detect optimal environment
+# docker API access
+docker-access := $(shell command -v docker &> /dev/null && docker info >/dev/null 2>&1 && echo y)
+# podman is installed
+podman-access := $(shell command -v podman &> /dev/null && echo y)
+# /dev/kvm exist
+kvm-exist := $(shell [[ -e /dev/kvm ]] && echo y)
+# /dev/kvm accessable as user
+kvm-access := $(shell [[ -w /dev/kvm ]] && echo y)
+# debian based disto
+debian-os := $(shell [[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release |grep -q debian;echo y)
+
+## list of available debos environment
+#
+define DEBOS_ENV_LIST
+*** supported environments are:
+- native: Run debos on debian based host (user needs kvm access)
+- docker: Run debos in a docker container (user needs docker API access and host has kvm avaiable)
+- podman: Run debos in a podman container (user needs kvm access)
+
+*** Use DEBOS_ENV=<env>
+
+*** make autodetects available environments, if DEBOS_ENV is not set
+endef
+
+# error messages
+define DEBOS_ERROR_NO_KVM
+
+*** KVM in not installed on this machine (/dev/kvm is missing)
+*** Currently debos only works on host with kvm support
+endef
+
+define DEBOS_ERROR_NO_KVM_ACCESS
+
+*** User has no access to kvm.
+*** Either add your user to the kvm group or install docker.
+endef
+
+define DEBOS_ERROR_NO_ENV
+
+*** No debos environment available to use debos
+endef
+
+# TODO: support environment for hosts without kvm
+ifneq ($(kvm-exist),y)
+DEBOS_ENV := error
+  debos-err := $(call DEBOS_ERROR_NO_KVM)
+endif
+
+### detect optimal environment
 ifeq ($(DEBOS_ENV),)
-# detect debian based distros to run debos on host
-ifneq ($(findstring debian,$(shell [[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release)),)
-DEBOS_ENV := native
-else
-# detect docker api access
-ifeq ($(strip $(shell docker info >/dev/null 2>&1; echo $$?)),0)
-DEBOS_ENV := docker
-else
-DEBOS_ENV := podman
-endif
-endif
+  # check if user has access to kvm
+  ifeq ($(kvm-access),y)
+    # detect debian based distros to run debos on host
+    ifeq ($(debian-os),y)
+    DEBOS_ENV := native
+    else
+      # detect if podman is installed
+      ifeq ($(podman-access),y)
+        DEBOS_ENV = podman
+      endif
+    endif
+  endif
 endif
 
-define UNKNOWN_DEBOS_ENV
+ifeq ($(DEBOS_ENV),)
+  # use docker if either and of user has kvm access, since it
+  # runs as root
+  ifeq ($(docker-access),y)
+    DEBOS_ENV = docker
+  else
+    # you need access to either docker API or kvm
+    DEBOS_ENV = error
+    debos-err := $(call DEBOS_ERROR_NO_KVM_ACCESS))
+  endif
+  ifeq ($(DEBOS_ENV),)
+    DEBOS_ENV = error
+    debos-err := $(call DEBOS_ERROR_NO_ENV)
+  endif
+endif
+
+define DEBOS_ERROR_ENV
+
+$(debos-err)
+
+$(call DEBOS_ENV_LIST)
+endef
+
+define DEBOS_UNKNOWN_ENV
 
 Unknown DEBOS_ENV=$(DEBOS_ENV).
 
-supported environments are:
-* native: Run debos on debian based host (need kvm access)
-* docker: Run debos in a docker container (need docker API access)
-* podman: Runn debos unpriviledged in a podman container (need kvm access)
+$(call DEBOS_ENV_LIST)
 endef
 
 # default container arguments
 container-args += --rm -it --workdir /recipes -v $$(dir $$<):/recipes -v $(os-out):/out --device /dev/kvm --security-opt label=disable
 
-ifeq ($(DEBOS_ENV),native)
-CONTAINER :=
-run-debos := $(debos_bin)
-setup-debos: $(debos_bin)
-debos-deb += kvm-check
+ifeq ($(DEBOS_ENV),error)
+debos-error := $(call DEBOS_ERROR_ENV)
 else
-ifeq ($(DEBOS_ENV),docker)
-CONTAINER := docker
-# check docker API access
-container-check += docker-check
-# drop priviledge to have user id and access to kvm
-container-args += --user $(shell id -u):$(shell stat -c %g /dev/kvm)
-else ifeq ($(DEBOS_ENV),podman)
-CONTAINER := podman
-debos-deb += kvm-check
-else
-%:
-	$(error $(call UNKNOWN_DEBOS_ENV))
-endif
-# build container image
-setup-debos: setup-debos-$(CONTAINER)
-run-debos := $(CONTAINER) run $(container-args) debos-$(debos-base)
+  ifeq ($(DEBOS_ENV),native)
+    CONTAINER :=
+    run-debos := $(debos_bin)
+    debos-dep += kvm-check $(debos_bin)
+  else
+    ifeq ($(DEBOS_ENV),docker)
+      CONTAINER := docker
+      # check docker API access
+      debos-dep += docker-check
+      container-dep += docker-check
+      # drop priviledge to have user id and access to kvm
+      container-args += --user $(shell id -u):$(shell stat -c %g /dev/kvm)
+    else
+      ifeq ($(DEBOS_ENV),podman)
+        CONTAINER := podman
+        debos-dep += kvm-check podman-check
+        container-dep += kvm-check podman-check
+      endif
+    endif
+    ifneq ($(CONTAINER),)
+      # build container image
+      run-debos := $(CONTAINER) run $(container-args) debos-$(debos-base)
+      debos-dep += setup-debos-$(CONTAINER)
+    else
+      # unknown environment
+      debos-error := $(call DEBOS_UNKNOWN_ENV))
+    endif
+  endif
 endif
 
 # check docker API access
 docker-check:
-	@echo [debos] Check docker API access
-	if !(docker info >/dev/null 2>&1); then \
-	  echo "[debos] Error: no access to docker API"; \
-	  exit 1; \
-	else \
-	  echo "[debos] docker API access granted"; \
-	fi
+	@echo "[debos] Check docker API access"
+ifneq ($(docker-access),y)
+	@echo "[debos] Error: no access to docker API"
+	@exit 1
+endif
+	echo "[debos] docker API access granted"
+
+podman-check:
+	@echo "[debos] Check podman access"
+ifneq ($(podman-access),y)
+	@echo "[debos] Error: podman not installed"
+	@exit 1
+endif
+	echo "[debos] docker API access granted"
 
 # check kvm access
 kvm-check:
 	@echo [debos] Check kvm access
-	if [[ ! -w /dev/kvm ]]; then \
-	  echo "[debos] Error: no access to /dev/kvm"; \
-	  exit 1; \
-	else \
-	  echo "[debos] kvm access granted"; \
-        fi
+ifneq ($(kvm-access),y)
+	@echo "[debos] Error: no access to /dev/kvm"
+	@exit 1
+endif
+	echo "[debos] kvm access granted"
+
+debos-error:
+ifneq ($(debos-error),)
+	$(error $(debos-error))
+endif
 
 # build container image
-setup-debos-%: $(container-check)
+setup-debos-%: debos-error $(container-dep)
 	@echo '[debos] Build $* image debos-$(debos-base)';
 	$* build --build-arg="BASE_IMAGE=$(debos-base-image)" --build-arg="BASE_TAG=$(debos-base-tag)" \
-		--build-arg="DEBOS_REPO" --build-arg="DEBOS_BRANCH" \
+		--build-arg="DEBOS_REPO=$(debos_package)" --build-arg="DEBOS_BRANCH=$(debos_branch)" \
 		-q -t debos-$(debos-base) $(os)/debos;
 	@echo '[debos] Done $* image debos-$(debos-base) "$(shell $* images -q debos-$(debos-base))"';
 
@@ -108,7 +197,7 @@ endif
 ifneq ($5,)
 $1-debos-suite-arg := --template-var=suite:$5
 endif
-$1 $3 $4: $2 $(debos-deb) setup-debos $(tboot) acm
+$1 $3 $4: $2 debos-error $(debos-dep) $(tboot) acm
 	mkdir -p $(os-out)
 	@echo '[stboot] Build $1 ($(DEBOS_ENV))'
 	$(run-debos) \
@@ -120,11 +209,6 @@ $1 $3 $4: $2 $(debos-deb) setup-debos $(tboot) acm
 		$(debos-debug-args) \
 		$$($1-debos-suite-arg) \
 		$$($1-debos-recipe)
-	@echo [stboot] Done $1
-$1-test: $2 setup-debos $(tboot) acm
-	mkdir -p $(os-out)
-	@echo '[stboot] Debug $1 ($(DEBOS_ENV))'
-	$(CONTAINER) run $(container-args) --entrypoint bash debos-$(debos-base)
 	@echo [stboot] Done $1
 .PHONY: $1
 endef
@@ -141,3 +225,5 @@ ubuntu_recipe := $(os)/debos/ubuntu.yaml
 $(eval $(call DEBOS_TARGET,debian,$(debian_recipe),$(debian_kernel),$(debian_initramfs)))
 $(eval $(call DEBOS_TARGET,ubuntu-18,$(ubuntu_recipe),$(ubuntu-18_kernel),$(ubuntu-18_initramfs),bionic))
 $(eval $(call DEBOS_TARGET,ubuntu-20,$(ubuntu_recipe),$(ubuntu_kernel-20),$(ubuntu_initramfs-20),focal))
+
+.PHONY: debos-error
