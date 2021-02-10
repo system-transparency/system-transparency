@@ -6,17 +6,10 @@ common := $(top)/stboot-installation/common
 gopath ?= $(cache)/go
 acm-dir := $(cache)/ACMs
 scripts := $(top)/scripts
-os := $(top)/operating-system
 stboot-installation := $(top)/stboot-installation
 
 tboot := $(out)/tboot/tboot.gz
 newest-ospkg := $(top)/.newest-ospkgs.zip
-debian_kernel := $(out)/operating-system/debian-buster-amd64.vmlinuz
-debian_initramfs := $(out)/operating-system/debian-buster-amd64.cpio.gz
-ubuntu-18_kernel := $(out)/operating-system/ubuntu-bionic-amd64.vmlinuz
-ubuntu-18_initramfs := $(out)/operating-system/ubuntu-bionic-amd64.cpio.gz
-ubuntu-20_kernel := $(out)/operating-system/ubuntu-focal-amd64.vmlinuz
-ubuntu-20_initramfs := $(out)/operating-system/ubuntu-focal-amd64.cpio.gz
 initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
 
 # reproducible builds
@@ -137,8 +130,9 @@ OS_INITRAMFS := $(top)/$(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
 endif
 
 include $(top)/modules/go.mk
-include $(top)/modules/debos.mk
 include $(top)/modules/linux.mk
+
+include $(top)/operating-system/makefile
 
 include $(top)/stboot-installation/common/makefile
 include $(top)/stboot-installation/mbr-bootloader/makefile
@@ -209,37 +203,6 @@ $(CPU_SSH_KEYS) &:
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example cpu ssh keys
 
-tboot $(tboot):
-	@echo [stboot] Build tboot
-	$(os)/common/build_tboot.sh MAKE=$(MAKE) $(OUTREDIRECT)
-	@echo [stboot] Done tboot
-
-acm: $(sinit-acm-grebber_bin)
-	@echo [stboot] Get ACM
-	$(os)/common/get_acms.sh $(OUTREDIRECT)
-	@echo [stboot] Done ACM
-
-$(debian_kernel) $(debian_initramfs):
-	$(error $(call NO_OS,debian,Debian Buster))
-debian: $(tboot) acm
-	@echo [stboot] Build Debian Buster
-	$(os)/debian/build_os_artefacts.sh $(OUTREDIRECT)
-	@echo [stboot] Done Debian Buster
-
-$(ubuntu-18_kernel) $(ubuntu-18_initramfs):
-	$(error $(call NO_OS,ubuntu-18,Ubuntu Bionic (latest)))
-ubuntu-18: $(tboot) acm
-	@echo '[stboot] Build Ubuntu Bionic (latest)'
-	$(os)/ubuntu/build_os_artefacts.sh "18" $(OUTREDIRECT)
-	@echo '[stboot] Done Ubuntu Bionic (latest)'
-
-$(ubuntu-20_kernel) $(ubuntu-20_initramfs):
-	$(error $(call NO_OS,ubuntu-20,Ubuntu Focal))
-ubuntu-20: $(tboot) acm
-	@echo [stboot] Build Ubuntu Focal
-	$(os)/ubuntu/build_os_artefacts.sh "20" $(OUTREDIRECT)
-	@echo [stboot] Done Ubuntu Focal
-
 sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(OS_KERNEL) $(OS_INITRAMFS) $(stmanager_bin)
 	@echo [stboot] Sign OS package
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
@@ -260,4 +223,4 @@ distclean: clean
 	rm -rf $(cache)
 	rm -f run.config
 
-.PHONY: all _all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean
+.PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean

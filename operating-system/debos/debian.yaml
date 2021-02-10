@@ -5,6 +5,11 @@
 architecture: {{ $architecture }}
 
 actions:
+  # hotfix: wait to prevent network race condition
+  - action: run
+    description: Wait until network is up
+    command: sleep 5
+
   - action: debootstrap
     description: Install Debian base system
     suite: {{ $suite }}
@@ -27,27 +32,19 @@ actions:
 
   - action: run
     description: Clean up irreproducible data
-    chroot: true
-    script: debos_cleanup_irreproducible_data.sh
-
-  - action: overlay
-    description: Overlay - Add example file
-    source: debos-overlays/
+    script: scripts/cleanup_irreproducible_data.sh
 
   - action: run
     description: Set hostname
-    chroot: true
     command: echo debian > /etc/hostname
 
   - action: run
     description: Set root password
-    chroot: true
     command: echo 'root:$5$iog/g/SUY7Pm0L$vjoNOFeV5OHSZyxNDsLmZpI0XorPu8iZixBLvLBP6S5' | chpasswd -e
 
   - action: run
     description: Pack reproducibly
-    chroot: false
-    script: debos_pack_reproducibly.sh {{ $image }}
+    script: scripts/pack_reproducibly.sh {{ $image }}
 
 # since pack is not supporting reproducible builds, we pack manually
 #  - action: pack

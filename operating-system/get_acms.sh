@@ -7,7 +7,7 @@ set -o nounset
 
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-root="$(cd "${dir}/../../" && pwd)"
+root="$(cd "${dir}/../" && pwd)"
 
 gopath="${root}/cache/go"
 cache="${root}/cache/ACMs"
