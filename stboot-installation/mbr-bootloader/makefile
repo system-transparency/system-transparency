@@ -1,4 +1,4 @@
-mbr := $(top)/stboot-installation/mbr-bootloader
+mbr := stboot-installation/mbr-bootloader
 mbr-out := $(st-out)/mbr-bootloader
 out-dirs += $(mbr-out)
 

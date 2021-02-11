@@ -1,4 +1,4 @@
-efi := $(top)/stboot-installation/efi-application
+efi := stboot-installation/efi-application
 efi-out := $(st-out)/efi-application
 out-dirs += $(efi-out)
 

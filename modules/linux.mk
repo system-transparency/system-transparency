@@ -53,7 +53,7 @@ $(tarball_dir)/linux-%.tar.asc:
 	@echo "[linux] Get $($*_kernel_sha)"
 	$(eval $(call KERNEL_MIRROR_PATH,$*))
 	cd $(tarball_dir) && curl -LSs $($*_kernel_mirror_path)/sha256sums.asc \
-		| grep "$($*_kernel_tarball)" > $@
+		| grep "$($*_kernel_tarball)" > $(notdir $@)
 
 # check linux tarball sha256sum
 $(tarball_dir)/linux-%.tar.checksum: $(tarball_dir)/linux-%.tar.xz $(tarball_dir)/linux-%.tar.asc

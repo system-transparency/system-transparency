@@ -1,4 +1,3 @@
-gopath := $(cache)/go
 ## debos
 debos_bin := $(gopath)/bin/debos
 # do not edit debos_packages

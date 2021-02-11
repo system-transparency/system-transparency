@@ -1,14 +1,13 @@
-top := $(CURDIR)
-out ?= $(top)/out
+out ?= out
 out-dirs += $(out)
-cache ?= $(top)/cache
-common := $(top)/stboot-installation/common
-gopath ?= $(cache)/go
+cache ?= cache
+common := stboot-installation/common
+gopath ?= $(CURDIR)/cache/go
 acm-dir := $(cache)/ACMs
-scripts := $(top)/scripts
-stboot-installation := $(top)/stboot-installation
+scripts := scripts
+stboot-installation := stboot-installation
 
-newest-ospkg := $(top)/.newest-ospkgs.zip
+newest-ospkg := .newest-ospkgs.zip
 initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
 
 # reproducible builds
@@ -33,7 +32,7 @@ endif
 MAKEFLAGS += -j$(shell nproc)
 
 BOARD ?= qemu
-DOTCONFIG ?= $(top)/run.config
+DOTCONFIG ?= run.config
 
 ifneq ($(strip $(wildcard $(DOTCONFIG))),)
 include $(DOTCONFIG)
@@ -122,21 +121,21 @@ $(ROOT_CERT) $(KEYS_CERTS) &:
 	$(error $(NO_SIGN_KEY))
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
-OS_KERNEL := $(top)/$(patsubst "%",%,$(ST_OS_PKG_KERNEL))
+OS_KERNEL := $(patsubst "%",%,$(ST_OS_PKG_KERNEL))
 endif
 
 ifneq ($(strip $(ST_OS_PKG_INITRAMFS)),)
-OS_INITRAMFS := $(top)/$(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
+OS_INITRAMFS := $(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
 endif
 
-include $(top)/modules/go.mk
-include $(top)/modules/linux.mk
+include modules/go.mk
+include modules/linux.mk
 
-include $(top)/operating-system/makefile
+include operating-system/makefile
 
-include $(top)/stboot-installation/common/makefile
-include $(top)/stboot-installation/mbr-bootloader/makefile
-include $(top)/stboot-installation/efi-application/makefile
+include stboot-installation/common/makefile
+include stboot-installation/mbr-bootloader/makefile
+include stboot-installation/efi-application/makefile
 
 help:
 	@echo

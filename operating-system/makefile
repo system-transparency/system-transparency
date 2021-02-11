@@ -1,4 +1,4 @@
-os := $(top)/operating-system
+os := operating-system
 os-out := $(out)/operating-system
 tboot-out := $(out)/tboot
 tboot-cache := $(cache)/tboot

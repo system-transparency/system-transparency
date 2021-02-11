@@ -103,7 +103,7 @@ $(call DEBOS_ENV_LIST)
 endef
 
 # default container arguments
-container-args += --rm -it --workdir /recipes -v $$(dir $$<):/recipes -v $(os-out):/out --device /dev/kvm --security-opt label=disable
+container-args += --rm -it --workdir /recipes -v $(CURDIR)/$$(dir $$<):/recipes -v $(CURDIR)/$(os-out):/out --device /dev/kvm --security-opt label=disable
 
 ifeq ($(DEBOS_ENV),error)
 debos-error := $(call DEBOS_ERROR_ENV)
@@ -213,8 +213,8 @@ $1 $3 $4: $2 debos-error $(debos-dep) $(tboot) acm
 .PHONY: $1
 endef
 
-debian_kernel := $(os-out)/debian-amd64.vmlinuz
-debian_initramfs := $(os-out)/debian-amd64.cpio.gz
+debian_kernel := $(os-out)/debian-buster-amd64.vmlinuz
+debian_initramfs := $(os-out)/debian-buster-amd64.cpio.gz
 debian_recipe := $(os)/debos/debian.yaml
 ubuntu-18_kernel := $(os-out)/ubuntu-bionic-amd64.vmlinuz
 ubuntu-18_initramfs := $(os-out)/ubuntu-bionic-amd64.cpio.gz
@@ -224,6 +224,6 @@ ubuntu_recipe := $(os)/debos/ubuntu.yaml
 
 $(eval $(call DEBOS_TARGET,debian,$(debian_recipe),$(debian_kernel),$(debian_initramfs)))
 $(eval $(call DEBOS_TARGET,ubuntu-18,$(ubuntu_recipe),$(ubuntu-18_kernel),$(ubuntu-18_initramfs),bionic))
-$(eval $(call DEBOS_TARGET,ubuntu-20,$(ubuntu_recipe),$(ubuntu_kernel-20),$(ubuntu_initramfs-20),focal))
+$(eval $(call DEBOS_TARGET,ubuntu-20,$(ubuntu_recipe),$(ubuntu-20_kernel),$(ubuntu-20_initramfs),focal))
 
 .PHONY: debos-error

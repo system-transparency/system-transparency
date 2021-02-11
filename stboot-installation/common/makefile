@@ -1,5 +1,4 @@
-st-out := $(top)/out/stboot-installation
-os-out = $(top)/out/os-packages/
+st-out := $(out)/stboot-installation
 out-dirs += $(st-out) $(os-out)
 
 data_partition := $(st-out)/data_partition.ext4
