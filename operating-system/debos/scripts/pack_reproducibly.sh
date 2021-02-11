@@ -12,16 +12,14 @@ if [ -z "$SOURCE_DATE_EPOCH" ] ; then
   exit 1
 fi
 
-cd "$ROOTDIR" || exit 1
-
 echo "set date of files to SOURCE_DATE_EPOCH"
 touch -hcd "@$SOURCE_DATE_EPOCH" "${ROOTDIR}/boot/vmlinuz-"*
-find . | while read -r line ; do touch -hcd "@$SOURCE_DATE_EPOCH" "$line" ; done
+find ${ROOTDIR} | while read -r line ; do touch -hcd "@$SOURCE_DATE_EPOCH" "$line" ; done
 
 echo "moving kernel to ${kernel_out}"
 mv "${ROOTDIR}/boot/vmlinuz-"* "${kernel_out}"
 
 echo "creating ${archive_out} ..."
-find . -print0 | cpio --reproducible -0 -o -H newc | gzip -9 -n > "${archive_out}"
+find ${ROOTDIR} -print0 | cpio --reproducible -0 -o -H newc | gzip -9 -n > "${archive_out}"
 
 trap - EXIT

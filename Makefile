@@ -220,7 +220,7 @@ $(CPU_SSH_KEYS) &:
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example cpu ssh keys
 
-sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(OS_KERNEL) $(OS_INITRAMFS) $(stmanager_bin)
+sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(OS_KERNEL) $(OS_INITRAMFS) $(stmanager_bin) $(tboot) acm
 	@echo [stboot] Sign OS package
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package
