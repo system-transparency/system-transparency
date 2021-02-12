@@ -1,6 +1,6 @@
 {{- $architecture := or .architecture "amd64" -}}
 {{- $suite := or .suite "bionic" -}}
-{{ $image := or .image (printf "ubuntu-%s-%s" $suite $architecture) }}
+{{ $image := or .image (printf "ubuntu-%s-%s.tgz" $suite $architecture) }}
 
 architecture: {{ $architecture }}
 
@@ -51,17 +51,7 @@ actions:
     packages:
       - linux-image-generic
       - linux-firmware
-  
-  - action: run
-    description: Clean up some irreproducible data
-    script: scripts/cleanup_irreproducible_data.sh
 
-# This packs reproducibly
-  - action: run
-    description: Pack reproducibly
-    script: scripts/pack_reproducibly.sh {{ $image }}
-
-# Since pack is not supporting reproducible builds, we pack manually
-#  - action: pack
-#    file: {{ $image }}
-#    compression: gz
+  - action: pack
+    file: {{ $image }}
+    compression: gz

@@ -5,6 +5,7 @@ tboot-cache := $(cache)/tboot
 tboot-version := "v1.9.11"
 tboot := $(tboot-out)/tboot.gz
 tboot-url := http://hg.code.sf.net/p/tboot/code
+acm-cache := $(cache)/ACMs
 
 include $(os)/debos/makefile
 
@@ -36,7 +37,7 @@ tboot $(tboot): $(tboot_code)
 	@echo [stboot] Done tboot
 
 acm: $(sinit-acm-grebber_bin)
+	mkdir -p $(acm-cache)
 	@echo [stboot] Get ACM
-	mkdir -p $(cache)/ACMs
-	$(os)/get_acms.sh $(OUTREDIRECT)
+	$< -of $(acm-cache)
 	@echo [stboot] Done ACM
