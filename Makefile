@@ -60,7 +60,7 @@ ifeq ($(strip $(ROOTCERT)),)
 ROOT_CERT := $(out)/keys/signing_keys/root.cert
 endif
 
-IDs = 1 2 3 4 5
+IDs = 1 2 3
 TYPEs = key cert
 KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(ROOT_CERT))signing-key-$(ID).$(TYPE)))
 

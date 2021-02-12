@@ -49,7 +49,7 @@ echo "[INFO]: created OS package ${os_pkg_name}"
 signing_key_dir="${root}/out/keys/signing_keys"
 
 echo "[INFO]: call 'stmanager sign' to sign $os_pkg with example keys"
-for I in 1 2 3 4 5
+for I in 1 2 3
 do
     ${gopath}/bin/stmanager sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$os_pkg"
 done
