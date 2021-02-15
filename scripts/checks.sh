@@ -12,7 +12,8 @@ root="$(cd "${dir}/../" && pwd)"
 misc_cmds=( "git"  "hg" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
             "wget" "dd" "mmd" "mcopy" "mkfs.vfat" "mkfs.ext4" "e2mkdir" "e2ls" "e2cp" "parted" \
             "mkfs" "mount" "umount" "shasum" "ssh" "scp" "tree" "truncate" \
-            "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath" "make" "mkfs.vfat" "sort" "ssh-keygen")
+            "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath" "make" "mkfs.vfat" "sort" \
+            "ssh-keygen" "hexdump")
 
 misc_libs=( "libelf" "libcrypto" )
 
@@ -163,4 +164,4 @@ function run_full_check {
 }
 
 # run all checks if script is not sourced
-[[ $_ != $0 ]] && run_full_check
+[[ "$_" != "$0" ]] && run_full_check
