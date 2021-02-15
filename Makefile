@@ -56,7 +56,7 @@ file run.config missing:
 endef
 
 ROOT_CERT := $(patsubst "%",%,$(ST_SIGNING_ROOT))
-ifeq ($(strip $(ROOTCERT)),)
+ifeq ($(strip $(ROOT_CERT)),)
 ROOT_CERT := $(out)/keys/signing_keys/root.cert
 endif
 
@@ -64,15 +64,20 @@ IDs = 1 2 3
 TYPEs = key cert
 KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(ROOT_CERT))signing-key-$(ID).$(TYPE)))
 
-# error if keys/cert are required
-define NO_KEY_CERT
+# error if sign keys are required
+define NO_SIGN_KEY
 
 $@ file missing.
 
-*** Please provide keys and certificates and or run "make keygen"
+*** Please provide signing keys and certificates or run "make sign-keygen"
 *** to generate example keys and certificates.
 
 endef
+
+CPU_KEY_DIR := $(out)/keys/cpu_keys/
+CPU_SSH_FILES := cpu_rsa  cpu_rsa.pub  ssh_host_rsa_key  ssh_host_rsa_key.pub
+CPU_SSH_KEYS += $(foreach CPU_SSH_FILE,$(CPU_SSH_FILES),$(CPU_KEY_DIR)/$(CPU_SSH_FILE))
+
 
 ## error if OS packages are missing
 # args:
@@ -120,8 +125,8 @@ all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-insta
 $(DOTCONFIG):
 	$(error $(NO_DOTCONFIG_ERROR))
 
-$(ROOT_CERT) $(KEYS_CERTS):
-	$(error $(NO_KEY_CERT))
+$(ROOT_CERT) $(KEYS_CERTS) &:
+	$(error $(NO_SIGN_KEY))
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
 OS_KERNEL := $(top)/$(patsubst "%",%,$(ST_OS_PKG_KERNEL))
@@ -145,9 +150,12 @@ help:
 	@echo  '  Use "make [target] V=1" for extra build debug information'
 	@echo  '  default-config               - Generate default run.config'
 	@echo  '  check                        - Check for missing dependencies'
-	@echo  '  keygen                       - Generate example keys and certificates'
 	@echo  '  clean                        - Remove build artifacts'
 	@echo  '  distclean                    - Remove build artifacts, cache and config file'
+	@echo  '*** key generation'
+	@echo  '  keygen                       - Generate all example keys'
+	@echo  '  sign-keygen                  - Generate example sign keys'
+	@echo  '  cpu-keygen                   - Generate cpu ssh keys for debugging'
 	@echo  '*** Build image'
 	@echo  '  all                          - Build all installation options'
 	@echo  '  mbr-bootloader-installation  - Build MBR bootloader installation option'
@@ -187,10 +195,19 @@ default-config:
 
 toolchain: go-tools debos
 
-keygen:
-	@echo [stboot] Generate example keys and certificates
-	$(scripts)/make_keys_and_certs.sh $(OUTREDIRECT)
-	@echo [stboot] Done example keys and certificates
+keygen: sign-keygen cpu-keygen
+
+sign-keygen: $(stmanager_bin)
+	@echo [stboot] Generate example signing keys
+	$(scripts)/make_signing_keys.sh $(OUTREDIRECT)
+	@echo [stboot] Done example signing keys
+
+cpu-keygen: $(CPU_SSH_KEYS)
+
+$(CPU_SSH_KEYS) &:
+	@echo [stboot] Generate example cpu ssh keys
+	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
+	@echo [stboot] Done example cpu ssh keys
 
 tboot $(tboot):
 	@echo [stboot] Build tboot
@@ -243,4 +260,4 @@ distclean: clean
 	rm -rf $(cache)
 	rm -f run.config
 
-.PHONY: all _all help check default toolchain keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean
+.PHONY: all _all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean

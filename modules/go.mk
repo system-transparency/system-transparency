@@ -100,7 +100,7 @@ stmanager: u-root_checkout
 $(stmanager_bin): $(u-root_checkout)
 	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
 
-cpu $(cpu_bin) $(cpud_bin):
+cpu $(cpu_bin) $(cpud_bin) &:
 	@echo [Go] Get $(cpu_package)
 	GO111MODULE=off GOPATH=$(gopath) go get -d -u $(cpu_package)
 	$(call go_update,cpu,$(cpu_bin),$(cpu_package))

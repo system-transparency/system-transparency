@@ -52,7 +52,7 @@ case $variant in
 "debug" )
     echo
     echo "[INFO]: creating initramfs including debugging tools"
-    GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
+    GOPATH="${gopath}" ${gopath}/bin/u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \

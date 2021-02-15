@@ -17,7 +17,12 @@ $(data_partition): % : %.config $(os-out) $(os-out_dirs) $(os-out_files)
 	@echo "[stboot] Done data partition"
 
 $(eval $(call CONFIG_DEP,$(initramfs),ST_LINUXBOOT_VARIANT))
+# add cpu ssh public key
+ifeq ($(strip $(ST_LINUXBOOT_VARIANT)),debug)
+$(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT) $(cpu_bin) $(cpud_bin) $(CPU_SSH_KEYS)
+else
 $(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT)
+endif
 	@echo "[stboot] Build initramfs"
 	$(common)/build_initramfs.sh $(OUTREDIRECT)
 	@echo "[stboot] Done initramfs"
