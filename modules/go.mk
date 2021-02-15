@@ -156,7 +156,7 @@ $(u-root_bin) $(stmanager_bin): $(u-root_checkout)
 
 ### cpu command
 
-cpu $(cpu_bin) $(cpud_bin) &:
+cpu $(cpu_bin) $(cpud_bin)&:
 	@echo [Go] Get $(cpu_package)
 	GO111MODULE=off GOPATH=$(gopath) go get -d -u $(cpu_package)
 	$(call go_update,cpu,$(cpu_bin),$(cpu_package))

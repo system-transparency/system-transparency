@@ -117,7 +117,7 @@ all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-insta
 $(DOTCONFIG):
 	$(error $(NO_DOTCONFIG_ERROR))
 
-$(ROOT_CERT) $(KEYS_CERTS) &:
+$(ROOT_CERT) $(KEYS_CERTS)&:
 	$(error $(NO_SIGN_KEY))
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
@@ -212,7 +212,7 @@ sign-keygen: $(stmanager_bin)
 
 cpu-keygen: $(CPU_SSH_KEYS)
 
-$(CPU_SSH_KEYS) &:
+$(CPU_SSH_KEYS)&:
 	@echo [stboot] Generate example cpu ssh keys
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example cpu ssh keys
