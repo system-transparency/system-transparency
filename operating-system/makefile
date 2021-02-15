@@ -22,9 +22,9 @@ $(tboot_code):
 	rm -rf $(tboot-cache)
 	mkdir -p $(tboot-cache)/..
 	@echo [stboot] Get tboot
-	hg --cwd $(tboot-cache) clone $(tboot-url)
+	hg --cwd $(tboot-cache) clone $(tboot-url) $(OUTREDIRECT)
 	@echo [stboot] Update tboot to version $(tboot-version)
-	hg --cwd $(dir $@) update $(tboot-version)
+	hg --cwd $(dir $@) update $(tboot-version) $(OUTREDIRECT)
 	touch $@
 
 tboot $(tboot): $(tboot_code)
@@ -33,7 +33,7 @@ tboot $(tboot): $(tboot_code)
 	# bug: parallel build sometimes fails
 	# rerun make on failiure
 	$(tboot_env) ${MAKE} -C $(dir $<) dist >/dev/null 2>&1  \
-		|| $(tboot_env) ${MAKE} -C $(dir $<) dist >/dev/null
+		|| $(tboot_env) ${MAKE} -C $(dir $<) dist $(OUTREDIRECT)
 	cp $(tboot-cache)/code/dist/boot/tboot.gz $(tboot)
 	@echo [stboot] Done tboot
 

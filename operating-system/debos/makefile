@@ -257,7 +257,7 @@ $(os-out)/$4 $(os-out)/$5&: $2 $(debos-dep)
 	mkdir -p $$(dir $$@)
 	$(debos-check)
 	$(debos-setup)
-	@echo '[stboot] Build debos image $$(dir $$@) using $(DEBOS_ENV) debos'
+	@echo '[stboot] Build debos image $1 using $(DEBOS_ENV) debos'
 	# single threaded for reproducibility
 	$(run-debos) \
 		--cpus=1 \
