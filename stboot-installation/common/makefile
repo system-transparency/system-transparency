@@ -33,7 +33,7 @@ $(host_config): % : %.config
 	$(common)/build_host_config.sh $(OUTREDIRECT)
 	@echo "[stboot] Done host configuration"
 
-$(eval $(call CONFIG_DEP,$(security_config),ST_SIGNING_ROOT|ST_NUM_SIGNATURES|ST_BOOT_MODE))
+$(eval $(call CONFIG_DEP,$(security_config),ST_SIGNING_ROOT|ST_NUM_SIGNATURES|ST_BOOT_MODE|ST_USE_PKG_CACHE))
 $(security_config): % : %.config
 	@echo "[stboot] Build security configuration"
 	$(common)/build_security_config.sh $(OUTREDIRECT)
