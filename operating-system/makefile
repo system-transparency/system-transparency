@@ -19,7 +19,8 @@ tboot_env := CFLAGS=$(TBOOT_CFLAGS) TBOOT_CFLAGS=$(TBOOT_CFLAGS)
 endif
 
 $(tboot_code):
-	mkdir -p $(tboot-cache)
+	rm -rf $(tboot-cache)
+	mkdir -p $(tboot-cache)/..
 	@echo [stboot] Get tboot
 	hg --cwd $(tboot-cache) clone $(tboot-url)
 	@echo [stboot] Update tboot to version $(tboot-version)
