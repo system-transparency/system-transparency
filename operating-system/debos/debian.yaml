@@ -1,6 +1,6 @@
 {{- $architecture := or .architecture "amd64" -}}
 {{- $suite := or .suite "buster" -}}
-{{ $image := or .image (printf "debian-%s-%s.tgz" $suite $architecture) }}
+{{ $image := or .image (printf "debian-%s-%s" $suite $architecture) }}
 
 architecture: {{ $architecture }}
 
@@ -38,7 +38,12 @@ actions:
     description: Set root password
     command: echo 'root:$5$iog/g/SUY7Pm0L$vjoNOFeV5OHSZyxNDsLmZpI0XorPu8iZixBLvLBP6S5' | chpasswd -e
 
+# This packs reproducibly
+  - action: run
+    description: Pack reproducibly
+    script: scripts/pack_reproducibly.sh {{ $image }}
+
 # since pack is not supporting reproducible builds, we pack manually
-  - action: pack
-    file: {{ $image }}
-    compression: gz
+#  - action: pack
+#    file: {{ $image }}
+#    compression: gz

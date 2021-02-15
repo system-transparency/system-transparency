@@ -17,7 +17,8 @@ touch -hcd "@$SOURCE_DATE_EPOCH" "${ROOTDIR}/boot/vmlinuz-"*
 find ${ROOTDIR} | while read -r line ; do touch -hcd "@$SOURCE_DATE_EPOCH" "$line" ; done
 
 echo "moving kernel to ${kernel_out}"
-mv "${ROOTDIR}/boot/vmlinuz-"* "${kernel_out}"
+cp "${ROOTDIR}/boot/vmlinuz-"* "${kernel_out}"
+rm -f "${ROOTDIR}/boot/vmlinuz-"*
 
 echo "creating ${archive_out} ..."
 find ${ROOTDIR} -print0 | cpio --reproducible -0 -o -H newc | gzip -9 -n > "${archive_out}"

@@ -28,7 +28,7 @@ define DEBOS_ENV_LIST
 *** supported environments are:
 - native: Run debos on debian based host (user needs kvm access)
 - docker: Run debos in a docker container (user needs docker API access and host has kvm avaiable)
-- podman: Run debos in a podman container (user needs kvm access)
+- podman: Run debos in a podman container [experimental] (user needs kvm access)
 
 *** Use DEBOS_ENV=<env>
 
@@ -76,30 +76,34 @@ ifeq ($(DEBOS_ENV),)
   ifeq ($(kvm-access),y)
     # detect debian based distros to run debos on host
     ifeq ($(debian-os),y)
-    DEBOS_ENV := native
+      DEBOS_ENV := native
     else
-      # detect if podman is installed
-      ifeq ($(podman-access),y)
-        DEBOS_ENV = podman
+      # detect docker API
+      ifeq ($(docker-access),y)
+        DEBOS_ENV = docker
+      else
+        # detect if podman is installed
+        ifeq ($(podman-access),y)
+          DEBOS_ENV = podman
+        endif
       endif
+    endif
+  else
+    # use docker if user has no kvm access, since it runs as root
+    ifeq ($(docker-access),y)
+      DEBOS_ENV = docker
+    else
+      # you need access to either docker API or kvm
+      DEBOS_ENV = error
+      debos-err := $(call DEBOS_ERROR_NO_KVM_ACCESS))
     endif
   endif
 endif
 
+# no environment found
 ifeq ($(DEBOS_ENV),)
-  # use docker if either and of user has kvm access, since it
-  # runs as root
-  ifeq ($(docker-access),y)
-    DEBOS_ENV = docker
-  else
-    # you need access to either docker API or kvm
-    DEBOS_ENV = error
-    debos-err := $(call DEBOS_ERROR_NO_KVM_ACCESS))
-  endif
-  ifeq ($(DEBOS_ENV),)
-    DEBOS_ENV = error
-    debos-err := $(call DEBOS_ERROR_NO_ENV)
-  endif
+  DEBOS_ENV = error
+  debos-err := $(call DEBOS_ERROR_NO_ENV)
 endif
 
 define DEBOS_ERROR_ENV
@@ -248,7 +252,8 @@ endif
 ifneq ($6,)
 $1-debos-suite-arg := --template-var=suite:$6
 endif
-$(os-out)/$3: $2 $(debos-dep)
+#$(os-out)/$3: $2 $(debos-dep)
+$(os-out)/$4 $(os-out)/$5&: $2 $(debos-dep)
 	mkdir -p $$(dir $$@)
 	$(debos-check)
 	$(debos-setup)
@@ -260,34 +265,35 @@ $(os-out)/$3: $2 $(debos-dep)
 		--environ-var=LANG:$(LANG) \
 	        --environ-var=TZ:$(TZ) \
 		--artifactdir=$$($1-debos-out) \
+		--environ-var=SOURCE_DATE_EPOCH:$(SOURCE_DATE_EPOCH) \
 		$(debos-debug-args) \
 		$$($1-debos-suite-arg) \
 		$$($1-debos-recipe)
 	@echo [stboot] Done $$@
-$$($1-debos-rootfs):
-	rm -rf $$@
-	mkdir -p $$@
-$(os-out)/.$3.unpack: $(os-out)/$3 $$($1-debos-rootfs)
-	@echo [stboot] Unpack $$($1-debos-rootfs)
-	mkdir -p $$($1-debos-rootfs)
-	fakeroot tar xzf $$< -C $$($1-debos-rootfs)
-	touch $$@
-$(os-out)/$4: $(os-out)/.$3.unpack
-	@echo [stboot] Touch date epoch $$(notdir $$@)
-	touch -hcd "@$(SOURCE_DATE_EPOCH)" $$($1-debos-rootfs)/boot/vmlinuz-*
-	@echo [stboot] Copy $$(notdir $$@)
-	cp $$($1-debos-rootfs)/boot/vmlinuz-* $$@
-	@echo [stboot] Done $$(notdir $$@)
-$(os-out)/$5: $(os-out)/.$3.unpack
-	@echo [stboot] Touch date epoch in $$(dir $$<)
-	find $$($1-debos-rootfs) | \
-		while read -r line; \
-		do touch -hcd "@$(SOURCE_DATE_EPOCH)" "$$$$line"; \
-		done
-	@echo [stboot] Pack binary reproducible $$(notdir $$@)
-	fakeroot -- sh -c 'find $$(dir $$<) -print0 | \
-		cpio --reproducible -0 -o -H newc | gzip -9 -n > $$@'
-	@echo [stboot] Done $$(notdir $$@)
+#$$($1-debos-rootfs):
+#	rm -rf $$@
+#	mkdir -p $$@
+#$(os-out)/.$3.unpack: $(os-out)/$3 $$($1-debos-rootfs)
+#	@echo [stboot] Unpack $$($1-debos-rootfs)
+#	mkdir -p $$($1-debos-rootfs)
+#	fakeroot tar xzf $$< -C $$($1-debos-rootfs)
+#	touch $$@
+#$(os-out)/$4: $(os-out)/.$3.unpack
+#	@echo [stboot] Touch date epoch $$(notdir $$@)
+#	touch -hcd "@$(SOURCE_DATE_EPOCH)" $$($1-debos-rootfs)/boot/vmlinuz-*
+#	@echo [stboot] Copy $$(notdir $$@)
+#	cp $$($1-debos-rootfs)/boot/vmlinuz-* $$@
+#	@echo [stboot] Done $$(notdir $$@)
+#$(os-out)/$5: $(os-out)/.$3.unpack
+#	@echo [stboot] Touch date epoch in $$(dir $$<)
+#	find $$($1-debos-rootfs) | \
+#		while read -r line; \
+#		do touch -hcd "@$(SOURCE_DATE_EPOCH)" "$$$$line"; \
+#		done
+#	@echo [stboot] Pack binary reproducible $$(notdir $$@)
+#	fakeroot -- sh -c 'find $$(dir $$<) -print0 | \
+#		cpio --reproducible -0 -o -H newc | gzip -9 -n > $$@'
+#	@echo [stboot] Done $$(notdir $$@)
 $1: $(os-out)/$4 $(os-out)/$5
 
 .PHONY: $1

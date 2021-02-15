@@ -4,6 +4,8 @@ set -o errexit
 set -o nounset
 # set -o xtrace
 
+cd "$ROOTDIR" || exit 1
+
 # remove systemd machine id
 rm -f ${ROOTDIR}/etc/machine-id
 

@@ -68,6 +68,7 @@ RUN apt-get update && \
         bzip2 \
         ca-certificates \
         debootstrap \
+	debian-archive-keyring \
         dosfstools \
         e2fsprogs \
         equivs \
