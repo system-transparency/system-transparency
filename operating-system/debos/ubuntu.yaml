@@ -1,9 +1,11 @@
 {{- $architecture := or .architecture "amd64" -}}
 {{- $suite := or .suite "bionic" -}}
 {{ $image := or .image (printf "ubuntu-%s-%s" $suite $architecture) }}
-# default password
+
+{{ $hostname := or "ubuntu" }}
 {{ $user := or "admin" }}
-{{ $password := "$(mkpasswd --method=MD5 admin)" }}
+# default password: admin
+{{ $password := "$1$VQIrG7bj$2X6AdR4UqAjPFpqUwbsY81" }}
 
 architecture: {{ $architecture }}
 
@@ -53,19 +55,27 @@ actions:
 
   - action: run
     description: Set hostname
-    command: echo ubuntu > /etc/hostname
+    command: |
+      chroot root /bin/bash <<'EOF'
+      echo {{ $hostname }} > /etc/hostname
+      EOF
 
   - action: run
     description: Add standard user
     command: |
+      chroot root /bin/bash <<'EOF'
       useradd {{ $user }} -m -s /bin/bash
       usermod -a -G sudo {{ $user }}
       echo '{{ $user }}:{{ $password }}' | chpasswd -e
+      EOF
 
   - action: run
-    description: Enable SSH password Authentication
+    description: Enable SSH with password Authentication
     command: |
-      sed -i  's/#PasswordAuthentication yes/PasswordAuthentication yes/g' root/etc/ssh/sshd_config
+      chroot root /bin/bash <<'EOF'
+      systemctl enable ssh
+      sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+      EOF
 
   - action: run
     description: Clean up irreproducible data

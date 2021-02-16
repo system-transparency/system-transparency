@@ -297,6 +297,7 @@ $(os-out)/$4 $(os-out)/$5&: $2 $(debos-dep)
 $1: $(os-out)/$4 $(os-out)/$5
 
 .PHONY: $1
+.PRECIOUS: $(os-out)/$4 $(os-out)/$5
 endef
 
 debian_image := debian-buster-amd64.tgz
