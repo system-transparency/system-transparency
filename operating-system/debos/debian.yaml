@@ -41,17 +41,15 @@ actions:
 
   - action: run
     description: Set hostname
+    chroot: true
     command: |
-      chroot root /bin/bash <<'EOF'
       echo {{ $hostname }} > /etc/hostname
-      EOF
 
   - action: run
     description: Set root password
+    chroot: true
     command: |
-      chroot root /bin/bash <<'EOF'
       echo 'root:{{ $password }}' | chpasswd -e
-      EOF
 
   - action: run
     description: Clean up irreproducible data

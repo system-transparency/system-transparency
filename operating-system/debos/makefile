@@ -225,7 +225,7 @@ endif
 define SETUP_DEBOS_CONTAINER
 	@echo '[debos] Build $1 image $(debos-image)';
 	$1 build --build-arg="BASE_IMAGE=$(debos-base-image)" --build-arg="BASE_TAG=$(debos-base-tag)" \
-		--build-arg="DEBOS_REPO=$(debos_package)" --build-arg="DEBOS_BRANCH=$(debos_branch)" \
+		--build-arg="DEBOS_REPO=$(debos_repo)" --build-arg="DEBOS_BRANCH=$(debos_branch)" \
 		-q -t $(debos-image) $(op)/debos;
 	@echo '[debos] Done $* image $(debos-image)';
 endef
@@ -253,7 +253,7 @@ endif
 ifneq ($5,)
 $1-debos-suite-arg := --template-var=suite:$5
 endif
-$(op-out)/$3 $(op-out)/$4&: $2 $(debos-dep)
+$(op-out)/$3 $(op-out)/$4$(GROUP_TARGET): $2 $(debos-dep)
 	mkdir -p $$(dir $$@)
 	$(debos-check)
 	$(debos-setup)
@@ -270,7 +270,7 @@ $(op-out)/$3 $(op-out)/$4&: $2 $(debos-dep)
 		$$($1-debos-suite-arg) \
 		$$($1-debos-recipe)
 	@echo [stboot] Done $$@
-$1: $(op-out)/$3 $(op-out)/$4
+$1: $(call GROUP,$(op-out)/$3 $(op-out)/$4)
 
 .PHONY: $1
 .PRECIOUS: $(op-out)/$3 $(op-out)/$4

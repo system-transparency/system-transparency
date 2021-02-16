@@ -24,7 +24,7 @@ endif
 $(eval $(call CONFIG_DEP,$(initramfs),ST_LINUXBOOT_VARIANT))
 # add cpu ssh public key
 ifeq ($(strip $(ST_LINUXBOOT_VARIANT)),debug)
-$(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT) $(cpu_bin) $(cpud_bin) $(CPU_SSH_KEYS)
+$(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT) $(call GROUP,$(CPU_SSH_KEYS)) $(call GROUP,$(cpu_bin) $(cpud_bin))
 else
 $(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT)
 endif

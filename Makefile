@@ -39,6 +39,21 @@ OUTREDIRECT :=  > /dev/null
 endif
 endif
 
+# make "grouped targets" are only supported since version 4.3
+MAKE_VER_MAYOR := $(word 1,$(subst ., ,$(MAKE_VERSION)))
+MAKE_VER_MINOR := $(word 2,$(subst ., ,$(MAKE_VERSION)))
+ifeq ($(shell [ $(MAKE_VER_MAYOR) -ge "4" ] && echo y),y)
+ifeq ($(shell [ $(MAKE_VER_MINOR) -ge "3" ] && echo y),y)
+GROUP_TARGET := &
+endif
+endif
+
+# HACK: If "grouped targets" are not supported, emulate the same behavior by removing
+#       grouped targets from target dependecies.
+define GROUP
+$(if $(GROUP_TARGET),$(1),$(word 1,$(1)))
+endef
+
 # Make uses maximal available job threads by default
 MAKEFLAGS += -j$(shell nproc)
 
@@ -78,7 +93,7 @@ $@ file missing.
 endef
 
 CPU_KEY_DIR := $(out)/keys/cpu_keys/
-CPU_SSH_FILES := cpu_rsa  cpu_rsa.pub  ssh_host_rsa_key  ssh_host_rsa_key.pub
+CPU_SSH_FILES := cpu_rsa cpu_rsa.pub ssh_host_rsa_key ssh_host_rsa_key.pub
 CPU_SSH_KEYS += $(foreach CPU_SSH_FILE,$(CPU_SSH_FILES),$(CPU_KEY_DIR)/$(CPU_SSH_FILE))
 
 
@@ -128,7 +143,7 @@ all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-insta
 $(DOTCONFIG):
 	$(error $(NO_DOTCONFIG_ERROR))
 
-$(ROOT_CERT) $(KEYS_CERTS)&:
+$(ROOT_CERT) $(KEYS_CERTS)$(GROUG_TARGET):
 	$(error $(NO_SIGN_KEY))
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
@@ -224,14 +239,14 @@ keygen-sign: $(stmanager_bin)
 	$(scripts)/make_signing_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example signing keys
 
-keygen-cpu: $(CPU_SSH_KEYS)
+keygen-cpu: $(call GROUP,$(CPU_SSH_KEYS))
 
-$(CPU_SSH_KEYS)&:
+$(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
 	@echo [stboot] Generate example cpu ssh keys
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example cpu ssh keys
 
-sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(OS_KERNEL) $(OS_INITRAMFS) $(stmanager_bin) $(tboot) acm
+sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(tboot) acm
 	@echo [stboot] Sign OS package
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package

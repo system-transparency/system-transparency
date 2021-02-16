@@ -55,19 +55,17 @@ actions:
 
   - action: run
     description: Set hostname
+    chroot: true
     command: |
-      chroot root /bin/bash <<'EOF'
       echo {{ $hostname }} > /etc/hostname
-      EOF
 
   - action: run
     description: Add standard user
+    chroot: true
     command: |
-      chroot root /bin/bash <<'EOF'
       useradd {{ $user }} -m -s /bin/bash
       usermod -a -G sudo {{ $user }}
       echo '{{ $user }}:{{ $password }}' | chpasswd -e
-      EOF
 
   - action: run
     description: Clean up irreproducible data

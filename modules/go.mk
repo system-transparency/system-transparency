@@ -3,10 +3,10 @@ debos_bin := $(gopath)/bin/debos
 # do not edit debos_packages
 debos_package := github.com/go-debos/debos
 # change debos_repo to use a fork of debos
-debos_repo := $(debos_package)
+debos_repo := github.com/system-transparency/debos
 debos_src := $(gopath)/src/$(debos_package)
 # uses the remote defined in debos_repo
-debos_branch := master
+debos_branch := system-transparency
 ## u-root
 u-root_bin := $(gopath)/bin/u-root
 stmanager_bin := $(gopath)/bin/stmanager
@@ -156,7 +156,7 @@ $(u-root_bin) $(stmanager_bin): $(u-root_checkout)
 
 ### cpu command
 
-cpu $(cpu_bin) $(cpud_bin)&:
+cpu $(cpu_bin) $(cpud_bin)$(GROUP_TARGET):
 	@echo [Go] Get $(cpu_package)
 	GO111MODULE=off GOPATH=$(gopath) go get -d -u $(cpu_package)
 	$(call go_update,cpu,$(cpu_bin),$(cpu_package))
