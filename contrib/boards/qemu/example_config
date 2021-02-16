@@ -120,7 +120,7 @@ ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION=5.4.45
 
 # ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG is the linux kernel defconfig
 # loaded before the kernel is beeing built.
-ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG="contrib/boards/qemu/mbr_linuxboot.defconfig"
+ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG="contrib/boards/qemu/efi_linuxboot.defconfig"
 
 
 ##############################################################################
