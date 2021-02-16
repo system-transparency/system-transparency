@@ -1,6 +1,8 @@
 {{- $architecture := or .architecture "amd64" -}}
 {{- $suite := or .suite "buster" -}}
 {{ $image := or .image (printf "debian-%s-%s" $suite $architecture) }}
+# default password
+{{ $password := "$(mkpasswd --method=MD5 admin)" }}
 
 architecture: {{ $architecture }}
 
@@ -34,9 +36,13 @@ actions:
     description: Set hostname
     command: echo debian > /etc/hostname
 
+  - action: overlay
+    description: Overlay - Add files to system
+    source: debos-overlays
+
   - action: run
     description: Set root password
-    command: echo 'root:$5$iog/g/SUY7Pm0L$vjoNOFeV5OHSZyxNDsLmZpI0XorPu8iZixBLvLBP6S5' | chpasswd -e
+    command: echo 'root:{{ $password }}' | chpasswd -e
 
 # This packs reproducibly
   - action: run

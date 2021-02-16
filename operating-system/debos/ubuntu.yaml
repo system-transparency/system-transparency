@@ -1,6 +1,9 @@
 {{- $architecture := or .architecture "amd64" -}}
 {{- $suite := or .suite "bionic" -}}
 {{ $image := or .image (printf "ubuntu-%s-%s" $suite $architecture) }}
+# default password
+{{ $user := or "admin" }}
+{{ $password := "$(mkpasswd --method=MD5 admin)" }}
 
 architecture: {{ $architecture }}
 
@@ -16,6 +19,9 @@ actions:
     suite: {{ $suite }}
     components:
       - main
+      - restricted
+      - universe
+      - multiverse
     mirror: http://archive.ubuntu.com/ubuntu
     variant: minbase
 
@@ -35,22 +41,31 @@ actions:
       - isc-dhcp-client
       - udev
       - nano
-      - linux-firmware
       - openssh-server
       - python3
       - systemd
+      - linux-image-generic
+      - linux-firmware
 
+  - action: overlay
+    description: Overlay - Add files to system
+    source: debos-overlays
 
   - action: run
     description: Set hostname
     command: echo ubuntu > /etc/hostname
 
-# Install newest kernel
-  - action: apt
-    description: Update kernel
-    packages:
-      - linux-image-generic
-      - linux-firmware
+  - action: run
+    description: Add standard user
+    command: |
+      useradd {{ $user }} -m -s /bin/bash
+      usermod -a -G sudo {{ $user }}
+      echo '{{ $user }}:{{ $password }}' | chpasswd -e
+
+  - action: run
+    description: Enable SSH password Authentication
+    command: |
+      sed -i  's/#PasswordAuthentication yes/PasswordAuthentication yes/g' root/etc/ssh/sshd_config
 
   - action: run
     description: Clean up irreproducible data
