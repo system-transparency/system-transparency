@@ -39,7 +39,8 @@ endef
 # error messages
 define DEBOS_ERROR_NO_KVM
 *** KVM in not installed on this machine (/dev/kvm is missing)
-*** Currently debos only works on host with kvm support
+*** Currently debos only works on host with kvm support.
+*** debos is necessary to build the operating system.
 endef
 
 define DEBOS_ERROR_NO_KVM_ACCESS
