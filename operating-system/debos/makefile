@@ -6,6 +6,7 @@ debos-image := debos:$(debos-base-image)-$(debos-base-tag)
 # DEBOS_DEBUG=1 adds additional arguments for debugging debos
 ifeq ($(DEBOS_DEBUG),1)
   debos-debug-args := --verbose --debug-shell
+  container-args += -it
 endif
 
 # docker API access
@@ -121,7 +122,7 @@ $(call DEBOS_ENV_LIST)
 endef
 
 # default container arguments
-container-args += --rm -it --workdir /recipes -v $(CURDIR)/$$(dir $$<):/recipes -v $(CURDIR)/$(os-out):/out --device /dev/kvm --security-opt label=disable
+container-args += --rm --workdir /recipes -v $(CURDIR)/$$(dir $$<):/recipes -v $(CURDIR)/$(op-out):/out --device /dev/kvm --security-opt label=disable
 
 # check docker API access
 define DOCKER_CHECK
@@ -224,7 +225,7 @@ define SETUP_DEBOS_CONTAINER
 	@echo '[debos] Build $1 image $(debos-image)';
 	$1 build --build-arg="BASE_IMAGE=$(debos-base-image)" --build-arg="BASE_TAG=$(debos-base-tag)" \
 		--build-arg="DEBOS_REPO=$(debos_package)" --build-arg="DEBOS_BRANCH=$(debos_branch)" \
-		-q -t $(debos-image) $(os)/debos;
+		-q -t $(debos-image) $(op)/debos;
 	@echo '[debos] Done $* image $(debos-image)';
 endef
 
@@ -241,10 +242,10 @@ SOURCE_DATE_EPOCH := $(shell git log -1 --format=format:%ct)
 # $6 = suite (optional)
 
 define DEBOS_TARGET
-$1-debos-rootfs := $(os-out)/$1-rootfs
+$1-debos-rootfs := $(op-out)/$1-rootfs
 ifeq ($(CONTAINER),)
 $1-debos-recipe := $2
-$1-debos-out := $(os-out)
+$1-debos-out := $(op-out)
 else
 $1-debos-recipe := $(notdir $2)
 $1-debos-out := /out
@@ -252,8 +253,8 @@ endif
 ifneq ($6,)
 $1-debos-suite-arg := --template-var=suite:$6
 endif
-#$(os-out)/$3: $2 $(debos-dep)
-$(os-out)/$4 $(os-out)/$5&: $2 $(debos-dep)
+#$(op-out)/$3: $2 $(debos-dep)
+$(op-out)/$4 $(op-out)/$5&: $2 $(debos-dep)
 	mkdir -p $$(dir $$@)
 	$(debos-check)
 	$(debos-setup)
@@ -273,18 +274,18 @@ $(os-out)/$4 $(os-out)/$5&: $2 $(debos-dep)
 #$$($1-debos-rootfs):
 #	rm -rf $$@
 #	mkdir -p $$@
-#$(os-out)/.$3.unpack: $(os-out)/$3 $$($1-debos-rootfs)
+#$(op-out)/.$3.unpack: $(op-out)/$3 $$($1-debos-rootfs)
 #	@echo [stboot] Unpack $$($1-debos-rootfs)
 #	mkdir -p $$($1-debos-rootfs)
 #	fakeroot tar xzf $$< -C $$($1-debos-rootfs)
 #	touch $$@
-#$(os-out)/$4: $(os-out)/.$3.unpack
+#$(op-out)/$4: $(op-out)/.$3.unpack
 #	@echo [stboot] Touch date epoch $$(notdir $$@)
 #	touch -hcd "@$(SOURCE_DATE_EPOCH)" $$($1-debos-rootfs)/boot/vmlinuz-*
 #	@echo [stboot] Copy $$(notdir $$@)
 #	cp $$($1-debos-rootfs)/boot/vmlinuz-* $$@
 #	@echo [stboot] Done $$(notdir $$@)
-#$(os-out)/$5: $(os-out)/.$3.unpack
+#$(op-out)/$5: $(op-out)/.$3.unpack
 #	@echo [stboot] Touch date epoch in $$(dir $$<)
 #	find $$($1-debos-rootfs) | \
 #		while read -r line; \
@@ -294,23 +295,23 @@ $(os-out)/$4 $(os-out)/$5&: $2 $(debos-dep)
 #	fakeroot -- sh -c 'find $$(dir $$<) -print0 | \
 #		cpio --reproducible -0 -o -H newc | gzip -9 -n > $$@'
 #	@echo [stboot] Done $$(notdir $$@)
-$1: $(os-out)/$4 $(os-out)/$5
+$1: $(op-out)/$4 $(op-out)/$5
 
 .PHONY: $1
-.PRECIOUS: $(os-out)/$4 $(os-out)/$5
+.PRECIOUS: $(op-out)/$4 $(op-out)/$5
 endef
 
 debian_image := debian-buster-amd64.tgz
 debian_kernel := debian-buster-amd64.vmlinuz
 debian_initramfs := debian-buster-amd64.cpio.gz
-debian_recipe := $(os)/debos/debian.yaml
+debian_recipe := $(op)/debos/debian.yaml
 ubuntu-18_image := ubuntu-bionic-amd64.tgz
 ubuntu-18_kernel := ubuntu-bionic-amd64.vmlinuz
 ubuntu-18_initramfs := ubuntu-bionic-amd64.cpio.gz
 ubuntu-20_image := ubuntu-focal-amd64.tgz
 ubuntu-20_kernel := ubuntu-focal-amd64.vmlinuz
 ubuntu-20_initramfs := ubuntu-focal-amd64.cpio.gz
-ubuntu_recipe := $(os)/debos/ubuntu.yaml
+ubuntu_recipe := $(op)/debos/ubuntu.yaml
 
 $(eval $(call DEBOS_TARGET,debian,$(debian_recipe),$(debian_image),$(debian_kernel),$(debian_initramfs)))
 $(eval $(call DEBOS_TARGET,ubuntu-18,$(ubuntu_recipe),$(ubuntu-18_image),$(ubuntu-18_kernel),$(ubuntu-18_initramfs),bionic))

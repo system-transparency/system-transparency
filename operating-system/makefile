@@ -1,5 +1,5 @@
-os := operating-system
-os-out := $(out)/operating-system
+op := operating-system
+op-out := $(out)/operating-system
 tboot-out := $(out)/tboot
 tboot-cache := $(cache)/tboot
 tboot-version := "v1.9.11"
@@ -7,7 +7,7 @@ tboot := $(tboot-out)/tboot.gz
 tboot-url := http://hg.code.sf.net/p/tboot/code
 acm-cache := $(cache)/ACMs
 
-include $(os)/debos/makefile
+include $(op)/debos/makefile
 
 tboot_code := $(tboot-cache)/code/.unpack
 

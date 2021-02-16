@@ -143,8 +143,11 @@ help:
 	@echo  '  Use "make [target] V=1" for extra build debug information'
 	@echo  '  default-config BOARD=<target>- Generate default configuration (see contrib/boards)'
 	@echo  '  check                        - Check for missing dependencies'
-	@echo  '  clean                        - Remove build artifacts'
-	@echo  '  distclean                    - Remove build artifacts, cache and config file'
+	@echo  '*** clean directory'
+	@echo  '  clean                        - Remove all build artifacts'
+	@echo  '  clean-keys                   - Remove build keys'
+	@echo  '  clean-os                     - Remove build os-packages'
+	@echo  '  distclean                    - Remove all build artifacts, cache and config file'
 	@echo  '*** key generation'
 	@echo  '  keygen                       - Generate all example keys'
 	@echo  '  sign-keygen                  - Generate example sign keys'
@@ -229,6 +232,12 @@ upload: $(newest-ospkg)
 
 $(out-dirs):
 	mkdir -p $@
+
+clean-keys:
+	rm -rf $(out)/keys
+
+clean-os:
+	rm -rf $(out)/os-packages
 
 clean:
 	rm -rf $(out)
