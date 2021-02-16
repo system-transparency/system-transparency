@@ -38,6 +38,13 @@ jobs:
         run: |
           make keygen
 
+      # create a file in os-package to prevent os autobuild
+      # default github runner does not have kvm access
+      - name: Prevent os-package build
+        run: |
+          mkdir -p out/os-packages
+          touch out/os-packages/.nobuild
+
       - name: Build MBR bootloader installation
         run: |
           make mbr-bootloader-installation
