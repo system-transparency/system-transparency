@@ -70,14 +70,6 @@ actions:
       EOF
 
   - action: run
-    description: Enable SSH with password Authentication
-    command: |
-      chroot root /bin/bash <<'EOF'
-      systemctl enable ssh
-      sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-      EOF
-
-  - action: run
     description: Clean up irreproducible data
     script: scripts/cleanup_irreproducible_data.sh
 

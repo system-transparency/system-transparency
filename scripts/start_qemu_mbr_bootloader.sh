@@ -62,6 +62,7 @@ swtpm socket --tpmstate dir=$tpm --tpm2 --ctrl type=unixio,path=/$tpm/swtpm-sock
 
 
 qemu-system-x86_64 \
+  -enable-kvm \
   -drive if=virtio,file="${image}",format=raw \
   -nographic \
   -net user,hostfwd=tcp::2222-:2222 \

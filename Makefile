@@ -145,8 +145,8 @@ help:
 	@echo  '  check                        - Check for missing dependencies'
 	@echo  '*** clean directory'
 	@echo  '  clean                        - Remove all build artifacts'
-	@echo  '  clean-keys                   - Remove build keys'
-	@echo  '  clean-os                     - Remove build os-packages'
+	@echo  '  keys-clean                   - Remove build keys'
+	@echo  '  os-clean                     - Remove build os-packages'
 	@echo  '  distclean                    - Remove all build artifacts, cache and config file'
 	@echo  '*** key generation'
 	@echo  '  keygen                       - Generate all example keys'
@@ -233,10 +233,10 @@ upload: $(newest-ospkg)
 $(out-dirs):
 	mkdir -p $@
 
-clean-keys:
+keys-clean:
 	rm -rf $(out)/keys
 
-clean-os:
+os-clean:
 	rm -rf $(out)/os-packages
 
 clean:
