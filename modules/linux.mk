@@ -113,8 +113,8 @@ $1-kernel_target := $$($1-kernel_dir)/$(kernel_image)
 kernel $1-kernel: $(DOTCONFIG) $2
 
 $2: $$($1-kernel_target)
-	mkdir -p `dirname $2`
-	rsync -c $$($1-kernel_target) $2
+	mkdir -p $$(dir $$@)
+	cp $$< $$@
 	@echo "[$1-linux] Done kernel"
 
 $$($1-kernel_target): $$($1-kernel_dir)/.config  $(initramfs)
