@@ -53,7 +53,7 @@ endif
 define NO_DOTCONFIG_ERROR
 file run.config missing:
 
-*** Please provide a config file of run "make default-config"
+*** Please provide a config file of run "make config BOARD=<target>"
 *** to generate the default configuration.
 
 endef
@@ -72,7 +72,7 @@ define NO_SIGN_KEY
 
 $@ file missing.
 
-*** Please provide signing keys and certificates or run "make sign-keygen"
+*** Please provide signing keys and certificates or run "make keygen-sign"
 *** to generate example keys and certificates.
 
 endef
@@ -152,17 +152,17 @@ help:
 	@echo
 	@echo  '*** system-transparency targets ***'
 	@echo  '  Use "make [target] V=1" for extra build debug information'
-	@echo  '  default-config BOARD=<target>- Generate default configuration (see contrib/boards)'
+	@echo  '  config BOARD=<target>        - Generate default configuration (see contrib/boards)'
 	@echo  '  check                        - Check for missing dependencies'
 	@echo  '*** clean directory'
 	@echo  '  clean                        - Remove all build artifacts'
-	@echo  '  keys-clean                   - Remove keys'
-	@echo  '  os-clean                     - Remove os-packages'
+	@echo  '  clean-keys                   - Remove keys'
+	@echo  '  clean-os                     - Remove os-packages'
 	@echo  '  distclean                    - Remove all build artifacts, cache and config file'
 	@echo  '*** key generation'
 	@echo  '  keygen                       - Generate all example keys'
-	@echo  '  sign-keygen                  - Generate example sign keys'
-	@echo  '  cpu-keygen                   - Generate cpu ssh keys for debugging'
+	@echo  '  keygen-sign                  - Generate example sign keys'
+	@echo  '  keygen-cpu                   - Generate cpu ssh keys for debugging'
 	@echo  '*** Build image'
 	@echo  '  all                          - Build all installation options'
 	@echo  '  mbr-bootloader-installation  - Build MBR bootloader installation option'
@@ -194,7 +194,7 @@ check:
 	$(scripts)/checks.sh
 	@echo [stboot] Done checking dependencies
 
-default-config:
+config:
 	if [[ ! -d contrib/boards/$(BOARD) ]]; then \
 	  echo '[stboot] Target board "$(BOARD)" not found'; \
 	  echo -e '\n  Avaiable examples boards are:'; \
@@ -206,25 +206,25 @@ default-config:
 	fi
 	echo [stboot] Apply default configuration for $(BOARD)
 	if [[ -f $(DOTCONFIG) ]]; then \
-	  if diff $(DOTCONFIG) contrib/boards/$(BOARD)/example_config $(OUTREDIRECT); then \
+	  if diff $(DOTCONFIG) contrib/default.config $(OUTREDIRECT); then \
 	    echo [stboot] configuration already up-to-date; \
 	  else \
 	    echo [stboot] moving old config to $(notdir $(DOTCONFIG)).old; \
 	    mv $(DOTCONFIG) $(DOTCONFIG).old; \
 	  fi \
 	fi
-	rsync -c contrib/boards/$(BOARD)/example_config $(DOTCONFIG)
+	BOARD=$(BOARD) envsubst < contrib/default.config  > $(DOTCONFIG)
 
 toolchain: go-tools debos
 
-keygen: sign-keygen cpu-keygen
+keygen: keygen-sign keygen-cpu
 
-sign-keygen: $(stmanager_bin)
+keygen-sign: $(stmanager_bin)
 	@echo [stboot] Generate example signing keys
 	$(scripts)/make_signing_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example signing keys
 
-cpu-keygen: $(CPU_SSH_KEYS)
+keygen-cpu: $(CPU_SSH_KEYS)
 
 $(CPU_SSH_KEYS)&:
 	@echo [stboot] Generate example cpu ssh keys
@@ -244,10 +244,10 @@ upload: $(newest-ospkg)
 $(out-dirs):
 	mkdir -p $@
 
-keys-clean:
+clean-keys:
 	rm -rf $(out)/keys
 
-os-clean:
+clean-os:
 	rm -rf $(out)/os-packages
 
 clean:
