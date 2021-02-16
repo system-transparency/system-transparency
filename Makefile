@@ -2,7 +2,6 @@ out ?= out
 out-dirs += $(out)
 cache ?= cache
 common := stboot-installation/common
-gopath ?= $(CURDIR)/cache/go
 acm-dir := $(cache)/ACMs
 scripts := scripts
 stboot-installation := stboot-installation
@@ -17,6 +16,18 @@ TZ:=UTC0
 
 # use bash (nix/NixOS friendly)
 SHELL := /usr/bin/env bash -euo pipefail -c
+
+# use custom gopath
+ifneq ($(STBOOT_GOPATH),)
+# have to be an absolute path
+ifeq ($(shell [[ $(STBOOT_GOPATH) = /* ]] && echo y),y)
+gopath := $(STBOOT_GOPATH)
+else
+$(error STBOOT_GOPATH have to be an absolute path!)
+endif
+else
+gopath := $(CURDIR)/cache/go
+endif
 
 # Make is silent per default, but 'make V=1' will show all compiler calls.
 Q:=@
