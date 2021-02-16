@@ -236,10 +236,9 @@ SOURCE_DATE_EPOCH := $(shell git log -1 --format=format:%ct)
 ## args
 # $1 = target name
 # $2 = debos recipe
-# $3 = debos image
-# $4 = kernel file
-# $5 = initramfs file
-# $6 = suite (optional)
+# $3 = kernel file
+# $4 = initramfs file
+# $5 = suite (optional)
 
 define DEBOS_TARGET
 $1-debos-rootfs := $(op-out)/$1-rootfs
@@ -250,11 +249,10 @@ else
 $1-debos-recipe := $(notdir $2)
 $1-debos-out := /out
 endif
-ifneq ($6,)
-$1-debos-suite-arg := --template-var=suite:$6
+ifneq ($5,)
+$1-debos-suite-arg := --template-var=suite:$5
 endif
-#$(op-out)/$3: $2 $(debos-dep)
-$(op-out)/$4 $(op-out)/$5&: $2 $(debos-dep)
+$(op-out)/$3 $(op-out)/$4&: $2 $(debos-dep)
 	mkdir -p $$(dir $$@)
 	$(debos-check)
 	$(debos-setup)
@@ -271,48 +269,21 @@ $(op-out)/$4 $(op-out)/$5&: $2 $(debos-dep)
 		$$($1-debos-suite-arg) \
 		$$($1-debos-recipe)
 	@echo [stboot] Done $$@
-#$$($1-debos-rootfs):
-#	rm -rf $$@
-#	mkdir -p $$@
-#$(op-out)/.$3.unpack: $(op-out)/$3 $$($1-debos-rootfs)
-#	@echo [stboot] Unpack $$($1-debos-rootfs)
-#	mkdir -p $$($1-debos-rootfs)
-#	fakeroot tar xzf $$< -C $$($1-debos-rootfs)
-#	touch $$@
-#$(op-out)/$4: $(op-out)/.$3.unpack
-#	@echo [stboot] Touch date epoch $$(notdir $$@)
-#	touch -hcd "@$(SOURCE_DATE_EPOCH)" $$($1-debos-rootfs)/boot/vmlinuz-*
-#	@echo [stboot] Copy $$(notdir $$@)
-#	cp $$($1-debos-rootfs)/boot/vmlinuz-* $$@
-#	@echo [stboot] Done $$(notdir $$@)
-#$(op-out)/$5: $(op-out)/.$3.unpack
-#	@echo [stboot] Touch date epoch in $$(dir $$<)
-#	find $$($1-debos-rootfs) | \
-#		while read -r line; \
-#		do touch -hcd "@$(SOURCE_DATE_EPOCH)" "$$$$line"; \
-#		done
-#	@echo [stboot] Pack binary reproducible $$(notdir $$@)
-#	fakeroot -- sh -c 'find $$(dir $$<) -print0 | \
-#		cpio --reproducible -0 -o -H newc | gzip -9 -n > $$@'
-#	@echo [stboot] Done $$(notdir $$@)
-$1: $(op-out)/$4 $(op-out)/$5
+$1: $(op-out)/$3 $(op-out)/$4
 
 .PHONY: $1
-.PRECIOUS: $(op-out)/$4 $(op-out)/$5
+.PRECIOUS: $(op-out)/$3 $(op-out)/$4
 endef
 
-debian_image := debian-buster-amd64.tgz
 debian_kernel := debian-buster-amd64.vmlinuz
 debian_initramfs := debian-buster-amd64.cpio.gz
 debian_recipe := $(op)/debos/debian.yaml
-ubuntu-18_image := ubuntu-bionic-amd64.tgz
 ubuntu-18_kernel := ubuntu-bionic-amd64.vmlinuz
 ubuntu-18_initramfs := ubuntu-bionic-amd64.cpio.gz
-ubuntu-20_image := ubuntu-focal-amd64.tgz
 ubuntu-20_kernel := ubuntu-focal-amd64.vmlinuz
 ubuntu-20_initramfs := ubuntu-focal-amd64.cpio.gz
 ubuntu_recipe := $(op)/debos/ubuntu.yaml
 
-$(eval $(call DEBOS_TARGET,debian,$(debian_recipe),$(debian_image),$(debian_kernel),$(debian_initramfs)))
-$(eval $(call DEBOS_TARGET,ubuntu-18,$(ubuntu_recipe),$(ubuntu-18_image),$(ubuntu-18_kernel),$(ubuntu-18_initramfs),bionic))
-$(eval $(call DEBOS_TARGET,ubuntu-20,$(ubuntu_recipe),$(ubuntu-20_image),$(ubuntu-20_kernel),$(ubuntu-20_initramfs),focal))
+$(eval $(call DEBOS_TARGET,debian,$(debian_recipe),$(debian_kernel),$(debian_initramfs)))
+$(eval $(call DEBOS_TARGET,ubuntu-18,$(ubuntu_recipe),$(ubuntu-18_kernel),$(ubuntu-18_initramfs),bionic))
+$(eval $(call DEBOS_TARGET,ubuntu-20,$(ubuntu_recipe),$(ubuntu-20_kernel),$(ubuntu-20_initramfs),focal))
