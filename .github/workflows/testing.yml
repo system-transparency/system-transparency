@@ -30,9 +30,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build default-config
+      - name: Build default config
         run: |
-          make default-config
+          make config
 
       - name: Generate keys and certificates
         run: |

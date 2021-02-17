@@ -57,11 +57,6 @@ define DEBOS_ERROR_NO_KERNEL_ACCESS
     chmod 644 $(host-kernel)
 endef
 
-define DEBOS_ERROR_NO_KVM_ACCESS
-*** User has no access to kvm.
-*** Either add your user to the kvm group or install docker.
-endef
-
 define DEBOS_ERROR_NO_ENV
 *** No debos environment available to use debos
 endef
