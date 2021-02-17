@@ -1,22 +1,12 @@
-top := $(CURDIR)
-out ?= $(top)/out
+out ?= out
 out-dirs += $(out)
-cache ?= $(top)/cache
-common := $(top)/stboot-installation/common
-gopath ?= $(cache)/go
+cache ?= cache
+common := stboot-installation/common
 acm-dir := $(cache)/ACMs
-scripts := $(top)/scripts
-os := $(top)/operating-system
-stboot-installation := $(top)/stboot-installation
+scripts := scripts
+stboot-installation := stboot-installation
 
-tboot := $(out)/tboot/tboot.gz
-newest-ospkg := $(top)/.newest-ospkgs.zip
-debian_kernel := $(out)/operating-system/debian-buster-amd64.vmlinuz
-debian_initramfs := $(out)/operating-system/debian-buster-amd64.cpio.gz
-ubuntu-18_kernel := $(out)/operating-system/ubuntu-bionic-amd64.vmlinuz
-ubuntu-18_initramfs := $(out)/operating-system/ubuntu-bionic-amd64.cpio.gz
-ubuntu-20_kernel := $(out)/operating-system/ubuntu-focal-amd64.vmlinuz
-ubuntu-20_initramfs := $(out)/operating-system/ubuntu-focal-amd64.cpio.gz
+newest-ospkg := .newest-ospkgs.zip
 initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
 
 # reproducible builds
@@ -26,6 +16,18 @@ TZ:=UTC0
 
 # use bash (nix/NixOS friendly)
 SHELL := /usr/bin/env bash -euo pipefail -c
+
+# use custom gopath
+ifneq ($(STBOOT_GOPATH),)
+# have to be an absolute path
+ifeq ($(shell [[ $(STBOOT_GOPATH) = /* ]] && echo y),y)
+gopath := $(STBOOT_GOPATH)
+else
+$(error STBOOT_GOPATH have to be an absolute path!)
+endif
+else
+gopath := $(CURDIR)/cache/go
+endif
 
 # Make is silent per default, but 'make V=1' will show all compiler calls.
 Q:=@
@@ -37,10 +39,26 @@ OUTREDIRECT :=  > /dev/null
 endif
 endif
 
+# make "grouped targets" are only supported since version 4.3
+MAKE_VER_MAYOR := $(word 1,$(subst ., ,$(MAKE_VERSION)))
+MAKE_VER_MINOR := $(word 2,$(subst ., ,$(MAKE_VERSION)))
+ifeq ($(shell [ $(MAKE_VER_MAYOR) -ge "4" ] && echo y),y)
+ifeq ($(shell [ $(MAKE_VER_MINOR) -ge "3" ] && echo y),y)
+GROUP_TARGET := &
+endif
+endif
+
+# HACK: If "grouped targets" are not supported, emulate the same behavior by removing
+#       grouped targets from target dependecies.
+define GROUP
+$(if $(GROUP_TARGET),$(1),$(word 1,$(1)))
+endef
+
 # Make uses maximal available job threads by default
 MAKEFLAGS += -j$(shell nproc)
 
-DOTCONFIG ?= $(top)/run.config
+BOARD ?= qemu
+DOTCONFIG ?= run.config
 
 ifneq ($(strip $(wildcard $(DOTCONFIG))),)
 include $(DOTCONFIG)
@@ -50,7 +68,7 @@ endif
 define NO_DOTCONFIG_ERROR
 file run.config missing:
 
-*** Please provide a config file of run "make default-config"
+*** Please provide a config file of run "make config BOARD=<target>"
 *** to generate the default configuration.
 
 endef
@@ -69,13 +87,13 @@ define NO_SIGN_KEY
 
 $@ file missing.
 
-*** Please provide signing keys and certificates or run "make sign-keygen"
+*** Please provide signing keys and certificates or run "make keygen-sign"
 *** to generate example keys and certificates.
 
 endef
 
 CPU_KEY_DIR := $(out)/keys/cpu_keys/
-CPU_SSH_FILES := cpu_rsa  cpu_rsa.pub  ssh_host_rsa_key  ssh_host_rsa_key.pub
+CPU_SSH_FILES := cpu_rsa cpu_rsa.pub ssh_host_rsa_key ssh_host_rsa_key.pub
 CPU_SSH_KEYS += $(foreach CPU_SSH_FILE,$(CPU_SSH_FILES),$(CPU_KEY_DIR)/$(CPU_SSH_FILE))
 
 
@@ -125,37 +143,41 @@ all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-insta
 $(DOTCONFIG):
 	$(error $(NO_DOTCONFIG_ERROR))
 
-$(ROOT_CERT) $(KEYS_CERTS) &:
+$(ROOT_CERT) $(KEYS_CERTS)$(GROUG_TARGET):
 	$(error $(NO_SIGN_KEY))
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
-OS_KERNEL := $(top)/$(patsubst "%",%,$(ST_OS_PKG_KERNEL))
+OS_KERNEL := $(patsubst "%",%,$(ST_OS_PKG_KERNEL))
 endif
 
 ifneq ($(strip $(ST_OS_PKG_INITRAMFS)),)
-OS_INITRAMFS := $(top)/$(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
+OS_INITRAMFS := $(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
 endif
 
-include $(top)/modules/go.mk
-include $(top)/modules/debos.mk
-include $(top)/modules/linux.mk
+include modules/go.mk
+include modules/linux.mk
 
-include $(top)/stboot-installation/common/makefile
-include $(top)/stboot-installation/mbr-bootloader/makefile
-include $(top)/stboot-installation/efi-application/makefile
+include operating-system/makefile
+
+include stboot-installation/common/makefile
+include stboot-installation/mbr-bootloader/makefile
+include stboot-installation/efi-application/makefile
 
 help:
 	@echo
 	@echo  '*** system-transparency targets ***'
 	@echo  '  Use "make [target] V=1" for extra build debug information'
-	@echo  '  default-config               - Generate default run.config'
+	@echo  '  config BOARD=<target>        - Generate default configuration (see contrib/boards)'
 	@echo  '  check                        - Check for missing dependencies'
-	@echo  '  clean                        - Remove build artifacts'
-	@echo  '  distclean                    - Remove build artifacts, cache and config file'
+	@echo  '*** clean directory'
+	@echo  '  clean                        - Remove all build artifacts'
+	@echo  '  clean-keys                   - Remove keys'
+	@echo  '  clean-os                     - Remove os-packages'
+	@echo  '  distclean                    - Remove all build artifacts, cache and config file'
 	@echo  '*** key generation'
 	@echo  '  keygen                       - Generate all example keys'
-	@echo  '  sign-keygen                  - Generate example sign keys'
-	@echo  '  cpu-keygen                   - Generate cpu ssh keys for debugging'
+	@echo  '  keygen-sign                  - Generate example sign keys'
+	@echo  '  keygen-cpu                   - Generate cpu ssh keys for debugging'
 	@echo  '*** Build image'
 	@echo  '  all                          - Build all installation options'
 	@echo  '  mbr-bootloader-installation  - Build MBR bootloader installation option'
@@ -171,9 +193,6 @@ help:
 	@echo  '*** Install toolchain'
 	@echo  '  toolchain                    - Build/Update toolchain'
 	@echo  '  go-tools                     - Build/Update Golang tools'
-	@echo  '  debos                        - Create all docker debos environments'
-	@echo  '  debos-debian                 - Create docker debos environment for debian'
-	@echo  '  debos-ubuntu	               - Create docker debos environment for ubuntu'
 	@echo  '*** Build Operating Sytem'
 	@echo  '  tboot                        - Build tboot'
 	@echo  '  debian                       - Build reproducible Debian Buster'
@@ -190,57 +209,44 @@ check:
 	$(scripts)/checks.sh
 	@echo [stboot] Done checking dependencies
 
-default-config:
-	$(scripts)/make_global_config.sh
+config:
+	if [[ ! -d contrib/boards/$(BOARD) ]]; then \
+	  echo '[stboot] Target board "$(BOARD)" not found'; \
+	  echo -e '\n  Avaiable examples boards are:'; \
+	  for board in `ls contrib/boards/`; do \
+	    echo  "  - $$board"; \
+	  done; \
+	  echo; \
+	  exit 1; \
+	fi
+	echo [stboot] Apply default configuration for $(BOARD)
+	if [[ -f $(DOTCONFIG) ]]; then \
+	  if diff $(DOTCONFIG) contrib/default.config $(OUTREDIRECT); then \
+	    echo [stboot] configuration already up-to-date; \
+	  else \
+	    echo [stboot] moving old config to $(notdir $(DOTCONFIG)).old; \
+	    mv $(DOTCONFIG) $(DOTCONFIG).old; \
+	  fi \
+	fi
+	BOARD=$(BOARD) envsubst < contrib/default.config  > $(DOTCONFIG)
 
 toolchain: go-tools debos
 
-keygen: sign-keygen cpu-keygen
+keygen: keygen-sign keygen-cpu
 
-sign-keygen: $(stmanager_bin)
+keygen-sign: $(stmanager_bin)
 	@echo [stboot] Generate example signing keys
 	$(scripts)/make_signing_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example signing keys
 
-cpu-keygen: $(CPU_SSH_KEYS)
+keygen-cpu: $(call GROUP,$(CPU_SSH_KEYS))
 
-$(CPU_SSH_KEYS) &:
+$(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
 	@echo [stboot] Generate example cpu ssh keys
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example cpu ssh keys
 
-tboot $(tboot):
-	@echo [stboot] Build tboot
-	$(os)/common/build_tboot.sh MAKE=$(MAKE) $(OUTREDIRECT)
-	@echo [stboot] Done tboot
-
-acm: $(sinit-acm-grebber_bin)
-	@echo [stboot] Get ACM
-	$(os)/common/get_acms.sh $(OUTREDIRECT)
-	@echo [stboot] Done ACM
-
-$(debian_kernel) $(debian_initramfs):
-	$(error $(call NO_OS,debian,Debian Buster))
-debian: $(tboot) acm
-	@echo [stboot] Build Debian Buster
-	$(os)/debian/build_os_artefacts.sh $(OUTREDIRECT)
-	@echo [stboot] Done Debian Buster
-
-$(ubuntu-18_kernel) $(ubuntu-18_initramfs):
-	$(error $(call NO_OS,ubuntu-18,Ubuntu Bionic (latest)))
-ubuntu-18: $(tboot) acm
-	@echo '[stboot] Build Ubuntu Bionic (latest)'
-	$(os)/ubuntu/build_os_artefacts.sh "18" $(OUTREDIRECT)
-	@echo '[stboot] Done Ubuntu Bionic (latest)'
-
-$(ubuntu-20_kernel) $(ubuntu-20_initramfs):
-	$(error $(call NO_OS,ubuntu-20,Ubuntu Focal))
-ubuntu-20: $(tboot) acm
-	@echo [stboot] Build Ubuntu Focal
-	$(os)/ubuntu/build_os_artefacts.sh "20" $(OUTREDIRECT)
-	@echo [stboot] Done Ubuntu Focal
-
-sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(OS_KERNEL) $(OS_INITRAMFS) $(stmanager_bin)
+sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(tboot) acm
 	@echo [stboot] Sign OS package
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package
@@ -253,6 +259,12 @@ upload: $(newest-ospkg)
 $(out-dirs):
 	mkdir -p $@
 
+clean-keys:
+	rm -rf $(out)/keys
+
+clean-os:
+	rm -rf $(out)/os-packages
+
 clean:
 	rm -rf $(out)
 
@@ -260,4 +272,4 @@ distclean: clean
 	rm -rf $(cache)
 	rm -f run.config
 
-.PHONY: all _all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean
+.PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean

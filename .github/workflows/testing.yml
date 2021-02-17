@@ -30,13 +30,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build default-config
+      - name: Build default config
         run: |
-          make default-config
+          make config
 
       - name: Generate keys and certificates
         run: |
           make keygen
+
+      # create a file in os-package to prevent os autobuild
+      # default github runner does not have kvm access
+      - name: Prevent os-package build
+        run: |
+          mkdir -p out/os-packages
+          touch out/os-packages/.nobuild
 
       - name: Build MBR bootloader installation
         run: |

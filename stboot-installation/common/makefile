@@ -1,5 +1,5 @@
-st-out := $(top)/out/stboot-installation
-os-out = $(top)/out/os-packages/
+os-out := $(out)/os-packages
+st-out := $(out)/stboot-installation
 out-dirs += $(st-out) $(os-out)
 
 data_partition := $(st-out)/data_partition.ext4
@@ -11,7 +11,12 @@ os-out_dirs = $(shell find $(os-out) -type d 2>/dev/null)
 os-out_files = $(shell find $(os-out) -type f -name '*' 2>/dev/null)
 
 $(eval $(call CONFIG_DEP,$(data_partition),ST_DATA_PARTITION_SZIZE))
+# build and sign os-packages, if directy is empty
+ifeq ($(os-out_files),)
+$(data_partition): % : %.config sign
+else
 $(data_partition): % : %.config $(os-out) $(os-out_dirs) $(os-out_files)
+endif
 	@echo "[stboot] Build data partition"
 	$(common)/build_data_filesystem.sh $(OUTREDIRECT)
 	@echo "[stboot] Done data partition"
@@ -19,7 +24,7 @@ $(data_partition): % : %.config $(os-out) $(os-out_dirs) $(os-out_files)
 $(eval $(call CONFIG_DEP,$(initramfs),ST_LINUXBOOT_VARIANT))
 # add cpu ssh public key
 ifeq ($(strip $(ST_LINUXBOOT_VARIANT)),debug)
-$(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT) $(cpu_bin) $(cpud_bin) $(CPU_SSH_KEYS)
+$(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT) $(call GROUP,$(CPU_SSH_KEYS)) $(call GROUP,$(cpu_bin) $(cpud_bin))
 else
 $(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT)
 endif

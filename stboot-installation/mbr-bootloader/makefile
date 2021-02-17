@@ -1,4 +1,4 @@
-mbr := $(top)/stboot-installation/mbr-bootloader
+mbr := stboot-installation/mbr-bootloader
 mbr-out := $(st-out)/mbr-bootloader
 out-dirs += $(mbr-out)
 
@@ -15,7 +15,7 @@ $(mbr_image): $(mbr_boot_partition) $(data_partition)
 	$(mbr)/build_image.sh $(OUTREDIRECT)
 	@echo "[stboot] Done MBR bootloader image"
 
-$(mbr_boot_partition): $(syslinux_config) $(host_config) $(syslinux) $(mbr_kernel)
+$(mbr_boot_partition): $(mbr_kernel) $(syslinux_config) $(host_config) $(syslinux)
 	@echo "[stboot] Build MBR boot partition"
 	$(mbr)/build_boot_filesystem.sh $(OUTREDIRECT)
 	@echo "[stboot] Done MBR boot partition"

@@ -74,6 +74,7 @@ echo "Starting $tpm"
 swtpm socket --tpmstate dir=$tpm --tpm2 --ctrl type=unixio,path=/$tpm/swtpm-sock &
 
 qemu-system-x86_64 \
+  -enable-kvm \
   -M q35 \
   -drive if=virtio,file="${image}",format=raw \
   -net user,hostfwd=tcp::2222-:2222 \

@@ -6,8 +6,6 @@
 /stboot-installation/mbr-bootloader/*.defconfig.patch
 /stboot-installation/efi-application/user_modified.defconfig
 /stboot-installation/efi-application/*.defconfig.patch
-/operating-system/debian/.debos-*
-/operating-system/ubuntu*/.debos-*
 /out/
 /.notes/
 **/*.old

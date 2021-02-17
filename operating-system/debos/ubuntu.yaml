@@ -2,15 +2,28 @@
 {{- $suite := or .suite "bionic" -}}
 {{ $image := or .image (printf "ubuntu-%s-%s" $suite $architecture) }}
 
+{{ $hostname := or "ubuntu" }}
+{{ $user := or "admin" }}
+# default password: admin
+{{ $password := "$1$VQIrG7bj$2X6AdR4UqAjPFpqUwbsY81" }}
+
 architecture: {{ $architecture }}
 
 actions:
+  # hotfix: wait to prevent network race condition
+  - action: run
+    description: Wait until network is up
+    command: sleep 5
+
   - action: debootstrap
     description: Install Ubuntu base system
     keyring-file: /usr/share/keyrings/ubuntu-archive-keyring.gpg
     suite: {{ $suite }}
     components:
       - main
+      - restricted
+      - universe
+      - multiverse
     mirror: http://archive.ubuntu.com/ubuntu
     variant: minbase
 
@@ -30,53 +43,38 @@ actions:
       - isc-dhcp-client
       - udev
       - nano
-      - linux-firmware
       - openssh-server
       - python3
       - systemd
-
-  - action: run
-    description: Clean up some irreproducible data
-    chroot: true
-    script: debos_cleanup_some_irreproducible_data.sh
+      - linux-image-generic
+      - linux-firmware
 
   - action: overlay
     description: Overlay - Add files to system
     source: debos-overlays
 
   - action: run
-    description: Update Ubuntu to latest
-    chroot: true
-    script: debos_update_ubuntu.sh 18
-
-  - action: run
     description: Set hostname
     chroot: true
-    command: echo ubuntu > /etc/hostname
+    command: |
+      echo {{ $hostname }} > /etc/hostname
 
   - action: run
     description: Add standard user
     chroot: true
-    script: debos_add_standard_user.sh
+    command: |
+      useradd {{ $user }} -m -s /bin/bash
+      usermod -a -G sudo {{ $user }}
+      echo '{{ $user }}:{{ $password }}' | chpasswd -e
 
   - action: run
-    description: Enable SSH
-    chroot: true
-    script: debos_enable_ssh.sh
-
-# Install newest kernel
-  - action: apt
-    description: Update kernel
-    packages:
-      - linux-image-5.4.0-51-generic 
-      - linux-modules-5.4.0-51-generic
-      - linux-firmware
+    description: Clean up irreproducible data
+    script: scripts/cleanup_irreproducible_data.sh
 
 # This packs reproducibly
   - action: run
     description: Pack reproducibly
-    chroot: false
-    script: debos_pack_reproducibly.sh {{ $image }}
+    script: scripts/pack_reproducibly.sh {{ $image }}
 
 # Since pack is not supporting reproducible builds, we pack manually
 #  - action: pack

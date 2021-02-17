@@ -1,1 +1,0 @@
-Overlay example file
