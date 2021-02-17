@@ -15,7 +15,7 @@ gopath="${root}/cache/go"
 source "${root}/run.config"
 
 out="${root}/out/os-packages"
-output_path="${out}/os-pkg-$(date +"%Y-%m-%d-%H-%M-%S").zip"
+signing_key_dir="${root}/out/keys/signing_keys"
 local_boot_order_file_name="local_boot_order"
 local_boot_order_file="${out}/${local_boot_order_file_name}"
 os_pkg_name="${ST_OS_PKG_NAME}"
@@ -40,18 +40,16 @@ stmanager_create_args=( "--out=${output_path}" "--label=${os_pkg_label}" "--kern
 [ -z "${os_pkg_tboot}" ] || stmanager_create_args+=( "--tboot=${os_pkg_tboot}" )
 [ -z "${os_pkg_acm}" ] || stmanager_create_args+=( "--acm=${os_pkg_acm}" )
 
-os_pkg_name=$(${gopath}/bin/stmanager create "${stmanager_create_args[@]}")
-os_pkg="${out}/${os_pkg_name}"
+"${gopath}"/bin/stmanager create "${stmanager_create_args[@]}"
 
 echo "[INFO]: created OS package ${os_pkg_name}"
+os_pkg="${output_path}"
 
 
-signing_key_dir="${root}/out/keys/signing_keys"
-
-echo "[INFO]: call 'stmanager sign' to sign $os_pkg with example keys"
+echo "[INFO]: call 'stmanager sign' to sign $os_pkg_name with example keys"
 for I in 1 2 3
 do
-    ${gopath}/bin/stmanager sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$os_pkg"
+    "${gopath}"/bin/stmanager sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$os_pkg"
 done
 
 # local boot order configuration
