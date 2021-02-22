@@ -48,14 +48,13 @@ define DEBOS_ERROR_NO_KVM_ACCESS
 *** Either add your user to the kvm group or install docker.
 endef
 
-define DEBOS_WARN_NO_KERNEL_ACCESS
-*** Host kernel "$(host-kernel)" is not readable
+define DEBOS_ERROR_NO_KERNEL_ACCESS
+'*** Host kernel "$(host-kernel)" is not readable'
 
-*** native debos needs a readable kernel to work.
+*** debos fakemachine needs a readable kernel to work.
 *** to change the kernel read permission run:
 
-*** chmod 644 $(host-kernel)
-
+    chmod 644 $(host-kernel)
 endef
 
 define DEBOS_ERROR_NO_ENV
@@ -65,7 +64,7 @@ endef
 # TODO: support environment for hosts without kvm
 ifneq ($(kvm-exist),y)
 DEBOS_ENV := error
-  debos-err-msg := $(call DEBOS_ERROR_NO_KVM)
+  debos-err := $(call DEBOS_ERROR_NO_KVM)
 endif
 
 ### detect optimal environment
@@ -73,15 +72,9 @@ ifeq ($(DEBOS_ENV),)
   # check if user has access to kvm
   ifeq ($(kvm-access),y)
     # detect debian based distros to run debos on host
-    # (host kernel have to be readable by the user)
-    ifeq ($(debian-os)$(kernel-access),yy)
+    ifeq ($(debian-os),y)
       DEBOS_ENV := native
     else
-      # print waring on debian-based system, if kernel is not readable
-      ifeq ($(debian-os)_$(kernel-access),y_)
-	debos-warn := $(DEBOS_WARN_NO_KERNEL_ACCESS)
-#$(warning $(DEBOS_WARN_NO_KERNEL_ACCESS))
-      endif
       # detect docker API
       ifeq ($(docker-access),y)
         DEBOS_ENV = docker
@@ -99,7 +92,7 @@ ifeq ($(DEBOS_ENV),)
     else
       # you need access to either docker API or kvm
       DEBOS_ENV = error
-      debos-err-msg := $(call DEBOS_ERROR_NO_KVM_ACCESS))
+      debos-err := $(call DEBOS_ERROR_NO_KVM_ACCESS))
     endif
   endif
 endif
@@ -107,12 +100,12 @@ endif
 # no environment found
 ifeq ($(DEBOS_ENV),)
   DEBOS_ENV = error
-  debos-err-msg := $(call DEBOS_ERROR_NO_ENV)
+  debos-err := $(call DEBOS_ERROR_NO_ENV)
 endif
 
 define DEBOS_ERROR_ENV
 
-$(debos-err-msg)
+$(debos-err)
 
 $(call DEBOS_ENV_LIST)
 endef
@@ -217,20 +210,10 @@ endef
 # evaluate debos-error
 ifdef debos-error
 define EVAL_DEBOS_ERROR
-
-	echo -e '$(subst $(\n),\n,$(debos-error))'
-	exit 1
+	  echo -e '$(subst $(\n),\n,$(debos-error))'
+	  exit 1
 endef
 debos-check += $(call EVAL_DEBOS_ERROR)
-else
-# evaluate debos-warn
-ifdef debos-warn
-define EVAL_DEBOS_WARN
-
-	echo -e '$(subst $(\n),\n,$(debos-warn))'
-endef
-debos-check += $(call EVAL_DEBOS_WARN)
-endif
 endif
 
 # build container image
