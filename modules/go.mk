@@ -85,23 +85,20 @@ debos_remote := $(debos_src)/.remote
 debos_checkout := $(debos_src)/.rev
 
 $(debos_get): $(go_check)
+	if [[ -f $@ ]]; then \
+	  git -C $(dir $@) checkout --quiet master; \
+	fi
 	@echo [Go] Get $(debos_package)
 	GOPATH=$(gopath) go get -d -u $(debos_package)/...
 	touch $@
-debos_remote: $(debos_get)
-	@echo [Go] Add stboot remote $(debos_repo)
-	git -C $(dir $(debos_get)) remote remove stboot 2>/dev/null || true
-	git -C $(dir $(debos_get)) remote add stboot https://$(debos_repo)
-	echo $(debos_repo) > $(debos_get).temp
-	rsync -c $(debos_get).temp $(debos_get)
-	rm $(debos_get)
 $(debos_remote): $(debos_get)
 	@echo [Go] Add stboot remote $(debos_repo)
 	git -C $(dir $@) remote add stboot https://$(debos_repo)
 	echo $(debos_repo) > $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
-debos_checkout: debos_remote
+# phony target to force update
+debos_checkout: $(debos_remote)
 	@echo [Go] Fetch branch $(debos_branch)
 	git -C $(dir $(debos_get)) fetch --quiet stboot $(debos_branch)
 	@echo [Go] Checkout branch $(debos_branch)
