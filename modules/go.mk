@@ -49,8 +49,6 @@ endef
 
 ifneq ($(strip $(ST_UROOT_DEV_BRANCH)),)
 u-root_branch := $(ST_UROOT_DEV_BRANCH)
-else
-u-root_branch := stboot
 endif
 
 go_version=$(shell go version | sed -nr 's/.*go([0-9]+\.[0-9]+.?[0-9]?).*/\1/p' )
@@ -131,8 +129,12 @@ $(u-root_get): $(go_check)
 	touch $@
 u-root_checkout: $(u-root_get)
 	git -C $(dir $(u-root_checkout)) fetch --all --quiet
+ifneq ($(u-root_branch),)
 	@echo [Go] Checkout branch $(u-root_branch)
 	git -C $(u-root_src) checkout --quiet $(u-root_branch)
+else
+	@echo [Go] Skip u-root checkout since ST_UROOT_DEV_BRANCH is not set
+endif
 	git -C $(u-root_src) rev-parse HEAD > $(u-root_checkout).temp
 	rsync -c $(u-root_checkout).temp $(u-root_checkout)
 	rm $(u-root_checkout).temp
