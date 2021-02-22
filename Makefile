@@ -236,7 +236,7 @@ keygen: keygen-sign keygen-cpu
 
 keygen-sign: $(stmanager_bin)
 	@echo [stboot] Generate example signing keys
-	$(scripts)/make_signing_keys.sh $(OUTREDIRECT)
+	GOPATH=$(gopath) $(scripts)/make_signing_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example signing keys
 
 keygen-cpu: $(call GROUP,$(CPU_SSH_KEYS))
@@ -248,7 +248,7 @@ $(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
 
 sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(tboot) acm
 	@echo [stboot] Sign OS package
-	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
+	GOPATH=$(gopath) $(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package
 
 upload: $(newest-ospkg)

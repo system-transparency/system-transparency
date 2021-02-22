@@ -9,7 +9,7 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
-gopath="${root}/cache/go"
+gopath="${GOPATH:-${root}/cache/go}"
 
 # import global configuration
 source "${root}/run.config"
