@@ -21,17 +21,22 @@ kvm-access := $(shell [[ -w /dev/kvm ]] && echo y)
 debian-os := $(shell [[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release |grep -q debian;echo y)
 # kernel user readable
 host-kernel := /boot/vmlinuz-$(shell uname -r)
-kernel-access := $(shell [[ -r $$(stat $(host-kernel)) ]] && echo y)
+kernel-access := $(shell [[ -r $(host-kernel) ]] && echo y)
+
+define \n
+
+
+endef
 
 ## list of available debos environment
 #
 define DEBOS_ENV_LIST
 *** supported environments are:
-- native: Run debos on debian based host (user needs kvm access)
+- native: Run debos on debian based host (user needs kvm access and readable host kernel)
 - docker: Run debos in a docker container (user needs docker API access and host has kvm avaiable)
 - podman: Run debos in a podman container [experimental] (user needs kvm access)
 
-*** Use DEBOS_ENV=<env>
+*** set DEBOS_ENV=<env>
 
 *** make autodetects available environments, if DEBOS_ENV is not set
 endef
@@ -49,12 +54,13 @@ define DEBOS_ERROR_NO_KVM_ACCESS
 endef
 
 define DEBOS_ERROR_NO_KERNEL_ACCESS
-'*** Host kernel "$(host-kernel)" is not readable'
+*** Host kernel "$(host-kernel)" is not readable
 
-*** debos fakemachine needs a readable kernel to work.
+*** native debos on debian-based systems needs a readable kernel to work.
 *** to change the kernel read permission run:
 
     chmod 644 $(host-kernel)
+
 endef
 
 define DEBOS_ERROR_NO_ENV
@@ -156,13 +162,12 @@ endef
 # check if kernel is readable
 define KERNEL_CHECK
 
-	@echo [debos] Check host kernel permision
-ifneq ($(kvm-access),y)
-	@echo "[debos] Error: no access to /dev/kvm"
+	@echo [debos] Check host kernel readability
+ifneq ($(kernel-access),y)
+	@echo -e '$(subst $(\n),\n,$(DEBOS_ERROR_NO_KERNEL_ACCESS))'
+	@echo -e '$(subst $(\n),\n,$(DEBOS_ENV_LIST))'
 	@exit 1
 endif
-	echo "[debos] kvm access granted"
-
 endef
 
 ifeq ($(DEBOS_ENV),error)
@@ -202,10 +207,6 @@ else
   endif
 endif
 
-define \n
-
-
-endef
 
 # evaluate debos-error
 ifdef debos-error
