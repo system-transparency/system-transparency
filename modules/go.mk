@@ -47,9 +47,7 @@ define go_update
 	echo [Go] Done $(1)
 endef
 
-ifneq ($(strip $(ST_UROOT_DEV_BRANCH)),)
-u-root_branch := $(ST_UROOT_DEV_BRANCH)
-endif
+u-root_branch := $(patsubst "%",%,$(ST_UROOT_DEV_BRANCH))
 
 go_version=$(shell go version | sed -nr 's/.*go([0-9]+\.[0-9]+.?[0-9]?).*/\1/p' )
 go_version_major=$(shell echo $(go_version) |  sed -nr 's/^([0-9]+)\.([0-9]+)\.?([0-9]*)$$/\1/p')
