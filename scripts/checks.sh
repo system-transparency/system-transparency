@@ -15,7 +15,7 @@ misc_cmds=( "git"  "hg" "docker" "gpg" "gpgv" "qemu-system-x86_64" "id" \
             "bison" "flex" "pkg-config" "bc" "date" "jq" "realpath" "make" "mkfs.vfat" "sort" \
             "ssh-keygen" "hexdump")
 
-misc_libs=( "libelf" "libcrypto" )
+misc_libs=( "libelf" "libcrypto" "ostree-1" )
 
 function checkMISC {
     needs_exit=false
