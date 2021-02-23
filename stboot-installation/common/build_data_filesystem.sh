@@ -15,7 +15,7 @@ source ${root}/run.config
 out="${root}/out/stboot-installation"
 name="data_partition.ext4"
 fs="${out}/${name}"
-local_boot_order_file_name="local_boot_order"
+local_boot_order_file_name="boot_order"
 local_boot_order_file="${root}/out/os-packages/${local_boot_order_file_name}"
 os_pkg_dir="${root}/out/os-packages"
 size_ext4="${ST_DATA_PARTITION_SZIZE}"
@@ -48,7 +48,7 @@ rm "${timestamp_file}"
 echo
 echo "[INFO]: Copying OS packages to image (for local boot method)"
 ls -l "${root}/out/os-packages/."
-e2cp "${local_boot_order_file}" "${fs}":/stboot/etc
+e2cp "${local_boot_order_file}" "${fs}":/stboot/os_pkgs/local
 for i in "${os_pkg_dir}"/*; do
   [ -e "$i" ] || continue
   e2cp "$i" "${fs}":/stboot/os_pkgs/local

@@ -10,7 +10,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 out="${root}/out/os-packages"
-local_boot_order_file_name="local_boot_order"
+local_boot_order_file_name="boot_order"
 local_boot_order_file="${out}/${local_boot_order_file_name}"
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
