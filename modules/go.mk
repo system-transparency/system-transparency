@@ -144,10 +144,10 @@ $(u-root_checkout): $(u-root_get)
 	rsync -c $@.temp $@
 	rm $(u-root_checkout).temp
 # phony target to force update
-u-root stmanager: u-root_checkout
+u-root stmanager: $(DOTCONFIG) u-root_checkout
 	$(call go_update,u-root,$(u-root_bin),$(u-root_package))
 	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
-$(u-root_bin) $(stmanager_bin): $(u-root_checkout)
+$(u-root_bin) $(stmanager_bin): $(DOTCONFIG) $(u-root_checkout)
 	$(call go_update,u-root,$(u-root_bin),$(u-root_package))
 	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
 
