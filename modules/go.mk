@@ -12,6 +12,7 @@ u-root_bin := $(gopath)/bin/u-root
 stmanager_bin := $(gopath)/bin/stmanager
 u-root_package := github.com/u-root/u-root
 u-root_src := $(gopath)/src/$(u-root_package)
+u-root_default_branch := stboot
 ## ACM grebber
 sinit-acm-grebber_bin := $(gopath)/bin/sinit-acm-grebber
 sinit-acm-grebber_package := github.com/system-transparency/sinit-acm-grebber
@@ -48,11 +49,13 @@ define go_update
 endef
 
 u-root_branch := $(patsubst "%",%,$(ST_UROOT_DEV_BRANCH))
+ifeq ($(u-root_branch),)
+u-root_branch := $(u-root_default_branch)
+endif
 
 go_version=$(shell go version | sed -nr 's/.*go([0-9]+\.[0-9]+.?[0-9]?).*/\1/p' )
 go_version_major=$(shell echo $(go_version) |  sed -nr 's/^([0-9]+)\.([0-9]+)\.?([0-9]*)$$/\1/p')
 go_version_minor=$(shell echo $(go_version) |  sed -nr 's/^([0-9]+)\.([0-9]+)\.?([0-9]*)$$/\2/p')
-
 
 # phony target to force update
 go-tools: cpu sinit-acm-grebber debos u-root
@@ -127,12 +130,8 @@ $(u-root_get): $(go_check)
 	touch $@
 u-root_checkout: $(u-root_get)
 	git -C $(dir $(u-root_checkout)) fetch --all --quiet
-ifneq ($(u-root_branch),)
 	@echo [Go] Checkout branch $(u-root_branch)
 	git -C $(u-root_src) checkout --quiet $(u-root_branch)
-else
-	@echo [Go] Skip u-root checkout since ST_UROOT_DEV_BRANCH is not set
-endif
 	git -C $(u-root_src) rev-parse HEAD > $(u-root_checkout).temp
 	rsync -c $(u-root_checkout).temp $(u-root_checkout)
 	rm $(u-root_checkout).temp
@@ -144,10 +143,10 @@ $(u-root_checkout): $(u-root_get)
 	rsync -c $@.temp $@
 	rm $(u-root_checkout).temp
 # phony target to force update
-u-root stmanager: $(DOTCONFIG) u-root_checkout
+u-root stmanager: u-root_checkout
 	$(call go_update,u-root,$(u-root_bin),$(u-root_package))
 	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
-$(u-root_bin) $(stmanager_bin): $(DOTCONFIG) $(u-root_checkout)
+$(u-root_bin) $(stmanager_bin): $(u-root_checkout)
 	$(call go_update,u-root,$(u-root_bin),$(u-root_package))
 	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
 

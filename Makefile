@@ -17,15 +17,24 @@ TZ:=UTC0
 # use bash (nix/NixOS friendly)
 SHELL := /usr/bin/env bash -euo pipefail -c
 
-# use custom gopath
-ifneq ($(STBOOT_GOPATH),)
-# have to be an absolute path
-ifeq ($(shell [[ $(STBOOT_GOPATH) = /* ]] && echo y),y)
-gopath := $(STBOOT_GOPATH)
-else
-$(error STBOOT_GOPATH have to be an absolute path!)
+# setup development environment if ST_DEVELOP=1
+ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+	# use local GOPATH
+	gopath := $(shell source <(go env) && echo $$GOPATH)
 endif
+
+# use custom gopath
+ifneq ($(ST_GOPATH),)
+# have to be an absolute path
+ifeq ($(shell [[ $(ST_GOPATH) = /* ]] && echo y),y)
+gopath := $(ST_GOPATH)
 else
+$(error ST_GOPATH have to be an absolute path!)
+endif
+endif
+
+# default gopath
+ifeq ($(gopath),)
 gopath := $(CURDIR)/cache/go
 endif
 
