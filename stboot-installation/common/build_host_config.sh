@@ -21,7 +21,8 @@ network_mode=${ST_NETWORK_MODE}
 host_ip=${ST_HOST_IP}
 host_gateway=${ST_HOST_GATEWAY}
 host_dns=${ST_HOST_DNS}
-provisioning_url=${ST_PROVISIONING_SERVER_URL}
+provisioning_url=("${ST_PROVISIONING_SERVER_URL[@]}")
+url_array=$(printf '%s\n' "${provisioning_url[@]}" | jq -cR . | jq -cs .)
 
 identity=$(hexdump -n 32 -e '8/4 "%08X"' /dev/random)
 authentication=$(hexdump -n 32 -e '8/4 "%08X"' /dev/random)
@@ -40,7 +41,7 @@ cat >"${host_config}" <<EOL
    "host_ip":"${host_ip}",
    "gateway":"${host_gateway}",
    "dns":"${host_dns}",
-   "provisioning_urls": [${provisioning_url}],
+   "provisioning_urls": ${url_array},
    "identity":"${identity}",
    "authentication":"${authentication}",
    "entropy_seed":"${entropy_seed}"
