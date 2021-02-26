@@ -12,13 +12,46 @@ Detailed information about the project itself can be found at https://system-tra
 
 ## Quick Start
 
+### build dependency check
+
 ```bash
-# GNU make targets
-make help
-# (alternative)
-./run.sh
+# Check for missing dependencies
+make check
 ```
-`run.sh` script will lead you through the process described in [Build Process in Detail](#Build-Process-in-Detail).
+
+### Configure stboot target installation
+
+```bash
+# make default configuration
+make config
+# modify configuration
+$(EDITOR) run.config
+```
+
+### Configure stboot target installation
+
+```bash
+# Generate example sign keys
+make keygen-sign
+```
+
+### Build stboot installations
+
+```bash
+# Build MBR bootloader installation
+make mbr-bootloader-installation
+# Build EFI application installation
+efi-application-installation
+```
+
+### Test installation in QEMU
+
+```bash
+# run MBR bootloader installation
+make run-mbr-bootloader
+# run EFI application installation
+make run-efi-application
+```
 
 ## Features
 
@@ -92,14 +125,14 @@ There are two main parts to build. You need an operating system which is reprodu
 ### Tool Chain
 
 ```bash
-./scripts/make_toolchain.sh
+make toolchain
 ```
 
 ### Keys
 The blob containing the operating system, called _OS package_ needs to be signed. You can use your own keys or create new ones with:
 
 ```bash
-./scripts/make_keys_and_certs.sh
+make keygen-sign
 ```
 
 Created directorys:
@@ -110,20 +143,20 @@ Created directorys:
 The operating systems to be used with _System Transparency_ need to be build reproducible. Currently, the only supported OS by this tooling is Debian Buster.
 
 ```bash
-./operating-system/debian/make_debian.sh
+make debian
 ```
 
 After the kernel and initramfs being created use the _stmanager_ utility to create a sign a OS package from it.
 See `stmanager --help-long` or to make use of the generated keys form `./scripts/make_keys_and_certs.sh` call:
 
 ```bash
-./scripts/create_and_sign_os_package.sh
+make sign
 ```
 
 If you want to go with the netboot feature of _stboot_ have set the corresponding parameters in `run.config` you can upload the OS package to your provisioning server with:
 
 ```bash
-./scripts/upload_os_package.sh
+make upload
 ```
 
 ### Bootloader (stboot)
@@ -135,7 +168,7 @@ Regarding deployment, we defined three real world scenarios which should at leas
 Bringing system transparency to already existing hardware which can’t be transformed to open source firmware machines is troublesome. Therefore, we need to propose a solution which even works on those limited systems. We will use a standard Ubuntu 18.04 server edition and standard bootloader to load _stboot_. This scenario is especially helpful for a server landscape with mixed firmware like BIOS and UEFI.
 
 ```bash
-./stboot-installation/mbr-bootloader/make_image.sh
+make mbr-bootloader-installation
 ```
 
 You need to deploy the created`./stboot-installation/mbr-bootloader/stboot_mbr_installation.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. The MBR is written accordingly.
@@ -144,7 +177,7 @@ You need to deploy the created`./stboot-installation/mbr-bootloader/stboot_mbr_i
 In this scenario we have a closed source UEFI firmware which cannot easily be modified. In order to deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as EFI application.
 
 ```bash
-./stboot-installation/efi-application/make_image.sh
+make efi-application-installation
 ```
 
 You need to deploy the created`./stboot-installation/efi-application/stboot_efi_installation.img` to the hard drive of your host. It contains a _STBOOT_ partition containing the bootloader and a _STDATA_ partition containing configuration data for both bootloader and operating system. _STBOOT_ in this case is an EFI special partition containing the bootloader as an efistub.
@@ -152,10 +185,9 @@ You need to deploy the created`./stboot-installation/efi-application/stboot_efi_
 #### Colocated server with coreboot payload installation
 In this scenario we are able to place our own server in the data center. This server already contains Open Source firmware and is able to boot a Linux kernel payload after hardware initialization.
 
-This process is not automated yet. Only the _STDATA_ partition can be generated using:
-
 ```
-./stboot-installation/coreboot-payload/make_image.sh
+# Work in Progress: Not yet implemented!
+#make coreboot-payload-installation
 ```
 
 To build and flash the coreboot-rom including _stboot_ as a payload, please refer to [this instructions](stboot-installation/coreboot-payload/#deploy-coreboot-rom). 

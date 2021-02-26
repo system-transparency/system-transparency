@@ -9,7 +9,7 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
-gopath="${root}/cache/go"
+gopath="${GOPATH:-${root}/cache/go}"
 signing_key_dir="${root}/out/keys/signing_keys"
 
 mkdir -p "${signing_key_dir}"

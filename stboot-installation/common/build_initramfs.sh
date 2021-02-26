@@ -28,7 +28,7 @@ cpu_keys="${root}/out/keys/cpu_keys"
 
 variant=${ST_LINUXBOOT_VARIANT}
 
-gopath="${root}/cache/go"
+gopath="${GOPATH:-${root}/cache/go}"
 
 if [ -f "${initramfs_compressed}" ]; then
     echo

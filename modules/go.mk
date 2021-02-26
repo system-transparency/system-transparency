@@ -12,6 +12,7 @@ u-root_bin := $(gopath)/bin/u-root
 stmanager_bin := $(gopath)/bin/stmanager
 u-root_package := github.com/u-root/u-root
 u-root_src := $(gopath)/src/$(u-root_package)
+u-root_default_branch := stboot
 ## ACM grebber
 sinit-acm-grebber_bin := $(gopath)/bin/sinit-acm-grebber
 sinit-acm-grebber_package := github.com/system-transparency/sinit-acm-grebber
@@ -47,16 +48,14 @@ define go_update
 	echo [Go] Done $(1)
 endef
 
-ifneq ($(strip $(ST_UROOT_DEV_BRANCH)),)
-u-root_branch := $(ST_UROOT_DEV_BRANCH)
-else
-u-root_branch := stboot
+u-root_branch := $(patsubst "%",%,$(ST_UROOT_DEV_BRANCH))
+ifeq ($(u-root_branch),)
+u-root_branch := $(u-root_default_branch)
 endif
 
 go_version=$(shell go version | sed -nr 's/.*go([0-9]+\.[0-9]+.?[0-9]?).*/\1/p' )
 go_version_major=$(shell echo $(go_version) |  sed -nr 's/^([0-9]+)\.([0-9]+)\.?([0-9]*)$$/\1/p')
 go_version_minor=$(shell echo $(go_version) |  sed -nr 's/^([0-9]+)\.([0-9]+)\.?([0-9]*)$$/\2/p')
-
 
 # phony target to force update
 go-tools: cpu sinit-acm-grebber debos u-root
@@ -85,23 +84,20 @@ debos_remote := $(debos_src)/.remote
 debos_checkout := $(debos_src)/.rev
 
 $(debos_get): $(go_check)
+	if [[ -f $@ ]]; then \
+	  git -C $(dir $@) checkout --quiet master; \
+	fi
 	@echo [Go] Get $(debos_package)
 	GOPATH=$(gopath) go get -d -u $(debos_package)/...
 	touch $@
-debos_remote: $(debos_get)
-	@echo [Go] Add stboot remote $(debos_repo)
-	git -C $(dir $(debos_get)) remote remove stboot 2>/dev/null || true
-	git -C $(dir $(debos_get)) remote add stboot https://$(debos_repo)
-	echo $(debos_repo) > $(debos_get).temp
-	rsync -c $(debos_get).temp $(debos_get)
-	rm $(debos_get)
 $(debos_remote): $(debos_get)
 	@echo [Go] Add stboot remote $(debos_repo)
 	git -C $(dir $@) remote add stboot https://$(debos_repo)
 	echo $(debos_repo) > $@.temp
 	rsync -c $@.temp $@
 	rm $@.temp
-debos_checkout: debos_remote
+# phony target to force update
+debos_checkout: $(debos_remote)
 	@echo [Go] Fetch branch $(debos_branch)
 	git -C $(dir $(debos_get)) fetch --quiet stboot $(debos_branch)
 	@echo [Go] Checkout branch $(debos_branch)
