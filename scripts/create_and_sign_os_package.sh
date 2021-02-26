@@ -20,6 +20,7 @@ local_boot_order_file_name="local_boot_order"
 local_boot_order_file="${out}/${local_boot_order_file_name}"
 os_pkg_name="${ST_OS_PKG_NAME}"
 os_pkg_label="${ST_OS_PKG_LABEL}"
+os_pkg_url="${ST_OS_PKG_URL}"
 os_pkg_kernel="${ST_OS_PKG_KERNEL}"
 os_pkg_initramfs="${ST_OS_PKG_INITRAMFS}"
 os_pkg_cmdline="${ST_OS_PKG_CMDLINE}"
@@ -39,6 +40,7 @@ stmanager_create_args=( "--out=${output_path}" "--label=${os_pkg_label}" "--kern
 [ -z "${os_pkg_initramfs}" ] || stmanager_create_args+=( "--initramfs=${os_pkg_initramfs}" )
 [ -z "${os_pkg_tboot}" ] || stmanager_create_args+=( "--tboot=${os_pkg_tboot}" )
 [ -z "${os_pkg_acm}" ] || stmanager_create_args+=( "--acm=${os_pkg_acm}" )
+[ -z "${os_pkg_url}" ] || stmanager_create_args+=( "--url=${os_pkg_url}" )
 
 "${gopath}"/bin/stmanager create "${stmanager_create_args[@]}"
 
