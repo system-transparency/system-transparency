@@ -178,6 +178,7 @@ help:
 	@echo  '  Use "make [target] V=1" for extra build debug information'
 	@echo  '  config BOARD=<target>        - Generate default configuration (see contrib/boards)'
 	@echo  '  check                        - Check for missing dependencies'
+	@echo  '  toolchain                    - Build/Update toolchain'
 	@echo  '*** clean directory'
 	@echo  '  clean                        - Remove all build artifacts'
 	@echo  '  clean-keys                   - Remove keys'
@@ -199,9 +200,6 @@ help:
 	@echo  '  efi-kernel-%                 - (debug) Run EFI application kernel target'
 	@echo  '  mbr-kernel-updatedefconfig   - (debug) Update MBR bootloader kernel defconfig'
 	@echo  '  efi-kernel-updatedefconfig   - (debug) Update EFI application kernel defconfig'
-	@echo  '*** Install toolchain'
-	@echo  '  toolchain                    - Build/Update toolchain'
-	@echo  '  go-tools                     - Build/Update Golang tools'
 	@echo  '*** Build Operating Sytem'
 	@echo  '  tboot                        - Build tboot'
 	@echo  '  debian                       - Build reproducible Debian Buster'
@@ -239,7 +237,7 @@ config:
 	fi
 	BOARD=$(BOARD) envsubst < contrib/default.config  > $(DOTCONFIG)
 
-toolchain: go-tools debos
+toolchain: go-tools
 
 keygen: keygen-sign keygen-cpu
 
