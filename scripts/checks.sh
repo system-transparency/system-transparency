@@ -148,6 +148,20 @@ function checkOVMF {
    fi
 }
 
+
+function checkKVM {
+   if [[ -c /dev/kvm ]]; then
+     echo "/dev/kvm device available"
+     if [[ -w /dev/kvm ]]; then
+       echo "/dev/kvm is accessible by the user"
+     else
+       echo "user has no permissions to access /dev/kvm. add user \"`whoami`\" to the \"kvm\" group"
+     fi
+   else
+     echo -e "/dev/kvm device not available:\n*** Please enable (nested) virtualisation on you host"
+   fi
+}
+
 function run_full_check {
    echo ""
    echo "Checking dependencies ..."
@@ -161,6 +175,7 @@ function run_full_check {
    checkSwtpmSetup
    checkSwtpm
    checkOVMF
+   checkKVM
 }
 
 # run all checks if script is not sourced
