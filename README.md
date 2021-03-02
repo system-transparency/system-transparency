@@ -53,6 +53,16 @@ make run-mbr-bootloader
 make run-efi-application
 ```
 
+
+### Modify LinuxBoot kernel config
+
+```bash
+# Run MBR bootloader kernel menuconfig
+make mbr-kernel-menuconfig
+# Update MBR bootloader kernel defconfig
+make mbr-kernel-updatedefconfig
+```
+
 ## Features
 
 ### Configuration data
