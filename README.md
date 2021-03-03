@@ -25,7 +25,7 @@ make check
 # make default configuration
 make config
 # modify configuration
-$(EDITOR) run.config
+${EDITOR} run.config
 ```
 
 ### Configure stboot target installation
@@ -41,7 +41,7 @@ make keygen-sign
 # Build MBR bootloader installation
 make mbr-bootloader-installation
 # Build EFI application installation
-efi-application-installation
+make efi-application-installation
 ```
 
 ### Test installation in QEMU
@@ -56,7 +56,7 @@ make run-efi-application
 ## Features
 
 ### Configuration data
-security_configuration.json: Cirtical data included into the initramfs
+security_configuration.json: Critical data included into the initramfs
 * Integer controlling the minimum number of signatures that must pass verification
 * String array of allowed fingerprints of root certificates for signature verification
 * Build timestamp
@@ -84,7 +84,7 @@ Network DHCP:
     * Request the file from the provisioning servers in the order of the URL list in security_configuration.json
     * Take the first match
     
-Nework static IP:
+Network static IP:
 * Configure network dynamically via DHCP
 * Download OS package from a provisioning server
     * Request the file from the provisioning servers in the order of the URL list in security_configuration.json
@@ -120,7 +120,7 @@ The root certificate is also included. The signature verification after download
 See [debugging section](#Debugging)
 
 ## Build Process in Detail
-There are two main parts to build. You need an operating system which is reproducible and completely self-contained in a Linux kernel + initramfs. Then you need to build the _stboot_ bootloader depending on your deploymet scenario. Further you need some additional things likes keys to be set up and at the right place. To be able to build these components you need to build a tool chain once.
+There are two main parts to build. You need an operating system which is reproducible and completely self-contained in a Linux kernel + initramfs. Then you need to build the _stboot_ bootloader depending on your deployment scenario. Further you need some additional things likes keys to be set up and at the right place. To be able to build these components you need to build a tool chain once.
 
 ### Tool Chain
 
@@ -135,7 +135,7 @@ The blob containing the operating system, called _OS package_ needs to be signed
 make keygen-sign
 ```
 
-Created directorys:
+Created directories:
 - `out/keys/signing_keys/`: Contains the keys for signing the OS package
 - `out/keys/cpu_keys/`: Contains the keys for using the cpu command for debugging
 
