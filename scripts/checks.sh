@@ -42,6 +42,8 @@ function checkMISC {
         needs_exit=true
     fi
 
+    printf "#include <trousers/tss.h>\n" | gcc -x c - -Wl,--defsym=main=0 -o $@ >/dev/null 2>&1 || echo "libtspi-dev/trousers-devel package is required"
+
     if $needs_exit ; then
         echo 'Please install all missing dependencies!';
         exit 1;
