@@ -121,7 +121,7 @@ $$($1-kernel_target): $$($1-kernel_dir)/.config  $(initramfs)
 	@echo "[$1-linux] Make kernel $$($1-kernel_version)"
 	$$(MAKE) -C $$($1-kernel_dir) $$(KERNEL_MAKE_FLAGS) bzImage
 
-$$($1-kernel_dir)/.config: $$($1-kernel_dir)/.unpack $(patsubst "%",%,$4)
+$$($1-kernel_dir)/.config: $(DOTCONFIG) $$($1-kernel_dir)/.unpack $(patsubst "%",%,$4)
 	@echo "[$1-linux] Configure kernel $$($1-kernel_version)"
 ifneq ($(strip $4),)
 	echo "[$1-linux] Use configuration file $(patsubst "%",%,$4)"
