@@ -15,13 +15,7 @@ source ${root}/run.config
 mem=${ST_QEMU_MEM}
 image="${root}/out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img"
 
-i=0
-while [ -d /tmp/mytpm$i ]; do
-  let i=i+1
-done
-tpm=/tmp/mytpm$i
-
-mkdir $tpm
+tpm=$(mktemp -d --suffix='-tpm')
 
 if [ -z "${XDG_CONFIG_HOME:-}" ]; then
   export XDG_CONFIG_HOME=~/.config
