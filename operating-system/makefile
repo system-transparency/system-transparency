@@ -14,7 +14,7 @@ tboot_code := $(tboot-cache)/code/.unpack
 TBOOT_CFLAGS="-Wno-error=address-of-packed-member"
 gcc_version := $(shell gcc -dumpversion | cut -d . -f 1)
 
-ifeq ($(shell [ "$(gcc_version)" -ge "9" ] && echo $$?),0)
+ifeq ($(shell [[ "$(gcc_version)" -ge "9" ]] && echo $$?),0)
 tboot_env := CFLAGS=$(TBOOT_CFLAGS) TBOOT_CFLAGS=$(TBOOT_CFLAGS)
 endif
 
