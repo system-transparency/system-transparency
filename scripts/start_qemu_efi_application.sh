@@ -28,13 +28,7 @@ if [ "$ovmf" == "" ]; then
   echo "ERROR: OVMF not found"
 fi
 
-i=0
-while [ -d /tmp/mytpm$i ]; do
-  let i=i+1
-done
-tpm=/tmp/mytpm$i
-
-mkdir $tpm
+tpm=$(mktemp -d --suffix='-tpm')
 
 if [ -z "${XDG_CONFIG_HOME:-}" ]; then
   export XDG_CONFIG_HOME=~/.config

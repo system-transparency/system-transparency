@@ -53,66 +53,43 @@ ifeq ($(u-root_branch),)
 u-root_branch := $(u-root_default_branch)
 endif
 
-go_version=$(shell go version | sed -nr 's/.*go([0-9]+\.[0-9]+.?[0-9]?).*/\1/p' )
-go_version_major=$(shell echo $(go_version) |  sed -nr 's/^([0-9]+)\.([0-9]+)\.?([0-9]*)$$/\1/p')
-go_version_minor=$(shell echo $(go_version) |  sed -nr 's/^([0-9]+)\.([0-9]+)\.?([0-9]*)$$/\2/p')
-
 # phony target to force update
 go-tools: cpu sinit-acm-grebber debos u-root
 
-go_check := $(gopath)/.version
-
-$(go_check):
-ifeq ("$(go_version)","")
-	@printf "\n[Go] Error: Please install Golang >= 1.9\n\n"
-	@exit 1
-endif
-ifeq ($(shell if [ $(go_version_major) -eq 1 ]; then echo y; fi),y)
-ifeq ($(shell if [ $(go_version_minor) -lt 9 ]; then echo y; fi),y)
-	printf "[Go] Error: Golang version $(go_version) currently installed.\n\
-		Please install Golang version >= 1.9\n\n"
-	exit 1
-endif
-endif
-	mkdir -p $$(dirname $@)
-	touch $(go_check)
-
 ### debos
 
-debos_get := $(debos_src)/.unpack
-debos_remote := $(debos_src)/.remote
-debos_checkout := $(debos_src)/.rev
+debos_get := $(debos_src)/.git/config
+debos_remote := $(debos_src)/.git/refs/remotes/system-transparency/system-transparency
+debos_fetch := $(debos_src)/.git/FETCH_HEAD
+debos_checkout := $(debos_src)/.git/HEAD
 
-$(debos_get): $(go_check)
-	if [[ -f $@ ]]; then \
-	  git -C $(dir $@) checkout --quiet master; \
-	fi
+$(debos_get):
 	@echo [Go] Get $(debos_package)
 	GOPATH=$(gopath) go get -d -u $(debos_package)/...
-	touch $@
 $(debos_remote): $(debos_get)
-	@echo [Go] Add stboot remote $(debos_repo)
-	git -C $(dir $@) remote add stboot https://$(debos_repo)
-	echo $(debos_repo) > $@.temp
-	rsync -c $@.temp $@
-	rm $@.temp
-# phony target to force update
-debos_checkout: $(debos_remote)
+	if ! git -C $(debos_src) remote show system-transparency >/dev/null 2>&1; then \
+	  echo [Go] Add system-transparecy remote $(debos_repo); \
+	  git -C $(debos_src) remote add system-transparency https://$(debos_repo); \
+	fi
+debos_fetch $(debos_fetch): $(debos_remote)
 	@echo [Go] Fetch branch $(debos_branch)
-	git -C $(dir $(debos_get)) fetch --quiet stboot $(debos_branch)
-	@echo [Go] Checkout branch $(debos_branch)
-	git -C $(dir $(debos_get)) checkout --quiet $(debos_branch)
-	git -C $(dir $(debos_get)) rev-parse HEAD > $(debos_checkout).temp
-	rsync -c $(debos_checkout).temp $(debos_checkout)
-	rm $(debos_checkout).temp
-$(debos_checkout): $(debos_remote)
-	@echo [Go] Fetch branch $(debos_branch)
-	git -C $(dir $(debos_get)) fetch --quiet stboot $(debos_branch)
-	@echo [Go] Checkout branch $(debos_branch)
-	git -C $(dir $<) checkout --quiet $(debos_branch)
-	git -C $(dir $<) rev-parse HEAD > $(debos_checkout).temp
-	rsync -c $(debos_checkout).temp $(debos_checkout)
-	rm $(debos_checkout).temp
+	git -C $(debos_src) fetch --quiet system-transparency $(debos_branch)
+debos_checkout: debos_fetch
+ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
+else
+	@echo '[Go] Checkout branch $(debos_branch)'
+	git -C $(debos_src) checkout --quiet $(debos_branch)
+endif
+	touch $(debos_checkout)
+$(debos_checkout): $(debos_fetch)
+ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
+else
+	@echo '[Go] Checkout branch $(debos_branch)'
+	git -C $(debos_src) checkout --quiet $(debos_branch)
+endif
+	touch $@
 # phony target to force update
 debos: debos_checkout
 	$(call go_update,debos,$(debos_bin),$(debos_package)/cmd/debos)
@@ -121,27 +98,33 @@ $(debos_bin): $(debos_checkout)
 
 ### u-root/stmanager
 
-u-root_get := $(u-root_src)/.complete
-u-root_checkout := $(u-root_src)/.rev
+u-root_get := $(u-root_src)/.git/config
+u-root_fetch := $(u-root_src)/.git/FETCH_HEAD
+u-root_checkout := $(u-root_src)/.git/HEAD
 
 $(u-root_get): $(go_check)
 	@echo [Go] Get $(u-root_package)
-	GO111MODULE=off GOPATH=$(gopath) go get -d -u $(u-root_package)
+	GOPATH=$(gopath) go get -d -u $(u-root_package)
+	git -C $(u-root_src) checkout --quiet $(u-root_default_branch)
+u-root_fetch $(u-root_fetch): $(u-root_get)
+	@echo [Go] Fetch branch $(u-root_branch)
+	git -C $(u-root_src) fetch --all --quiet
+u-root_checkout: u-root_fetch
+ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
+else
+	@echo '[Go] Checkout branch $(u-root_branch)'
+	git -C $(u-root_src) checkout --quiet $(u-root_branch)
+endif
+	touch $(u-root_checkout)
+$(u-root_checkout): $(u-root_fetch)
+ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
+else
+	@echo '[Go] Checkout branch $(u-root_branch)'
+	git -C $(u-root_src) checkout --quiet $(u-root_branch)
+endif
 	touch $@
-u-root_checkout: $(u-root_get)
-	git -C $(dir $(u-root_checkout)) fetch --all --quiet
-	@echo [Go] Checkout branch $(u-root_branch)
-	git -C $(u-root_src) checkout --quiet $(u-root_branch)
-	git -C $(u-root_src) rev-parse HEAD > $(u-root_checkout).temp
-	rsync -c $(u-root_checkout).temp $(u-root_checkout)
-	rm $(u-root_checkout).temp
-$(u-root_checkout): $(u-root_get)
-	git -C $(dir $@) fetch --all --quiet
-	@echo [Go] Checkout branch $(u-root_branch)
-	git -C $(u-root_src) checkout --quiet $(u-root_branch)
-	git -C $(u-root_src) rev-parse HEAD > $@.temp
-	rsync -c $@.temp $@
-	rm $(u-root_checkout).temp
 # phony target to force update
 u-root stmanager: u-root_checkout
 	$(call go_update,u-root,$(u-root_bin),$(u-root_package))

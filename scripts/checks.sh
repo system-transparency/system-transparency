@@ -42,6 +42,10 @@ function checkMISC {
         needs_exit=true
     fi
 
+    tmp_out=$(mktemp)
+    printf "#include <trousers/tss.h>\n" | gcc -x c - -Wl,--defsym=main=0 -o $tmp_out >/dev/null 2>&1 || echo "libtspi-dev/trousers-devel package is required"
+    rm $tmp_out
+
     if $needs_exit ; then
         echo 'Please install all missing dependencies!';
         exit 1;
@@ -90,7 +94,24 @@ function checkGO {
    fi
 }
 
-function checkDebootstrap {
+debos_cmds=( "debootstrap" "systemd-nspawn")
+
+function checkDebootstrapNative {
+    # check if debian-based
+    if ([[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release |grep -q debian); then
+        for i in "${debos_cmds[@]}"
+        do
+            PATH=/sbin:/usr/sbin:$PATH command -v "$i" >/dev/null 2>&1 || {
+                echo >&2 "$i required for native debos support";
+                needs_exit=true
+            }
+        done
+    else
+         echo "non debian based distro. native debos build not supported"
+    fi
+}
+
+function checkDebootstrapFs {
     if findmnt -T "${root}" | grep -cq "nodev"; then
         echo "The directory ${root} is mounted with the nodev option but debootstrap needs mknod to work."
         exit 1
@@ -148,6 +169,20 @@ function checkOVMF {
    fi
 }
 
+
+function checkKVM {
+   if [[ -c /dev/kvm ]]; then
+     echo "/dev/kvm device available"
+     if [[ -w /dev/kvm ]]; then
+       echo "/dev/kvm is accessible by the user"
+     else
+       echo "user has no permissions to access /dev/kvm. add user \"`whoami`\" to the \"kvm\" group"
+     fi
+   else
+     echo -e "/dev/kvm device not available:\n*** Please enable (nested) virtualisation on you host"
+   fi
+}
+
 function run_full_check {
    echo ""
    echo "Checking dependencies ..."
@@ -157,10 +192,12 @@ function run_full_check {
 
    echo ""
    echo "Checking environment ..."
-   checkDebootstrap
+   checkDebootstrapNative
+   checkDebootstrapFs
    checkSwtpmSetup
    checkSwtpm
    checkOVMF
+   checkKVM
 }
 
 # run all checks if script is not sourced
