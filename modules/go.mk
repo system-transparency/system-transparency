@@ -81,6 +81,7 @@ else
 	@echo '[Go] Checkout branch $(debos_branch)'
 	git -C $(debos_src) checkout --quiet $(debos_branch)
 endif
+	touch $(debos_checkout)
 $(debos_checkout): $(debos_fetch)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
 	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
@@ -88,6 +89,7 @@ else
 	@echo '[Go] Checkout branch $(debos_branch)'
 	git -C $(debos_src) checkout --quiet $(debos_branch)
 endif
+	touch $@
 # phony target to force update
 debos: debos_checkout
 	$(call go_update,debos,$(debos_bin),$(debos_package)/cmd/debos)
@@ -104,7 +106,6 @@ $(u-root_get): $(go_check)
 	@echo [Go] Get $(u-root_package)
 	GOPATH=$(gopath) go get -d -u $(u-root_package)
 	git -C $(u-root_src) checkout --quiet $(u-root_default_branch)
-	touch $@
 u-root_fetch $(u-root_fetch): $(u-root_get)
 	@echo [Go] Fetch branch $(u-root_branch)
 	git -C $(u-root_src) fetch --all --quiet
@@ -115,6 +116,7 @@ else
 	@echo '[Go] Checkout branch $(u-root_branch)'
 	git -C $(u-root_src) checkout --quiet $(u-root_branch)
 endif
+	touch $(u-root_checkout)
 $(u-root_checkout): $(u-root_fetch)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
 	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
@@ -122,6 +124,7 @@ else
 	@echo '[Go] Checkout branch $(u-root_branch)'
 	git -C $(u-root_src) checkout --quiet $(u-root_branch)
 endif
+	touch $@
 # phony target to force update
 u-root stmanager: u-root_checkout
 	$(call go_update,u-root,$(u-root_bin),$(u-root_package))
