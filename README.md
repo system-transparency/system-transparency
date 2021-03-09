@@ -129,6 +129,13 @@ The root certificate is also included. The signature verification after download
 ### Debugging
 See [debugging section](#Debugging)
 
+
+## Go toolchain Development
+This repository uses its own path (`GOPATH=cache/go`) to build the needed Go binaries by default.
+To use the default system GOPATH, define `ST_DEVELOP=1` as environment variable. It will prevent
+any `git checkout` operation, which could change the HEAD of any Go repository at build-time. Furthermore, you can
+define the environment variable `ST_GOPATH` to use a custom GOPATH for the installation.
+
 ## Build Process in Detail
 There are two main parts to build. You need an operating system which is reproducible and completely self-contained in a Linux kernel + initramfs. Then you need to build the _stboot_ bootloader depending on your deployment scenario. Further you need some additional things likes keys to be set up and at the right place. To be able to build these components you need to build a tool chain once.
 
