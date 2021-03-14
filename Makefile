@@ -6,7 +6,7 @@ acm-dir := $(cache)/ACMs
 scripts := scripts
 stboot-installation := stboot-installation
 
-newest-ospkg := .newest-ospkgs.zip
+newest-ospkg := .newest-ospkg.zip
 initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
 
 # reproducible builds
