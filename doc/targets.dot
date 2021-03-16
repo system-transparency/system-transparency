@@ -1,0 +1,197 @@
+digraph targets {
+
+  rankdir=LR
+  edge [headport="w" tailport="e"]
+  
+  // TARGETS
+  //
+  // Makefile
+  cpu_private_key [label="out/keys/scpu_keys/cpu_rsa"]
+  cpu_public_key [label="out/keys/scpu_keys/cpu_rsa.pub"]
+  ssh_private_key [label="out/keys/scpu_keys/ssh_host_rsa_key"]
+  ssh_public_key [label="out/keys/scpu_keys/ssh_host_rsa_key.pub"]
+  root_key [label="out/keys/signing_keys/root.key"]
+  root_cert [label="out/keys/signing_keys/root.cert"]
+  signing_keys [label="out/keys/signing_keys/signing-key-{1-N}.key"]
+  signing_certs [label="out/keys/signing_keys/signing-key-{1-N}.cert"]
+  boot_order
+  os_pkg_zip [label="os-pkg-date.zip"]
+  os_pkg_manifest [label="os-pkg-date.json"]
+  sign [label="sign"]
+  // modules/go.mk
+  subgraph cluster_golang {
+    label = "Golang binary toolchain"
+    debos [label="cache/go/bin/debos"]
+    uroot [label="cache/go/bin/u-root"]
+    stmanager [label="cache/go/bin/stmanager"]
+    acmgrebber [label="cache/go/bin/sinit-acm-grebber"]
+    //cpu [label="cache/go/bin/cpu"]
+    cpud [label="cache/go/bin/cpud"]
+  }
+  // operating-system/makefile
+  tboot [label="out/tboot/tboot.gz"]
+  acm [label="cache/ACMs"]
+  // operation-system/debos/makefile
+  debian_kernel [label="out/operating-system/debian-buster-amd64.vmlinuz"]
+  debian_initramfs [label="out/operating-system/debian-buster-amd64.cpio.gz"]
+  debian_recipe [label="operating-system/debos/debian.yaml"]
+  ubuntu18_kernel [label="out/operating-system/ubuntu-bionic-amd64.vmlinuz"]
+  ubuntu18_initramfs [label="out/operating-system/ubuntu-bionic-amd64.cpio.gz"]
+  ubuntu20_kernel [label="out/operating-system/ubuntu-focal-amd64.vmlinuz"]
+  ubuntu20_initramfs [label="out/operating-system/ubuntu-focal-amd64.cpio.gz"]
+  ubuntu_recipe [label="operating-system/debos/ubuntu.yaml"]
+  // stboot-installation/common/makefile
+  data_partition [label="out/stboot-installation/data_partition.ext4"]
+  initramfs [label="out/stboot-installation/initramfs-linuxboot.cpio.gz"]
+  host_config [label="out/stboot-installation/host_configuration.json"]
+  security_config [label="out/stboot-installation/security_configuration.json"]
+  os_out [label="out/os-packages/*"]
+  // stboot-installation/mbr-bootloader/makefile
+  mbr_image [label="out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img"]
+  mbr_boot_partition [label="out/stboot-installation/mbr-bootloader/boot_partition.vfat"]
+  mbr_kernel [label="out/stboot-installation/mbr-bootloader/linuxboot.vmlinuz"]
+  syslinux [label="cache/syslinux/syslinux-6.03/bios/mtools/syslinux"]
+  syslinux_config [label="out/stboot-installation/mbr-bootloader/syslinux.cfg"]
+  // stboot-installation/efi-application/makefile
+  efi_image [label="out/stboot-installation/efi-application/stboot_efi_installation.img"]
+  efi_boot_partition [label="out/stboot-installation/efi-application/boot_partition.vfat"]
+  efi_kernel [label="out/stboot-installation/efi-application/linuxboot.vmlinuz"]
+
+  // GRAPHS
+  //
+  // Makefile
+  {
+    // config variables
+    subgraph cluster_config {
+      label = "run.config"
+      subgraph cluster_config_installation {
+        label = "Installation"
+        ST_UROOT_DEV_BRANCH
+      }
+      subgraph cluster_config_data {
+        label = "STBoot Data"
+        ST_PROVISIONING_SERVER_URL
+        ST_NETWORK_MODE
+        ST_HOST_IP
+        ST_HOST_GATEWAY
+        ST_HOST_DNS
+      }
+      subgraph cluster_config_common {
+        label = "STBoot - common"
+        ST_LINUXBOOT_CMDLINE
+        ST_LINUXBOOT_VARIANT
+        ST_SIGNING_ROOT
+        ST_NUM_SIGNATURES
+        ST_BOOT_MODE
+        ST_USE_PKG_CACHE
+        ST_KERNEL_VERSION
+        ST_DATA_PARTITION_SZIZE
+      }
+      subgraph cluster_config_mbr {
+        label = "STBoot - MBR Bootloader"
+	ST_MBR_BOOTLOADER_KERNEL_VERSION
+        ST_MBR_BOOTLOADER_KERNEL_CONFIG
+      }
+      subgraph cluster_config_mbr {
+        label = "STBoot - EFI Application"
+        ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION
+        ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG
+      }
+      subgraph cluster_config_os {
+        label = "STBoot OS packages - General"
+        ST_OS_PKG_TBOOT
+        ST_OS_PKG_TBOOT_ARGS
+        ST_OS_PKG_ACM
+        ST_OS_PKG_NAME
+        ST_OS_PKG_LABEL
+        ST_OS_PKG_URL
+        ST_OS_PKG_KERNEL
+        ST_OS_PKG_INITRAMFS
+        ST_OS_PKG_CMDLINE
+      }
+      subgraph cluster_config_upload {
+        label = "Upload"
+        ST_SSH_UPLOAD_SERVER
+        ST_SSH_UPLOAD_USER
+        ST_SSH_UPLOAD_PATH
+      }
+      subgraph cluster_config_testing {
+        label = "Testing"
+        ST_QEMU_MEM
+      }
+    }
+  }
+  stmanager -> { subgraph cluster_signkey {
+    label = "signing keys and certs"
+    root_key root_cert
+    signing_keys signing_certs
+  }}
+  { subgraph cluster_cpu_keys {
+    label = "CPU ssh keys"
+    cpu_private_key cpu_public_key
+    ssh_private_key ssh_public_key
+  }}
+  {
+    ST_OS_PKG_TBOOT ST_OS_PKG_TBOOT_ARGS ST_OS_PKG_ACM ST_OS_PKG_NAME ST_OS_PKG_LABEL ST_OS_PKG_URL ST_OS_PKG_KERNEL ST_OS_PKG_INITRAMFS ST_OS_PKG_CMDLINE
+    tboot acm
+    root_key root_cert signing_keys signing_certs
+    debian_kernel debian_initramfs
+    ubuntu18_kernel ubuntu18_initramfs
+    ubuntu20_kernel ubuntu20_initramfs
+  } -> sign ->
+  {
+    boot_order
+    os_pkg_zip
+    os_pkg_manifest
+  } -> os_out
+  // modules/go.mk
+  ST_UROOT_DEV_BRANCH -> uroot
+  acmgrebber -> acm
+  // operation-system/debos/makefile
+  {debos debian_recipe} -> { subgraph cluster_debian {
+    label = "debian"
+    debian_kernel debian_initramfs
+  }}
+  {debos ubuntu_recipe} -> { subgraph cluster_ubuntu18 {
+    label = "ubuntu18"
+    ubuntu18_kernel ubuntu18_initramfs
+  }}
+  {debos ubuntu_recipe} -> { subgraph cluster_ubuntu20 {
+    label = "ubuntu20"
+    ubuntu20_kernel ubuntu20_initramfs
+  }}
+  // stboot-installation/common/makefile
+  {
+    os_out
+    ST_DATA_PARTITION_SZIZE
+  } -> data_partition
+  {
+    uroot
+    security_config
+    cpu_public_key ssh_private_key cpud
+    ST_LINUXBOOT_VARIANT ST_SIGNING_ROOT
+  } -> initramfs
+  {
+    ST_PROVISIONING_SERVER_URL ST_NETWORK_MODE ST_HOST_IP ST_HOST_GATEWAY ST_HOST_DNS
+  } -> host_config
+  {
+    ST_SIGNING_ROOT ST_NUM_SIGNATURES ST_BOOT_MODE ST_USE_PKG_CACHE
+  } -> security_config
+  // stboot-installation/mbr-bootloader/makefile
+  {mbr_boot_partition data_partition} -> mbr_image
+  {mbr_kernel syslinux_config host_config syslinux} -> mbr_boot_partition
+  {
+    ST_LINUXBOOT_CMDLINE
+    ST_MBR_BOOTLOADER_KERNEL_CONFIG
+    ST_MBR_BOOTLOADER_KERNEL_VERSION
+  } -> "mbr-kernel" -> mbr_kernel
+  syslinux
+  syslinux_config
+  // stboot-installation/efi-application/makefile
+  {efi_boot_partition data_partition} -> efi_image
+  {efi_kernel host_config} -> efi_boot_partition
+  {
+    initramfs
+    ST_LINUXBOOT_CMDLINE ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG
+  } -> "efi-kernel" -> efi_kernel
+}

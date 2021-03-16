@@ -5,7 +5,7 @@ tboot-cache := $(cache)/tboot
 tboot-version := "v1.9.11"
 tboot := $(tboot-out)/tboot.gz
 tboot-url := http://hg.code.sf.net/p/tboot/code
-acm-cache := $(cache)/ACMs
+acm-dir := $(cache)/ACMs
 
 include $(op)/debos/Makefile.inc
 
@@ -37,8 +37,8 @@ tboot $(tboot): $(tboot_code)
 	cp $(tboot-cache)/code/dist/boot/tboot.gz $(tboot)
 	@$(call LOG,DONE,tboot:,$(tboot))
 
-acm: $(sinit-acm-grebber_bin)
-	mkdir -p $(acm-cache)
+acm $(acm-dir): $(sinit-acm-grebber_bin)
+	mkdir -p $(acm-dir)
 	@$(call LOG,INFO,Get authenticated code modules (ACM))
 	$< -of $(acm-cache)
 	@$(call LOG,DONE,ACMs downloaded in:,$(acm-cache))
