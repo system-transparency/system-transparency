@@ -1,19 +1,18 @@
-SRCS := $(wildcard *.gv)
-SVGS := $(SRCS:%.gv=%.svg)
-PNGS := $(SRCS:%.gv=%.png)
-
-
+SRCS := $(wildcard *.dot)
+SVGS := $(SRCS:%.dot=%.svg)
+PNGS := $(SRCS:%.dot=%.png)
 
 doc: ${SVGS} ${PNGS}
 
 all: doc
 
-%.png: %.gv
+%.png: %.dot
 	dot -Tpng $< >$@
 
-%.svg: %.gv
+%.svg: %.dot
 	dot -Tsvg $< >$@
-
 
 clean:
 	rm -rf *.svg *.png
+
+.PHONY: clean

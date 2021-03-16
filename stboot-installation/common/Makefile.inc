@@ -3,6 +3,7 @@ st-out := $(out)/stboot-installation
 out-dirs += $(st-out) $(os-out)
 
 data_partition := $(st-out)/data_partition.ext4
+initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
 host_config := $(st-out)/host_configuration.json
 security_config := $(st-out)/security_configuration.json
 

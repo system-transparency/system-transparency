@@ -2,12 +2,10 @@ out ?= out
 out-dirs += $(out)
 cache ?= cache
 common := stboot-installation/common
-acm-dir := $(cache)/ACMs
 scripts := scripts
 stboot-installation := stboot-installation
 
 newest-ospkg := .newest-ospkg.zip
-initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
 
 # export all variables to child processes
 .EXPORT_ALL_VARIABLES:
@@ -274,7 +272,8 @@ $(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,Example cpu ssh keys in:,$(CPU_KEY_DIR))
 
-example-os-package: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(tboot) acm
+example-os-package: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(patsubst "%",%,$(ST_OS_PKG_TBOOT)) $(patsubst "%",%,$(ST_OS_PKG_ACM))
+
 	@$(call LOG,INFO,Sign OS package)
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,OS package:,$$(ls -tp $(os-out) | grep .zip | grep -v /$ | head -1))
