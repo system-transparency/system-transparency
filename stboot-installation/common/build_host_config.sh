@@ -24,9 +24,9 @@ host_dns=${ST_HOST_DNS}
 provisioning_url=("${ST_PROVISIONING_SERVER_URL[@]}")
 url_array=$(printf '%s\n' "${provisioning_url[@]}" | jq -cR . | jq -cs .)
 
-identity=$(hexdump -n 32 -e '8/4 "%08X"' /dev/random)
-authentication=$(hexdump -n 32 -e '8/4 "%08X"' /dev/random)
-entropy_seed=$(hexdump -n 32 -e '8/4 "%08X"' /dev/random)
+identity=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
+authentication=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
+entropy_seed=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
 
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
