@@ -130,39 +130,39 @@ container-args += --rm --workdir /recipes -v $(CURDIR)/$$(dir $$<):/recipes -v $
 define DOCKER_CHECK
 
 ifneq ($(docker-access),y)
-	@echo "[debos] Error: no access to docker API"
+	@$(call LOG,ERROR,No access to docker API)
 	@exit 1
 endif
-	echo "[debos] docker API access granted"
+	@$(call LOG,INFO,docker API access granted)
 
 endef
 
 define PODMAN_CHECK
 
 ifneq ($(podman-access),y)
-	@echo "[debos] Error: podman not installed"
+	@$(call LOG,ERROR,podman not installed)
 	@exit 1
 endif
-	echo "[debos] podman installed"
+	@$(call LOG,ERROR,podman installed)
 
 endef
 
 # check kvm access
 define KVM_CHECK
 
-	@echo [debos] Check kvm access
+	@$(call LOG,INFO,Check kvm access)
 ifneq ($(kvm-access),y)
-	@echo "[debos] Error: no access to /dev/kvm"
+	@$(call LOG,ERROR,No access to,/dev/kvm)
 	@exit 1
 endif
-	echo "[debos] kvm access granted"
+	@$(call LOG,INFO,kvm access granted)
 
 endef
 
 # check if kernel is readable
 define KERNEL_CHECK
 
-	@echo [debos] Check host kernel readability
+	@$(call LOG,INFO,Check host kernel readability)
 ifneq ($(kernel-access),y)
 	@echo -e '$(subst $(\n),\n,$(DEBOS_ERROR_NO_KERNEL_ACCESS))'
 	@echo -e '$(subst $(\n),\n,$(DEBOS_ENV_LIST))'
@@ -219,11 +219,11 @@ endif
 
 # build container image
 define SETUP_DEBOS_CONTAINER
-	@echo '[debos] Build $1 image $(debos-image)';
+	@$(call LOG,INFO,Build $1 debos image $(debos-image))
 	$1 build --build-arg="BASE_IMAGE=$(debos-base-image)" --build-arg="BASE_TAG=$(debos-base-tag)" \
 		--build-arg="DEBOS_REPO=$(debos_repo)" --build-arg="DEBOS_BRANCH=$(debos_branch)" \
 		-q -t $(debos-image) $(op)/debos;
-	@echo '[debos] Done $* image $(debos-image)';
+	@$(call LOG,DONE,$* debos image $(debos-image))
 endef
 
 SOURCE_DATE_EPOCH := $(shell git log -1 --format=format:%ct)
@@ -253,7 +253,7 @@ $(op-out)/$3 $(op-out)/$4$(GROUP_TARGET): $2 $(debos-dep)
 	mkdir -p $$(dir $$@)
 	$(debos-check)
 	$(debos-setup)
-	@echo '[stboot] Build debos image $1 using $(DEBOS_ENV) debos'
+	@$(call LOG,INFO,Build OS image $1 using $(DEBOS_ENV) debos)
 	# single threaded for reproducibility
 	$(run-debos) \
 		--cpus=1 \
@@ -265,7 +265,7 @@ $(op-out)/$3 $(op-out)/$4$(GROUP_TARGET): $2 $(debos-dep)
 		$(debos-debug-args) \
 		$$($1-debos-suite-arg) \
 		$$($1-debos-recipe)
-	@echo [stboot] Done $$@
+	@$(call LOG,DONE,$$@)
 $1: $(call GROUP,$(op-out)/$3 $(op-out)/$4)
 
 .PHONY: $1
