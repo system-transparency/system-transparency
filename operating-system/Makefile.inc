@@ -7,7 +7,7 @@ tboot := $(tboot-out)/tboot.gz
 tboot-url := http://hg.code.sf.net/p/tboot/code
 acm-cache := $(cache)/ACMs
 
-include $(op)/debos/makefile
+include $(op)/debos/Makefile.inc
 
 tboot_code := $(tboot-cache)/code/.unpack
 

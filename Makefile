@@ -166,11 +166,11 @@ endif
 include modules/go.mk
 include modules/linux.mk
 
-include operating-system/makefile
+include operating-system/Makefile.inc
 
-include stboot-installation/common/makefile
-include stboot-installation/mbr-bootloader/makefile
-include stboot-installation/efi-application/makefile
+include stboot-installation/common/Makefile.inc
+include stboot-installation/mbr-bootloader/Makefile.inc
+include stboot-installation/efi-application/Makefile.inc
 
 help:
 	@echo
