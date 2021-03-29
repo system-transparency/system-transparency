@@ -11,7 +11,7 @@ root="$(cd "${dir}/../" && pwd)"
 gopath="${GOPATH:-${root}/cache/go}"
 
 # import global configuration
-source "${root}/run.config"
+source "${DOTCONFIG}"
 
 out="${root}/out/os-packages"
 signing_key_dir="${root}/out/keys/signing_keys"

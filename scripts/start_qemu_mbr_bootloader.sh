@@ -10,7 +10,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
 # import global configuration
-source ${root}/run.config
+source "${DOTCONFIG}"
 
 mem=${ST_QEMU_MEM}
 image="${root}/out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img"

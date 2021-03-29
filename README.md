@@ -25,7 +25,7 @@ make check
 # make default configuration
 make config
 # modify configuration
-${EDITOR} run.config
+${EDITOR} .config
 ```
 
 ### Configure stboot target installation
@@ -170,7 +170,7 @@ See `stmanager --help-long` or to make use of the generated keys form `./scripts
 make sign
 ```
 
-If you want to go with the netboot feature of _stboot_ have set the corresponding parameters in `run.config` you can upload the OS package to your provisioning server with:
+If you want to go with the netboot feature of _stboot_ have set the corresponding parameters in `.config` you can upload the OS package to your provisioning server with:
 
 ```bash
 make upload
