@@ -38,7 +38,7 @@ define go_update
 	else \
 	echo [Go] Install $(1); \
 	fi;
-	GOPATH=$(gopath) go build $4 -o $(2).temp $(3)
+	GOPATH=$(gopath) GO111MODULE=off go build $4 -o $(2).temp $(3)
 	if [ -x $(2) ] && diff $(2) $(2).temp >/dev/null; then \
 	echo [Go] $(1) already up-to-date; \
 	fi
@@ -65,7 +65,7 @@ debos_checkout := $(debos_src)/.git/HEAD
 
 $(debos_get):
 	@echo [Go] Get $(debos_package)
-	GOPATH=$(gopath) go get -d -u $(debos_package)/...
+	GOPATH=$(gopath) GO111MODULE=off go get -d -u $(debos_package)/...
 $(debos_remote): $(debos_get)
 	if ! git -C $(debos_src) remote show system-transparency >/dev/null 2>&1; then \
 	  echo [Go] Add system-transparecy remote $(debos_repo); \
@@ -104,7 +104,7 @@ u-root_checkout := $(u-root_src)/.git/HEAD
 
 $(u-root_get): $(go_check)
 	@echo [Go] Get $(u-root_package)
-	GOPATH=$(gopath) go get -d -u $(u-root_package)
+	GOPATH=$(gopath) GO111MODULE=off go get -d -u $(u-root_package)
 	git -C $(u-root_src) checkout --quiet $(u-root_default_branch)
 u-root_fetch $(u-root_fetch): $(u-root_get)
 	@echo [Go] Fetch branch $(u-root_branch)
