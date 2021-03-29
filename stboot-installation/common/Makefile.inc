@@ -29,7 +29,7 @@ else
 $(initramfs): % : %.config $(u-root_bin) $(security_config) $(ROOT_CERT)
 endif
 	@echo "[stboot] Build initramfs"
-	GOPATH=$(gopath) $(common)/build_initramfs.sh $(OUTREDIRECT)
+	$(common)/build_initramfs.sh $(OUTREDIRECT)
 	@echo "[stboot] Done initramfs"
 
 $(eval $(call CONFIG_DEP,$(host_config),ST_PROVISIONING_SERVER_URL|ST_NETWORK_MODE|ST_HOST_IP|ST_HOST_GATEWAY|ST_HOST_DNS))
