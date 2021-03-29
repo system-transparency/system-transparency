@@ -8,8 +8,9 @@ set -o nounset
 # Set magic variables for current file & dir
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
+config="${DOTCONFIG}"
 
-source ${root}/run.config
+source "${config}"
 
 failed="\e[1;5;31mfailed\e[0m"
 
@@ -17,9 +18,9 @@ prov_server=${ST_SSH_UPLOAD_SERVER}
 prov_server_user=${ST_SSH_UPLOAD_USER}
 prov_server_path=${ST_SSH_UPLOAD_PATH}
 
-[ -z "$prov_server" ] && { echo -e "upload $failed : prov_server not set in run.config"; exit 1; }
-[ -z "$prov_server_user" ] && { echo -e "upload $failed : prov_server_user not set in run.config"; exit 1; }
-[ -z "$prov_server_path" ] && { echo -e " upload $failed : prov_server_path not set in run.config"; exit 1; }
+[ -z "$prov_server" ] && { echo -e "upload $failed : prov_server not set in ${config}"; exit 1; }
+[ -z "$prov_server_user" ] && { echo -e "upload $failed : prov_server_user not set in ${config}"; exit 1; }
+[ -z "$prov_server_path" ] && { echo -e " upload $failed : prov_server_path not set in ${config}"; exit 1; }
 
 os_package=""
 if [[ $# -eq 0 ]] ; then

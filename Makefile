@@ -70,7 +70,7 @@ endef
 MAKEFLAGS += -j$(shell nproc)
 
 BOARD ?= qemu
-DOTCONFIG ?= run.config
+DOTCONFIG ?= .config
 
 ifneq ($(strip $(wildcard $(DOTCONFIG))),)
 include $(DOTCONFIG)
@@ -78,7 +78,7 @@ endif
 
 # error if configfile is required
 define NO_DOTCONFIG_ERROR
-file run.config missing:
+file $(DOTCONFIG) missing:
 
 *** Please provide a config file of run "make config BOARD=<target>"
 *** to generate the default configuration.
@@ -282,6 +282,6 @@ clean:
 
 distclean: clean
 	rm -rf $(cache)
-	rm -f run.config
+	rm -f $(DOTCONFIG)
 
 .PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean

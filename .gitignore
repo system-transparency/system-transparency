@@ -1,5 +1,5 @@
 /.vscode/*
-/run.config
+/.config
 /cache/
 /.newest-ospkg.zip
 /stboot-installation/mbr-bootloader/user_modified.defconfig
