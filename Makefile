@@ -210,7 +210,7 @@ help:
 	@echo  '  debian                       - Build reproducible Debian Buster'
 	@echo  '  ubuntu-18                    - Build reproducible Ubuntu Bionic (latest)'
 	@echo  '  ubuntu-20                    - Build reproducible Ubuntu Focal'
-	@echo  '  sign                         - Sign OS package'
+	@echo  '  example-os-package           - Build and Sign an example OS package'
 	@echo  '  upload                       - Upload OS package to provisioning server'
 	@echo  '*** Run in QEMU'
 	@echo  '  run-mbr-bootloader           - Run MBR bootloader'
@@ -258,7 +258,7 @@ $(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example cpu ssh keys
 
-sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(tboot) acm
+example-os-package: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(tboot) acm
 	@echo [stboot] Sign OS package
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package
@@ -284,4 +284,4 @@ distclean: clean
 	rm -rf $(cache)
 	rm -f $(DOTCONFIG)
 
-.PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 sign upload clean distclean
+.PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 example-os-package upload clean distclean
