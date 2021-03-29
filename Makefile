@@ -9,6 +9,9 @@ stboot-installation := stboot-installation
 newest-ospkg := .newest-ospkg.zip
 initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
 
+# export all variables to child processes
+.EXPORT_ALL_VARIABLES:
+
 # reproducible builds
 LANG:=C
 LC_ALL:=C
@@ -20,22 +23,22 @@ SHELL := /usr/bin/env bash -euo pipefail -c
 # setup development environment if ST_DEVELOP=1
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
 	# use local GOPATH
-	gopath := $(shell source <(go env) && echo $$GOPATH)
+	GOPATH := $(shell source <(go env) && echo $$GOPATH)
 endif
 
-# use custom gopath
+# use custom GOPATH
 ifneq ($(ST_GOPATH),)
 # have to be an absolute path
 ifeq ($(shell [[ $(ST_GOPATH) = /* ]] && echo y),y)
-gopath := $(ST_GOPATH)
+GOPATH := $(ST_GOPATH)
 else
 $(error ST_GOPATH have to be an absolute path!)
 endif
 endif
 
-# default gopath
-ifeq ($(gopath),)
-gopath := $(CURDIR)/cache/go
+# default GOPATH
+ifeq ($(GOPATH),)
+GOPATH := $(CURDIR)/cache/go
 endif
 
 # Make is silent per default, but 'make V=1' will show all compiler calls.
@@ -245,7 +248,7 @@ keygen: keygen-sign keygen-cpu
 
 keygen-sign: $(stmanager_bin)
 	@echo [stboot] Generate example signing keys
-	GOPATH=$(gopath) $(scripts)/make_signing_keys.sh $(OUTREDIRECT)
+	$(scripts)/make_signing_keys.sh $(OUTREDIRECT)
 	@echo [stboot] Done example signing keys
 
 keygen-cpu: $(call GROUP,$(CPU_SSH_KEYS))
@@ -257,7 +260,7 @@ $(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
 
 sign: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(tboot) acm
 	@echo [stboot] Sign OS package
-	GOPATH=$(gopath) $(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
+	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@echo [stboot] Done sign OS package
 
 upload: $(newest-ospkg)
