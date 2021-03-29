@@ -21,24 +21,24 @@ endif
 $(tboot_code):
 	rm -rf $(tboot-cache)
 	mkdir -p $(tboot-cache)/..
-	@echo [stboot] Get tboot
+	@$(call LOG,INFO,Get,$(tboot-url))
 	hg --cwd $(tboot-cache) clone $(tboot-url) $(OUTREDIRECT)
-	@echo [stboot] Update tboot to version $(tboot-version)
+	@$(call LOG,INFO,Update tboot to version,$(tboot-version))
 	hg --cwd $(dir $@) update $(tboot-version) $(OUTREDIRECT)
 	touch $@
 
 tboot $(tboot): $(tboot_code)
-	@echo [stboot] Build tboot
+	@$(call LOG,INFO,Build tboot)
 	mkdir -p $(dir $(tboot))
 	# bug: parallel build sometimes fails
 	# rerun make on failiure
 	$(tboot_env) ${MAKE} -C $(dir $<) dist >/dev/null 2>&1  \
 		|| $(tboot_env) ${MAKE} -C $(dir $<) dist $(OUTREDIRECT)
 	cp $(tboot-cache)/code/dist/boot/tboot.gz $(tboot)
-	@echo [stboot] Done tboot
+	@$(call LOG,DONE,tboot:,$(tboot))
 
 acm: $(sinit-acm-grebber_bin)
 	mkdir -p $(acm-cache)
-	@echo [stboot] Get ACM
+	@$(call LOG,INFO,Get authenticated code modules (ACM))
 	$< -of $(acm-cache)
-	@echo [stboot] Done ACM
+	@$(call LOG,DONE,ACMs downloaded in:,$(acm-cache))

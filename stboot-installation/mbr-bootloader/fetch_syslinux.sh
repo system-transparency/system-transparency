@@ -20,7 +20,7 @@ else
     mkdir -p "${syslinux_cache}"
     echo
     echo "[INFO]: Downloading Syslinux Bootloader"
-    wget "${syslinux_src}/${syslinux_tar}" -P "${syslinux_cache}"
+    wget -q "${syslinux_src}/${syslinux_tar}" -P "${syslinux_cache}"
     tar -xf "${syslinux_cache}/${syslinux_tar}" -C "${syslinux_cache}"
 fi
 

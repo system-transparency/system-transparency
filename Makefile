@@ -41,6 +41,32 @@ ifeq ($(GOPATH),)
 GOPATH := $(CURDIR)/cache/go
 endif
 
+## logging color
+ifneq ($(TERM),)
+NORMAL_COLOR = $(shell tput sgr0)
+#green
+DONE_COLOR = $(shell tput setaf 2)
+# blue
+INFO_COLOR = $(shell tput setaf 4)
+# yellow
+WARN_COLOR = $(shell tput setaf 3)
+# red
+ERROR_COLOR = $(shell tput setaf 1)
+# cyan
+FILE_COLOR = $(shell tput setaf 6)
+endif
+
+## LOG
+#
+# args:
+# $1 = loglevel
+# $2 = message
+# $3 = file/path (optional)
+#
+define LOG
+printf "[%s] $2 %s\n" "$($1_COLOR)$1$(NORMAL_COLOR)" "$(FILE_COLOR)$3$(NORMAL_COLOR)"
+endef
+
 # Make is silent per default, but 'make V=1' will show all compiler calls.
 Q:=@
 ifneq ($(V),1)
@@ -76,15 +102,6 @@ ifneq ($(strip $(wildcard $(DOTCONFIG))),)
 include $(DOTCONFIG)
 endif
 
-# error if configfile is required
-define NO_DOTCONFIG_ERROR
-file $(DOTCONFIG) missing:
-
-*** Please provide a config file of run "make config BOARD=<target>"
-*** to generate the default configuration.
-
-endef
-
 ROOT_CERT := $(patsubst "%",%,$(ST_SIGNING_ROOT))
 ifeq ($(strip $(ROOT_CERT)),)
 ROOT_CERT := $(out)/keys/signing_keys/root.cert
@@ -93,16 +110,6 @@ endif
 IDs = 1 2 3
 TYPEs = key cert
 KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(ROOT_CERT))signing-key-$(ID).$(TYPE)))
-
-# error if sign keys are required
-define NO_SIGN_KEY
-
-$@ file missing.
-
-*** Please provide signing keys and certificates or run "make keygen-sign"
-*** to generate example keys and certificates.
-
-endef
 
 CPU_KEY_DIR := $(out)/keys/cpu_keys/
 CPU_SSH_FILES := cpu_rsa cpu_rsa.pub ssh_host_rsa_key ssh_host_rsa_key.pub
@@ -153,10 +160,18 @@ endef
 all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-installation
 
 $(DOTCONFIG):
-	$(error $(NO_DOTCONFIG_ERROR))
+	@$(call LOG,ERROR,File missing:,$(DOTCONFIG))
+	@echo
+	@echo '*** Please provide a config file of run "make config BOARD=<target>"'
+	@echo '*** to generate the default configuration.'
+	@echo
 
 $(ROOT_CERT) $(KEYS_CERTS)$(GROUG_TARGET):
-	$(error $(NO_SIGN_KEY))
+	@$(call LOG,ERROR,File missing:,$@)
+	@echo
+	@echo '*** Please provide signing keys and certificates or run "make keygen-sign"'
+	@echo '*** to generate example keys and certificates.'
+	@echo
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
 OS_KERNEL := $(patsubst "%",%,$(ST_OS_PKG_KERNEL))
@@ -217,26 +232,27 @@ help:
 	@echo  '  run-efi-application          - Run EFI application'
 
 check:
-	@echo [stboot] Checking dependencies
+	@$(call LOG,INFO,Check build dependencies)
 	$(scripts)/checks.sh
-	@echo [stboot] Done checking dependencies
+	@echo
+	@$(call LOG,DONE,Check build dependencies)
 
 config:
 	if [[ ! -d contrib/boards/$(BOARD) ]]; then \
-	  echo '[stboot] Target board "$(BOARD)" not found'; \
-	  echo -e '\n  Avaiable examples boards are:'; \
+	  $(call LOG,ERROR,Target board \"$(BOARD)\" not found); \
+	  echo -e '\n  Available boards are:'; \
 	  for board in `ls contrib/boards/`; do \
 	    echo  "  - $$board"; \
 	  done; \
 	  echo; \
 	  exit 1; \
 	fi
-	echo [stboot] Apply default configuration for $(BOARD)
+	@$(call LOG,INFO,Apply default configuration for \"$(BOARD)\")
 	if [[ -f $(DOTCONFIG) ]]; then \
-	  if diff $(DOTCONFIG) contrib/default.config $(OUTREDIRECT); then \
-	    echo [stboot] configuration already up-to-date; \
+	  if diff $(DOTCONFIG) <(BOARD=$(BOARD) envsubst < contrib/default.config) $(OUTREDIRECT); then \
+	    $(call LOG,WARN,Configuration already up-to-date); \
 	  else \
-	    echo [stboot] moving old config to $(notdir $(DOTCONFIG)).old; \
+	    $(call LOG,INFO,Moving old config to,$(notdir $(DOTCONFIG)).old); \
 	    mv $(DOTCONFIG) $(DOTCONFIG).old; \
 	  fi \
 	fi
@@ -247,41 +263,48 @@ toolchain: go-tools
 keygen: keygen-sign keygen-cpu
 
 keygen-sign: $(stmanager_bin)
-	@echo [stboot] Generate example signing keys
+	@$(call LOG,INFO,Generate example signing keys)
 	$(scripts)/make_signing_keys.sh $(OUTREDIRECT)
-	@echo [stboot] Done example signing keys
+	@$(call LOG,DONE,Example signing keys in:,$(dir $(ROOT_CERT)))
 
 keygen-cpu: $(call GROUP,$(CPU_SSH_KEYS))
 
 $(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
-	@echo [stboot] Generate example cpu ssh keys
+	@$(call LOG,INFO,Generate example cpu ssh keys)
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
-	@echo [stboot] Done example cpu ssh keys
+	@$(call LOG,DONE,Example cpu ssh keys in:,$(CPU_KEY_DIR))
 
 example-os-package: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(tboot) acm
-	@echo [stboot] Sign OS package
+	@$(call LOG,INFO,Sign OS package)
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
-	@echo [stboot] Done sign OS package
+	@$(call LOG,DONE,OS package:,$$(ls -tp $(os-out) | grep .zip | grep -v /$ | head -1))
 
 upload: $(newest-ospkg)
 	@echo [stboot] Upload OS package
+	@$(call LOG,INFO,Upload OS package)
 	$(scripts)/upload_os_package.sh $<
+	@$(call LOG,DONE,Upload OS package)
 	@echo [stboot] Done OS package
 
 $(out-dirs):
 	mkdir -p $@
 
 clean-keys:
+	@$(call LOG,INFO,Remove:,$(out)/keys)
 	rm -rf $(out)/keys
 
 clean-os:
+	@$(call LOG,INFO,Remove:,$(out)/os-packages)
 	rm -rf $(out)/os-packages
 
 clean:
+	@$(call LOG,INFO,Remove:,$(out))
 	rm -rf $(out)
 
 distclean: clean
+	@$(call LOG,INFO,Remove:,$(cache))
 	rm -rf $(cache)
+	@$(call LOG,INFO,Remove:,$(DOTCONFIG))
 	rm -f $(DOTCONFIG)
 
 .PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 example-os-package upload clean distclean

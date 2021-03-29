@@ -34,18 +34,18 @@ cpud_package := $(cpu_package)d
 #
 define go_update
 	if [ -x $(2) ]; then \
-	echo [Go] Update $(1); \
+	  $(call LOG,INFO,Go: Update,$(1)); \
 	else \
-	echo [Go] Install $(1); \
+	  $(call LOG,INFO,Go: Install,$(1)); \
 	fi;
 	go build $4 -o $(2).temp $(3)
 	if [ -x $(2) ] && diff $(2) $(2).temp >/dev/null; then \
-	echo [Go] $(1) already up-to-date; \
+	  $(call LOG,INFO,Go: $(1) already up-to-date); \
 	fi
         # use rsync to only update if hash changes (-c flag)
 	rsync -c $(2).temp $(2)
 	rm $(2).temp
-	echo [Go] Done $(1)
+	$(call LOG,DONE,Go:,$$(realpath --relative-to=. $2))
 endef
 
 u-root_branch := $(patsubst "%",%,$(ST_UROOT_DEV_BRANCH))
@@ -64,29 +64,29 @@ debos_fetch := $(debos_src)/.git/FETCH_HEAD
 debos_checkout := $(debos_src)/.git/HEAD
 
 $(debos_get):
-	@echo [Go] Get $(debos_package)
+	@$(call LOG,INFO,Go: Get,$(debos_package))
 	go get -d -u $(debos_package)/...
 $(debos_remote): $(debos_get)
 	if ! git -C $(debos_src) remote show system-transparency >/dev/null 2>&1; then \
-	  echo [Go] Add system-transparecy remote $(debos_repo); \
+	  $(call LOG,INFO,Go: Add system-transparecy remote,$(debos_repo)); \
 	  git -C $(debos_src) remote add system-transparency https://$(debos_repo); \
 	fi
 debos_fetch $(debos_fetch): $(debos_remote)
-	@echo [Go] Fetch branch $(debos_branch)
+	$(call LOG,INFO,Go: Fetch branch,$(debos_branch))
 	git -C $(debos_src) fetch --quiet system-transparency $(debos_branch)
 debos_checkout: debos_fetch
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
-	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
+	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
 else
-	@echo '[Go] Checkout branch $(debos_branch)'
+	$(call LOG,INFO,Go: Checkout branch,$(debos_branch))
 	git -C $(debos_src) checkout --quiet $(debos_branch)
 endif
 	touch $(debos_checkout)
 $(debos_checkout): $(debos_fetch)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
-	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
+	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
 else
-	@echo '[Go] Checkout branch $(debos_branch)'
+	$(call LOG,INFO,Go: Checkout branch,$(debos_branch))
 	git -C $(debos_src) checkout --quiet $(debos_branch)
 endif
 	touch $@
@@ -103,25 +103,25 @@ u-root_fetch := $(u-root_src)/.git/FETCH_HEAD
 u-root_checkout := $(u-root_src)/.git/HEAD
 
 $(u-root_get): $(go_check)
-	@echo [Go] Get $(u-root_package)
+	@$(call LOG,INFO,Go: Get,$(u-root_package))
 	go get -d -u $(u-root_package)
 	git -C $(u-root_src) checkout --quiet $(u-root_default_branch)
 u-root_fetch $(u-root_fetch): $(u-root_get)
-	@echo [Go] Fetch branch $(u-root_branch)
+	@$(call LOG,INFO,Go: Fetch branch $(u-root_branch))
 	git -C $(u-root_src) fetch --all --quiet
 u-root_checkout: u-root_fetch
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
-	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
+	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
 else
-	@echo '[Go] Checkout branch $(u-root_branch)'
+	$(call LOG,INFO,Go: Checkout branch,$(u-root_branch))
 	git -C $(u-root_src) checkout --quiet $(u-root_branch)
 endif
 	touch $(u-root_checkout)
 $(u-root_checkout): $(u-root_fetch)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
-	@echo '[Go] Skip checkout (ST_DEVELOP=1)'
+	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
 else
-	@echo '[Go] Checkout branch $(u-root_branch)'
+	$(call LOG,INFO,Go: Checkout branch,$(u-root_branch))
 	git -C $(u-root_src) checkout --quiet $(u-root_branch)
 endif
 	touch $@
@@ -136,7 +136,7 @@ $(u-root_bin) $(stmanager_bin): $(u-root_checkout)
 ### cpu command
 
 cpu $(cpu_bin) $(cpud_bin)$(GROUP_TARGET):
-	@echo [Go] Get $(cpu_package)
+	@$(call LOG,INFO,Go: Get,$(cpu_package))
 	go get -d -u $(cpu_package)
 	$(call go_update,cpu,$(cpu_bin),$(cpu_package))
 	$(call go_update,cpud,$(cpud_bin),$(cpud_package))
@@ -144,7 +144,7 @@ cpu $(cpu_bin) $(cpud_bin)$(GROUP_TARGET):
 ### ACM grebber
 
 sinit-acm-grebber $(sinit-acm-grebber_bin):
-	@echo [Go] Get $(sinit-acm-grebber_package)
+	@$(call LOG,INFO,Go: Get,$(sinit-acm-grebber_package))
 	go get -d -u $(sinit-acm-grebber_package)
 	$(call go_update,sinit-acm-grebber,$(sinit-acm-grebber_bin),$(sinit-acm-grebber_package))
 
