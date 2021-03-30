@@ -20,7 +20,7 @@ jobs:
       - name: Install Golang 1.13
         run: |
           go_tmp_dir=`mktemp -d`
-          wget -P $go_tmp_dir https://dl.google.com/go/go1.13.9.linux-amd64.tar.gz
+          wget -qP $go_tmp_dir https://dl.google.com/go/go1.13.9.linux-amd64.tar.gz
           export GOROOT=/usr/local/go-1.13
           sudo mkdir -p $GOROOT
           sudo tar xf $go_tmp_dir/go1.13.9.linux-amd64.tar.gz -C $GOROOT --strip 1
