@@ -277,8 +277,7 @@ $(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,Example cpu ssh keys in:,$(CPU_KEY_DIR))
 
-example-os-package: $(DOTCONFIG) $(call GROUP,$(ROOT_CERT) $(KEYS_CERTS)) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(patsubst "%",%,$(ST_OS_PKG_TBOOT)) $(patsubst %/,%,$(patsubst "%",%,$(ST_OS_PKG_ACM)))
-
+example-os-package: $(DOTCONFIG) $(stmanager_bin) $(call GROUP,$(ROOT_CERT) $(KEYS_CERTS)) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(patsubst "%",%,$(ST_OS_PKG_TBOOT)) $(patsubst %/,%,$(patsubst "%",%,$(ST_OS_PKG_ACM)))
 	@$(call LOG,INFO,Sign OS package)
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,OS package:,$$(ls -tp $(os-out) | grep .zip | grep -v /$ | head -1))

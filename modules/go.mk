@@ -53,8 +53,8 @@ ifeq ($(u-root_branch),)
 u-root_branch := $(u-root_default_branch)
 endif
 
-# phony target to force update
-go-tools: cpu sinit-acm-grebber debos u-root
+go-tools := debos u-root stmanager cpu sinit-acm-grebber
+go-tools: $(go-tools)
 
 ### debos
 
@@ -71,17 +71,9 @@ $(debos_remote): $(debos_get)
 	  $(call LOG,INFO,Go: Add system-transparecy remote,$(debos_repo)); \
 	  git -C $(debos_src) remote add system-transparency https://$(debos_repo); \
 	fi
-debos_fetch $(debos_fetch): $(debos_remote)
+$(debos_fetch): $(debos_remote)
 	$(call LOG,INFO,Go: Fetch branch,$(debos_branch))
 	git -C $(debos_src) fetch --quiet system-transparency $(debos_branch)
-debos_checkout: debos_fetch
-ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
-	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
-else
-	$(call LOG,INFO,Go: Checkout branch,$(debos_branch))
-	git -C $(debos_src) checkout --quiet $(debos_branch)
-endif
-	touch $(debos_checkout)
 $(debos_checkout): $(debos_fetch)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
 	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
@@ -90,9 +82,6 @@ else
 	git -C $(debos_src) checkout --quiet $(debos_branch)
 endif
 	touch $@
-# phony target to force update
-debos: debos_checkout
-	$(call go_update,debos,$(debos_bin),$(debos_package)/cmd/debos)
 $(debos_bin): $(debos_checkout)
 	$(call go_update,debos,$(debos_bin),$(debos_package)/cmd/debos)
 
@@ -106,17 +95,9 @@ $(u-root_get): $(go_check)
 	@$(call LOG,INFO,Go: Get,$(u-root_package))
 	go get -d -u $(u-root_package)
 	git -C $(u-root_src) checkout --quiet $(u-root_default_branch)
-u-root_fetch $(u-root_fetch): $(u-root_get)
+$(u-root_fetch): $(u-root_get)
 	@$(call LOG,INFO,Go: Fetch branch $(u-root_branch))
 	git -C $(u-root_src) fetch --all --quiet
-u-root_checkout: u-root_fetch
-ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
-	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
-else
-	$(call LOG,INFO,Go: Checkout branch,$(u-root_branch))
-	git -C $(u-root_src) checkout --quiet $(u-root_branch)
-endif
-	touch $(u-root_checkout)
 $(u-root_checkout): $(u-root_fetch)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
 	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
@@ -125,12 +106,9 @@ else
 	git -C $(u-root_src) checkout --quiet $(u-root_branch)
 endif
 	touch $@
-# phony target to force update
-u-root stmanager: u-root_checkout
+u-root $(u-root_bin)$(GROUP_TARGET): $(u-root_checkout)
 	$(call go_update,u-root,$(u-root_bin),$(u-root_package))
-	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
-$(u-root_bin) $(stmanager_bin): $(u-root_checkout)
-	$(call go_update,u-root,$(u-root_bin),$(u-root_package))
+stmanager $(stmanager_bin)$(GROUP_TARGET): $(u-root_checkout)
 	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
 
 ### cpu command
@@ -143,9 +121,9 @@ cpu $(cpu_bin) $(cpud_bin)$(GROUP_TARGET):
 
 ### ACM grebber
 
-sinit-acm-grebber $(sinit-acm-grebber_bin):
+sinit-acm-grebber $(sinit-acm-grebber_bin)$(GROUP_TARGET):
 	@$(call LOG,INFO,Go: Get,$(sinit-acm-grebber_package))
 	go get -d -u $(sinit-acm-grebber_package)
 	$(call go_update,sinit-acm-grebber,$(sinit-acm-grebber_bin),$(sinit-acm-grebber_package))
 
-.PHONY: go-tools debos debos_checkout debos_get u-root stmanager u-root_checkout u-root_get cpu sinit-acm-grebber
+.PHONY: go-tools debos u-root stmanager cpu sinit-acm-grebber
