@@ -18,6 +18,9 @@ TZ:=UTC0
 # use bash (nix/NixOS friendly)
 SHELL := /usr/bin/env bash -euo pipefail -c
 
+# Use PID to stop build process on error
+MAKEPID:= $(shell echo $$PPID)
+
 # setup development environment if ST_DEVELOP=1
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
 	# use local GOPATH
@@ -165,6 +168,7 @@ $(DOTCONFIG):
 	@echo '*** Please provide a config file of run "make config BOARD=<target>"'
 	@echo '*** to generate the default configuration.'
 	@echo
+	kill -TERM $(MAKEPID)
 
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
@@ -239,6 +243,7 @@ config:
 	    echo  "  - $$board"; \
 	  done; \
 	  echo; \
+	  kill -TERM $(MAKEPID); \
 	  exit 1; \
 	fi
 	@$(call LOG,INFO,Apply default configuration for \"$(BOARD)\")

@@ -131,7 +131,7 @@ define DOCKER_CHECK
 
 ifneq ($(docker-access),y)
 	@$(call LOG,ERROR,No access to docker API)
-	@exit 1
+	kill -TERM $(MAKEPID)
 endif
 	@$(call LOG,INFO,docker API access granted)
 
@@ -141,9 +141,9 @@ define PODMAN_CHECK
 
 ifneq ($(podman-access),y)
 	@$(call LOG,ERROR,podman not installed)
-	@exit 1
+	kill -TERM $(MAKEPID)
 endif
-	@$(call LOG,ERROR,podman installed)
+	@$(call LOG,INFO,podman installed)
 
 endef
 
@@ -153,7 +153,7 @@ define KVM_CHECK
 	@$(call LOG,INFO,Check kvm access)
 ifneq ($(kvm-access),y)
 	@$(call LOG,ERROR,No access to,/dev/kvm)
-	@exit 1
+	kill -TERM $(MAKEPID)
 endif
 	@$(call LOG,INFO,kvm access granted)
 
@@ -166,7 +166,7 @@ define KERNEL_CHECK
 ifneq ($(kernel-access),y)
 	@echo -e '$(subst $(\n),\n,$(DEBOS_ERROR_NO_KERNEL_ACCESS))'
 	@echo -e '$(subst $(\n),\n,$(DEBOS_ENV_LIST))'
-	@exit 1
+	kill -TERM $(MAKEPID)
 endif
 endef
 
@@ -212,7 +212,7 @@ endif
 ifdef debos-error
 define EVAL_DEBOS_ERROR
 	  echo -e '$(subst $(\n),\n,$(debos-error))'
-	  exit 1
+	  kill -TERM $(MAKEPID)
 endef
 debos-check += $(call EVAL_DEBOS_ERROR)
 endif
