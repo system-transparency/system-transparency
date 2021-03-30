@@ -12,7 +12,7 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
 # import global configuration
-source "${DOTCONFIG}"
+source "${DOTCONFIG:-.config}"
 
 out="${root}/out/stboot-installation"
 name="initramfs-linuxboot.cpio"
@@ -41,6 +41,7 @@ if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 # cache stderr in a file to run silently on success
 rc=0
 stderr_log=$(tempfile)
+trap "rm ${stderr_log}" EXIT
 
 case $variant in
 "minimal" )
