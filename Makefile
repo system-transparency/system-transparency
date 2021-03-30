@@ -100,13 +100,15 @@ ifneq ($(strip $(wildcard $(DOTCONFIG))),)
 include $(DOTCONFIG)
 endif
 
+EXAMPLE_ROOT_CERT := $(out)/keys/signing_keys/root.cert
 ROOT_CERT := $(patsubst "%",%,$(ST_SIGNING_ROOT))
 ifeq ($(strip $(ROOT_CERT)),)
-ROOT_CERT := $(out)/keys/signing_keys/root.cert
+ROOT_CERT := $(EXAMPLE_ROOT_CERT)
 endif
 
 IDs = 1 2 3
 TYPEs = key cert
+EXAMPLE_KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(EXAMPLE_ROOT_CERT))signing-key-$(ID).$(TYPE)))
 KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(ROOT_CERT))signing-key-$(ID).$(TYPE)))
 
 CPU_KEY_DIR := $(out)/keys/cpu_keys/
@@ -164,12 +166,6 @@ $(DOTCONFIG):
 	@echo '*** to generate the default configuration.'
 	@echo
 
-$(ROOT_CERT) $(KEYS_CERTS)$(GROUG_TARGET):
-	@$(call LOG,ERROR,File missing:,$@)
-	@echo
-	@echo '*** Please provide signing keys and certificates or run "make keygen-sign"'
-	@echo '*** to generate example keys and certificates.'
-	@echo
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
 OS_KERNEL := $(patsubst "%",%,$(ST_OS_PKG_KERNEL))
@@ -260,8 +256,12 @@ toolchain: go-tools
 
 keygen: keygen-sign keygen-cpu
 
-keygen-sign: $(stmanager_bin)
-	@$(call LOG,INFO,Generate example signing keys)
+keygen-sign $(EXAMPLE_ROOT_CERT) $(EXAMPLE_KEYS_CERTS)$(GROUG_TARGET): $(stmanager_bin)
+	# WARN if example keys are used to build installation
+	if [ "$@" != keygen-sign ]; then \
+	  $(call LOG,WARN,Using example signing certs and keys for installation); \
+	fi
+	$(call LOG,INFO,Generate example signing keys); \
 	$(scripts)/make_signing_keys.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,Example signing keys in:,$(dir $(ROOT_CERT)))
 
@@ -272,7 +272,7 @@ $(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,Example cpu ssh keys in:,$(CPU_KEY_DIR))
 
-example-os-package: $(DOTCONFIG) $(ROOT_CERT) $(KEYS_CERTS) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(patsubst "%",%,$(ST_OS_PKG_TBOOT)) $(patsubst "%",%,$(ST_OS_PKG_ACM))
+example-os-package: $(DOTCONFIG) $(call GROUP,$(ROOT_CERT) $(KEYS_CERTS)) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(stmanager_bin) $(patsubst "%",%,$(ST_OS_PKG_TBOOT)) $(patsubst %/,%,$(patsubst "%",%,$(ST_OS_PKG_ACM)))
 
 	@$(call LOG,INFO,Sign OS package)
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)

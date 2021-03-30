@@ -28,13 +28,6 @@ make config
 ${EDITOR} .config
 ```
 
-### Configure stboot target installation
-
-```bash
-# Generate example sign keys
-make keygen-sign
-```
-
 ### Build stboot installations
 
 ```bash
