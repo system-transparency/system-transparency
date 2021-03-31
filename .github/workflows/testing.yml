@@ -33,11 +33,6 @@ jobs:
       - name: Build default config
         run: |
           make config
-
-      - name: Generate keys and certificates
-        run: |
-          make keygen
-
       # create a file in os-package to prevent os autobuild
       # default github runner does not have kvm access
       - name: Prevent os-package build
