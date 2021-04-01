@@ -223,7 +223,7 @@ define SETUP_DEBOS_CONTAINER
 	$1 build --build-arg="BASE_IMAGE=$(debos-base-image)" --build-arg="BASE_TAG=$(debos-base-tag)" \
 		--build-arg="DEBOS_REPO=$(debos_repo)" --build-arg="DEBOS_BRANCH=$(debos_branch)" \
 		-q -t $(debos-image) $(op)/debos;
-	@$(call LOG,DONE,$* debos image $(debos-image))
+	@$(call LOG,DONE,debos $1 image $(debos-image))
 endef
 
 SOURCE_DATE_EPOCH := $(shell git log -1 --format=format:%ct)
@@ -249,7 +249,7 @@ endif
 ifneq ($5,)
 $1-debos-suite-arg := --template-var=suite:$5
 endif
-$(op-out)/$3 $(op-out)/$4$(GROUP_TARGET): $2 $(debos-dep)
+$(op-out)/$3 $(op-out)/$4: $2 $(debos-dep)
 	mkdir -p $$(dir $$@)
 	$(debos-check)
 	$(debos-setup)
