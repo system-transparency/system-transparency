@@ -41,6 +41,7 @@ endif
 ifeq ($(GOPATH),)
 GOPATH := $(CURDIR)/cache/go
 endif
+GO111MODULE := off
 
 ## logging color
 ifneq ($(TERM),)
