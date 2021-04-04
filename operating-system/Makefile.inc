@@ -11,12 +11,18 @@ include $(op)/debos/Makefile.inc
 
 tboot_code := $(tboot-cache)/code/.unpack
 
-_TBOOT_CFLAGS="-Wno-error=address-of-packed-member"
 gcc_version := $(shell gcc -dumpversion | cut -d . -f 1)
 
 ifeq ($(shell [[ "$(gcc_version)" -ge "9" ]] && echo $$?),0)
-tboot_env := CFLAGS=$(_TBOOT_CFLAGS) TBOOT_CFLAGS=$(_TBOOT_CFLAGS)
+_TBOOT_CFLAGS += -Wno-error=address-of-packed-member
 endif
+ifeq ($(shell [[ "$(gcc_version)" -ge "11" ]] && echo $$?),0)
+_TBOOT_CFLAGS += -Wno-error=stringop-overflow
+_TBOOT_CFLAGS += -Wno-error=maybe-uninitialized
+_TBOOT_CFLAGS += -Wno-error=array-parameter
+endif
+
+tboot_env := CFLAGS="$(_TBOOT_CFLAGS)" TBOOT_CFLAGS="$(_TBOOT_CFLAGS)"
 
 $(tboot_code):
 	rm -rf $(tboot-cache)
