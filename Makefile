@@ -23,8 +23,10 @@ MAKEPID:= $(shell echo $$PPID)
 
 # setup development environment if ST_DEVELOP=1
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
-	# use local GOPATH
+# use local GOPATH
+ifeq ($(ST_GOPATH),)
 	GOPATH := $(shell source <(go env) && echo $$GOPATH)
+endif
 endif
 
 # use custom GOPATH
@@ -35,12 +37,11 @@ GOPATH := $(ST_GOPATH)
 else
 $(error ST_GOPATH have to be an absolute path!)
 endif
-endif
-
-# default GOPATH
-ifeq ($(GOPATH),)
+else
 GOPATH := $(CURDIR)/cache/go
 endif
+# disable go modules
+GO111MODULE := off
 
 ## logging color
 ifneq ($(TERM),)
