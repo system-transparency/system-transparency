@@ -6,8 +6,49 @@ on:
   - push
 
 jobs:
-  ubuntu-latest_build:
-    runs-on: ubuntu-latest
+  ubuntu_20-04_go-1-16_build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install dependencies
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install \
+          git make flex bison bc rsync wget gpg libelf-dev \
+          dosfstools mtools e2tools parted udev
+          DEBIAN_FRONTEND=noninteractive sudo apt-get clean
+
+      - name: Install Golang 1.16
+        run: |
+          go_tmp_dir=`mktemp -d`
+          wget -qP $go_tmp_dir https://golang.org/dl/go1.16.3.linux-amd64.tar.gz
+          export GOROOT=/usr/local/go-1.16
+          sudo mkdir -p $GOROOT
+          sudo tar xf $go_tmp_dir/go1.16.3.linux-amd64.tar.gz -C $GOROOT --strip 1
+          export PATH=$GOROOT/bin:$PATH
+          rm -r $go_tmp_dir
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build default config
+        run: |
+          make config
+      # create a file in os-package to prevent os autobuild
+      # default github runner does not have kvm access
+      - name: Prevent os-package build
+        run: |
+          mkdir -p out/os-packages
+          touch out/os-packages/.nobuild
+
+      - name: Build MBR bootloader installation
+        run: |
+          make mbr-bootloader-installation
+
+      - name: Build EFI application installation
+        run: |
+          make efi-application-installation
+  ubuntu_20-04_go-1-13_build:
+    runs-on: ubuntu-20.04
     steps:
       - name: Install dependencies
         run: |
