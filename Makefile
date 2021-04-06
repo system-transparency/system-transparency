@@ -79,19 +79,20 @@ OUTREDIRECT :=  > /dev/null
 endif
 endif
 
+## commented out: Emulate grouped target on all make versions
+#
 # make "grouped targets" are only supported since version 4.3
-MAKE_VER_MAYOR := $(word 1,$(subst ., ,$(MAKE_VERSION)))
-MAKE_VER_MINOR := $(word 2,$(subst ., ,$(MAKE_VERSION)))
-ifeq ($(shell [ $(MAKE_VER_MAYOR) -ge "4" ] && echo y),y)
-ifeq ($(shell [ $(MAKE_VER_MINOR) -ge "3" ] && echo y),y)
-GROUP_TARGET := &
-endif
-endif
+#MAKE_VER_MAYOR := $(word 1,$(subst ., ,$(MAKE_VERSION)))
+#MAKE_VER_MINOR := $(word 2,$(subst ., ,$(MAKE_VERSION)))
+#ifeq ($(shell [ $(MAKE_VER_MAYOR) -ge "4" ] && echo y),y)
+#ifeq ($(shell [ $(MAKE_VER_MINOR) -ge "3" ] && echo y),y)
+#GROUP_TARGET := &
+#endif
+#endif
 
-# HACK: If "grouped targets" are not supported, emulate the same behavior by removing
-#       grouped targets from target dependecies.
+# HACK: Emulate grouped target, to support make version <4.3
 define GROUP
-$(if $(GROUP_TARGET),$(1),$(word 1,$(1)))
+$(word 1,$(1))
 endef
 
 # Make uses maximal available job threads by default
@@ -262,7 +263,7 @@ toolchain: go-tools
 
 keygen: keygen-sign keygen-cpu
 
-keygen-sign $(EXAMPLE_ROOT_CERT) $(EXAMPLE_KEYS_CERTS)$(GROUG_TARGET): $(stmanager_bin)
+keygen-sign $(EXAMPLE_ROOT_CERT) $(EXAMPLE_KEYS_CERTS) &: $(stmanager_bin)
 	# WARN if example keys are used to build installation
 	if [ "$@" != keygen-sign ]; then \
 	  $(call LOG,WARN,Using example signing certs and keys for installation); \
@@ -271,9 +272,7 @@ keygen-sign $(EXAMPLE_ROOT_CERT) $(EXAMPLE_KEYS_CERTS)$(GROUG_TARGET): $(stmanag
 	$(scripts)/make_signing_keys.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,Example signing keys in:,$(dir $(ROOT_CERT)))
 
-keygen-cpu: $(call GROUP,$(CPU_SSH_KEYS))
-
-$(call GROUP,$(CPU_SSH_KEYS))$(GROUP_TARGET):
+keygen-cpu $(CPU_SSH_KEYS):
 	@$(call LOG,INFO,Generate example cpu ssh keys)
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,Example cpu ssh keys in:,$(CPU_KEY_DIR))

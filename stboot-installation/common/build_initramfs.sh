@@ -40,7 +40,7 @@ if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
 # cache stderr in a file to run silently on success
 rc=0
-stderr_log=$(tempfile)
+stderr_log=$(mktemp)
 trap "rm ${stderr_log}" EXIT
 
 case $variant in
