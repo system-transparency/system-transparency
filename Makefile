@@ -245,7 +245,6 @@ config:
 	    echo  "  - $$board"; \
 	  done; \
 	  echo; \
-	  kill -TERM $(MAKEPID); \
 	  exit 1; \
 	fi
 	@$(call LOG,INFO,Apply default configuration for \"$(BOARD)\")
