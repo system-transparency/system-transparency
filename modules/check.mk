@@ -12,6 +12,8 @@ ifeq ($(DEBIAN-OS),y)
 HOST-KERNEL := /boot/vmlinuz-$(shell uname -r)
 endif
 
+dep_pkgs += wget
+check_bins += wget
 check_bins += go
 dep_pkgs += git
 check_bins += git
