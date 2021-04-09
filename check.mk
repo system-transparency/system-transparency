@@ -231,7 +231,7 @@ check_debos_docker: check_docker_bin
 	    $(CHECK_EXIT) \
 	  fi; \
 	else \
-	  $(call LOG,FAIL,install docker to enable docker debos build environment.);\
+	  $(call LOG,WARN,install docker to enable docker debos build environment.);\
 	  $(CHECK_EXIT) \
 	fi;
 
