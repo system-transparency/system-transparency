@@ -185,8 +185,7 @@ ifneq ($(strip $(ST_OS_PKG_INITRAMFS)),)
 OS_INITRAMFS := $(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
 endif
 
-include check.mk
-
+include modules/check.mk
 include modules/go.mk
 include modules/linux.mk
 
