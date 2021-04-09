@@ -202,6 +202,7 @@ help:
 	@echo  '  Use "make [target] V=1" for extra build debug information'
 	@echo  '  config BOARD=<target>        - Generate default configuration (see contrib/boards)'
 	@echo  '  check                        - Check for missing dependencies'
+	@echo  '  install-deps                 - Setup and install apt dependencies (Debian bases OS only)'
 	@echo  '  toolchain                    - Build/Update toolchain'
 	@echo  '*** clean directory'
 	@echo  '  clean                        - Remove all build artifacts'
