@@ -90,11 +90,25 @@ install-deps:
 	  $(call LOG,ERROR,Please run as root); \
 	  exit 1; \
 	fi;
-	$(call LOG,WARN,need manually installation:,go(>=$(GO_VERSION_MIN)))
-	$(call LOG,WARN,need manually installation:,swtpm(>=$(SWTPM_VERSION_MIN)) [https://github.com/stefanberger/swtpm])
 	$(call LOG,INFO,install dependencies:,$(dep_pkgs))
 	apt-get update -yqq
 	apt-get install -yqq --no-install-recommends $(dep_pkgs)
+	$(eval APT_GO_VERSION := 1.10)
+	$(eval APT_GO_VERSION_MAJOR := $(shell echo $(APT_GO_VERSION) | cut -d . -f 1))
+	$(eval APT_GO_VERSION_MINOR := $(shell echo $(APT_GO_VERSION) | cut -d . -f 2))
+	#$(eval APT_GO_VERSION := $(shell apt show golang-go 2>/dev/null | sed -nr 's/^Version: [0-9]:([0-9]+\.[0-9]+).*/\1/p'))
+	$(call LOG,INFO,check apt Go package version,(>=$(GO_VERSION_MIN)));
+	$(call LOG,INFO,apt Go package version:,$(APT_GO_VERSION));
+	if [ "$(APT_GO_VERSION_MAJOR)" -gt "$(GO_VERSION_MAJOR_MIN)" ] || \
+	([ "$(APT_GO_VERSION_MAJOR)" -eq "$(GO_VERSION_MAJOR_MIN)" ] && \
+	[ "$(APT_GO_VERSION_MINOR)" -ge "$(GO_VERSION_MINOR_MIN)" ]); then \
+	  $(call LOG,PASS,Go version \"$(APT_GO_VERSION)\" supported); \
+	  $(call LOG,INFO,install dependencies:,golang-go); \
+	  apt-get install -yqq --no-install-recommends golang-go; \
+	else \
+	  $(call LOG,WARN,apt Go package version not supported. need manually installation:,go(>=$(GO_VERSION_MIN))); \
+	fi;
+	$(call LOG,WARN,need manually installation:,swtpm(>=$(SWTPM_VERSION_MIN)) [https://github.com/stefanberger/swtpm])
 	$(call LOG,DONE,dependencies installed)
 endif
 
