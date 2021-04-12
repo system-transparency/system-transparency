@@ -157,7 +157,7 @@ endef
 define CONFIG_DEP
 $(1).config: $(DOTCONFIG)
 	mkdir -p `dirname $$@`
-	(grep -E "^$2" $(DOTCONFIG) || true) | sort >> $$@.temp
+	(grep -E "^($2)" $(DOTCONFIG) || true) | sort >> $$@.temp
 	rsync -c $$@.temp $$@
 	rm $$@.temp
 endef
