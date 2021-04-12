@@ -65,7 +65,7 @@ case $variant in
 "full" )
     echo
     echo "[INFO]: creating initramfs including all u-root core tools"
-    GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}.tmp" \
+    GOPATH="${gopath}" ${gopath}/bin/u-root -build=bb -uinitcmd=stboot -o "${initramfs}.tmp" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
