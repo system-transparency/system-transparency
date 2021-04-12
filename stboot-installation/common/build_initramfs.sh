@@ -17,8 +17,6 @@ source "${DOTCONFIG:-.config}"
 out="${root}/out/stboot-installation"
 name="initramfs-linuxboot.cpio"
 initramfs="${out}/${name}"
-initramfs_compressed="${initramfs}.gz"
-initramfs_backup="${initramfs_compressed}.backup"
 signing_root="${ST_SIGNING_ROOT}"
 signing_root_name="ospkg_signing_root.pem"
 security_config="${out}/security_configuration.json"
@@ -29,12 +27,6 @@ cpu_keys="${root}/out/keys/cpu_keys"
 variant=${ST_LINUXBOOT_VARIANT}
 
 gopath="${GOPATH:-${root}/cache/go}"
-
-if [ -f "${initramfs_compressed}" ]; then
-    echo
-    echo "[INFO]: backup existing initramfs to $(realpath --relative-to="${root}" "${initramfs_backup}")"
-    mv "${initramfs_compressed}" "${initramfs_backup}"
-fi
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
@@ -47,7 +39,7 @@ case $variant in
 "minimal" )
     echo
     echo "[INFO]: creating minimal initramfs including stboot only"
-    GOPATH="${gopath}" ${gopath}/bin/u-root -build=bb -uinitcmd=stboot -defaultsh="" -o "${initramfs}" \
+    GOPATH="${gopath}" ${gopath}/bin/u-root -build=bb -uinitcmd=stboot -defaultsh="" -o "${initramfs}.tmp" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
@@ -57,7 +49,7 @@ case $variant in
 "debug" )
     echo
     echo "[INFO]: creating initramfs including debugging tools"
-    GOPATH="${gopath}" ${gopath}/bin/u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
+    GOPATH="${gopath}" ${gopath}/bin/u-root -build=bb -uinitcmd=stboot -o "${initramfs}.tmp" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
@@ -73,7 +65,7 @@ case $variant in
 "full" )
     echo
     echo "[INFO]: creating initramfs including all u-root core tools"
-    GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}" \
+    GOPATH="${gopath}" u-root -build=bb -uinitcmd=stboot -o "${initramfs}.tmp" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
@@ -91,4 +83,6 @@ esac
 # print stderr if u-root fails
 [ "$rc" -ne 0 ] && (cat ${stderr_log}>&2;exit $rc)
 
-gzip -f "${initramfs}"
+gzip -f "${initramfs}.tmp"
+
+mv ${initramfs}.{tmp.gz,gz}

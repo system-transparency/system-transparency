@@ -22,16 +22,18 @@ size_vfat=$((12*(1<<20)))
 echo "[INFO]: Using kernel (efi stub): $(realpath --relative-to="${root}" "${linuxboot_kernel}")"
 
 # mkfs.vfat requires size as an (undefined) block-count; seem to be units of 1k
-if [ -f "${fs}" ]; then rm "${fs}"; fi
-mkfs.vfat -C -n "STBOOT" "${fs}" $((size_vfat >> 10))
+if [ -f "${fs}.tmp" ]; then rm "${fs}.tmp"; fi
+mkfs.vfat -C -n "STBOOT" "${fs}.tmp" $((size_vfat >> 10))
 
 echo "[INFO]: Installing STBOOT.EFI"
-mmd -i "${fs}" ::EFI
-mmd -i "${fs}" ::EFI/BOOT
+mmd -i "${fs}.tmp" ::EFI
+mmd -i "${fs}.tmp" ::EFI/BOOT
 
-mcopy -i "${fs}" "${linuxboot_kernel}" ::/EFI/BOOT/BOOTX64.EFI
+mcopy -i "${fs}.tmp" "${linuxboot_kernel}" ::/EFI/BOOT/BOOTX64.EFI
 
 echo "[INFO]: Writing host cofiguration"
-mcopy -i "${fs}" "${host_config}" ::
+mcopy -i "${fs}.tmp" "${host_config}" ::
+
+mv ${fs}{.tmp,}
 
 trap - EXIT

@@ -26,21 +26,24 @@ echo "[INFO]: Using kernel: $(realpath --relative-to="${root}" "${linuxboot_kern
 
 echo
 # mkfs.vfat requires size as an (undefined) block-count; seem to be units of 1k
-if [ -f "${fs}" ]; then rm "${fs}"; fi
-mkfs.vfat -C -n "STBOOT" "${fs}" $((size_vfat >> 10))
+if [ -f "${fs}.tmp" ]; then rm "${fs}.tmp"; fi
+mkfs.vfat -C -n "STBOOT" "${fs}.tmp" $((size_vfat >> 10))
 
 echo "[INFO]: Installing Syslinux"
-mmd -i "${fs}" ::syslinux
+mmd -i "${fs}.tmp" ::syslinux
 
-"${syslinux_cache}/${syslinux_dir}/bios/mtools/syslinux" --directory /syslinux/ --install "${fs}"
+"${syslinux_cache}/${syslinux_dir}/bios/mtools/syslinux" --directory /syslinux/ --install "${fs}.tmp"
 
 echo "[INFO]: Installing linuxboot kernel"
-mcopy -i "${fs}" "${linuxboot_kernel}" ::
+mcopy -i "${fs}.tmp" "${linuxboot_kernel}" ::
 
 echo "[INFO]: Writing syslinux config"
-mcopy -i "${fs}" "${syslinux_config}" ::syslinux/
+mcopy -i "${fs}.tmp" "${syslinux_config}" ::syslinux/
 
 echo "[INFO]: Writing host cofiguration"
-mcopy -i "${fs}" "${host_config}" ::
+mcopy -i "${fs}.tmp" "${host_config}" ::
+
+echo "[INFO]: Done VFAT filesystems for STBOOT partition"
+mv ${fs}{.tmp,}
 
 trap - EXIT

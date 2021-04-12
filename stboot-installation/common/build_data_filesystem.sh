@@ -28,30 +28,32 @@ if [ -z "${size_ext4}" ]; then size_ext4=$(( $(du -b "${os_pkg_dir}" | cut -f1) 
 echo
 echo "[INFO]: Creating EXT4 filesystems for STDATA partition:"
 
-if [ -f "${fs}" ]; then rm "${fs}"; fi
-mkfs.ext4 -L "STDATA" "${fs}" $((size_ext4 >> 10))
+if [ -f "${fs}.tmp" ]; then rm "${fs}.tmp"; fi
+mkfs.ext4 -L "STDATA" "${fs}.tmp" $((size_ext4 >> 10))
 
-e2mkdir "${fs}":/stboot
-e2mkdir "${fs}":/stboot/etc
-e2mkdir "${fs}":/stboot/os_pkgs
-e2mkdir "${fs}":/stboot/os_pkgs/local
-e2mkdir "${fs}":/stboot/os_pkgs/cache
+e2mkdir "${fs}.tmp":/stboot
+e2mkdir "${fs}.tmp":/stboot/etc
+e2mkdir "${fs}.tmp":/stboot/os_pkgs
+e2mkdir "${fs}.tmp":/stboot/os_pkgs/local
+e2mkdir "${fs}.tmp":/stboot/os_pkgs/cache
 
 echo
 echo "[INFO]: Writing UNIX timestamp"
 timestamp_file="${out}/system_time_fix"
 date +%s > "${timestamp_file}"
 cat "${timestamp_file}"
-e2cp "${timestamp_file}" "${fs}":/stboot/etc
+e2cp "${timestamp_file}" "${fs}.tmp":/stboot/etc
 rm "${timestamp_file}"
 
 echo
 echo "[INFO]: Copying OS packages to image (for local boot method)"
 ls -l "${root}/out/os-packages/."
-e2cp "${local_boot_order_file}" "${fs}":/stboot/os_pkgs/local
+e2cp "${local_boot_order_file}" "${fs}.tmp":/stboot/os_pkgs/local
 for i in "${os_pkg_dir}"/*; do
   [ -e "$i" ] || continue
-  e2cp "$i" "${fs}":/stboot/os_pkgs/local
+  e2cp "$i" "${fs}.tmp":/stboot/os_pkgs/local
 done
+
+mv ${fs}{.tmp,}
 
 trap - EXIT

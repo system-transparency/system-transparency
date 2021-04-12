@@ -12,15 +12,8 @@ root="$(cd "${dir}/../../" && pwd)"
 out="${root}/out/stboot-installation/efi-application"
 name="stboot_efi_installation.img"
 img="${out}/${name}"
-img_backup="${img}.backup"
 boot_filesystem="${out}/boot_partition.vfat"
 data_filesystem="${out}/../data_partition.ext4"
-
-if [ -f "${img}" ]; then
-    echo
-    echo "[INFO]: backup existing image to $(realpath --relative-to="${root}" "${img_backup}")"
-    mv "${img}" "${img_backup}"
-fi
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
@@ -40,20 +33,22 @@ offset_vfat=$(( alignment/512 ))
 offset_ext4=$(( (alignment + size_vfat + alignment)/512 ))
 
 # insert the filesystem to a new file at offset 1MB
-dd if="${boot_filesystem}" of="${img}" conv=notrunc obs=512 status=none seek=${offset_vfat}
-dd if="${data_filesystem}" of="${img}" conv=notrunc obs=512 status=none seek=${offset_ext4}
+dd if="${boot_filesystem}" of="${img}.tmp" conv=notrunc obs=512 status=none seek=${offset_vfat}
+dd if="${data_filesystem}" of="${img}.tmp" conv=notrunc obs=512 status=none seek=${offset_ext4}
 
 # extend the file by 1MB
-truncate -s "+${alignment}" "${img}"
+truncate -s "+${alignment}" "${img}.tmp"
 
 echo "[INFO]: Adding partitions to disk image:"
 
 # apply partitioning
-parted -s --align optimal "${img}" mklabel gpt mkpart "STBOOT" fat32 "$((offset_vfat * 512))B" "$((offset_vfat * 512 + size_vfat))B" mkpart "STDATA" ext4 "$((offset_ext4 * 512))B" "$((offset_ext4 * 512 + size_ext4))B" set 1 boot on set 1 legacy_boot on
+parted -s --align optimal "${img}.tmp" mklabel gpt mkpart "STBOOT" fat32 "$((offset_vfat * 512))B" "$((offset_vfat * 512 + size_vfat))B" mkpart "STDATA" ext4 "$((offset_ext4 * 512))B" "$((offset_ext4 * 512 + size_ext4))B" set 1 boot on set 1 legacy_boot on
 
 echo ""
 echo "[INFO]: Image layout:"
-parted -s "${img}" print
+parted -s "${img}.tmp" print
+
+mv ${img}{.tmp,}
 
 echo ""
 echo "[INFO]: $(realpath --relative-to="${root}" "${img}") created."
