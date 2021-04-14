@@ -24,7 +24,7 @@ make check
 # make default configuration
 make config
 # modify configuration
-${EDITOR} run.config
+${EDITOR} .config
 # build toolchain (u-root et al.)
 make toolchain
 
@@ -144,9 +144,9 @@ You need to write the coreboot.rom to the SPI Flash of the host and write the im
 # System Configuration
 
 ## Configuration of stboot
-Most options can be set in `run.config`. See the descriptions there for details.
+Most options can be set in `.config`. See the descriptions there for details.
 
-A subset of the configuration options in `run.config` end up in two files which stboot reads in during the boot process:
+A subset of the configuration options in `.config` end up in two files whis stboot reads in during the boot process:
 
 ### host_configuration.json
 This file is written to the root directory of the STBOOT partition. It contains the following fields:
@@ -276,7 +276,7 @@ Note that stboot will always verify the signatures on the OS package before exec
 # Debugging
 
 ## Console output
-The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in `run.config`. Beside usual kernel parameters you can pass flags to stboot via the special parameter `uroot.uinitargs`. 
+The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in `.config`. Beside usual kernel parameters you can pass flags to stboot via the special parameter `uroot.uinitargs`. 
 * To enable debug output in stboot pass `-debug`
 * To see not only the LinuxBoot kernel's but also stboot's output on all defined consoles (not on the last one defined only) pass `-klog`
 
@@ -287,13 +287,13 @@ Examples:
 * print minimal output: `console=ttyS0,115200`
 
 ## u-root shell
-By setting `ST_LINUXBOOT_VARIANT=full` in `run.config` the LinuxBoot initramfs will contain a shell and u-root's core commands (https://github.com/u-root/u-root/tree/stboot/cmds/core) in addition to stboot itself. So while stboot is running you can press `ctrl+c` to exit. You are then dropped into a shell and can inspect the system and use u-roots core commands.
+By setting `ST_LINUXBOOT_VARIANT=full` in `.config` the LinuxBoot initramfs will contain a shell and u-root's core commands (https://github.com/u-root/u-root/tree/stboot/cmds/core) in addition to stboot itself. So while stboot is running you can press `ctrl+c` to exit. You are then droped into a shell and can inspect the system and use u-roots core commands.
 
 ## Remote Debugging Using the CPU Command
 In order to do extensive remote debugging of the host, you can use u-root's cpu command. Since the stboot image running on the host has much fewer tools and services than usual Linux operating systems, the `cpu` command is a well suited option for debugging the host remotely.
 It connects to the host, bringing all your local tools and environment with you.
 
-You need to set `ST_LINUXBOOT_VARIANT=debug` in `run.config` in order to include the cpu daemon into the LinuxBoot initramfs.
+You need to set `ST_LINUXBOOT_VARIANT=debug` in `.config` in order to include the cpu deamon into the LinuxBoot initramfs.
 
 The cpu command (the counterpart to the daemon) should be installed on your system as part of the toolchain. Try to run it:
 
