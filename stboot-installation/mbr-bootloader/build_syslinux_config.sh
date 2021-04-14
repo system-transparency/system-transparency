@@ -11,7 +11,7 @@ root="$(cd "${dir}/../../" && pwd)"
 
 out="${root}/out/stboot-installation/mbr-bootloader"
 config="${out}/syslinux.cfg"
-kernel="../linuxboot.vmlinuz"
+kernel="/linuxboot.vmlinuz"
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
 
