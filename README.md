@@ -1,11 +1,11 @@
 # System Transparency Tooling
 
-This repository contains tooling, configurations files and example data to forma build-, test- and development environment for _System Transparency_.
+This repository contains tooling, configuration files and example data to form a build-, test- and development environment for _System Transparency_.
 
 _stboot_ is System Transparency Project’s official bootloader. It is a LinuxBoot distribution based on u-root.
 A LinuxBoot distribution is simply a Linux kernel and an initramfs. U-root is another project consisting of an initramfs builder, a collection of core Linux commands implemented in Go, and a collection of bootloaders. stboot is one of these bootloaders. Source code of stboot: https://github.com/u-root/u-root/tree/stboot
 
-The stboot program embedded in the initramfs acts as a bootloader to find the real OS - kernel and userland - for the host. The OS comes with one or more signatures to prove its validity. Furthermore, it supports Intel®'s Trusted Execution Technology (TXT) by booting the OS via tboot. All OS related artefacts are bundled together in an _OS Package_. An OS package consists of an archive file (ZIP) and desriptor file (JSON). OS packages can be created and managed with the _stmanager_ tool. Source code of stmanager: https://github.com/u-root/u-root/tree/stboot/tools/stmanager
+The stboot program embedded in the initramfs acts as a bootloader to find the real OS - kernel and userland - for the host. The OS comes with one or more signatures to prove its validity. Furthermore, it supports Intel®'s Trusted Execution Technology (TXT) by booting the OS via tboot. All OS related artifacts are bundled together in an _OS Package_. An OS package consists of an archive file (ZIP) and descriptor file (JSON). OS packages can be created and managed with the _stmanager_ tool. Source code of stmanager: https://github.com/u-root/u-root/tree/stboot/tools/stmanager
 
 
 stboot currently supports loading the OS packages from an HTTP/HTTPS server or from local storage.
@@ -30,15 +30,15 @@ make toolchain
 
 ```
 ## OS Package
-In Order to create an example OS package to get started with just do:
+To create an example OS package to get started with just do:
 ```bash
 # Generate sign keys
 make keygen-sign
-# build configures OS kernel and initramfs, creat and sign an OS package
+# build configures OS kernel and initramfs, create and signs an OS package
 make sign
 ```
 
-Otherwise, to build a custom OS package use stmanager directly. Therefore, you need a kernel & initramfs which contains the complete userspace. Use one of the following or create your own. The following comands create OS kernel & initramfs using _debos_. If debos cannot be run native on your system, virtualisation options will be used:
+Otherwise, to build a custom OS package use stmanager directly. Therefore, you need a kernel & initramfs which contains the complete userspace. Use one of the following or create your own. The following commands create OS kernel & initramfs using _debos_. If debos cannot be run native on your system, virtualization options will be used:
 ``` bash
 # Build debian system described in operating-system/debos/debian.yaml
 make debian
@@ -75,14 +75,14 @@ make mbr-bootloader-installation
 ```
 
 ### Leased server with EFI application installation
-In this scenario we have a closed source UEFI firmware which cannot easily be modified. In order to deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as EFI application.
+In this scenario we have a closed source UEFI firmware which cannot easily be modified. In order to deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as an EFI application.
 
 ```bash
 make efi-application-installation
 ```
 
 ### Colocated server with coreboot payload installation
-In this scenario we are able to place our own server in the data center. This server already contains Open Source firmware and is able to boot a Linux kernel payload after hardware initialization.
+In this scenario we can place our own server in the data center. This server already contains Open Source firmware and is able to boot a Linux kernel payload after hardware initialization.
 
 ```
 # Work in Progress: Not yet implemented!
@@ -112,7 +112,7 @@ When built as an MBR bootloader there is one artefact `out/stboot-installation/m
     * Less critical configuration data (host_configuration.json for stboot.
 * An Ext4 partition named STDATA containing
     * An OS package if boot method is set to _local_.
-    * An empty directory for use as a cache if boot method is set to _network_.
+    * An empty directory for use as a cache if the boot method is set to _network_.
 
 You need to write this image to the hard drive of the host.
 
@@ -123,21 +123,21 @@ When built as an EFI application there is one artefact `out/stboot-installation/
     * Less critical configuration data (host_configuration.json) for stboot.
 *An Ext4 partition named STDATA containing:
     * An OS package if boot method is set to _local_.
-    * An empty directory for use as a cache if boot method is set to _network_.
+    * An empty directory for use as a cache if the boot method is set to _network_.
 
 You need to write this image to the hard drive of the host.
 
 ## coreboot Payload Installation
 _WORK IN PROGRESS_
 
-When built as a coreboot payload there will be two artefacts:
+When built as a coreboot payload there will be two artifacts:
 * A file named coreboot.rom containing an SPI flash image.
 * A file named stboot_coreboot_installation.img containing:
     * A VFAT/FAT32 partition named STBOOT containing:
         * Less critical configuration data (host_configuration.json) for stboot.
     * An Ext4 partition named STDATA containing:
         * An OS package if boot method is set to _local_.
-        * An empty directory for use as a cache if if boot method is set to _network_.
+        * An empty directory for use as a cache if boot method is set to _network_.
 
 You need to write the coreboot.rom to the SPI Flash of the host and write the image to the hard drive of the host.
 
@@ -146,7 +146,7 @@ You need to write the coreboot.rom to the SPI Flash of the host and write the im
 ## Configuration of stboot
 Most options can be set in `run.config`. See the descriptions there for details.
 
-A subset of the configuration options in `run.config` end up in two files whis stboot reads in during the boot process:
+A subset of the configuration options in `run.config` end up in two files which stboot reads in during the boot process:
 
 ### host_configuration.json
 This file is written to the root directory of the STBOOT partition. It contains the following fields:
@@ -183,7 +183,7 @@ make mbr-kernel-updatedefconfig
 
 # Features
 
-stboot extensively validates the state of the system and all data it will use in its control flow. In case of any error it will reboot the system. At the end of the controll flow stboot will use kexec to hand over the control to the kernel provided in the OS package. From that point on stboot has no longer control over the system.
+stboot extensively validates the state of the system and all data it will use in its control flow. In case of any error it will reboot the system. At the end of the control flow stboot will use kexec to hand over the control to the kernel provided in the OS package. From that point on stboot has no longer control over the system.
 
 ## System Time Validation
 A proper system time is important for validating certificates. It is the responsibility of the operator to set the system time correctly. However, stboot performs the following check:
@@ -197,10 +197,10 @@ The OS is allowed to update this file. Especially if it’s an embedded system w
 stboot supports two boot methods - Network and Local. Network loads an OS package from a provisioning server. Local loads an OS package from the STDATA partition on a local disk. Only one boot method at a time may be configured.
 
 ### Network boot
-Network boot can be configured using either DHCP or a static network configuration. In case of static network stboot uses IP address, netmask, default gateway, and DNS server form `host_configuration.json`. The latest downloaded and verified OS package can be cached depending on settings in `security_configuration.json`. Older ones are removed. The cache directory is separate from the directory used by the Local boot method.
+Network boot can be configured using either DHCP or a static network configuration. In case of static network stboot uses IP address, netmask, default gateway, and DNS server from `host_configuration.json`. The latest downloaded and verified OS package can be cached depending on settings in `security_configuration.json`. Older ones are removed. The cache directory is separate from the directory used by the Local boot method.
 
 Provisioning Server Communication:
-* The HTTPS root certificates is stored in the LinuxBoot initramfs
+* The HTTPS root certificates are stored in the LinuxBoot initramfs
     * File name: `/etc/https_roots.pem`
     * Use https://letsencrypt.org/certificates/ roots as default.
 Regarding Provisioning URLs:
@@ -210,7 +210,7 @@ Regarding Provisioning URLs:
     * e.g. https://provisioning.foo.net/api/v1/?id=$ID&auth=$AUTH 
     * e.g. https://provisioning.bar.net/api/v1/$ID
 
-This URLs are supposed to server the OS package descriptor.
+These URLs are supposed to server the OS package descriptor.
 
 For each provisioning server URL in `host_configuration.json`:
 * Try downloading the OS package descriptor (json file).
@@ -287,13 +287,13 @@ Examples:
 * print minimal output: `console=ttyS0,115200`
 
 ## u-root shell
-By setting `ST_LINUXBOOT_VARIANT=full` in `run.config` the LinuxBoot initramfs will contain a shell and u-root's core commands (https://github.com/u-root/u-root/tree/stboot/cmds/core) in addition to stboot itself. So while stboot is running you can press `ctrl+c` to exit. You are then droped into a shell and can inspect the system and use u-roots core commands.
+By setting `ST_LINUXBOOT_VARIANT=full` in `run.config` the LinuxBoot initramfs will contain a shell and u-root's core commands (https://github.com/u-root/u-root/tree/stboot/cmds/core) in addition to stboot itself. So while stboot is running you can press `ctrl+c` to exit. You are then dropped into a shell and can inspect the system and use u-roots core commands.
 
 ## Remote Debugging Using the CPU Command
 In order to do extensive remote debugging of the host, you can use u-root's cpu command. Since the stboot image running on the host has much fewer tools and services than usual Linux operating systems, the `cpu` command is a well suited option for debugging the host remotely.
 It connects to the host, bringing all your local tools and environment with you.
 
-You need to set `ST_LINUXBOOT_VARIANT=debug` in `run.config` in order to include the cpu deamon into the LinuxBoot initramfs.
+You need to set `ST_LINUXBOOT_VARIANT=debug` in `run.config` in order to include the cpu daemon into the LinuxBoot initramfs.
 
 The cpu command (the counterpart to the daemon) should be installed on your system as part of the toolchain. Try to run it:
 
@@ -316,7 +316,7 @@ Usage: cpu [options] host [shell command]:
 
 ### Usage
 
-Before accessing the remote machine trough `cpu` you first need to start the cpu deamon on the host running stboot. To do so, go to the serial console and press `ctrl+c` while stboot is running. This will give you access to the shell. Then do:
+Before accessing the remote machine through `cpu` you first need to start the cpu daemon on the host running stboot. To do so, go to the serial console and press `ctrl+c` while stboot is running. This will give you access to the shell. Then do:
 
 ``` bash
 # Start the `cpud` with all the required keys.
@@ -337,7 +337,7 @@ You can test it for example with your stboot MBR installation option running in 
 make run-mbr-bootloader
 # interrupt stboot while booting
 ctrl+c
-# start the cpu deamon
+# start the cpu daemon
 ./elvish start_cpu.elv
 ```
 
@@ -348,6 +348,6 @@ cpu -key keys/cpu_keys/cpu_rsa localhost
 
 # Development
 This repository uses its own path (`GOPATH=cache/go`) to build the needed Go binaries by default.
-To use the default system GOPATH, define `ST_DEVELOP=1` as environment variable. It will prevent
+To use the default system GOPATH, define `ST_DEVELOP=1` as an environment variable. It will prevent
 any `git checkout` operation, which could change the HEAD of any Go repository at build-time. Furthermore, you can
 define the environment variable `ST_GOPATH` to use a custom GOPATH for the installation.

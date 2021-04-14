@@ -2,7 +2,7 @@
 
 Work in progress ...
 
-This are some draft notes to build a coreboot image for the Supermicro X11SSH (only with system >=gcc-7)
+These are some draft notes to build a coreboot image for the Supermicro X11SSH (only with system >=gcc-7)
 
 ## Build Coreboot
 
@@ -43,7 +43,7 @@ diff bios.1 bios.2
 diff bios.1 bios.3
 ```
 
-Save the dumo as `original_vendor_bios_dump.bin` in the coreboot dir
+Save the dump as `original_vendor_bios_dump.bin` in the coreboot dir
 
 ## Build Coreboot continued
 
