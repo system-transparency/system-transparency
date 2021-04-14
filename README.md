@@ -3,7 +3,7 @@
 This repository contains tooling, configuration files and example data to form a build-, test- and development environment for _System Transparency_.
 
 _stboot_ is System Transparency Project’s official bootloader. It is a LinuxBoot distribution based on u-root.
-A LinuxBoot distribution is simply a Linux kernel and an initramfs. U-root is another project consisting of an initramfs builder, a collection of core Linux commands implemented in Go, and a collection of bootloaders. stboot is one of these bootloaders. Source code of stboot: https://github.com/u-root/u-root/tree/stboot
+A LinuxBoot distribution is simply a Linux kernel and an initramfs. U-root is another project consisting of an initramfs builder, a collection of core Linux commands implemented in Go, and a collection of bootloaders. stboot is one of these bootloaders. Source code of stboot: https://github.com/u-root/u-root/tree/stboot/cmds/boot/stboot and https://github.com/u-root/u-root/tree/stboot/pkg/boot/stboot respectively.
 
 The stboot program embedded in the initramfs acts as a bootloader to find the real OS - kernel and userland - for the host. The OS comes with one or more signatures to prove its validity. Furthermore, it supports Intel®'s Trusted Execution Technology (TXT) by booting the OS via tboot. All OS related artifacts are bundled together in an _OS Package_. An OS package consists of an archive file (ZIP) and descriptor file (JSON). OS packages can be created and managed with the _stmanager_ tool. Source code of stmanager: https://github.com/u-root/u-root/tree/stboot/tools/stmanager
 
@@ -50,9 +50,9 @@ make ubuntu-20
 Once you have an OS kernel & initramfs containing the usersapce and optionally a tboot kernel and appropriate ACM for TXT create an OS package out of it:
 ``` bash
 # Create a new OS package
-./cache/go/bin/stmanager create --kernel=KERNEL --initramfs=INITRAMFS
+./cache/go/bin/stmanager create --kernel=your-kernel.vmlinuz --initramfs=your-initramfs.cpio
 # Sign the OS package (multiple times)
-./cache/go/bin/stmanager sign --key=KEY --cert=CERT <OS package>
+./cache/go/bin/stmanager sign --key=your.key --cert=your.cert <OS package>
 
 # See help for all options
 ./cache/go/bin/stmanager --help-long
@@ -109,7 +109,7 @@ When built as an MBR bootloader there is one artefact `out/stboot-installation/m
 * A VFAT/FAT32 partition named STBOOT containing:
     * Syslinux configuration
     * LinuxBoot files
-    * Less critical configuration data (host_configuration.json for stboot.
+    * Less critical configuration data (host_configuration.json) for stboot.
 * An Ext4 partition named STDATA containing
     * An OS package if boot method is set to _local_.
     * An empty directory for use as a cache if the boot method is set to _network_.
