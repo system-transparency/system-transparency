@@ -11,7 +11,7 @@ security_config := $(st-out)/security_configuration.json
 os-out_dirs = $(shell find $(os-out) -type d 2>/dev/null)
 os-out_files = $(shell find $(os-out) -type f -name '*' 2>/dev/null)
 
-$(eval $(call CONFIG_DEP,$(data_partition),ST_DATA_PARTITION_SZIZE))
+$(eval $(call CONFIG_DEP,$(data_partition),ST_DATA_PARTITION_EXTRA_SPACE))
 # build and sign example os-package, if directy is empty
 ifeq ($(os-out_files),)
 $(data_partition): % : %.config example-os-package
