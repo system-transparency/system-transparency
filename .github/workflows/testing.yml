@@ -32,12 +32,9 @@ jobs:
 
       - name: Build default config
         run: make config
-      # create a file in os-package to prevent os autobuild
-      # default github runner does not have kvm access
-      - name: Prevent os-package build
-        run: |
-          mkdir -p out/os-packages
-          touch out/os-packages/.nobuild
+
+      - name: Set boot mode to network
+        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' .config
 
       - name: Build MBR bootloader installation
         run: make mbr-bootloader-installation
@@ -70,12 +67,9 @@ jobs:
 
       - name: Build default config
         run: make config
-      # create a file in os-package to prevent os autobuild
-      # default github runner does not have kvm access
-      - name: Prevent os-package build
-        run: |
-          mkdir -p out/os-packages
-          touch out/os-packages/.nobuild
+
+      - name: Set boot mode to network
+        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' .config
 
       - name: Build MBR bootloader installation
         run: make mbr-bootloader-installation
@@ -109,12 +103,8 @@ jobs:
       - name: Build default config
         run: make config
 
-      # create a file in os-package to prevent os autobuild
-      # default github runner does not have kvm access
-      - name: Prevent os-package build
-        run: |
-          mkdir -p out/os-packages
-          touch out/os-packages/.nobuild
+      - name: Set boot mode to network
+        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' .config
 
       - name: Build MBR bootloader installation
         run: make mbr-bootloader-installation
@@ -148,12 +138,8 @@ jobs:
       - name: Build default config
         run: make config
 
-      # create a file in os-package to prevent os autobuild
-      # default github runner does not have kvm access
-      - name: Prevent os-package build
-        run: |
-          mkdir -p out/os-packages
-          touch out/os-packages/.nobuild
+      - name: Set boot mode to network
+        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' .config
 
       - name: Build MBR bootloader installation
         run: make mbr-bootloader-installation
