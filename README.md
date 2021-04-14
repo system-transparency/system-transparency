@@ -34,8 +34,8 @@ To create an example OS package to get started with just do:
 ```bash
 # Generate sign keys
 make keygen-sign
-# build configures OS kernel and initramfs, create and signs an OS package
-make sign
+# build configures OS kernel and initramfs, creat and sign an OS package
+make example-os-package
 ```
 
 Otherwise, to build a custom OS package use stmanager directly. Therefore, you need a kernel & initramfs which contains the complete userspace. Use one of the following or create your own. The following commands create OS kernel & initramfs using _debos_. If debos cannot be run native on your system, virtualization options will be used:
