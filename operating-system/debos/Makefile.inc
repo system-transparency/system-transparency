@@ -98,7 +98,7 @@ ifeq ($(DEBOS_ENV),)
     else
       # you need access to either docker API or kvm
       DEBOS_ENV = error
-      debos-err := $(call DEBOS_ERROR_NO_KVM_ACCESS))
+      debos-err := $(call DEBOS_ERROR_NO_KVM_ACCESS)
     endif
   endif
 endif
@@ -131,7 +131,7 @@ define DOCKER_CHECK
 
 ifneq ($(docker-access),y)
 	@$(call LOG,ERROR,No access to docker API)
-	kill -TERM $(MAKEPID)
+	@exit 1
 endif
 	@$(call LOG,INFO,docker API access granted)
 
@@ -141,7 +141,7 @@ define PODMAN_CHECK
 
 ifneq ($(podman-access),y)
 	@$(call LOG,ERROR,podman not installed)
-	kill -TERM $(MAKEPID)
+	@exit 1
 endif
 	@$(call LOG,INFO,podman installed)
 
@@ -153,7 +153,7 @@ define KVM_CHECK
 	@$(call LOG,INFO,Check kvm access)
 ifneq ($(kvm-access),y)
 	@$(call LOG,ERROR,No access to,/dev/kvm)
-	kill -TERM $(MAKEPID)
+	@exit 1
 endif
 	@$(call LOG,INFO,kvm access granted)
 
@@ -166,7 +166,7 @@ define KERNEL_CHECK
 ifneq ($(kernel-access),y)
 	@echo -e '$(subst $(\n),\n,$(DEBOS_ERROR_NO_KERNEL_ACCESS))'
 	@echo -e '$(subst $(\n),\n,$(DEBOS_ENV_LIST))'
-	kill -TERM $(MAKEPID)
+	@exit 1
 endif
 endef
 
@@ -176,14 +176,12 @@ else
   ifeq ($(DEBOS_ENV),native)
     CONTAINER :=
     run-debos := $(debos_bin)
-    debos-dep := $(debos_bin)
-    debos-check += $(call KVM_CHECK)
-    debos-check += $(call KERNEL_CHECK)
+    debos-dep := $(debos_bin) check_debos_native check_kvm_access
+    debos-dep += check_debootstrap_bin check_systemd-nspawn_bin
   else
     ifeq ($(DEBOS_ENV),docker)
       CONTAINER := docker
-      # check docker API access
-      debos-check += $(call DOCKER_CHECK)
+      debos-dep := check_debos_docker check_kvm_access
       container-dep += docker-check
       # drop priviledge to have user id and access to kvm
       container-args += --user $(shell id -u):$(shell stat -c %g /dev/kvm)
@@ -212,7 +210,7 @@ endif
 ifdef debos-error
 define EVAL_DEBOS_ERROR
 	  echo -e '$(subst $(\n),\n,$(debos-error))'
-	  kill -TERM $(MAKEPID)
+	  exit 1
 endef
 debos-check += $(call EVAL_DEBOS_ERROR)
 endif

@@ -8,15 +8,19 @@ Detailed information about the project itself can be found at https://system-tra
 ## Prerequisites
 
 * The operator machine should run a Linux system (tested with Ubuntu 18.04.2 LTS (Bionic Beaver) / Kernel 4.15.0-47-generic
-* Further software prerequisites will be checked during setup. For details take a look at `./scripts/checks.sh`. 
 
 ## Quick Start
 
-### build dependency check
+### build dependencies
 
 ```bash
 # Check for missing dependencies
 make check
+```
+
+```bash
+# Install missing dependencies (Debian/Ubuntu only)
+sudo make install-deps
 ```
 
 ### Configure stboot target installation

@@ -45,17 +45,23 @@ GO111MODULE := off
 
 ## logging color
 ifneq ($(TERM),)
-NORMAL_COLOR = $(shell tput sgr0)
-#green
-DONE_COLOR = $(shell tput setaf 2)
-# blue
-INFO_COLOR = $(shell tput setaf 4)
-# yellow
-WARN_COLOR = $(shell tput setaf 3)
-# red
-ERROR_COLOR = $(shell tput setaf 1)
-# cyan
-FILE_COLOR = $(shell tput setaf 6)
+# all colors
+NORMAL = $(shell tput sgr0 2>/dev/null)
+RED = $(shell tput setaf 1 2>/dev/null)
+GREEN = $(shell tput setaf 2 2>/dev/null)
+YELLOW = $(shell tput setaf 3 2>/dev/null)
+BLUE = $(shell tput setaf 4 2>/dev/null)
+#MAGENTA = $(shell tput setaf 5 2>/dev/null)
+CYAN = $(shell tput setaf 6 2>/dev/null)
+# log types
+INFO_COLOR = $(BLUE)
+DONE_COLOR = $(GREEN)
+WARN_COLOR = $(YELLOW)
+ERROR_COLOR = $(RED)
+FILE_COLOR = $(CYAN)
+# check logs
+PASS_COLOR = $(GREEN)
+FAIL_COLOR = $(RED)
 endif
 
 ## LOG
@@ -66,7 +72,7 @@ endif
 # $3 = file/path (optional)
 #
 define LOG
-printf "[%s] $2 %s\n" "$($1_COLOR)$1$(NORMAL_COLOR)" "$(FILE_COLOR)$3$(NORMAL_COLOR)"
+printf "[%s] $2 %s\n" "$($1_COLOR)$1$(NORMAL)" "$(FILE_COLOR)$3$(NORMAL)"
 endef
 
 # Make is silent per default, but 'make V=1' will show all compiler calls.
@@ -120,7 +126,6 @@ CPU_KEY_DIR := $(out)/keys/cpu_keys/
 CPU_SSH_FILES := cpu_rsa cpu_rsa.pub ssh_host_rsa_key ssh_host_rsa_key.pub
 CPU_SSH_KEYS += $(foreach CPU_SSH_FILE,$(CPU_SSH_FILES),$(CPU_KEY_DIR)/$(CPU_SSH_FILE))
 
-
 ## error if OS packages are missing
 # args:
 # $1 = target
@@ -170,8 +175,7 @@ $(DOTCONFIG):
 	@echo '*** Please provide a config file of run "make config BOARD=<target>"'
 	@echo '*** to generate the default configuration.'
 	@echo
-	kill -TERM $(MAKEPID)
-
+	@exit 1
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
 OS_KERNEL := $(patsubst "%",%,$(ST_OS_PKG_KERNEL))
@@ -181,6 +185,7 @@ ifneq ($(strip $(ST_OS_PKG_INITRAMFS)),)
 OS_INITRAMFS := $(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
 endif
 
+include modules/check.mk
 include modules/go.mk
 include modules/linux.mk
 
@@ -196,6 +201,7 @@ help:
 	@echo  '  Use "make [target] V=1" for extra build debug information'
 	@echo  '  config BOARD=<target>        - Generate default configuration (see contrib/boards)'
 	@echo  '  check                        - Check for missing dependencies'
+	@echo  '  install-deps                 - Setup and install apt dependencies (Debian bases OS only)'
 	@echo  '  toolchain                    - Build/Update toolchain'
 	@echo  '*** clean directory'
 	@echo  '  clean                        - Remove all build artifacts'
@@ -231,12 +237,6 @@ help:
 	@echo  '  run-mbr-bootloader           - Run MBR bootloader'
 	@echo  '  run-efi-application          - Run EFI application'
 
-check:
-	@$(call LOG,INFO,Check build dependencies)
-	$(scripts)/checks.sh
-	@echo
-	@$(call LOG,DONE,Check build dependencies)
-
 config:
 	if [[ ! -d contrib/boards/$(BOARD) ]]; then \
 	  $(call LOG,ERROR,Target board \"$(BOARD)\" not found); \
@@ -245,7 +245,6 @@ config:
 	    echo  "  - $$board"; \
 	  done; \
 	  echo; \
-	  kill -TERM $(MAKEPID); \
 	  exit 1; \
 	fi
 	@$(call LOG,INFO,Apply default configuration for \"$(BOARD)\")
