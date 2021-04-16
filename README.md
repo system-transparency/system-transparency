@@ -1,5 +1,40 @@
 # System Transparency Tooling
 
+* [Intro](#Intro)
+* [Prerequisites](#Prerequisites)
+* [Installation](#Installation)
+    * [Setup](#Setup)
+    * [OS Package](#OS-Package)
+    * [stboot image](#stboot-image)
+        * [Leased server with MBR bootloader installation](#Leased-server-with-MBR-bootloader-installation)
+        * [Leased server with EFI application installation](#Leased-server-with-EFI-application-installation)
+        * [Colocated server with coreboot payload installation](#Colocated-server-with-coreboot-payload-installation)
+* [Installation Test](#Installation-Test)
+* [Deployment](#Deployment)
+    * [MBR Bootloader Installation](#MBR-Bootloader-Installation)
+    * [EFI Application Installation](#EFI-Application-Installation)
+    * [coreboot Payload Installation](#coreboot-Payload-Installation)
+* [System Configuration](#System-Configuration)
+    * [Configuration of stboot](#Configuration-of-stboot)
+        * [host_configuration.json](#host_configuration.json)
+        * [security_configuration.json](#security_configuration.json)
+    * [Modify LinuxBoot kernel config](#Modify-LinuxBoot-kernel-config)
+* [Features](#Features)
+    * [System Time Validation](#System-Time-Validation)
+    * [Boot Modes](#intro)
+        * [Network Boot](#Network-Boot)
+        * [Local Boot](#Local-Boot)
+    * [Signature Verification](#Signature-Verification)
+    * [Intel® Trusted Execution Technologie (TXT) and Measured Boot](#Intel®-Trusted-Execution-Technologie-(TXT)-and-Measured-Boot)
+* [Debugging](#Debugging)
+    * [Console Output](#Console-Output)
+    * [u-root Shell](#u-root-Shell)
+    * [Remote Debugging Using the CPU Command](#Remote-Debugging-Using-the-CPU-Command)
+        * [Preparation](#Preparation)
+        * [Usage](#Usage)
+* [Development](#Development)
+
+# Intro 
 This repository contains tooling, configuration files and example data to form a build-, test- and development environment for _System Transparency_.
 
 _stboot_ is System Transparency Project’s official bootloader. It is a LinuxBoot distribution based on u-root.
@@ -7,8 +42,7 @@ A LinuxBoot distribution is simply a Linux kernel and an initramfs. U-root is an
 
 The stboot program embedded in the initramfs acts as a bootloader to find the real OS - kernel and userland - for the host. The OS comes with one or more signatures to prove its validity. Furthermore, it supports Intel®'s Trusted Execution Technology (TXT) by booting the OS via tboot. All OS related artifacts are bundled together in an _OS Package_. An OS package consists of an archive file (ZIP) and descriptor file (JSON). OS packages can be created and managed with the _stmanager_ tool. Source code of stmanager: https://github.com/u-root/u-root/tree/stboot/tools/stmanager
 
-
-stboot currently supports loading the OS packages from an HTTP/HTTPS server or from local storage.
+stboot currently supports loading the OS packages from an HTTP/HTTPS server or from local storage. To learn more about the various aspects, take a look at the [feature list](#features).
 
 
 # Prerequisites
@@ -92,7 +126,7 @@ In this scenario we can place our own server in the data center. This server alr
 To build and flash the coreboot-rom including _stboot_ as a payload, please refer to [these instructions](stboot-installation/coreboot-payload/#deploy-coreboot-rom). 
 
 
-# Test Your Installation
+# Installation Test
 ``` bash 
 # run MBR bootloader installation
 make run-mbr-bootloader
@@ -193,10 +227,10 @@ A proper system time is important for validating certificates. It is the respons
 
 The OS is allowed to update this file. Especially if it’s an embedded system without a RTC.
 
-## Boot Methods
+## Boot Modes
 stboot supports two boot methods - Network and Local. Network loads an OS package from a provisioning server. Local loads an OS package from the STDATA partition on a local disk. Only one boot method at a time may be configured.
 
-### Network boot
+### Network Boot
 Network boot can be configured using either DHCP or a static network configuration. In case of static network stboot uses IP address, netmask, default gateway, and DNS server from `host_configuration.json`. The latest downloaded and verified OS package can be cached depending on settings in `security_configuration.json`. Older ones are removed. The cache directory is separate from the directory used by the Local boot method.
 
 Provisioning Server Communication:
@@ -225,7 +259,7 @@ In case the provisioning server is down the operator has to choose whether to fa
      * (all caps note in case of uncached network loaded os package)
 * Cache path: `STDATA/stboot/os_pkgs/cache/`
 
-### Local boot
+### Local Boot
 * Local storage: `STDATA/stboot/os_pkgs/local/`
 * Try OS packages in the order they are listed in the file
 `STDATA/stboot/os_pkgs/local/boot_order`
@@ -256,7 +290,7 @@ Verification process in stboot:
     * Increase count of valid signatures
 * Check if the number of successful signatures is enough.
 
-# Intel® Trusted Execution Technologie (TXT) and Measured Boot
+## Intel® Trusted Execution Technologie (TXT) and Measured Boot
 
 stboot is designed to opportunistically use platform security features supported by stboot, the machine it runs on, and the OS package it loads.
 
@@ -275,7 +309,7 @@ Note that stboot will always verify the signatures on the OS package before exec
 
 # Debugging
 
-## Console output
+## Console Output
 The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in `.config`. Beside usual kernel parameters you can pass flags to stboot via the special parameter `uroot.uinitargs`. 
 * To enable debug output in stboot pass `-debug`
 * To see not only the LinuxBoot kernel's but also stboot's output on all defined consoles (not on the last one defined only) pass `-klog`
@@ -286,13 +320,14 @@ Examples:
 
 * print minimal output: `console=ttyS0,115200`
 
-## u-root shell
+## u-root Shell
 By setting `ST_LINUXBOOT_VARIANT=full` in `.config` the LinuxBoot initramfs will contain a shell and u-root's core commands (https://github.com/u-root/u-root/tree/stboot/cmds/core) in addition to stboot itself. So while stboot is running you can press `ctrl+c` to exit. You are then droped into a shell and can inspect the system and use u-roots core commands.
 
 ## Remote Debugging Using the CPU Command
 In order to do extensive remote debugging of the host, you can use u-root's cpu command. Since the stboot image running on the host has much fewer tools and services than usual Linux operating systems, the `cpu` command is a well suited option for debugging the host remotely.
 It connects to the host, bringing all your local tools and environment with you.
 
+### Preparation
 You need to set `ST_LINUXBOOT_VARIANT=debug` in `.config` in order to include the cpu deamon into the LinuxBoot initramfs.
 
 The cpu command (the counterpart to the daemon) should be installed on your system as part of the toolchain. Try to run it:
@@ -315,7 +350,6 @@ Usage: cpu [options] host [shell command]:
 ```
 
 ### Usage
-
 Before accessing the remote machine through `cpu` you first need to start the cpu daemon on the host running stboot. To do so, go to the serial console and press `ctrl+c` while stboot is running. This will give you access to the shell. Then do:
 
 ``` bash
