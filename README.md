@@ -181,30 +181,73 @@ You need to write the coreboot.rom to the SPI Flash of the host and write the im
 ## Configuration of stboot
 Most options can be set in `.config`. See the descriptions there for details.
 
-A subset of the configuration options in `.config` end up in two files whis stboot reads in during the boot process:
+A subset of the configuration options in `.config` end up in two JSON files which stboot reads in during the boot process:
 
 ### host_configuration.json
-This file is written to the root directory of the STBOOT partition. It contains the following fields:
+This file is written to the root directory of the STBOOT partition. It contains host specific data and resides on the STBOOT partition, so it can easily be modified during an orchestration process. It contains a single JSON object that stboot parses. The JSON object has the following fields:
+
+#### `version ` - JSON number
+Version number of the host configuation.
+
+#### `network_mode` - JSON string
+Valid values are `"static"` or `"dhcp"`. In network boot mode it determines the setup of the network interface. Either the DHCP protololl is used or a static IP setup using the values of the fields `host_ip` and `gateway`.
+
+#### `host_ip` - JSON string
+Only relevant in network bootmode and when `network_mode` is set to `"static"`. The mashine's network IP address is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
+
+#### `gateway` - JSON string
+Only relevant in network bootmode and when `network_mode` is set to `"static"`. The mashine's network default gateway is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
+
+#### `dns` - JSON string
+Optional setting to pass a custom DNS server when using network boot mode. The value will be prefixed with `nameserver ` and then written to `/etc/resolv.conf` inside the LinuxBoot initramfs. If no own setting is provided, `8.8.8.8` is used.
+
+#### `provisioning_urls` - JSON array of strings
+A list of provisioning server URLs. See also [Network Boot](#Network-Boot). The URLs must include the sheeme (`http://` or `https://`).
+
+#### `identity` - JSON string
+This string representation of random hex-encoded 256 bits is used for string replacement in the provisioning URLs. See [Network Boot](#Network-Boot).
+
+#### `authentication` - JSON string
+This string representation of random hex-encoded 256 bits is used for string replacement in the provisioning URLs. See [Network Boot](#Network-Boot).
+
+An example host_configuration.json file could look like this:
 ``` json
-version:
-network_mode: “dhcp” XOR “static”
-host_ip:"",
-gateway:"",
-dns:""
-provisioning_urls: [list of urls]
-identity: identity (hex-encoded 256-bit entropy)
-authentication: shared_secret (hex-encoded 256-bit entropy)
-entropy_seed: seed (hex-encoded 256-bit entropy)
+{
+    "version":1,
+    "network_mode":"static",
+    "host_ip":"10.0.2.15/24",
+    "gateway":"10.0.2.2/24",
+    "dns":"8.8.8.8",
+    "provisioning_urls": ["http://a.server.com","https://b.server.com"],
+    "identity":"8D4EA31D49AF0EB93FAB198D3FD874B0A2C7C4C4351F28A7967C8D674FE508DC",
+    "authentication":"C2F3F516A79F756E7D3128B77077B4A8AEF61E888499FD99AE92E6D4F2E7653C"
+}
 ```
+All values can be managed via `.config` so although you can easily modify this file on the image, generally it is recommended not to edit this file manually but control the values via the general configuration.
 
 ### security_configuration.json
-This file is compiled into the LinuxBoot initramfs at `/etc/security_configuration.json`. It contains the following security critical fields:
+This file is compiled into the LinuxBoot initramfs at `/etc/security_configuration.json`. It contains the following security critical fields it is not recommended to edit this file manually. It contains a single JSON object that stboot parses. The JSON object has the following fields:
+
+#### `version ` - JSON number
+Version number of the security configuation.
+
+#### `min_valid_sigs_required ` - JSON number
+This value determines the minimum number of signatures that must be valid during the validation of an OS package. See [Signature Verification](#Signature-Verification)
+
+#### `boot_mode ` - JSON string
+Valid values are `"local"` or `"network"`. See [Boot Modes](#Boot-Modes).
+
+#### `use_ospkg_cache ` - JSON boolean
+Only relevant when using network boot mode. In case the provisioning server is down this setting controlles whether to fall back on the local cache or fail. This choice results in either risking a downgrading attack or a DoS attack.
+
+An example security_configuration.json file could look like this:
 ``` json
-version: ,
-min_valid_sigs_required: ,
-build_timestamp: 1602108426,
-boot_mode: "local" XOR “network”
-use_ospkg_cache: false XOR false
+{
+  "version": 1,
+  "minimal_signatures_match": 2,
+  "boot_mode": "local",
+  "use_ospkg_cache": false
+}
 
 ```
 
@@ -238,7 +281,8 @@ Provisioning Server Communication:
 * The HTTPS root certificates are stored in the LinuxBoot initramfs
     * File name: `/etc/https_roots.pem`
     * Use https://letsencrypt.org/certificates/ roots as default.
-Regarding Provisioning URLs:
+
+Provisioning URLs:
 * If multiple provisioning URLs are present in host_configuration, try all, in order.
 * The user must specify HTTP or HTTPS in the URL.
 * stboot will do string replacement on $ID and $AUTH using the values from `host_configuration.json`:
