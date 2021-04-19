@@ -99,17 +99,17 @@ Once you have an OS kernel & initramfs containing the usersapce and optionally a
 make
 ```
 Otherwise, use one of the following dedicated options.
-Regarding deployment, we defined three real world scenarios which should at least support a high chance that we have covered a lot of hardware systems.
+Regarding deployment, we defined three real world scenarios which should at least support a high chance that we have covered a lot of hardware systems. See also [Deployment](#Deployment)
 
 ### Leased server with MBR bootloader installation
-Bringing system transparency to already existing hardware which can’t be transformed to open source firmware machines is troublesome. Therefore, we need to propose a solution which even works on those limited systems. This scenario is especially helpful for a server landscape with mixed firmware like BIOS and UEFI.
+Bringing system transparency to already existing hardware which can’t be transformed to open source firmware machines is troublesome. Therefore, we need to propose a solution which even works on those limited systems. This scenario is especially helpful for a server landscape with mixed firmware like BIOS and UEFI. Syslinux is used as an intermedeate bootloader. There is both, valid boot code in the MBR (for legacy systems) and a .efi file on the first partition (for EFI systems) to load stboot. The disadvantage is that there is no guarantied TPM measurement of the stboot code in the installation option.
 
 ```bash
 make mbr-bootloader-installation
 ```
 
 ### Leased server with EFI application installation
-In this scenario we have a closed source UEFI firmware which cannot easily be modified. In order to deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as an EFI application.
+In this scenario we have a closed source UEFI firmware which cannot easily be modified. In order to deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as an EFI application. The idea is to take advantage of the TPM measurements done by the efi firmware. stboot (kernel + initramfs compiled into this kernel) is build as an EFI executable / efi application in this installation option. This artifact resides at partition partition marked as ESP (EFI special partition). The efi firmware measures this file before execution (even with secure boot disabled in our tests). 
 
 ```bash
 make efi-application-installation
@@ -135,15 +135,16 @@ make run-efi-application
 ```
 
 # Deployment
-The bootloader artifact can be built in three different formats:
+The bootloader artifact can be built in three different formats (see also [installation](#stboot-image)):
 
 ## MBR Bootloader Installation
 When built as an MBR bootloader there is one artefact `out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img`containing:
 * SYSLINUX (for the Master Boot Record)
 * A VFAT/FAT32 partition named STBOOT containing:
     * Syslinux configuration
+    * Syslinux boot files
     * LinuxBoot files
-    * Less critical configuration data (host_configuration.json) for stboot.
+    * Host configuration for stboot
 * An Ext4 partition named STDATA containing
     * An OS package if boot method is set to _local_.
     * An empty directory for use as a cache if the boot method is set to _network_.
@@ -154,7 +155,7 @@ You need to write this image to the hard drive of the host.
 When built as an EFI application there is one artefact `out/stboot-installation/efi-application/stboot_efi_installation.img` containing:
 * A VFAT/FAT32 partition named STBOOT marked as an EFI system partition containing:
     * LinuxBoot files compiled as an EFI stub
-    * Less critical configuration data (host_configuration.json) for stboot.
+    * Host configuration for stboot
 *An Ext4 partition named STDATA containing:
     * An OS package if boot method is set to _local_.
     * An empty directory for use as a cache if the boot method is set to _network_.
@@ -168,7 +169,7 @@ When built as a coreboot payload there will be two artifacts:
 * A file named coreboot.rom containing an SPI flash image.
 * A file named stboot_coreboot_installation.img containing:
     * A VFAT/FAT32 partition named STBOOT containing:
-        * Less critical configuration data (host_configuration.json) for stboot.
+        * Host configuration for stboot
     * An Ext4 partition named STDATA containing:
         * An OS package if boot method is set to _local_.
         * An empty directory for use as a cache if boot method is set to _network_.
