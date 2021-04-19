@@ -26,7 +26,6 @@ url_array=$(printf '%s\n' "${provisioning_url[@]}" | jq -cR . | jq -cs .)
 
 identity=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
 authentication=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
-entropy_seed=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
 
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
@@ -43,8 +42,7 @@ cat >"${host_config}" <<EOL
    "dns":"${host_dns}",
    "provisioning_urls": ${url_array},
    "identity":"${identity}",
-   "authentication":"${authentication}",
-   "entropy_seed":"${entropy_seed}"
+   "authentication":"${authentication}"
 }
 EOL
 
