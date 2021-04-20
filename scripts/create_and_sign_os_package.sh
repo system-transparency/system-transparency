@@ -26,7 +26,7 @@ os_pkg_tboot="${ST_OS_PKG_TBOOT}"
 os_pkg_tboot_args="${ST_OS_PKG_TBOOT_ARGS}"
 os_pkg_acm="${ST_OS_PKG_ACM}"
 
-output_name="os-pkg-example-$(date +"%Y-%m-%d-%H-%M-%S")"
+output_name="os-pkg-example-$(date +"%Y-%m-%d-%H-%M-%S").zip"
 output_path="${out}/${output_name}"
 
 
@@ -42,11 +42,11 @@ stmanager_create_args=( "--out=${output_path}" "--label=${os_pkg_label}" "--kern
 
 "${gopath}"/bin/stmanager create "${stmanager_create_args[@]}"
 
-echo "[INFO]: created OS package ${os_pkg_name}"
+echo "[INFO]: created OS package ${output_name}"
 os_pkg="${output_path}"
 
 
-echo "[INFO]: call 'stmanager sign' to sign $os_pkg_name with example keys"
+echo "[INFO]: call 'stmanager sign' to sign $output_name with example keys"
 for I in 1 2 3
 do
     "${gopath}"/bin/stmanager sign --key="${signing_key_dir}/signing-key-${I}.key" --cert="${signing_key_dir}/signing-key-${I}.cert" "$os_pkg"
