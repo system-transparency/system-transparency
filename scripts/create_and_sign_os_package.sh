@@ -17,7 +17,6 @@ out="${root}/out/os-packages"
 signing_key_dir="${root}/out/keys/signing_keys"
 local_boot_order_file_name="local_boot_order"
 local_boot_order_file="${out}/${local_boot_order_file_name}"
-os_pkg_name="${ST_OS_PKG_NAME}"
 os_pkg_label="${ST_OS_PKG_LABEL}"
 os_pkg_url="${ST_OS_PKG_URL}"
 os_pkg_kernel="${ST_OS_PKG_KERNEL}"
@@ -27,8 +26,8 @@ os_pkg_tboot="${ST_OS_PKG_TBOOT}"
 os_pkg_tboot_args="${ST_OS_PKG_TBOOT_ARGS}"
 os_pkg_acm="${ST_OS_PKG_ACM}"
 
-if [ -z "${ST_OS_PKG_NAME}" ]; then os_pkg_name="os-pkg-$(date +"%Y-%m-%d-%H-%M-%S").zip"; fi
-output_path="${out}/${os_pkg_name}"
+output_name="os-pkg-example-$(date +"%Y-%m-%d-%H-%M-%S")"
+output_path="${out}/${output_name}"
 
 
 if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi

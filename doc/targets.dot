@@ -102,7 +102,6 @@ digraph targets {
         ST_OS_PKG_TBOOT
         ST_OS_PKG_TBOOT_ARGS
         ST_OS_PKG_ACM
-        ST_OS_PKG_NAME
         ST_OS_PKG_LABEL
         ST_OS_PKG_URL
         ST_OS_PKG_KERNEL
@@ -132,7 +131,7 @@ digraph targets {
     ssh_private_key ssh_public_key
   }}
   {
-    ST_OS_PKG_TBOOT ST_OS_PKG_TBOOT_ARGS ST_OS_PKG_ACM ST_OS_PKG_NAME ST_OS_PKG_LABEL ST_OS_PKG_URL ST_OS_PKG_KERNEL ST_OS_PKG_INITRAMFS ST_OS_PKG_CMDLINE
+    ST_OS_PKG_TBOOT ST_OS_PKG_TBOOT_ARGS ST_OS_PKG_ACM ST_OS_PKG_LABEL ST_OS_PKG_URL ST_OS_PKG_KERNEL ST_OS_PKG_INITRAMFS ST_OS_PKG_CMDLINE
     tboot acm
     root_key root_cert signing_keys signing_certs
     debian_kernel debian_initramfs
