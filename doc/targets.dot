@@ -63,42 +63,45 @@ digraph targets {
   {
     // config variables
     subgraph cluster_config {
-      label = "run.config"
+      label = ".config"
       subgraph cluster_config_installation {
-        label = "Installation"
+        label = "Tooling"
         ST_UROOT_DEV_BRANCH
       }
       subgraph cluster_config_data {
         label = "STBoot Data"
-        ST_PROVISIONING_SERVER_URL
-        ST_NETWORK_MODE
-        ST_HOST_IP
-        ST_HOST_GATEWAY
-        ST_HOST_DNS
+        
       }
       subgraph cluster_config_common {
-        label = "STBoot - common"
+        label = "stboot installation image"
+        ST_KERNEL_VERSION
+        ST_MBR_BOOTLOADER_KERNEL_VERSION
+        ST_MBR_BOOTLOADER_KERNEL_CONFIG
+        ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION
+        ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG
         ST_LINUXBOOT_CMDLINE
         ST_LINUXBOOT_VARIANT
         ST_SIGNING_ROOT
         ST_NUM_SIGNATURES
         ST_BOOT_MODE
         ST_USE_PKG_CACHE
-        ST_KERNEL_VERSION
+        ST_PROVISIONING_SERVER_URL
+        ST_NETWORK_MODE
+        ST_HOST_IP
+        ST_HOST_GATEWAY
+        ST_HOST_DNS
         ST_DATA_PARTITION_SZIZE
       }
       subgraph cluster_config_mbr {
         label = "STBoot - MBR Bootloader"
-	ST_MBR_BOOTLOADER_KERNEL_VERSION
-        ST_MBR_BOOTLOADER_KERNEL_CONFIG
+	      
       }
       subgraph cluster_config_mbr {
         label = "STBoot - EFI Application"
-        ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION
-        ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG
+        
       }
       subgraph cluster_config_os {
-        label = "STBoot OS packages - General"
+        label = "OS packages"
         ST_OS_PKG_TBOOT
         ST_OS_PKG_TBOOT_ARGS
         ST_OS_PKG_ACM
