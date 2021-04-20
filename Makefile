@@ -232,7 +232,6 @@ help:
 	@echo  '  ubuntu-18                    - Build reproducible Ubuntu Bionic (latest)'
 	@echo  '  ubuntu-20                    - Build reproducible Ubuntu Focal'
 	@echo  '  example-os-package           - Build and Sign an example OS package'
-	@echo  '  upload                       - Upload OS package to provisioning server'
 	@echo  '*** Run in QEMU'
 	@echo  '  run-mbr-bootloader           - Run MBR bootloader'
 	@echo  '  run-efi-application          - Run EFI application'
@@ -280,13 +279,6 @@ example-os-package: $(DOTCONFIG) $(stmanager_bin) $(call GROUP,$(ROOT_CERT) $(KE
 	@$(call LOG,INFO,Sign OS package)
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,OS package:,$$(ls -tp $(os-out) | grep .zip | grep -v /$ | head -1))
-
-upload: $(newest-ospkg)
-	@echo [stboot] Upload OS package
-	@$(call LOG,INFO,Upload OS package)
-	$(scripts)/upload_os_package.sh $<
-	@$(call LOG,DONE,Upload OS package)
-	@echo [stboot] Done OS package
 
 $(out-dirs):
 	mkdir -p $@

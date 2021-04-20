@@ -108,12 +108,6 @@ digraph targets {
         ST_OS_PKG_INITRAMFS
         ST_OS_PKG_CMDLINE
       }
-      subgraph cluster_config_upload {
-        label = "Upload"
-        ST_SSH_UPLOAD_SERVER
-        ST_SSH_UPLOAD_USER
-        ST_SSH_UPLOAD_PATH
-      }
       subgraph cluster_config_testing {
         label = "Testing"
         ST_QEMU_MEM
