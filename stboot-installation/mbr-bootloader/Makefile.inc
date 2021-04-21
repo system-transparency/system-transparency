@@ -3,7 +3,6 @@ mbr-out := $(st-out)/mbr-bootloader
 
 mbr_image:= $(mbr-out)/stboot_mbr_installation.img
 mbr_boot_partition := $(mbr-out)/boot_partition.vfat
-mbr_kernel := $(mbr-out)/linuxboot.vmlinuz
 syslinux := $(cache)/syslinux/syslinux-6.03/bios/mtools/syslinux
 syslinux_efi32 := $(cache)/syslinux/syslinux-6.03/efi32/efi/syslinux.efi
 syslinux_efi64 := $(cache)/syslinux/syslinux-6.03/efi64/efi/syslinux.efi
@@ -20,14 +19,10 @@ $(mbr_image): $(mbr_boot_partition) $(data_partition)
 	$(mbr)/build_image.sh $(OUTREDIRECT)
 	$(call LOG,DONE,MBR bootloader image,$@)
 
-$(mbr_boot_partition): $(mbr_kernel) $(syslinux_config) $(host_config) $(syslinux) $(efi32) $(efi64)
+$(mbr_boot_partition): $(kernel) $(syslinux_config) $(host_config) $(syslinux) $(efi32) $(efi64)
 	$(call LOG,INFO,Build STBOOT MBR boot partition,$@)
 	$(mbr)/build_boot_filesystem.sh $(OUTREDIRECT)
 	$(call LOG,DONE,STBOOT MBR boot partition,$@)
-
-$(eval $(call CONFIG_DEP,$(mbr_kernel),ST_LINUXBOOT_CMDLINE|ST_MBR_BOOTLOADER_KERNEL_CONFIG|ST_MBR_BOOTLOADER_KERNEL_VERSION))
-$(eval $(call KERNEL_TARGET,mbr,$(mbr_kernel),$(ST_MBR_BOOTLOADER_KERNEL_VERSION),$(ST_MBR_BOOTLOADER_KERNEL_CONFIG)))
-$(mbr_kernel): % : %.config
 
 $(syslinux):
 	$(call LOG,INFO,Fetch syslinux,$@)
@@ -35,6 +30,7 @@ $(syslinux):
 	$(call LOG,DONE,syslinux,$@)
 
 $(syslinux_config):
+	mkdir -p $(dir $@)
 	$(call LOG,INFO,Generating syslinux configuration,$@)
 	$(mbr)/build_syslinux_config.sh $(OUTREDIRECT)
 	$(call LOG,DONE,syslinux configuration,$@)

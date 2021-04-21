@@ -12,7 +12,7 @@ root="$(cd "${dir}/../../" && pwd)"
 out="${root}/out/stboot-installation/efi-application"
 name="boot_partition.vfat"
 fs="${out}/${name}"
-linuxboot_kernel="${out}/linuxboot.efi"
+linuxboot_kernel="${out}/../linuxboot.vmlinuz"
 host_config="${root}/out/stboot-installation/host_configuration.json"
 
 echo
