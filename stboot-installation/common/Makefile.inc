@@ -2,7 +2,8 @@ os-out := $(out)/os-packages
 st-out := $(out)/stboot-installation
 
 data_partition := $(st-out)/data_partition.ext4
-initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
+kernel := $(st-out)/linuxboot.vmlinuz
+initramfs := $(st-out)/initramfs-linuxboot.cpio.gz
 host_config := $(st-out)/host_configuration.json
 security_config := $(st-out)/security_configuration.json
 
@@ -23,6 +24,10 @@ endif
 	@$(call LOG,INFO,Build STDATA partition,$(data_partition))
 	$(common)/build_data_filesystem.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,STDATA,$(data_partition))
+
+$(eval $(call CONFIG_DEP,$(kernel),ST_LINUXBOOT_KERNEL_CONFIG|ST_LINUXBOOT_KERNEL_VERSION|ST_LINUXBOOT_CMDLINE))
+$(eval $(call KERNEL_TARGET,common,$(kernel),$(ST_LINUXBOOT_KERNEL_VERSION),$(ST_LINUXBOOT_KERNEL_CONFIG)))
+$(kernel): % : %.config
 
 $(eval $(call CONFIG_DEP,$(initramfs),ST_LINUXBOOT_VARIANT))
 # add cpu ssh public key

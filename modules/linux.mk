@@ -98,8 +98,8 @@ $(tarball_dir)/linux-%.tar.xz.valid: $(tarball_dir)/linux-%.tar.xz $(tarball_dir
 ### KERNEL_TARGET: function to generate linux kernel targets for specific installations
 ## args
 #
-# $1: name           - "installation name (e.g. mbr, efi ...)"
-# $2: kernel_path    - "kernel path"
+# $1: name           - "kernel path prefix"
+# $2: kernel_path    - "kernel target"
 # $3: kernel_version - "kernel version"
 # $4: defconfig      - "kernel defconfig"
 
@@ -108,7 +108,7 @@ define KERNEL_TARGET
 ifneq ($$(strip $3),)
 $1-kernel_version := $3
 else
-$1-kernel_version := $(ST_KERNEL_VERSION)
+$1-kernel_version := $(ST_LINUXBOOT_KERNEL_VERSION)
 endif
 
 $1-kernel_tarball=linux-$$($1-kernel_version).tar.xz
@@ -121,19 +121,19 @@ kernel $1-kernel: $(DOTCONFIG) $2
 $2: $$($1-kernel_target)
 	mkdir -p $$(dir $$@)
 	cp $$< $$@
-	$(call LOG,DONE,Linux/$1: kernel,$$($1-kernel_version))
+	$(call LOG,DONE,Linux: kernel,$$($1-kernel_version))
 
 $$($1-kernel_target): $$($1-kernel_dir)/.config  $(initramfs)
-	$(call LOG,INFO,Linux/$1: Make kernel,$$($1-kernel_version))
+	$(call LOG,INFO,Linux: Make kernel,$$($1-kernel_version))
 	$$(MAKE) -C $$($1-kernel_dir) $$(KERNEL_MAKE_FLAGS) bzImage
 
 $$($1-kernel_dir)/.config: $(DOTCONFIG) $$($1-kernel_dir)/.unpack $(patsubst "%",%,$4)
-	$(call LOG,INFO,Linux/$1: Configure kernel,$$($1-kernel_version));
+	$(call LOG,INFO,Linux: Configure kernel,$$($1-kernel_version));
 ifneq ($(strip $4),)
-	$(call LOG,INFO,Linux/$1: Use configuration file,$(patsubst "%",%,$4));
+	$(call LOG,INFO,Linux: Use configuration file,$(patsubst "%",%,$4));
 	cp $4 $$@.tmp
 ifneq ($(strip $(ST_LINUXBOOT_CMDLINE)),)
-	$(call LOG,WARN,Linux/$1: Override CONFIG_CMDLINE with ST_LINUXBOOT_CMDLINE=$(_ST_LINUXBOOT_CMDLINE));
+	$(call LOG,WARN,Linux: Override CONFIG_CMDLINE with ST_LINUXBOOT_CMDLINE=$(_ST_LINUXBOOT_CMDLINE));
 	sed -ie 's/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=$(_ST_LINUXBOOT_CMDLINE)/g' $$@.tmp
 endif
 	mv $$@.tmp $$@
@@ -146,20 +146,20 @@ $$($1-kernel_dir)/.unpack: $(tarball_dir)/$$($1-kernel_tarball).valid
 	fi
 	if [[ ! -d "$$($1-kernel_dir)" ]]; then \
 	mkdir -p $$($1-kernel_dir); \
-	$(call LOG,INFO,Linux/$1: Unpack $$($1-kernel_tarball)); \
+	$(call LOG,INFO,Linux: Unpack $$($1-kernel_tarball)); \
 	tar xJf $(tarball_dir)/$$($1-kernel_tarball) --strip 1 -C $$($1-kernel_dir); \
 	fi
 	touch $$@
 
 $1-kernel-updatedefconfig: $$($1-kernel_dir)/.config $(DOTCONFIG)
-	$(call LOG,INFO,Linux/$1: Update defconfig $4)
+	$(call LOG,INFO,Linux: Update defconfig $4)
 	$$(MAKE) -C $$($1-kernel_dir) $(KERNEL_MAKE_FLAGS) savedefconfig
 	sed -ie "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"$(subst $\",,$(DEFAULT_CMDLINE))\"/" $$($1-kernel_dir)/defconfig
 	if [[ -f $4 ]]; then \
 	  if diff $$($1-kernel_dir)/defconfig $4 $(OUTREDIRECT); then \
-	    $(call LOG,WARN,Linux/$1: defconfig already up-to-date); \
+	    $(call LOG,WARN,Linux: defconfig already up-to-date); \
           else \
-	    $(call LOG,INFO,Linux/$1: Move old defconfig $(notdir $4) to $(notdir $4).old); \
+	    $(call LOG,INFO,Linux: Move old defconfig $(notdir $4) to $(notdir $4).old); \
 	    mv $4{,.old}; \
 	  fi \
 	fi
