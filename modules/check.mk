@@ -48,6 +48,7 @@ dep_pkgs += libc6-i386
 ### debos
 ## native env
 ifeq ($(DEBIAN-OS),y)
+dep_pkgs += ubuntu-keyring
 dep_pkgs += libglib2.0-dev
 check_libs += glib-2.0
 check_libs += gobject-2.0
