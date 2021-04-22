@@ -56,6 +56,8 @@ endif
 go-tools := debos u-root stmanager cpu sinit-acm-grebber
 go-tools: $(go-tools)
 
+.PHONY: go-tools $(go-tools)
+
 ### debos
 
 debos_get := $(debos_src)/.git/config
@@ -87,6 +89,8 @@ endif
 debos $(debos_bin): $(debos_checkout)
 	$(call go_update,debos,$(debos_bin),$(debos_package)/cmd/debos)
 
+.PHONY: $(debos_fetch)
+
 ### u-root/stmanager
 
 u-root_get := $(u-root_src)/.git/config
@@ -98,7 +102,7 @@ $(u-root_get): $(go_check)
 	go get -d -u $(u-root_package)
 	git -C $(u-root_src) checkout --quiet $(u-root_default_branch)
 $(u-root_fetch): $(u-root_get)
-	@$(call LOG,INFO,Go: Fetch branch $(u-root_branch))
+	@$(call LOG,INFO,Go: Fetch branch,$(u-root_branch))
 	git -C $(u-root_src) fetch --all --quiet
 $(u-root_checkout): $(u-root_fetch)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
@@ -112,6 +116,8 @@ u-root $(u-root_bin): $(u-root_checkout)
 	$(call go_update,u-root,$(u-root_bin),$(u-root_package))
 stmanager $(stmanager_bin): $(u-root_checkout)
 	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
+
+.PHONY: $(u-root_fetch)
 
 ### cpu command
 
@@ -127,4 +133,3 @@ sinit-acm-grebber $(sinit-acm-grebber_bin):
 	go get -d -u $(sinit-acm-grebber_package)
 	$(call go_update,sinit-acm-grebber,$(sinit-acm-grebber_bin),$(sinit-acm-grebber_package))
 
-.PHONY: go-tools debos u-root stmanager cpu sinit-acm-grebber
