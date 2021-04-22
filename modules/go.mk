@@ -89,7 +89,9 @@ endif
 debos $(debos_bin): $(debos_checkout)
 	$(call go_update,debos,$(debos_bin),$(debos_package)/cmd/debos)
 
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools debos $(debos_bin)),)
 .PHONY: $(debos_fetch)
+endif
 
 ### u-root/stmanager
 
@@ -117,7 +119,9 @@ u-root $(u-root_bin): $(u-root_checkout)
 stmanager $(stmanager_bin): $(u-root_checkout)
 	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
 
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools u-root stmanager $(u-root_bin) $(stmanager_bin)),)
 .PHONY: $(u-root_fetch)
+endif
 
 ### cpu command
 
@@ -127,9 +131,16 @@ cpu $(cpu_bin) $(cpud_bin):
 	$(call go_update,cpu,$(cpu_bin),$(cpu_package))
 	$(call go_update,cpud,$(cpud_bin),$(cpud_package))
 
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools $(cpu_bin) $(cpud_bin)),)
+.PHONY: $(cpu_bin) $(cpud_bin)
+endif
+
 ### ACM grebber
 sinit-acm-grebber $(sinit-acm-grebber_bin):
 	@$(call LOG,INFO,Go: Get,$(sinit-acm-grebber_package))
 	go get -d -u $(sinit-acm-grebber_package)
 	$(call go_update,sinit-acm-grebber,$(sinit-acm-grebber_bin),$(sinit-acm-grebber_package))
 
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools $(sinit-acm-grebber_bin)),)
+.PHONY: $(sinit-acm-grebber_bin)
+endif
