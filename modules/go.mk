@@ -65,7 +65,9 @@ debos_checkout := $(debos_src)/.git/HEAD
 
 $(debos_get):
 	@$(call LOG,INFO,Go: Get,$(debos_package))
-	go get -d -u $(debos_package)/...
+	go get -d -u $(debos_package)/... 2>/dev/null || \
+		rm -rf $(debos_src) && \
+		go get -d -u $(debos_package)/...
 $(debos_remote): $(debos_get)
 	if ! git -C $(debos_src) remote show system-transparency >/dev/null 2>&1; then \
 	  $(call LOG,INFO,Go: Add system-transparecy remote,$(debos_repo)); \
