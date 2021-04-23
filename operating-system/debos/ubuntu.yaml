@@ -69,11 +69,13 @@ actions:
 
   - action: run
     description: Clean up irreproducible data
+    chroot: true
     script: scripts/cleanup_irreproducible_data.sh
 
 # This packs reproducibly
   - action: run
     description: Pack reproducibly
+    chroot: false
     script: scripts/pack_reproducibly.sh {{ $image }}
 
 # Since pack is not supporting reproducible builds, we pack manually
