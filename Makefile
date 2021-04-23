@@ -72,7 +72,7 @@ endif
 # $3 = file/path (optional)
 #
 define LOG
-printf '[%s] $2 %s\n' '$($1_COLOR)$1$(NORMAL)' '$(FILE_COLOR)$3$(NORMAL)'
+printf '[%s] $2 %s\n' "$($1_COLOR)$1$(NORMAL)" "$(FILE_COLOR)$3$(NORMAL)"
 endef
 
 # Make is silent per default, but 'make V=1' will show all compiler calls.

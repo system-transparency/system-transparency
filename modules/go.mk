@@ -56,6 +56,8 @@ endif
 go-tools := debos u-root stmanager cpu sinit-acm-grebber
 go-tools: $(go-tools)
 
+.PHONY: go-tools $(go-tools)
+
 ### debos
 
 debos_get := $(debos_src)/.git/config
@@ -65,7 +67,9 @@ debos_checkout := $(debos_src)/.git/HEAD
 
 $(debos_get):
 	@$(call LOG,INFO,Go: Get,$(debos_package))
-	go get -d -u $(debos_package)/...
+	go get -d -u $(debos_package)/... 2>/dev/null || \
+		rm -rf $(debos_src) && \
+		go get -d -u $(debos_package)/...
 $(debos_remote): $(debos_get)
 	if ! git -C $(debos_src) remote show system-transparency >/dev/null 2>&1; then \
 	  $(call LOG,INFO,Go: Add system-transparecy remote,$(debos_repo)); \
@@ -85,6 +89,10 @@ endif
 debos $(debos_bin): $(debos_checkout)
 	$(call go_update,debos,$(debos_bin),$(debos_package)/cmd/debos)
 
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools debos $(debos_bin)),)
+.PHONY: $(debos_fetch)
+endif
+
 ### u-root/stmanager
 
 u-root_get := $(u-root_src)/.git/config
@@ -96,7 +104,7 @@ $(u-root_get): $(go_check)
 	go get -d -u $(u-root_package)
 	git -C $(u-root_src) checkout --quiet $(u-root_default_branch)
 $(u-root_fetch): $(u-root_get)
-	@$(call LOG,INFO,Go: Fetch branch $(u-root_branch))
+	@$(call LOG,INFO,Go: Fetch branch,$(u-root_branch))
 	git -C $(u-root_src) fetch --all --quiet
 $(u-root_checkout): $(u-root_fetch)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
@@ -111,6 +119,10 @@ u-root $(u-root_bin): $(u-root_checkout)
 stmanager $(stmanager_bin): $(u-root_checkout)
 	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
 
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools u-root stmanager $(u-root_bin) $(stmanager_bin)),)
+.PHONY: $(u-root_fetch)
+endif
+
 ### cpu command
 
 cpu $(cpu_bin) $(cpud_bin):
@@ -119,10 +131,16 @@ cpu $(cpu_bin) $(cpud_bin):
 	$(call go_update,cpu,$(cpu_bin),$(cpu_package))
 	$(call go_update,cpud,$(cpud_bin),$(cpud_package))
 
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools $(cpu_bin) $(cpud_bin)),)
+.PHONY: $(cpu_bin) $(cpud_bin)
+endif
+
 ### ACM grebber
 sinit-acm-grebber $(sinit-acm-grebber_bin):
 	@$(call LOG,INFO,Go: Get,$(sinit-acm-grebber_package))
 	go get -d -u $(sinit-acm-grebber_package)
 	$(call go_update,sinit-acm-grebber,$(sinit-acm-grebber_bin),$(sinit-acm-grebber_package))
 
-.PHONY: go-tools debos u-root stmanager cpu sinit-acm-grebber
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools $(sinit-acm-grebber_bin)),)
+.PHONY: $(sinit-acm-grebber_bin)
+endif

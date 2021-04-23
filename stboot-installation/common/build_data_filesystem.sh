@@ -57,7 +57,7 @@ rm "${timestamp_file}"
 echo
 echo "[INFO]: Copying OS packages to image (for local boot method)"
 ls -l "${root}/out/os-packages/."
-e2cp "${local_boot_order_file}" "${fs}.tmp":/stboot/os_pkgs/local
+if [ -f "${local_boot_order_file}" ]; then e2cp "${local_boot_order_file}" "${fs}.tmp":/stboot/os_pkgs/local; fi
 for i in "${os_pkg_dir}"/*; do
   [ -e "$i" ] || continue
   e2cp "$i" "${fs}.tmp":/stboot/os_pkgs/local

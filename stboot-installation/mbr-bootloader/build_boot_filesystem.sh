@@ -48,19 +48,19 @@ mcopy -i "${fs}.tmp" "${syslinux_config}" ::boot/syslinux/
 echo "[INFO]: Writing host cofiguration"
 mcopy -i "${fs}.tmp" "${host_config}" ::
 
-echo "[INFO]: Done VFAT filesystems for STBOOT partition"
-mv ${fs}{.tmp,}
-
 echo "[INFO]: Installing EFI"
-mmd -i "${fs}" ::EFI
-mmd -i "${fs}" ::EFI/BOOT
-mcopy -i "${fs}" "${syslinux_e32}" ::boot/syslinux/
-mcopy -i "${fs}" "${syslinux_e64}" ::boot/syslinux/
+mmd -i "${fs}.tmp" ::EFI
+mmd -i "${fs}.tmp" ::EFI/BOOT
+mcopy -i "${fs}.tmp" "${syslinux_e32}" ::boot/syslinux/
+mcopy -i "${fs}.tmp" "${syslinux_e64}" ::boot/syslinux/
 
 echo "[INFO]: Installing efi32"
-mcopy -i "${fs}" "${syslinux_efi32}" ::/EFI/BOOT/
+mcopy -i "${fs}.tmp" "${syslinux_efi32}" ::/EFI/BOOT/
 
 echo "[INFO]: Installing efi64"
-mcopy -i "${fs}" "${syslinux_efi64}" ::/EFI/BOOT/
+mcopy -i "${fs}.tmp" "${syslinux_efi64}" ::/EFI/BOOT/
+
+echo "[INFO]: Done VFAT filesystems for STBOOT partition"
+mv ${fs}{.tmp,}
 
 trap - EXIT
