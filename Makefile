@@ -1,6 +1,7 @@
 out ?= out
 out-dirs += $(out)
 cache ?= cache
+tarball_dir := $(cache)/tarball
 common := stboot-installation/common
 scripts := scripts
 stboot-installation := stboot-installation
@@ -188,6 +189,7 @@ endif
 include modules/check.mk
 include modules/go.mk
 include modules/linux.mk
+include modules/swtpm.mk
 
 include operating-system/Makefile.inc
 
