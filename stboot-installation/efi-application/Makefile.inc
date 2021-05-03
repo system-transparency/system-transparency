@@ -1,6 +1,5 @@
 efi := stboot-installation/efi-application
 efi-out := $(st-out)/efi-application
-out-dirs += $(efi-out)
 
 efi_image:= $(efi-out)/stboot_efi_installation.img
 efi_boot_partition := $(efi-out)/boot_partition.vfat

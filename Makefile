@@ -1,5 +1,4 @@
 out ?= out
-out-dirs += $(out)
 cache ?= cache
 tarball_dir := $(cache)/tarball
 common := stboot-installation/common

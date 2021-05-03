@@ -1,6 +1,5 @@
 mbr := stboot-installation/mbr-bootloader
 mbr-out := $(st-out)/mbr-bootloader
-out-dirs += $(mbr-out)
 
 mbr_image:= $(mbr-out)/stboot_mbr_installation.img
 mbr_boot_partition := $(mbr-out)/boot_partition.vfat
