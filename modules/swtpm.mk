@@ -63,7 +63,7 @@ $(swtpm_src)/Makefile: $(libtpms_pkg) $(swtpm_src)/.unpack
 $(swtpm_bin): $(swtpm_src)/Makefile
 	mkdir -p $(dir $@)
 	@$(call LOG,INFO,swtpm: Make,swtpm)
-	$(MAKE) -C $(dir $<) install >/dev/null 2>$(dir $<)build.log || \
+	$(MAKE) -C $(dir $<) python-install install >/dev/null 2>$(dir $<)build.log || \
 	($(call LOG,ERROR,swtpm: swtpm build failed. See,$(dir $<)build.log); \
 	exit 1)
 	@$(call LOG,DONE,swtpm:,$(swtpm_bin))
