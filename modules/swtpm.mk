@@ -9,6 +9,8 @@ swtpm_setup_bin := $(swtpm_dir)/bin/swtpm_setup
 libtpms_version := 0.7.7
 swtpm_version := 0.5.2
 
+PYTHONPATH=$(CURDIR)/cache/swtpm/lib/python3/dist-packages
+
 $(tarball_dir)/libtpms-v%.tar.gz:
 	mkdir -p $(tarball_dir)
 	@$(call LOG,INFO,Get,$(notdir $@))

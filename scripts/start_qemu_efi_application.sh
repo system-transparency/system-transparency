@@ -26,6 +26,7 @@ done
 
 if [ "$ovmf" == "" ]; then
   echo "ERROR: OVMF not found"
+  exit 1
 fi
 
 tpm=$(mktemp -d --suffix='-tpm')
