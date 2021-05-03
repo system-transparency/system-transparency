@@ -183,8 +183,8 @@ else
       CONTAINER := docker
       debos-dep := check_debos_docker check_kvm_access
       container-dep += docker-check
-      # drop priviledge to have user id and access to kvm
-      container-args += --user $(shell id -u):$(shell stat -c %g /dev/kvm)
+      # drop priviledge to have user id and access to kvm (fallback to user group)
+      container-args += --user $(ID):$(shell stat -c %g /dev/kvm 2>/dev/null || stat -c %g $(CURDIR))
     else
       ifeq ($(DEBOS_ENV),podman)
         CONTAINER := podman
