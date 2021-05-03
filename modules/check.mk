@@ -174,6 +174,20 @@ check_%_lib:
 	  fi; \
 	fi;
 
+check_targets += check_ovmf
+check_ovmf:
+	found=""; \
+	for i in /usr/share/OVMF/OVMF_CODE.fd /usr/share/edk2/ovmf/OVMF_CODE.fd; do \
+	  if [ -f "$$i" ]; then \
+	    found=y; \
+	    $(call LOG,PASS,OVMF binary found:,$$i); \
+	  fi; \
+	done; \
+	if [ "$$found" != "y" ]; then \
+	  $(call LOG,FAIL,OVMF binary not found); \
+	    $(CHECK_EXIT) \
+	fi;
+
 check_targets += check_libc_i386
 check_libc_i386:
 	@$(call LOG,INFO,check runtime library:,libc(i386)) 
