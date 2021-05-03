@@ -19,6 +19,20 @@ TZ:=UTC0
 # use bash (nix/NixOS friendly)
 SHELL := /usr/bin/env bash -euo pipefail -c
 
+# Get user id and group from the top directory
+ID := $(shell stat -c %u $(CURDIR))
+GID := $(shell stat -c %g $(CURDIR))
+IS_ROOT := $(shell [[ $$(id -u) == "0" ]] && echo y)
+KVM_EXISTS := $(shell [[ -e /dev/kvm ]] && echo y)
+
+# command to drop privileges
+SETPRIV := setpriv --reuid=$(ID) --regid=$(GID)
+ifeq ($(KVM_EXISTS),y)
+SETPRIV += --groups $(shell stat -c %g /dev/kvm)
+else
+SETPRIV += --clear-groups
+endif
+
 # Use PID to stop build process on error
 MAKEPID:= $(shell echo $$PPID)
 
@@ -103,7 +117,9 @@ $(word 1,$(1))
 endef
 
 # Make uses maximal available job threads by default
+ifeq ($(MAKELEVEL),0)
 MAKEFLAGS += -j$(shell nproc)
+endif
 
 BOARD ?= qemu
 DOTCONFIG ?= .config
@@ -120,12 +136,12 @@ endif
 
 IDs = 1 2 3
 TYPEs = key cert
-EXAMPLE_KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(EXAMPLE_ROOT_CERT))signing-key-$(ID).$(TYPE)))
-KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(ROOT_CERT))signing-key-$(ID).$(TYPE)))
+EXAMPLE_KEYS_CERTS := $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(EXAMPLE_ROOT_CERT))signing-key-$(ID).$(TYPE)))
+KEYS_CERTS := $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(ROOT_CERT))signing-key-$(ID).$(TYPE)))
 
 CPU_KEY_DIR := $(out)/keys/cpu_keys/
 CPU_SSH_FILES := cpu_rsa cpu_rsa.pub ssh_host_rsa_key ssh_host_rsa_key.pub
-CPU_SSH_KEYS += $(foreach CPU_SSH_FILE,$(CPU_SSH_FILES),$(CPU_KEY_DIR)/$(CPU_SSH_FILE))
+CPU_SSH_KEYS := $(foreach CPU_SSH_FILE,$(CPU_SSH_FILES),$(CPU_KEY_DIR)/$(CPU_SSH_FILE))
 
 ## error if OS packages are missing
 # args:
@@ -167,6 +183,18 @@ $(1).config: $(DOTCONFIG)
 	rsync -c $$@.temp $$@
 	rm $$@.temp
 endef
+
+# do not drop privileges on specific targets
+build_as_root := install-deps
+build_as_root += clean clean-os distclean
+
+ifeq ($(IS_ROOT)$(filter $(MAKECMDGOALS),$(build_as_root)),y)
+
+%:
+	@$(call LOG,WARN,Dropping root privileges for target,$@)
+	HOME=$(CURDIR)/cache/fakeroot $(SETPRIV) $(MAKE) $@
+
+else
 
 all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-installation
 
@@ -304,4 +332,6 @@ distclean: clean
 	@$(call LOG,INFO,Remove:,$(DOTCONFIG))
 	rm -f $(DOTCONFIG)
 
-.PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 example-os-package upload clean distclean
+.PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 example-os-package upload clean clean-% distclean
+
+endif #ifeq ($(IS_ROOT),y)
