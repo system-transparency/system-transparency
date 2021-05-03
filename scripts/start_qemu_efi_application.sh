@@ -38,8 +38,13 @@ swtpm_setup --tpmstate $tpm --tpm2 --config ${root}/cache/swtpm/etc/swtpm_setup.
 echo "Starting $tpm"
 swtpm socket --tpmstate dir=$tpm --tpm2 --ctrl type=unixio,path=/$tpm/swtpm-sock &
 
+args=()
+# use kvm if avaiable
+if [[ -w /dev/kvm ]]; then
+args+=("-enable-kvm")
+fi
+
 qemu-system-x86_64 \
-  -enable-kvm \
   -M q35 \
   -drive if=virtio,file="${image}",format=raw \
   -net user,hostfwd=tcp::2222-:2222 \
@@ -52,6 +57,6 @@ qemu-system-x86_64 \
   -tpmdev emulator,id=tpm0,chardev=chrtpm \
   -device tpm-tis,tpmdev=tpm0 \
   -bios "${ovmf}" \
-  -nographic
+  -nographic "${args[@]}"
 
 rm -r ${tpm/*:?}

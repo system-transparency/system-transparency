@@ -24,11 +24,14 @@ swtpm_setup --tpmstate $tpm --tpm2 --config ${root}/cache/swtpm/etc/swtpm_setup.
 echo "Starting $tpm"
 swtpm socket --tpmstate dir=$tpm --tpm2 --ctrl type=unixio,path=/$tpm/swtpm-sock &
 
+args=()
+# use kvm if avaiable
+if [[ -w /dev/kvm ]]; then
+args+=("-enable-kvm")
+fi
 
 qemu-system-x86_64 \
-  -enable-kvm \
   -drive if=virtio,file="${image}",format=raw \
-  -nographic \
   -net user,hostfwd=tcp::2222-:2222 \
   -net nic \
   -object rng-random,filename=/dev/urandom,id=rng0 \
@@ -37,6 +40,7 @@ qemu-system-x86_64 \
   -m "${mem}" \
   -chardev socket,id=chrtpm,path=/$tpm/swtpm-sock \
   -tpmdev emulator,id=tpm0,chardev=chrtpm \
-  -device tpm-tis,tpmdev=tpm0
+  -device tpm-tis,tpmdev=tpm0 \
+  -nographic "${args[@]}"
 
 rm -r ${tpm:?}/*
