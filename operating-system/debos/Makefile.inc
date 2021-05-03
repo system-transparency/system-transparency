@@ -249,6 +249,9 @@ $1-debos-suite-arg := --template-var=suite:$5
 endif
 $(op-out)/$3 $(op-out)/$4: $2 $(debos-dep)
 	mkdir -p $$(dir $$@)
+ifeq ($(IS_ROOT),y)
+	chown $(ID):$(GID) -R $(out)
+endif
 	$(debos-check)
 	$(debos-setup)
 	@$(call LOG,INFO,Build OS image $1 using $(DEBOS_ENV) debos)
@@ -264,6 +267,11 @@ $(op-out)/$3 $(op-out)/$4: $2 $(debos-dep)
 		$$($1-debos-suite-arg) \
 		$$($1-debos-recipe)
 	@$(call LOG,DONE,$$@)
+ifeq ($(IS_ROOT),y)
+	chown $(ID):$(GID) $(op-out)/$3 $(op-out)/$4
+	rm -rf $(CURDIR)/.debos-*
+endif
+
 $1: $(call GROUP,$(op-out)/$3 $(op-out)/$4)
 
 .PHONY: $1
