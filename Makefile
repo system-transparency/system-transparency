@@ -235,6 +235,7 @@ help:
 	@echo  '  ubuntu-20                    - Build reproducible Ubuntu Focal'
 	@echo  '  example-os-package           - Build and Sign an example OS package'
 	@echo  '*** Run in QEMU'
+	@echo  '  swtpm                        - Build Software TPM Emulator'
 	@echo  '  run-mbr-bootloader           - Run MBR bootloader'
 	@echo  '  run-efi-application          - Run EFI application'
 
