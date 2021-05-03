@@ -12,6 +12,8 @@ efi32 := $(mbr-out)/BOOTIA32.EFI
 efi64 := $(mbr-out)/BOOTX64.EFI
 syslinux_config := $(mbr-out)/syslinux.cfg
 
+ifeq ($(IS_ROOT),)
+
 mbr-bootloader-installation: $(mbr_image)
 
 $(mbr_image): $(mbr_boot_partition) $(data_partition)
@@ -49,3 +51,5 @@ run-mbr-bootloader: $(swtpm_bin) $(DOTCONFIG) $(mbr_image)
 	PATH=$(dir $<):$${PATH} $(scripts)/start_qemu_mbr_bootloader.sh
 
 .PHONY: mbr-bootloader-installation run-mbr-bootloader
+
+endif #ifeq ($(IS_ROOT),)

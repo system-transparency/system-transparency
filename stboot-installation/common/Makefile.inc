@@ -11,6 +11,9 @@ security_config := $(st-out)/security_configuration.json
 os-out_dirs = $(shell find $(os-out) -type d 2>/dev/null)
 os-out_files = $(shell find $(os-out) -type f -name '*' 2>/dev/null)
 
+
+ifeq ($(IS_ROOT),)
+
 $(eval $(call CONFIG_DEP,$(data_partition),ST_DATA_PARTITION_EXTRA_SPACE,ST_BOOT_MODE))
 # build and sign example os-package, if bootmode is local and  directy is empty
 ifeq ($(os-out_files)$(filter local,$(ST_BOOT_MODE)),local)
@@ -44,3 +47,5 @@ $(security_config): % : %.config
 	@$(call LOG,INFO,Build security configuration,$@)
 	$(common)/build_security_config.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,security configuration,$@)
+
+endif #ifeq ($(IS_ROOT),)

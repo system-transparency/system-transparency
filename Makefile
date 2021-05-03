@@ -184,19 +184,14 @@ $(1).config: $(DOTCONFIG)
 	rm $$@.temp
 endef
 
-# do not drop privileges on specific targets
-build_as_root := install-deps
-build_as_root += clean clean-os distclean
+all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-installation
 
-ifeq ($(IS_ROOT)$(filter $(MAKECMDGOALS),$(build_as_root)),y)
-
+# drop root privileges by default
+ifeq ($(IS_ROOT),y)
 %:
 	@$(call LOG,WARN,Dropping root privileges for target,$@)
 	HOME=$(CURDIR)/cache/fakeroot $(SETPRIV) $(MAKE) $@
-
-else
-
-all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-installation
+endif
 
 $(DOTCONFIG):
 	@$(call LOG,ERROR,File missing:,$(DOTCONFIG))
@@ -220,7 +215,6 @@ include modules/linux.mk
 include modules/swtpm.mk
 
 include operating-system/Makefile.inc
-
 include stboot-installation/common/Makefile.inc
 include stboot-installation/mbr-bootloader/Makefile.inc
 include stboot-installation/efi-application/Makefile.inc
@@ -267,6 +261,8 @@ help:
 	@echo  '  run-mbr-bootloader           - Run MBR bootloader'
 	@echo  '  run-efi-application          - Run EFI application'
 
+ifeq ($(IS_ROOT),)
+
 config:
 	if [[ ! -d contrib/boards/$(BOARD) ]]; then \
 	  $(call LOG,ERROR,Target board \"$(BOARD)\" not found); \
@@ -311,8 +307,9 @@ example-os-package: $(DOTCONFIG) $(stmanager_bin) $(call GROUP,$(ROOT_CERT) $(KE
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,OS package:,$$(ls -tp $(os-out) | grep .zip | grep -v /$ | head -1))
 
-$(out-dirs):
-	mkdir -p $@
+.PHONY: config toolchain keygen keygen-%
+
+endif #ifeq ($(IS_ROOT),)
 
 clean-keys:
 	@$(call LOG,INFO,Remove:,$(out)/keys)
@@ -332,6 +329,4 @@ distclean: clean
 	@$(call LOG,INFO,Remove:,$(DOTCONFIG))
 	rm -f $(DOTCONFIG)
 
-.PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 example-os-package upload clean clean-% distclean
-
-endif #ifeq ($(IS_ROOT),y)
+.PHONY: all help clean clean-% distclean

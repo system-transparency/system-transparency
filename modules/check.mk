@@ -120,6 +120,8 @@ install-deps:
 	$(call LOG,DONE,dependencies installed)
 endif
 
+ifeq ($(IS_ROOT),)
+
 check_targets += $(foreach bin,$(check_bins),check_$(bin)_bin)
 check_%_bin:
 	@$(call LOG,INFO,check command:,$*)
@@ -271,4 +273,8 @@ check_kvm_access: check_kvm
 
 check: $(check_targets)
 
-.PHONY: install-deps check check_%
+.PHONY: check check_%
+
+endif #ifeq ($(IS_ROOT),)
+
+.PHONY: install-deps

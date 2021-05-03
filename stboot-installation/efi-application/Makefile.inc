@@ -6,6 +6,8 @@ efi_image:= $(efi-out)/stboot_efi_installation.img
 efi_boot_partition := $(efi-out)/boot_partition.vfat
 efi_kernel := $(efi-out)/linuxboot.efi
 
+ifeq ($(IS_ROOT),)
+
 efi-application-installation: $(efi_image)
 
 $(efi_image): $(efi_boot_partition) $(data_partition)
@@ -27,3 +29,5 @@ run-efi-application: $(swtpm_bin) $(DOTCONFIG) $(efi_image)
 	PATH=$(dir $<):$${PATH} $(scripts)/start_qemu_efi_application.sh
 
 .PHONY: efi-application-installation run-efi-application
+
+endif #ifeq ($(IS_ROOT),)

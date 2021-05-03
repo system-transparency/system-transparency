@@ -11,6 +11,8 @@ swtpm_version := 0.5.2
 
 PYTHONPATH=$(CURDIR)/cache/swtpm/lib/python3/dist-packages
 
+ifeq ($(IS_ROOT),)
+
 $(tarball_dir)/libtpms-v%.tar.gz:
 	mkdir -p $(tarball_dir)
 	@$(call LOG,INFO,swtpm: Get,$(notdir $@))
@@ -71,3 +73,5 @@ $(swtpm_bin): $(swtpm_src)/Makefile
 swtpm: $(swtpm_bin)
 
 .PHONY: swtpm
+
+endif #ifeq ($(IS_ROOT),)
