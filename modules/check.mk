@@ -66,9 +66,10 @@ check_bins += docker
 ### qemu test
 dep_pkgs += qemu-kvm
 # swtpm(https://github.com/stefanberger/swtpm)
-check_bins += swtpm
-check_bins += swtpm_cert
-check_bins += swtpm_setup
+dep_pkgs += automake
+check_bins += automake
+# TODO: check for setuptools python module
+dep_pkgs += python3-setuptools
 # swtpm deps:
 #libtpms(https://github.com/stefanberger/libtpms)
 dep_pkgs += autoconf
@@ -81,6 +82,9 @@ dep_pkgs += socat
 dep_pkgs += python3-pip
 dep_pkgs += gnutls-bin
 dep_pkgs += libseccomp-dev
+# qemu
+# TODO: check for ovmf file
+dep_pkgs += ovmf
 
 # exit if check is not run explicitly
 ifeq ($(findstring check,$(MAKECMDGOALS)),)
@@ -113,9 +117,6 @@ install-deps:
 	    $(call LOG,WARN,apt Go package version not supported. need manually installation:,go(>=$(GO_VERSION_MIN))); \
 	  fi; \
 	fi;
-	if ! command -v "swtpm" >/dev/null 2>&1; then \
-	  $(call LOG,WARN,need manually installation:,swtpm(>=$(SWTPM_VERSION_MIN)) [https://github.com/stefanberger/swtpm]); \
-	fi;
 	$(call LOG,DONE,dependencies installed)
 endif
 
@@ -147,24 +148,6 @@ check_go_bin_version: check_go_bin
 	  fi; \
 	fi;
 
-check_targets += check_swtpm_bin_version
-check_swtpm_bin_version: check_swtpm_bin
-	$(eval SWTPM_VERSION := $(shell swtpm --version 2>/dev/null | cut -d ' ' -f 4 | sed 's/,//'))
-	$(eval SWTPM_VERSION_MAJOR := $(shell echo $(SWTPM_VERSION) | cut -d . -f 1))
-	$(eval SWTPM_VERSION_MINOR := $(shell echo $(SWTPM_VERSION) | cut -d . -f 2))
-	if command -v "swtpm" >/dev/null 2>&1; then \
-	  $(call LOG,INFO,check swtpm version,(>=$(SWTPM_VERSION_MIN))); \
-	  if [ "$(SWTPM_VERSION_MAJOR)" -gt "$(SWTPM_VERSION_MAJOR_MIN)" ] || \
-	  ([ "$(SWTPM_VERSION_MAJOR)" -eq "$(SWTPM_VERSION_MAJOR_MIN)" ] && \
-	  [ "$(SWTPM_VERSION_MINOR)" -ge "$(SWTPM_VERSION_MINOR_MIN)" ]); then \
-	    $(call LOG,PASS,swtpm version \"$(SWTPM_VERSION)\" supported); \
-	  else \
-	    $(call LOG,FAIL,swtpm version \"$(SWTPM_VERSION)\" is not supported); \
-	    $(call LOG,FAIL,Needs version \"$(SWTPM_VERSION_MIN)\" or later.); \
-	    $(CHECK_EXIT) \
-	  fi; \
-	fi;
-
 
 check_targets += $(foreach lib,$(check_libs),check_$(lib)_lib)
 check_%_lib:
@@ -189,6 +172,20 @@ check_%_lib:
 	    $(call LOG,FAIL,library not found:,$*); \
 	    $(CHECK_EXIT) \
 	  fi; \
+	fi;
+
+check_targets += check_ovmf
+check_ovmf:
+	found=""; \
+	for i in /usr/share/OVMF/OVMF_CODE.fd /usr/share/edk2/ovmf/OVMF_CODE.fd; do \
+	  if [ -f "$$i" ]; then \
+	    found=y; \
+	    $(call LOG,PASS,OVMF binary found:,$$i); \
+	  fi; \
+	done; \
+	if [ "$$found" != "y" ]; then \
+	  $(call LOG,FAIL,OVMF binary not found); \
+	    $(CHECK_EXIT) \
 	fi;
 
 check_targets += check_libc_i386

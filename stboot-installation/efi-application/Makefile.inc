@@ -22,8 +22,8 @@ $(eval $(call CONFIG_DEP,$(efi_kernel),ST_LINUXBOOT_CMDLINE|ST_EFI_APPLICATION_E
 $(eval $(call KERNEL_TARGET,efi,$(efi_kernel),$(ST_EFI_APPLICATION_EFISTUB_KERNEL_VERSION),$(ST_EFI_APPLICATION_EFISTUB_KERNEL_CONFIG)))
 $(efi_kernel): % : %.config
 
-run-efi-application: $(DOTCONFIG) $(efi_image)
+run-efi-application: $(swtpm_bin) $(DOTCONFIG) $(efi_image)
 	$(call LOG,INFO,Run EFI application image,$(mbr_image))
-	$(scripts)/start_qemu_efi_application.sh
+	PATH=$(dir $<):$${PATH} $(scripts)/start_qemu_efi_application.sh
 
 .PHONY: efi-application-installation run-efi-application

@@ -1,4 +1,3 @@
-tarball_dir := $(cache)/tarball
 gpg_dir := $(cache)/gnupg
 gpg_keyring := $(gpg_dir)/keyring.gpg
 kernel_mirror := https://cdn.kernel.org/pub/linux/kernel
