@@ -1,3 +1,4 @@
+kernel := $(st-out)/linuxboot.vmlinuz
 gpg_dir := $(cache)/gnupg
 gpg_keyring := $(gpg_dir)/keyring.gpg
 kernel_mirror := https://cdn.kernel.org/pub/linux/kernel
@@ -26,7 +27,20 @@ $1_kernel_mirror_path := $(kernel_mirror)/v6.x
 endif
 endef
 
-ifeq ($(IS_ROOT),)
+kernel_version := $(ST_LINUXBOOT_KERNEL_VERSION)
+kernel_defconfig := $(ST_LINUXBOOT_KERNEL_CONFIG)
+kernel_tarball=linux-$(kernel_version).tar.xz
+kernel_tarball_sign=linux-$(kernel_version).tar.sign
+kernel_dir := $(cache)/linux/kernel-$(subst .,_,$(kernel_version))
+kernel_target := $(kernel_dir)/$(kernel_image)
+
+kernel: $(kernel)
+
+$(eval $(call CONFIG_DEP,$(kernel),ST_LINUXBOOT_KERNEL_CONFIG|ST_LINUXBOOT_KERNEL_VERSION|ST_LINUXBOOT_CMDLINE))
+$(kernel): % : $(kernel_target) %.config
+	mkdir -p $(dir $@)
+	cp $< $@
+	$(call LOG,DONE,Linux: kernel,$(kernel_version))
 
 $(gpg_keyring):
 	mkdir -p -m 700 "$(gpg_dir)"
@@ -95,81 +109,49 @@ $(tarball_dir)/linux-%.tar.xz.valid: $(tarball_dir)/linux-%.tar.xz $(tarball_dir
 	fi;
 	touch $@
 
-### KERNEL_TARGET: function to generate linux kernel targets for specific installations
-## args
-#
-# $1: name           - "kernel path prefix"
-# $2: kernel_path    - "kernel target"
-# $3: kernel_version - "kernel version"
-# $4: defconfig      - "kernel defconfig"
+$(kernel_target): $(kernel_dir)/.config  $(initramfs)
+	$(call LOG,INFO,Linux: Make kernel,$(kernel_version))
+	$(MAKE) -C $(kernel_dir) $(KERNEL_MAKE_FLAGS) bzImage
 
-define KERNEL_TARGET
-
-ifneq ($$(strip $3),)
-$1-kernel_version := $3
-else
-$1-kernel_version := $(ST_LINUXBOOT_KERNEL_VERSION)
-endif
-
-$1-kernel_tarball=linux-$$($1-kernel_version).tar.xz
-$1-kernel_tarball_sign=linux-$$($1-kernel_version).tar.sign
-$1-kernel_dir := $(cache)/linux/$1-kernel-$$(subst .,_,$$($1-kernel_version))
-$1-kernel_target := $$($1-kernel_dir)/$(kernel_image)
-
-kernel $1-kernel: $(DOTCONFIG) $2
-
-$2: $$($1-kernel_target)
-	mkdir -p $$(dir $$@)
-	cp $$< $$@
-	$(call LOG,DONE,Linux: kernel,$$($1-kernel_version))
-
-$$($1-kernel_target): $$($1-kernel_dir)/.config  $(initramfs)
-	$(call LOG,INFO,Linux: Make kernel,$$($1-kernel_version))
-	$$(MAKE) -C $$($1-kernel_dir) $$(KERNEL_MAKE_FLAGS) bzImage
-
-$$($1-kernel_dir)/.config: $(DOTCONFIG) $$($1-kernel_dir)/.unpack $(patsubst "%",%,$4)
-	$(call LOG,INFO,Linux: Configure kernel,$$($1-kernel_version));
-ifneq ($(strip $4),)
-	$(call LOG,INFO,Linux: Use configuration file,$(patsubst "%",%,$4));
-	cp $4 $$@.tmp
+$(kernel_dir)/.config: $(DOTCONFIG) $(kernel_dir)/.unpack $(patsubst "%",%,$(ST_LINUXBOOT_KERNEL_CONFIG))
+	$(call LOG,INFO,Linux: Configure kernel,$(kernel_version));
+ifneq ($(strip $(ST_LINUXBOOT_KERNEL_CONFIG)),)
+	$(call LOG,INFO,Linux: Use configuration file,$(patsubst "%",%,$(ST_LINUXBOOT_KERNEL_CONFIG)));
+	cp $(ST_LINUXBOOT_KERNEL_CONFIG) $@.tmp
 ifneq ($(strip $(ST_LINUXBOOT_CMDLINE)),)
 	$(call LOG,WARN,Linux: Override CONFIG_CMDLINE with ST_LINUXBOOT_CMDLINE=$(_ST_LINUXBOOT_CMDLINE));
-	sed -ie 's/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=$(_ST_LINUXBOOT_CMDLINE)/g' $$@.tmp
+	sed -ie 's/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=$(_ST_LINUXBOOT_CMDLINE)/g' $@.tmp
 endif
-	mv $$@.tmp $$@
+	mv $@.tmp $@
 endif
-	$$(MAKE) -C $$($1-kernel_dir) $(KERNEL_MAKE_FLAGS) olddefconfig
+	$(MAKE) -C $(kernel_dir) $(KERNEL_MAKE_FLAGS) olddefconfig
 
-$$($1-kernel_dir)/.unpack: $(tarball_dir)/$$($1-kernel_tarball).valid
-	if [[ -d "$$($1-kernel_dir)" && ! -f "$$($1-kernel_dir)/.unpack" ]]; then \
-	rm -rf $$($1-kernel_dir); \
+$(kernel_dir)/.unpack: $(tarball_dir)/$(kernel_tarball).valid
+	if [[ -d "$(kernel_dir)" && ! -f "$(kernel_dir)/.unpack" ]]; then \
+	rm -rf $(kernel_dir); \
 	fi
-	if [[ ! -d "$$($1-kernel_dir)" ]]; then \
-	mkdir -p $$($1-kernel_dir); \
-	$(call LOG,INFO,Linux: Unpack $$($1-kernel_tarball)); \
-	tar xJf $(tarball_dir)/$$($1-kernel_tarball) --strip 1 -C $$($1-kernel_dir); \
+	if [[ ! -d "$(kernel_dir)" ]]; then \
+	mkdir -p $(kernel_dir); \
+	$(call LOG,INFO,Linux: Unpack $(kernel_tarball)); \
+	tar xJf $(tarball_dir)/$(kernel_tarball) --strip 1 -C $(kernel_dir); \
 	fi
-	touch $$@
+	touch $@
 
-$1-kernel-updatedefconfig: $$($1-kernel_dir)/.config $(DOTCONFIG)
-	$(call LOG,INFO,Linux: Update defconfig $4)
-	$$(MAKE) -C $$($1-kernel_dir) $(KERNEL_MAKE_FLAGS) savedefconfig
-	sed -ie "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"$(subst $\",,$(DEFAULT_CMDLINE))\"/" $$($1-kernel_dir)/defconfig
-	if [[ -f $4 ]]; then \
-	  if diff $$($1-kernel_dir)/defconfig $4 $(OUTREDIRECT); then \
+kernel-updatedefconfig: $(kernel_dir)/.config $(DOTCONFIG)
+	$(call LOG,INFO,Linux: Update defconfig $(ST_LINUXBOOT_KERNEL_CONFIG))
+	$(MAKE) -C $(kernel_dir) $(KERNEL_MAKE_FLAGS) savedefconfig
+	sed -ie "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"$(subst $\",,$(DEFAULT_CMDLINE))\"/" $(kernel_dir)/defconfig
+	if [[ -f $(ST_LINUXBOOT_KERNEL_CONFIG) ]]; then \
+	  if diff $(kernel_dir)/defconfig $(ST_LINUXBOOT_KERNEL_CONFIG) $(OUTREDIRECT); then \
 	    $(call LOG,WARN,Linux: defconfig already up-to-date); \
           else \
-	    $(call LOG,INFO,Linux: Move old defconfig $(notdir $4) to $(notdir $4).old); \
-	    mv $4{,.old}; \
+	    $(call LOG,INFO,Linux: Move old defconfig $(notdir $(ST_LINUXBOOT_KERNEL_CONFIG)) to $(notdir $(ST_LINUXBOOT_KERNEL_CONFIG)).old); \
+	    mv $(ST_LINUXBOOT_KERNEL_CONFIG){,.old}; \
 	  fi \
 	fi
-	rsync -c $$($1-kernel_dir)/defconfig $4; \
+	rsync -c $(kernel_dir)/defconfig $(ST_LINUXBOOT_KERNEL_CONFIG); \
 
-$1-kernel-%: $(DOTCONFIG) $$($1-kernel_dir)/.config
-	$$(MAKE) -C $$($1-kernel_dir) $(KERNEL_MAKE_FLAGS) $$*
+kernel-%: $(DOTCONFIG) $(kernel_dir)/.config
+	$(MAKE) -C $(kernel_dir) $(KERNEL_MAKE_FLAGS) $*
 
-.PHONY: $1-kernel $1-kernel-%
-
-endef
-
-endif #ifeq ($(IS_ROOT),)
+.PHONY: kernel kernel-%

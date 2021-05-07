@@ -211,7 +211,6 @@ endif
 
 include modules/check.mk
 include modules/go.mk
-include modules/linux.mk
 include modules/swtpm.mk
 
 include operating-system/Makefile.inc
@@ -241,15 +240,11 @@ help:
 	@echo  '  mbr-bootloader-installation  - Build MBR bootloader installation option'
 	@echo  '  efi-application-installation - Build EFI application installation option'
 	@echo  '*** Build kernel'
-	@echo  '  kernel                       - Build all kernels'
-	@echo  '  mbr-kernel                   - Build MBR bootloader kernel'
-	@echo  '  efi-kernel                   - Build EFI application kernel'
-	@echo  '  mbr-kernel-<kernel target>   - (debug) Run MBR bootloader kernel target'
-	@echo  '  mbr-kernel-menuconfig        - (debug) example: Run MBR bootloader kernel menuconfig'
-	@echo  '  efi-kernel-<kernel target>   - (debug) Run EFI application kernel target'
+	@echo  '  kernel                       - Build kernels'
+	@echo  '  kernel-<kernel target>       - (debug) Run kernel target'
+	@echo  '  kernel-menuconfig            - (debug) example: Run kernel menuconfig'
 	@echo  '  mbr-kernel-nconfig           - (debug) example: Run MBR bootloader kernel nconfig'
-	@echo  '  mbr-kernel-updatedefconfig   - (debug) Update MBR bootloader kernel defconfig'
-	@echo  '  efi-kernel-updatedefconfig   - (debug) Update EFI application kernel defconfig'
+	@echo  '  kernel-updatedefconfig       - (debug) Update kernel defconfig'
 	@echo  '*** Build Operating Sytem'
 	@echo  '  tboot                        - Build tboot'
 	@echo  '  debian                       - Build reproducible Debian Buster'
