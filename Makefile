@@ -184,7 +184,7 @@ $(1).config: $(DOTCONFIG)
 	rm $$@.temp
 endef
 
-all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-installation
+all: image
 
 # drop root privileges by default
 ifeq ($(IS_ROOT),y)
@@ -218,6 +218,26 @@ include stboot-installation/common/Makefile.inc
 include stboot-installation/mbr-bootloader/Makefile.inc
 include stboot-installation/efi-application/Makefile.inc
 
+run-qemu =
+ifneq ($(strip $(wildcard $(DOTCONFIG))),)
+ifeq ($(strip $(ST_INSTALLATION_OPTION)),)
+$(error ST_INSTALLATION_OPTION is not set)
+else ifeq ($(strip $(ST_INSTALLATION_OPTION)),mbr)
+image := $(mbr_image)
+run-qemu := run-mbr-bootloader
+else ifeq ($(strip $(ST_INSTALLATION_OPTION)),efi)
+image := $(efi_image)
+run-qemu := run-efi-application
+else
+$(error unknown installation option: "$(ST_INSTALLATION_OPTION)")
+endif
+endif
+
+image: $(DOTCONFIG) $(ROOT_CERT) $(image)
+	$(call LOG,DONE,Target installation image:,$(image))
+
+run-qemu: $(run-qemu)
+
 help:
 	@echo
 	@echo  '*** system-transparency targets ***'
@@ -236,7 +256,7 @@ help:
 	@echo  '  keygen-sign                  - Generate example sign keys'
 	@echo  '  keygen-cpu                   - Generate cpu ssh keys for debugging'
 	@echo  '*** Build image'
-	@echo  '  all                          - Build all installation options'
+	@echo  '  all/image                    - Build target installation option'
 	@echo  '  mbr-bootloader-installation  - Build MBR bootloader installation option'
 	@echo  '  efi-application-installation - Build EFI application installation option'
 	@echo  '*** Build kernel'
@@ -253,6 +273,7 @@ help:
 	@echo  '  example-os-package           - Build and Sign an example OS package'
 	@echo  '*** Run in QEMU'
 	@echo  '  swtpm                        - Build Software TPM Emulator'
+	@echo  '  run-qemu                     - Run target installation'
 	@echo  '  run-mbr-bootloader           - Run MBR bootloader'
 	@echo  '  run-efi-application          - Run EFI application'
 
@@ -324,4 +345,4 @@ distclean: clean
 	@$(call LOG,INFO,Remove:,$(DOTCONFIG))
 	rm -f $(DOTCONFIG)
 
-.PHONY: all help clean clean-% distclean
+.PHONY: all image help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 example-os-package upload clean distclean
