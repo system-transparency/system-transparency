@@ -177,8 +177,7 @@ else
   ifeq ($(DEBOS_ENV),native)
     CONTAINER :=
     run-debos := $(debos_bin)
-    debos-dep := $(debos_bin) check_debos_native
-    debos-dep += check_debootstrap_bin check_systemd-nspawn_bin
+    debos-dep := $(debos_bin)
   else
     ifeq ($(DEBOS_ENV),docker)
       CONTAINER := docker
