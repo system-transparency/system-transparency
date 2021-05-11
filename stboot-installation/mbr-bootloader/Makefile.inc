@@ -1,6 +1,5 @@
 mbr := stboot-installation/mbr-bootloader
 mbr-out := $(st-out)/mbr-bootloader
-out-dirs += $(mbr-out)
 
 mbr_image:= $(mbr-out)/stboot_mbr_installation.img
 mbr_boot_partition := $(mbr-out)/boot_partition.vfat
@@ -11,6 +10,8 @@ syslinux_efi64 := $(cache)/syslinux/syslinux-6.03/efi64/efi/syslinux.efi
 efi32 := $(mbr-out)/BOOTIA32.EFI
 efi64 := $(mbr-out)/BOOTX64.EFI
 syslinux_config := $(mbr-out)/syslinux.cfg
+
+ifeq ($(IS_ROOT),)
 
 mbr-bootloader-installation: $(mbr_image)
 
@@ -44,8 +45,10 @@ $(efi32): $(syslinux)
 $(efi64): $(syslinux)
 	cp $(syslinux_efi64) $@
 
-run-mbr-bootloader: $(swtpm_bin) $(DOTCONFIG) $(mbr_image)
+run-mbr-bootloader: $(call GROUP,$(swtpm_bin) $(swtpm_bin)) $(DOTCONFIG) $(mbr_image)
 	$(call LOG,INFO,Run MBR bootloader image,$(mbr_image))
 	PATH=$(dir $<):$${PATH} $(scripts)/start_qemu_mbr_bootloader.sh
 
 .PHONY: mbr-bootloader-installation run-mbr-bootloader
+
+endif #ifeq ($(IS_ROOT),)

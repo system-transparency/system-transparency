@@ -6,7 +6,7 @@ on:
   - push
 
 jobs:
-  ubuntu_20-04_go-1-16_build:
+  ubuntu_20-04_network_images:
     runs-on: ubuntu-20.04
     steps:
       - name: Install GNUmake
@@ -41,8 +41,9 @@ jobs:
 
       - name: Build EFI application installation
         run: make efi-application-installation
-  ubuntu_20-04_go-1-13_build:
-    runs-on: ubuntu-20.04
+
+  ubuntu_18-04_network_images:
+    runs-on: ubuntu-18.04
     steps:
       - name: Install GNUmake
         run: |
@@ -76,14 +77,56 @@ jobs:
 
       - name: Build EFI application installation
         run: make efi-application-installation
-  ubuntu_18-04_go-1-16_build:
+
+  ubuntu_20-04_local_images:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install GNUmake
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install make
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: sudo make install-deps
+
+      - name: Build default config
+        run: make config
+
+      - name: Set OS package to Ubuntu focal
+        run: |
+          sed -i 's|ST_OS_PKG_KERNEL="out/operating-system/ubuntu-bionic-amd64.vmlinuz"|ST_OS_PKG_KERNEL="out/operating-system/ubuntu-focal-amd64.vmlinuz"|' .config
+          sed -i 's|ST_OS_PKG_INITRAMFS="out/operating-system/ubuntu-bionic-amd64.cpio.gz"|ST_OS_PKG_INITRAMFS="out/operating-system/ubuntu-focal-amd64.cpio.gz"|' .config
+
+      - name: Build Ubuntu Focal
+        run: sudo make ubuntu-20 DEBOS_ENV=native
+
+      - name: Build MBR bootloader installation
+        run: make mbr-bootloader-installation DEBOS_ENV=native
+
+      - name: Build EFI application installation
+        run: make efi-application-installation DEBOS_ENV=native
+
+      - name: Build Software TPM Emulator
+        run: make swtpm
+
+      - name: Boot MBR bootloader installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh mbr
+
+      - name: Boot EFI application installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh efi
+
+  ubuntu_18-04_local_images:
     runs-on: ubuntu-18.04
     steps:
       - name: Install GNUmake
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install make
-
+      - name: Install setpriv
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install setpriv
       - name: Install Golang 1.16
         run: |
           go_tmp_dir=`mktemp -d`
@@ -93,7 +136,6 @@ jobs:
           sudo tar xf $go_tmp_dir/go1.16.3.linux-amd64.tar.gz -C $GOROOT --strip 1
           export PATH=$GOROOT/bin:$PATH
           rm -r $go_tmp_dir
-
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -103,46 +145,20 @@ jobs:
       - name: Build default config
         run: make config
 
-      - name: Set boot mode to network
-        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' .config
+      - name: Build Ubuntu Bionic
+        run: sudo make ubuntu-18 DEBOS_ENV=native
 
       - name: Build MBR bootloader installation
-        run: make mbr-bootloader-installation
+        run: make mbr-bootloader-installation DEBOS_ENV=native
 
       - name: Build EFI application installation
-        run: make efi-application-installation
-  ubuntu_18-04_go-1-13_build:
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Install GNUmake
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install make
+        run: make efi-application-installation DEBOS_ENV=native
 
-      - name: Install Golang 1.13
-        run: |
-          go_tmp_dir=`mktemp -d`
-          wget -qP $go_tmp_dir https://dl.google.com/go/go1.13.9.linux-amd64.tar.gz
-          export GOROOT=/usr/local/go-1.13
-          sudo mkdir -p $GOROOT
-          sudo tar xf $go_tmp_dir/go1.13.9.linux-amd64.tar.gz -C $GOROOT --strip 1
-          export PATH=$GOROOT/bin:$PATH
-          rm -r $go_tmp_dir
+      - name: Build Software TPM Emulator
+        run: make swtpm
 
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Boot MBR bootloader installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh mbr
 
-      - name: Install dependencies
-        run: sudo make install-deps
-
-      - name: Build default config
-        run: make config
-
-      - name: Set boot mode to network
-        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' .config
-
-      - name: Build MBR bootloader installation
-        run: make mbr-bootloader-installation
-
-      - name: Build EFI application installation
-        run: make efi-application-installation
+      - name: Boot EFI application installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh efi

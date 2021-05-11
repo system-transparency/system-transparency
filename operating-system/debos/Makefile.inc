@@ -13,10 +13,6 @@ endif
 docker-access := $(shell command -v docker &> /dev/null && docker info >/dev/null 2>&1 && echo y)
 # podman is installed
 podman-access := $(shell command -v podman &> /dev/null && echo y)
-# /dev/kvm exist
-kvm-exist := $(shell [[ -e /dev/kvm ]] && echo y)
-# /dev/kvm accessable as user
-kvm-access := $(shell [[ -w /dev/kvm ]] && echo y)
 # debian based disto
 debian-os := $(shell [[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release |grep -q debian;echo y)
 # kernel user readable
@@ -67,36 +63,41 @@ define DEBOS_ERROR_NO_ENV
 *** No debos environment available to use debos
 endef
 
-# TODO: support environment for hosts without kvm
-ifneq ($(kvm-exist),y)
-DEBOS_ENV := error
-  debos-err := $(call DEBOS_ERROR_NO_KVM)
-endif
-
 ### detect optimal environment
 ifeq ($(DEBOS_ENV),)
-  # check if user has access to kvm
-  ifeq ($(kvm-access),y)
-    # detect debian based distros to run debos on host
-    ifeq ($(debian-os),y)
-      DEBOS_ENV := native
+  # check kvm support
+  ifeq ($(KVM_EXISTS),y)
+    # check if user has access to kvm
+    ifeq ($(KVM_ACCESS),y)
+      # detect debian based distros to run debos on host
+      ifeq ($(debian-os),y)
+        DEBOS_ENV := native
+      else
+        # detect docker API
+        ifeq ($(docker-access),y)
+          DEBOS_ENV = docker
+        else
+          # detect if podman is installed
+          ifeq ($(podman-access),y)
+            DEBOS_ENV = podman
+          endif
+        endif
+      endif
     else
-      # detect docker API
+      # use docker if user has no kvm access, since it runs as root
       ifeq ($(docker-access),y)
         DEBOS_ENV = docker
       else
-        # detect if podman is installed
-        ifeq ($(podman-access),y)
-          DEBOS_ENV = podman
-        endif
+        # you need access to either docker API or kvm
+        DEBOS_ENV = error
+        debos-err := $(call DEBOS_ERROR_NO_KVM_ACCESS)
       endif
     endif
-  else
-    # use docker if user has no kvm access, since it runs as root
-    ifeq ($(docker-access),y)
-      DEBOS_ENV = docker
+  else #ifeq ($(KVM_EXISTS),y)
+    ### TODO support docker without kvm
+    ifeq ($(IS_ROOT)$(debian-os),yy)
+      DEBOS_ENV := native
     else
-      # you need access to either docker API or kvm
       DEBOS_ENV = error
       debos-err := $(call DEBOS_ERROR_NO_KVM_ACCESS)
     endif
@@ -151,7 +152,7 @@ endef
 define KVM_CHECK
 
 	@$(call LOG,INFO,Check kvm access)
-ifneq ($(kvm-access),y)
+ifneq ($(KVM_ACCESS),y)
 	@$(call LOG,ERROR,No access to,/dev/kvm)
 	@exit 1
 endif
@@ -176,15 +177,14 @@ else
   ifeq ($(DEBOS_ENV),native)
     CONTAINER :=
     run-debos := $(debos_bin)
-    debos-dep := $(debos_bin) check_debos_native check_kvm_access
-    debos-dep += check_debootstrap_bin check_systemd-nspawn_bin
+    debos-dep := $(debos_bin)
   else
     ifeq ($(DEBOS_ENV),docker)
       CONTAINER := docker
       debos-dep := check_debos_docker check_kvm_access
       container-dep += docker-check
-      # drop priviledge to have user id and access to kvm
-      container-args += --user $(shell id -u):$(shell stat -c %g /dev/kvm)
+      # drop priviledge to have user id and access to kvm (fallback to user group)
+      container-args += --user $(ID):$(shell stat -c %g /dev/kvm 2>/dev/null || stat -c %g $(CURDIR))
     else
       ifeq ($(DEBOS_ENV),podman)
         CONTAINER := podman
@@ -249,6 +249,9 @@ $1-debos-suite-arg := --template-var=suite:$5
 endif
 $(op-out)/$3 $(op-out)/$4: $2 $(debos-dep)
 	mkdir -p $$(dir $$@)
+ifeq ($(IS_ROOT),y)
+	chown $(ID):$(GID) -R $(out)
+endif
 	$(debos-check)
 	$(debos-setup)
 	@$(call LOG,INFO,Build OS image $1 using $(DEBOS_ENV) debos)
@@ -264,6 +267,11 @@ $(op-out)/$3 $(op-out)/$4: $2 $(debos-dep)
 		$$($1-debos-suite-arg) \
 		$$($1-debos-recipe)
 	@$(call LOG,DONE,$$@)
+ifeq ($(IS_ROOT),y)
+	chown $(ID):$(GID) $(op-out)/$3 $(op-out)/$4
+	rm -rf $(CURDIR)/.debos-*
+endif
+
 $1: $(call GROUP,$(op-out)/$3 $(op-out)/$4)
 
 .PHONY: $1

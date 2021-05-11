@@ -148,7 +148,6 @@ check_go_bin_version: check_go_bin
 	  fi; \
 	fi;
 
-
 check_targets += $(foreach lib,$(check_libs),check_$(lib)_lib)
 check_%_lib:
 	$(call LOG,INFO,check library:,$*)
@@ -200,7 +199,6 @@ check_libc_i386:
 	fi;
 
 check_targets += check_debos_native
-
 check_debos_native:
 	@$(call LOG,INFO,check if OS is debian based)
 	if ([[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release |grep -q debian); then \
@@ -271,4 +269,4 @@ check_kvm_access: check_kvm
 
 check: $(check_targets)
 
-.PHONY: install-deps check check_%
+.PHONY: check check_% install-deps

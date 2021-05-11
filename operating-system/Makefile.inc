@@ -24,6 +24,8 @@ endif
 
 tboot_env := CFLAGS="$(_TBOOT_CFLAGS)" TBOOT_CFLAGS="$(_TBOOT_CFLAGS)"
 
+ifeq ($(IS_ROOT),)
+
 $(tboot_code):
 	rm -rf $(tboot-cache)
 	mkdir -p $(tboot-cache)/..
@@ -48,3 +50,7 @@ acm $(acm-dir): $(sinit-acm-grebber_bin)
 	@$(call LOG,INFO,Get authenticated code modules (ACM))
 	$< -of $(acm-dir)
 	@$(call LOG,DONE,ACMs downloaded in:,$(acm-dir))
+
+.PHONY: tboot acm
+
+endif #ifeq ($(IS_ROOT),)

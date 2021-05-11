@@ -26,6 +26,8 @@ $1_kernel_mirror_path := $(kernel_mirror)/v6.x
 endif
 endef
 
+ifeq ($(IS_ROOT),)
+
 $(gpg_keyring):
 	mkdir -p -m 700 "$(gpg_dir)"
 	@$(call LOG,INFO,Linux: Fetch kernel developer keys)
@@ -169,3 +171,5 @@ $1-kernel-%: $(DOTCONFIG) $$($1-kernel_dir)/.config
 .PHONY: $1-kernel $1-kernel-%
 
 endef
+
+endif #ifeq ($(IS_ROOT),)

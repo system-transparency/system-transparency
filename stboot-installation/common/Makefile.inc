@@ -1,6 +1,5 @@
 os-out := $(out)/os-packages
 st-out := $(out)/stboot-installation
-out-dirs += $(st-out) $(os-out)
 
 data_partition := $(st-out)/data_partition.ext4
 initramfs := $(out)/stboot-installation/initramfs-linuxboot.cpio.gz
@@ -11,12 +10,15 @@ security_config := $(st-out)/security_configuration.json
 os-out_dirs = $(shell find $(os-out) -type d 2>/dev/null)
 os-out_files = $(shell find $(os-out) -type f -name '*' 2>/dev/null)
 
+
+ifeq ($(IS_ROOT),)
+
 $(eval $(call CONFIG_DEP,$(data_partition),ST_DATA_PARTITION_EXTRA_SPACE,ST_BOOT_MODE))
-# build and sign example os-package, if bootmode is local and  directy is empty
+# build and sign example os-package, if bootmode is local and directy is empty
 ifeq ($(os-out_files)$(filter local,$(ST_BOOT_MODE)),local)
 $(data_partition): % : %.config example-os-package
 else
-$(data_partition): % : %.config $(os-out) $(os-out_dirs) $(os-out_files)
+$(data_partition): % : %.config $(os-out_files)
 endif
 	@$(call LOG,INFO,Build STDATA partition,$(data_partition))
 	$(common)/build_data_filesystem.sh $(OUTREDIRECT)
@@ -44,3 +46,5 @@ $(security_config): % : %.config
 	@$(call LOG,INFO,Build security configuration,$@)
 	$(common)/build_security_config.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,security configuration,$@)
+
+endif #ifeq ($(IS_ROOT),)

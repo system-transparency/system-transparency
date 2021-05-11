@@ -53,6 +53,8 @@ ifeq ($(u-root_branch),)
 u-root_branch := $(u-root_default_branch)
 endif
 
+ifeq ($(IS_ROOT),)
+
 go-tools := debos u-root stmanager cpu sinit-acm-grebber
 go-tools: $(go-tools)
 
@@ -144,3 +146,5 @@ sinit-acm-grebber $(sinit-acm-grebber_bin):
 ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools $(sinit-acm-grebber_bin)),)
 .PHONY: $(sinit-acm-grebber_bin)
 endif
+
+endif #ifeq ($(IS_ROOT),)

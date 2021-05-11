@@ -11,6 +11,8 @@ swtpm_version := 0.5.2
 
 PYTHONPATH=$(CURDIR)/cache/swtpm/lib/python3/dist-packages
 
+ifeq ($(IS_ROOT),)
+
 $(tarball_dir)/libtpms-v%.tar.gz:
 	mkdir -p $(tarball_dir)
 	@$(call LOG,INFO,swtpm: Get,$(notdir $@))
@@ -60,7 +62,7 @@ $(swtpm_src)/Makefile: $(libtpms_pkg) $(swtpm_src)/.unpack
 	($(call LOG,ERROR,swtpm: swtpm configuration failed. See:,$(dir $@)config.log); \
 	exit 1)
 
-$(swtpm_bin): $(swtpm_src)/Makefile
+$(swtpm_bin) $(swtpm_setup_bin): $(swtpm_src)/Makefile
 	mkdir -p $(dir $@)
 	@$(call LOG,INFO,swtpm: Make,swtpm)
 	$(MAKE) -C $(dir $<) python-install install >/dev/null 2>$(dir $<)build.log || \
@@ -68,6 +70,8 @@ $(swtpm_bin): $(swtpm_src)/Makefile
 	exit 1)
 	@$(call LOG,DONE,swtpm:,$(swtpm_bin))
 
-swtpm: $(swtpm_bin)
+swtpm: $(call GROUP,$(swtpm_bin) $(swtpm_setup_bin))
 
 .PHONY: swtpm
+
+endif #ifeq ($(IS_ROOT),)

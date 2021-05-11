@@ -1,5 +1,4 @@
 out ?= out
-out-dirs += $(out)
 cache ?= cache
 tarball_dir := $(cache)/tarball
 common := stboot-installation/common
@@ -18,6 +17,21 @@ TZ:=UTC0
 
 # use bash (nix/NixOS friendly)
 SHELL := /usr/bin/env bash -euo pipefail -c
+
+# Get user id and group from the top directory
+ID := $(shell stat -c %u $(CURDIR))
+GID := $(shell stat -c %g $(CURDIR))
+IS_ROOT := $(shell [[ $$(id -u) == "0" ]] && echo y)
+KVM_EXISTS := $(shell [[ -e /dev/kvm ]] && echo y)
+KVM_ACCESS := $(shell [[ -w /dev/kvm ]] && echo y)
+
+# command to drop privileges
+SETPRIV := setpriv --reuid=$(ID) --regid=$(GID)
+ifeq ($(KVM_EXISTS),y)
+SETPRIV += --groups $(shell stat -c %g /dev/kvm)
+else
+SETPRIV += --clear-groups
+endif
 
 # Use PID to stop build process on error
 MAKEPID:= $(shell echo $$PPID)
@@ -103,7 +117,9 @@ $(word 1,$(1))
 endef
 
 # Make uses maximal available job threads by default
+ifeq ($(MAKELEVEL),0)
 MAKEFLAGS += -j$(shell nproc)
+endif
 
 BOARD ?= qemu
 DOTCONFIG ?= .config
@@ -120,12 +136,12 @@ endif
 
 IDs = 1 2 3
 TYPEs = key cert
-EXAMPLE_KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(EXAMPLE_ROOT_CERT))signing-key-$(ID).$(TYPE)))
-KEYS_CERTS += $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(ROOT_CERT))signing-key-$(ID).$(TYPE)))
+EXAMPLE_KEYS_CERTS := $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(EXAMPLE_ROOT_CERT))signing-key-$(ID).$(TYPE)))
+KEYS_CERTS := $(foreach TYPE,$(TYPEs),$(foreach ID,$(IDs),$(dir $(ROOT_CERT))signing-key-$(ID).$(TYPE)))
 
 CPU_KEY_DIR := $(out)/keys/cpu_keys/
 CPU_SSH_FILES := cpu_rsa cpu_rsa.pub ssh_host_rsa_key ssh_host_rsa_key.pub
-CPU_SSH_KEYS += $(foreach CPU_SSH_FILE,$(CPU_SSH_FILES),$(CPU_KEY_DIR)/$(CPU_SSH_FILE))
+CPU_SSH_KEYS := $(foreach CPU_SSH_FILE,$(CPU_SSH_FILES),$(CPU_KEY_DIR)/$(CPU_SSH_FILE))
 
 ## error if OS packages are missing
 # args:
@@ -170,6 +186,13 @@ endef
 
 all: $(DOTCONFIG) $(ROOT_CERT) mbr-bootloader-installation efi-application-installation
 
+# drop root privileges by default
+ifeq ($(IS_ROOT),y)
+%:
+	@$(call LOG,WARN,Dropping root privileges for target,$@)
+	HOME=$(CURDIR)/cache/fakeroot $(SETPRIV) $(MAKE) $@
+endif
+
 $(DOTCONFIG):
 	@$(call LOG,ERROR,File missing:,$(DOTCONFIG))
 	@echo
@@ -192,7 +215,6 @@ include modules/linux.mk
 include modules/swtpm.mk
 
 include operating-system/Makefile.inc
-
 include stboot-installation/common/Makefile.inc
 include stboot-installation/mbr-bootloader/Makefile.inc
 include stboot-installation/efi-application/Makefile.inc
@@ -239,6 +261,8 @@ help:
 	@echo  '  run-mbr-bootloader           - Run MBR bootloader'
 	@echo  '  run-efi-application          - Run EFI application'
 
+ifeq ($(IS_ROOT),)
+
 config:
 	if [[ ! -d contrib/boards/$(BOARD) ]]; then \
 	  $(call LOG,ERROR,Target board \"$(BOARD)\" not found); \
@@ -283,8 +307,9 @@ example-os-package: $(DOTCONFIG) $(stmanager_bin) $(call GROUP,$(ROOT_CERT) $(KE
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,OS package:,$$(ls -tp $(os-out) | grep .zip | grep -v /$ | head -1))
 
-$(out-dirs):
-	mkdir -p $@
+.PHONY: config toolchain keygen keygen-%
+
+endif #ifeq ($(IS_ROOT),)
 
 clean-keys:
 	@$(call LOG,INFO,Remove:,$(out)/keys)
@@ -304,4 +329,4 @@ distclean: clean
 	@$(call LOG,INFO,Remove:,$(DOTCONFIG))
 	rm -f $(DOTCONFIG)
 
-.PHONY: all help check default toolchain keygen sign-keygen cpu-keygen tboot acm debian ubuntu-18 ubuntu-20 example-os-package upload clean distclean
+.PHONY: all help clean clean-% distclean
