@@ -196,7 +196,7 @@ endif
 $(DOTCONFIG):
 	@$(call LOG,ERROR,File missing:,$(DOTCONFIG))
 	@echo
-	@echo '*** Please provide a config file of run "make config BOARD=<target>"'
+	@echo '*** Please provide a config file or run "make config BOARD=<target>"'
 	@echo '*** to generate the default configuration.'
 	@echo
 	@exit 1
@@ -244,7 +244,7 @@ help:
 	@echo  '  Use "make [target] V=1" for extra build debug information'
 	@echo  '  config BOARD=<target>        - Generate default configuration (see contrib/boards)'
 	@echo  '  check                        - Check for missing dependencies'
-	@echo  '  install-deps                 - Setup and install apt dependencies (Debian bases OS only)'
+	@echo  '  install-deps                 - Setup and install apt dependencies (Debian based OS only)'
 	@echo  '  toolchain                    - Build/Update toolchain'
 	@echo  '*** clean directory'
 	@echo  '  clean                        - Remove all build artifacts'
@@ -256,11 +256,11 @@ help:
 	@echo  '  keygen-sign                  - Generate example sign keys'
 	@echo  '  keygen-cpu                   - Generate cpu ssh keys for debugging'
 	@echo  '*** Build image'
-	@echo  '  all/image                    - Build target installation option'
+	@echo  '  all/image                    - Build target installation option (as set in .config)'
 	@echo  '  mbr-bootloader-installation  - Build MBR bootloader installation option'
 	@echo  '  efi-application-installation - Build EFI application installation option'
 	@echo  '*** Build kernel'
-	@echo  '  kernel                       - Build kernels'
+	@echo  '  kernel                       - Build LinuxBoot kernel'
 	@echo  '  kernel-<kernel target>       - (debug) Run kernel target'
 	@echo  '  kernel-menuconfig            - (debug) example: Run kernel menuconfig'
 	@echo  '  mbr-kernel-nconfig           - (debug) example: Run MBR bootloader kernel nconfig'
@@ -269,7 +269,7 @@ help:
 	@echo  '  tboot                        - Build tboot'
 	@echo  '  debian                       - Build reproducible Debian Buster'
 	@echo  '  ubuntu-18                    - Build reproducible Ubuntu Bionic (latest)'
-	@echo  '  ubuntu-20                    - Build reproducible Ubuntu Focal'
+	@echo  '  ubuntu-20                    - Build reproducible Ubuntu Focal (latest)'
 	@echo  '  example-os-package           - Build and Sign an example OS package'
 	@echo  '*** Run in QEMU'
 	@echo  '  swtpm                        - Build Software TPM Emulator'
