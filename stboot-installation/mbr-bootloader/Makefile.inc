@@ -45,7 +45,7 @@ $(efi32): $(syslinux)
 $(efi64): $(syslinux)
 	cp $(syslinux_efi64) $@
 
-run-mbr-bootloader: $(swtpm_bin) $(DOTCONFIG) $(mbr_image)
+run-mbr-bootloader: $(call GROUP,$(swtpm_bin) $(swtpm_bin)) $(DOTCONFIG) $(mbr_image)
 	$(call LOG,INFO,Run MBR bootloader image,$(mbr_image))
 	PATH=$(dir $<):$${PATH} $(scripts)/start_qemu_mbr_bootloader.sh
 

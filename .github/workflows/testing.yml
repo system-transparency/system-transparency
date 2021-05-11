@@ -108,6 +108,15 @@ jobs:
       - name: Build EFI application installation
         run: make efi-application-installation DEBOS_ENV=native
 
+      - name: Build Software TPM Emulator
+        run: make swtpm
+
+      - name: Boot MBR bootloader installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh mbr
+
+      - name: Boot EFI application installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh efi
+
   ubuntu_18-04_local_images:
     runs-on: ubuntu-18.04
     steps:
@@ -144,3 +153,12 @@ jobs:
 
       - name: Build EFI application installation
         run: make efi-application-installation DEBOS_ENV=native
+
+      - name: Build Software TPM Emulator
+        run: make swtpm
+
+      - name: Boot MBR bootloader installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh mbr
+
+      - name: Boot EFI application installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh efi

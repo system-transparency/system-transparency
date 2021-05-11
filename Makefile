@@ -23,6 +23,7 @@ ID := $(shell stat -c %u $(CURDIR))
 GID := $(shell stat -c %g $(CURDIR))
 IS_ROOT := $(shell [[ $$(id -u) == "0" ]] && echo y)
 KVM_EXISTS := $(shell [[ -e /dev/kvm ]] && echo y)
+KVM_ACCESS := $(shell [[ -w /dev/kvm ]] && echo y)
 
 # command to drop privileges
 SETPRIV := setpriv --reuid=$(ID) --regid=$(GID)
