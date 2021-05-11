@@ -44,7 +44,7 @@ case $variant in
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
     github.com/u-root/u-root/cmds/core/init \
-    github.com/u-root/u-root/cmds/boot/stboot 2>${stderr_log} || rc=$?
+    github.com/system-transparency/stboot 2>${stderr_log} || rc=$?
     ;;
 "debug" )
     echo
@@ -60,7 +60,7 @@ case $variant in
     github.com/u-root/u-root/cmds/core/init \
     github.com/u-root/u-root/cmds/core/elvish \
     github.com/u-root/cpu/cmds/cpud \
-    github.com/u-root/u-root/cmds/boot/stboot 2>${stderr_log} || rc=$?
+    github.com/system-transparency/stboot 2>${stderr_log} || rc=$?
     ;;
 "full" )
     echo
@@ -75,7 +75,7 @@ case $variant in
     -files "${cpu_keys}/cpu_rsa.pub:cpu_rsa.pub" \
     core \
     github.com/u-root/cpu/cmds/cpud \
-    github.com/u-root/u-root/cmds/boot/stboot 2>${stderr_log} || rc=$?
+    github.com/system-transparency/stboot 2>${stderr_log} || rc=$?
     ;;
 * ) echo "Unknown value in ST_LINUXBOOT_VARIANT";;
 esac
