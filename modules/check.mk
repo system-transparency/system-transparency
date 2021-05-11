@@ -120,8 +120,6 @@ install-deps:
 	$(call LOG,DONE,dependencies installed)
 endif
 
-ifeq ($(IS_ROOT),)
-
 check_targets += $(foreach bin,$(check_bins),check_$(bin)_bin)
 check_%_bin:
 	@$(call LOG,INFO,check command:,$*)
@@ -149,7 +147,6 @@ check_go_bin_version: check_go_bin
 	    $(CHECK_EXIT) \
 	  fi; \
 	fi;
-
 
 check_targets += $(foreach lib,$(check_libs),check_$(lib)_lib)
 check_%_lib:
@@ -202,7 +199,6 @@ check_libc_i386:
 	fi;
 
 check_targets += check_debos_native
-
 check_debos_native:
 	@$(call LOG,INFO,check if OS is debian based)
 	if ([[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release |grep -q debian); then \
@@ -273,8 +269,4 @@ check_kvm_access: check_kvm
 
 check: $(check_targets)
 
-.PHONY: check check_%
-
-endif #ifeq ($(IS_ROOT),)
-
-.PHONY: install-deps
+.PHONY: check check_% install-deps
