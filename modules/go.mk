@@ -9,10 +9,14 @@ debos_src := $(GOPATH)/src/$(debos_package)
 debos_branch := system-transparency
 ## u-root
 u-root_bin := $(GOPATH)/bin/u-root
-stmanager_bin := $(GOPATH)/bin/stmanager
 u-root_package := github.com/u-root/u-root
 u-root_src := $(GOPATH)/src/$(u-root_package)
-u-root_default_branch := stboot
+u-root_branch := $(patsubst "%",%,$(ST_UROOT_DEV_VERSION))
+## stboot
+stmanager_bin := $(GOPATH)/bin/stmanager
+stboot_package := github.com/system-transparency/stboot
+stboot_src := $(GOPATH)/src/$(stboot_package)
+stboot_branch := $(patsubst "%",%,$(ST_STBOOT_DEV_VERSION))
 ## ACM grebber
 sinit-acm-grebber_bin := $(GOPATH)/bin/sinit-acm-grebber
 sinit-acm-grebber_package := github.com/system-transparency/sinit-acm-grebber
@@ -34,24 +38,20 @@ cpud_package := $(cpu_package)d
 #
 define go_update
 	if [ -x $(2) ]; then \
-	  $(call LOG,INFO,Go: Update,$(1)); \
+	  $(call LOG,INFO,Go|$1: Update,$(1)); \
 	else \
-	  $(call LOG,INFO,Go: Install,$(1)); \
+	  $(call LOG,INFO,Go|$1: Install,$(1)); \
 	fi;
 	go build $4 -o $(2).temp $(3)
 	if [ -x $(2) ] && diff $(2) $(2).temp >/dev/null; then \
-	  $(call LOG,INFO,Go: $(1) already up-to-date); \
+	  $(call LOG,INFO,Go|$1: $(1) already up-to-date); \
 	fi
         # use rsync to only update if hash changes (-c flag)
 	rsync -c $(2).temp $(2)
 	rm $(2).temp
-	$(call LOG,DONE,Go:,$$(realpath --relative-to=. $2))
+	$(call LOG,DONE,Go|$1:,$$(realpath --relative-to=. $2))
 endef
 
-u-root_branch := $(patsubst "%",%,$(ST_UROOT_DEV_BRANCH))
-ifeq ($(u-root_branch),)
-u-root_branch := $(u-root_default_branch)
-endif
 
 ifeq ($(IS_ROOT),)
 
@@ -68,23 +68,23 @@ debos_fetch := $(debos_src)/.git/FETCH_HEAD
 debos_checkout := $(debos_src)/.git/HEAD
 
 $(debos_get):
-	@$(call LOG,INFO,Go: Get,$(debos_package))
+	@$(call LOG,INFO,Go|debos: Get,$(debos_package))
 	go get -d -u $(debos_package)/... 2>/dev/null || \
 		rm -rf $(debos_src) && \
 		go get -d -u $(debos_package)/...
 $(debos_remote): $(debos_get)
 	if ! git -C $(debos_src) remote show system-transparency >/dev/null 2>&1; then \
-	  $(call LOG,INFO,Go: Add system-transparecy remote,$(debos_repo)); \
+	  $(call LOG,INFO,Go|debos: Add system-transparecy remote,$(debos_repo)); \
 	  git -C $(debos_src) remote add system-transparency https://$(debos_repo); \
 	fi
 $(debos_fetch): $(debos_remote)
-	$(call LOG,INFO,Go: Fetch branch,$(debos_branch))
+	$(call LOG,INFO,Go|debos: Fetch branch,$(debos_branch))
 	git -C $(debos_src) fetch --quiet system-transparency $(debos_branch)
 $(debos_checkout): $(debos_fetch)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
-	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
+	$(call LOG,WARN,Go|debos: Skip checkout (ST_DEVELOP=1))
 else
-	$(call LOG,INFO,Go: Checkout branch,$(debos_branch))
+	$(call LOG,INFO,Go|debos: Checkout branch,$(debos_branch))
 	git -C $(debos_src) checkout --quiet $(debos_branch)
 endif
 	touch $@
@@ -95,40 +95,66 @@ ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools debos $(debos_bin)),)
 .PHONY: $(debos_fetch)
 endif
 
-### u-root/stmanager
+### u-root
 
 u-root_get := $(u-root_src)/.git/config
 u-root_fetch := $(u-root_src)/.git/FETCH_HEAD
 u-root_checkout := $(u-root_src)/.git/HEAD
 
 $(u-root_get): $(go_check)
-	@$(call LOG,INFO,Go: Get,$(u-root_package))
+	@$(call LOG,INFO,Go|u-root: Get,$(u-root_package))
 	go get -d -u $(u-root_package)
 	git -C $(u-root_src) checkout --quiet $(u-root_default_branch)
-$(u-root_fetch): $(u-root_get)
-	@$(call LOG,INFO,Go: Fetch branch,$(u-root_branch))
+$(u-root_fetch): $(u-root_get) $(DOTCONFIG)
+	@$(call LOG,INFO,Go|u-root: Fetch branch/commit,$(u-root_branch))
 	git -C $(u-root_src) fetch --all --quiet
-$(u-root_checkout): $(u-root_fetch)
+$(u-root_checkout): $(u-root_fetch) $(DOTCONFIG)
 ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
-	$(call LOG,WARN,Go: Skip checkout (ST_DEVELOP=1))
+	$(call LOG,WARN,Go|u-root: Skip checkout (ST_DEVELOP=1))
 else
-	$(call LOG,INFO,Go: Checkout branch,$(u-root_branch))
+	$(call LOG,INFO,Go|u-root: Checkout branch/commit,$(u-root_branch))
 	git -C $(u-root_src) checkout --quiet $(u-root_branch)
 endif
 	touch $@
 u-root $(u-root_bin): $(u-root_checkout)
 	$(call go_update,u-root,$(u-root_bin),$(u-root_package))
-stmanager $(stmanager_bin): $(u-root_checkout)
-	$(call go_update,stmanager,$(stmanager_bin),$(u-root_package)/tools/stmanager)
 
-ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools u-root stmanager $(u-root_bin) $(stmanager_bin)),)
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools u-root $(u-root_bin)),)
 .PHONY: $(u-root_fetch)
+endif
+
+### stboot/stmanager
+
+stboot_get := $(stboot_src)/.git/config
+stboot_fetch := $(stboot_src)/.git/FETCH_HEAD
+stboot_checkout := $(stboot_src)/.git/HEAD
+
+$(stboot_get): $(go_check)
+	@$(call LOG,INFO,Go|stboot: Get,$(stboot_package))
+	go get -d -u $(stboot_package)
+	git -C $(stboot_src) checkout --quiet $(stboot_default_branch)
+$(stboot_fetch): $(stboot_get) $(DOTCONFIG)
+	@$(call LOG,INFO,Go|stboot: Fetch branch/commit,$(stboot_branch))
+	git -C $(stboot_src) fetch --all --quiet
+$(stboot_checkout): $(stboot_fetch) $(DOTCONFIG)
+ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+	$(call LOG,WARN,Go|stboot: Skip checkout (ST_DEVELOP=1))
+else
+	$(call LOG,INFO,Go|stboot: Checkout branch/commit,$(stboot_branch))
+	git -C $(stboot_src) checkout --quiet $(stboot_branch)
+endif
+	touch $@
+stmanager $(stmanager_bin): $(stboot_checkout)
+	$(call go_update,stmanager,$(stmanager_bin),$(stboot_package)/tools/stmanager)
+
+ifneq ($(filter $(MAKECMDGOALS),toolchain go-tools stboot $(stmanager_bin)),)
+.PHONY: $(stboot_fetch)
 endif
 
 ### cpu command
 
 cpu $(cpu_bin) $(cpud_bin):
-	@$(call LOG,INFO,Go: Get,$(cpu_package))
+	@$(call LOG,INFO,Go|cpu: Get,$(cpu_package))
 	go get -d -u $(cpu_package)
 	$(call go_update,cpu,$(cpu_bin),$(cpu_package))
 	$(call go_update,cpud,$(cpud_bin),$(cpud_package))
@@ -139,7 +165,7 @@ endif
 
 ### ACM grebber
 sinit-acm-grebber $(sinit-acm-grebber_bin):
-	@$(call LOG,INFO,Go: Get,$(sinit-acm-grebber_package))
+	@$(call LOG,INFO,Go|sinit-acm-grebber: Get,$(sinit-acm-grebber_package))
 	go get -d -u $(sinit-acm-grebber_package)
 	$(call go_update,sinit-acm-grebber,$(sinit-acm-grebber_bin),$(sinit-acm-grebber_package))
 
