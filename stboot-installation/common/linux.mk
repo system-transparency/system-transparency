@@ -112,6 +112,7 @@ $(tarball_dir)/linux-%.tar.xz.valid: $(tarball_dir)/linux-%.tar.xz $(tarball_dir
 $(kernel_target): $(kernel_dir)/.config  $(initramfs)
 	$(call LOG,INFO,Linux: Make kernel,$(kernel_version))
 	$(MAKE) -C $(kernel_dir) $(KERNEL_MAKE_FLAGS) bzImage
+	touch $@
 
 $(kernel_dir)/.config: $(DOTCONFIG) $(kernel_dir)/.unpack $(patsubst "%",%,$(ST_LINUXBOOT_KERNEL_CONFIG))
 	$(call LOG,INFO,Linux: Configure kernel,$(kernel_version));
