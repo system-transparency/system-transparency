@@ -37,7 +37,9 @@ endif
 MAKEPID:= $(shell echo $$PPID)
 
 # setup development environment if ST_DEVELOP=1
-ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+ST_DEVELOP := $(strip $(patsubst "%",%,$($(ST_DEVELOP))))
+
+ifeq ($(ST_DEVELOP),1)
 # use local GOPATH
 ifeq ($(ST_GOPATH),)
 	GOPATH := $(shell source <(go env) && echo $$GOPATH)
@@ -90,6 +92,12 @@ define LOG
 printf '[%s] $2 %s\n' "$($1_COLOR)$1$(NORMAL)" "$(FILE_COLOR)$3$(NORMAL)"
 endef
 
+# newline
+define \n
+
+
+endef
+
 # Make is silent per default, but 'make V=1' will show all compiler calls.
 Q:=@
 ifneq ($(V),1)
@@ -124,12 +132,69 @@ endif
 BOARD ?= qemu
 DOTCONFIG ?= .config
 
+required_configs =
+required_configs += ST_UROOT_DEV_VERSION
+required_configs += ST_STBOOT_DEV_VERSION
+required_configs += ST_LINUXBOOT_KERNEL_VERSION
+required_configs += ST_LINUXBOOT_VARIANT
+required_configs += ST_SIGNING_ROOT
+required_configs += ST_NUM_SIGNATURES
+required_configs += ST_BOOT_MODE
+required_configs += ST_USE_PKG_CACHE
+required_configs += ST_NETWORK_MODE
+required_configs += ST_HOST_IP
+required_configs += ST_HOST_GATEWAY
+required_configs += ST_DATA_PARTITION_EXTRA_SPACE
+# local bootmode requirement
+local_required_configs := ST_OS_PKG_KERNEL
+
+
+installation_options := mbr efi
+linuxboot_variants := minimal debug full
+boot_modes := local network
+
+# check if variable is defined
+define SET
+ifndef $1
+$$(error $1 is not set!)
+endif
+endef
+
 ifneq ($(strip $(wildcard $(DOTCONFIG))),)
 include $(DOTCONFIG)
+
+# remove double quotes
+$(foreach config,$(filter ST_%,$(.VARIABLES)),$(eval $(config) := $(strip $(patsubst "%",%,$($(config))))))
+
+## DOTCONFIG VALIDAION
+#
+# skip validation for config and distclean
+ifeq ($(filter $(MAKECMDGOALS),config distclean),)
+# required
+$(foreach config,$(required_configs),$(eval $(call SET,$(config))))
+# installation option
+ifeq ($(filter $(ST_INSTALLATION_OPTION),$(installation_options)),)
+$(error unknown ST_INSTALLATION_OPTION=$(ST_INSTALLATION_OPTION) \
+$(\n)$(\n)Available options are: $(installation_options))
+endif
+# LinuxBoot variants
+ifeq ($(filter $(ST_LINUXBOOT_VARIANT),$(linuxboot_variants)),)
+$(error unknown ST_LINUXBOOT_VARIANT=$(ST_LINUXBOOT_VARIANT) \
+$(\n)$(\n)Available variants are: $(linuxboot_variants)))
+endif
+# boot modes
+ifeq ($(filter $(ST_BOOT_MODE),$(boot_modes)),)
+$(error unknown ST_BOOT_MODE=$(ST_BOOT_MODE) \
+$(\n)$(\n)Available modes are: $(boot_modes)))
+endif
+ifeq ($(ST_BOOT_MODE),local)
+$(foreach config,$(local_required_configs),$(eval $(call SET,$(config))))
+endif
+endif
 endif
 
 EXAMPLE_ROOT_CERT := $(out)/keys/signing_keys/root.cert
-ROOT_CERT := $(patsubst "%",%,$(ST_SIGNING_ROOT))
+ROOT_CERT := $(ST_SIGNING_ROOT)
 ifeq ($(strip $(ROOT_CERT)),)
 ROOT_CERT := $(EXAMPLE_ROOT_CERT)
 endif
@@ -202,11 +267,11 @@ $(DOTCONFIG):
 	@exit 1
 
 ifneq ($(strip $(ST_OS_PKG_KERNEL)),)
-OS_KERNEL := $(patsubst "%",%,$(ST_OS_PKG_KERNEL))
+OS_KERNEL := $(ST_OS_PKG_KERNEL)
 endif
 
 ifneq ($(strip $(ST_OS_PKG_INITRAMFS)),)
-OS_INITRAMFS := $(patsubst "%",%,$(ST_OS_PKG_INITRAMFS))
+OS_INITRAMFS := $(ST_OS_PKG_INITRAMFS)
 endif
 
 include modules/check.mk
@@ -318,7 +383,7 @@ keygen-cpu $(CPU_SSH_KEYS):
 	$(scripts)/make_cpu_keys.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,Example cpu ssh keys in:,$(CPU_KEY_DIR))
 
-example-os-package: $(DOTCONFIG) $(stmanager_bin) $(call GROUP,$(ROOT_CERT) $(KEYS_CERTS)) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(patsubst "%",%,$(ST_OS_PKG_TBOOT)) $(patsubst %/,%,$(patsubst "%",%,$(ST_OS_PKG_ACM)))
+example-os-package: $(DOTCONFIG) $(stmanager_bin) $(call GROUP,$(ROOT_CERT) $(KEYS_CERTS)) $(call GROUP,$(OS_KERNEL) $(OS_INITRAMFS)) $(ST_OS_PKG_TBOOT) $(patsubst %/,%,$(ST_OS_PKG_ACM))
 	@$(call LOG,INFO,Sign OS package)
 	$(scripts)/create_and_sign_os_package.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,OS package:,$$(ls -tp $(os-out) | grep .zip | grep -v /$ | head -1))

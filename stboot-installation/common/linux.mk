@@ -114,10 +114,10 @@ $(kernel_target): $(kernel_dir)/.config  $(initramfs)
 	$(MAKE) -C $(kernel_dir) $(KERNEL_MAKE_FLAGS) bzImage
 	touch $@
 
-$(kernel_dir)/.config: $(DOTCONFIG) $(kernel_dir)/.unpack $(patsubst "%",%,$(ST_LINUXBOOT_KERNEL_CONFIG))
+$(kernel_dir)/.config: $(DOTCONFIG) $(kernel_dir)/.unpack $(ST_LINUXBOOT_KERNEL_CONFIG)
 	$(call LOG,INFO,Linux: Configure kernel,$(kernel_version));
 ifneq ($(strip $(ST_LINUXBOOT_KERNEL_CONFIG)),)
-	$(call LOG,INFO,Linux: Use configuration file,$(patsubst "%",%,$(ST_LINUXBOOT_KERNEL_CONFIG)));
+	$(call LOG,INFO,Linux: Use configuration file,$(ST_LINUXBOOT_KERNEL_CONFIG));
 	cp $(ST_LINUXBOOT_KERNEL_CONFIG) $@.tmp
 ifneq ($(strip $(ST_LINUXBOOT_CMDLINE)),)
 	$(call LOG,WARN,Linux: Override CONFIG_CMDLINE with ST_LINUXBOOT_CMDLINE=$(_ST_LINUXBOOT_CMDLINE));

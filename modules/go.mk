@@ -11,12 +11,12 @@ debos_branch := system-transparency
 u-root_bin := $(GOPATH)/bin/u-root
 u-root_package := github.com/u-root/u-root
 u-root_src := $(GOPATH)/src/$(u-root_package)
-u-root_branch := $(patsubst "%",%,$(ST_UROOT_DEV_VERSION))
+u-root_branch := $(ST_UROOT_DEV_VERSION)
 ## stboot
 stmanager_bin := $(GOPATH)/bin/stmanager
 stboot_package := github.com/system-transparency/stboot
 stboot_src := $(GOPATH)/src/$(stboot_package)
-stboot_branch := $(patsubst "%",%,$(ST_STBOOT_DEV_VERSION))
+stboot_branch := $(ST_STBOOT_DEV_VERSION)
 ## ACM grebber
 sinit-acm-grebber_bin := $(GOPATH)/bin/sinit-acm-grebber
 sinit-acm-grebber_package := github.com/system-transparency/sinit-acm-grebber
@@ -81,7 +81,7 @@ $(debos_fetch): $(debos_remote)
 	$(call LOG,INFO,Go|debos: Fetch branch,$(debos_branch))
 	git -C $(debos_src) fetch --quiet system-transparency $(debos_branch)
 $(debos_checkout): $(debos_fetch)
-ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+ifeq ($(ST_DEVELOP),1)
 	$(call LOG,WARN,Go|debos: Skip checkout (ST_DEVELOP=1))
 else
 	$(call LOG,INFO,Go|debos: Checkout branch,$(debos_branch))
@@ -109,7 +109,7 @@ $(u-root_fetch): $(u-root_get) $(DOTCONFIG)
 	@$(call LOG,INFO,Go|u-root: Fetch branch/commit,$(u-root_branch))
 	git -C $(u-root_src) fetch --all --quiet
 $(u-root_checkout): $(u-root_fetch) $(DOTCONFIG)
-ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+ifeq ($(ST_DEVELOP),1)
 	$(call LOG,WARN,Go|u-root: Skip checkout (ST_DEVELOP=1))
 else
 	$(call LOG,INFO,Go|u-root: Checkout branch/commit,$(u-root_branch))
@@ -137,7 +137,7 @@ $(stboot_fetch): $(stboot_get) $(DOTCONFIG)
 	@$(call LOG,INFO,Go|stboot: Fetch branch/commit,$(stboot_branch))
 	git -C $(stboot_src) fetch --all --quiet
 $(stboot_checkout): $(stboot_fetch) $(DOTCONFIG)
-ifeq ($(patsubst "%",%,$(ST_DEVELOP)),1)
+ifeq ($(ST_DEVELOP),1)
 	$(call LOG,WARN,Go|stboot: Skip checkout (ST_DEVELOP=1))
 else
 	$(call LOG,INFO,Go|stboot: Checkout branch/commit,$(stboot_branch))

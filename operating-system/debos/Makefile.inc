@@ -19,11 +19,6 @@ debian-os := $(shell [[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" 
 host-kernel := /boot/vmlinuz-$(shell uname -r)
 kernel-access := $(shell [[ -r $(host-kernel) ]] && echo y)
 
-define \n
-
-
-endef
-
 ## list of available debos environment
 #
 define DEBOS_ENV_LIST
