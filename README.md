@@ -172,6 +172,9 @@ Only relevant in network bootmode and when `network_mode` is set to `"static"`. 
 #### `dns` - JSON string
 Optional setting to pass a custom DNS server when using network boot mode. The value will be prefixed with `nameserver ` and then written to `/etc/resolv.conf` inside the LinuxBoot initramfs. If no own setting is provided, `8.8.8.8` is used.
 
+#### `network_interface` - JSON string
+Optional setting to choose a specific network interface via its MAC address when using network boot mode. The MAC is supposed to be passed in IEEE 802 MAC-48, EUI-48 or EUI-64 formt, e.g `00:00:5e:00:53:01`.  If empty or if the desired network interface cannot be found, the first existing and successfully setup one will be used.
+
 #### `provisioning_urls` - JSON array of strings
 A list of provisioning server URLs. See also [Network Boot](#Network-Boot). The URLs must include the scheme (`http://` or `https://`).
 

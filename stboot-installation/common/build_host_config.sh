@@ -21,6 +21,7 @@ network_mode=${ST_NETWORK_MODE}
 host_ip=${ST_HOST_IP}
 host_gateway=${ST_HOST_GATEWAY}
 host_dns=${ST_HOST_DNS}
+host_network_interface=${ST_HOST_NETWORK_INTERFACE}
 provisioning_url=("${ST_PROVISIONING_SERVER_URL[@]}")
 url_array=$(printf '%s\n' "${provisioning_url[@]}" | jq -cR . | jq -cs .)
 
@@ -40,6 +41,7 @@ cat >"${host_config}" <<EOL
    "host_ip":"${host_ip}",
    "gateway":"${host_gateway}",
    "dns":"${host_dns}",
+   "network_interface":"${host_network_interface}",
    "provisioning_urls": ${url_array},
    "identity":"${identity}",
    "authentication":"${authentication}"

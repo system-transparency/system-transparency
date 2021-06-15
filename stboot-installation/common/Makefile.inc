@@ -37,7 +37,7 @@ endif
 	$(common)/build_initramfs.sh $(OUTREDIRECT)
 	@$(call LOG,DONE,LinuxBoot initramfs,$@)
 
-$(eval $(call CONFIG_DEP,$(host_config),ST_PROVISIONING_SERVER_URL|ST_NETWORK_MODE|ST_HOST_IP|ST_HOST_GATEWAY|ST_HOST_DNS))
+$(eval $(call CONFIG_DEP,$(host_config),ST_PROVISIONING_SERVER_URL|ST_NETWORK_MODE|ST_HOST_IP|ST_HOST_GATEWAY|ST_HOST_DNS|ST_HOST_NETWORK_INTERFACE))
 $(host_config): % : %.config
 	@$(call LOG,INFO,Build host configuration,$@)
 	$(common)/build_host_config.sh $(OUTREDIRECT)
