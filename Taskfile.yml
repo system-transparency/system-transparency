@@ -2,10 +2,43 @@
 # https://github.com/system-transparency/task/tree/dev
 version: '4'
 
+output: 'interleaved'
+
+vars:
+  # override go environment
+  go_env: 'export GO111MODULE="off"; export GOPATH="${PWD}/cache/go"; '
+
+dotenv:
+  - .config
+
+includes:
+  go: ./go.yml
+  deps: ./dependencies.yml
+
 tasks:
+
+  debug:
+    cmds:
+      - '{{.go_env}} echo hello world: ${GOPATH}'
 
   default:
     deps: [image]
+
+  config:
+    desc: Generate default configuration
+    cmds:
+      - ./scripts/config.sh -o .config
+    sources:
+      - contrib/default.config
+    generates:
+      - .config
+
+  toolchain:
+    desc: Build/Update toolchain
+    deps:
+      - go:all
+
+######## stboot-installation ########
 
   image:
     desc: Build target installation option
@@ -15,32 +48,25 @@ tasks:
       - sh: test -f .config
         msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
 
-  init-config:
-    desc: Generate default configuration
+  data_partition:
     cmds:
-      - make config
+      - 'mkdir -p out/stboot-installation'
+      - './stboot-installation/common/build_data_filesystem.sh'
     sources:
-      - contrib/default.config
+      - out/os-packages
     generates:
-      - .config
-
-  check:
-    desc: Check for missing dependencies
-    cmds:
-      - make check
-
-  install-deps:
-    desc: Install Debian/Ubuntu dependencies
-    cmds:
-      - make install-deps
+      - out/stboot-installation/data_partition.ext4
+    label: >
+      data partition
+      (
+      ST_DATA_PARTITION_EXTRA_SPACE={{.ST_DATA_PARTITION_EXTRA_SPACE}}'
+      ST_BOOT_MODE={{.ST_BOOT_MODE}}'
+      )
     preconditions:
-      - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release|grep -q debian'
-        msg: "OS is not debian based"
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
 
-  toolchain:
-    desc: Build/Update toolchain
-    cmds:
-      - make toolchain
+######## keygen ########
 
   keygen:
     desc: Generate all example keys
@@ -51,21 +77,27 @@ tasks:
   keygen-sign:
     desc: Generate example sign keys
     cmds:
-      - make keygen-sign
+      - './scripts/make_signing_keys.sh -o out/keys/signing_keys/'
     generates:
       - out/keys/signing_keys/*
+    deps:
+      - go:stmanager
 
   keygen-cpu:
     desc: Generate cpu ssh keys for debugging
     cmds:
-      - make keygen-cpu
+      - './scripts/make_cpu_keys.sh -o out/keys/cpu_keys/'
     generates:
       - out/keys/cpu_keys/*
+
+######## LinuxBoot kernel ########
 
   kernel:
     desc: Build LinuxBoot kernel
     cmds:
       - make kernel -j `nproc`
+
+######## cleanup ########
 
   clean:
     desc: Remove all build artifacts
@@ -82,7 +114,7 @@ tasks:
     cmds:
       - rm -rf out/os-packages
 
-  distclean:
+  clean-all:
     desc: Remove all build artifacts, cache and config file
     deps: [clean]
     cmds:

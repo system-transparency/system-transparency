@@ -1,0 +1,19 @@
+# Taskfile is not supported by upstream task yet.
+# https://github.com/system-transparency/task/tree/dev
+version: '4'
+
+tasks:
+
+  check:
+    desc: Check for missing dependencies
+    cmds:
+      - make check
+
+  install:
+    desc: Install Debian/Ubuntu dependencies
+    cmds:
+      - make install-deps
+    preconditions:
+      - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release|grep -q debian'
+        msg: "OS is not debian based"
+

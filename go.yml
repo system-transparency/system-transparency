@@ -1,0 +1,36 @@
+# Taskfile is not supported by upstream task yet.
+# https://github.com/system-transparency/task/tree/dev
+version: '4'
+
+tasks:
+
+  all:
+    deps:
+      - u-root
+      - stmanager
+      - sinit-acm-grebber
+      - cpu
+
+  u-root:
+    cmds:
+      - '{{.go_env}} go get -d -u github.com/u-root/u-root'
+      - '{{.go_env}} go install github.com/u-root/u-root'
+
+  stmanager:
+    cmds:
+      - '{{.go_env}} go get -d -u github.com/system-transparency/stboot'
+      - '{{.go_env}} go install github.com/system-transparency/stboot'
+
+  sinit-acm-grebber:
+    cmds:
+      - '{{.go_env}} go get -d -u github.com/system-transparency/sinit-acm-grebber'
+      - '{{.go_env}} go install github.com/system-transparency/sinit-acm-grebber'
+
+  cpu:
+    cmds:
+      - '{{.go_env}} go get -d -u github.com/u-root/cpu/cmds/cpu'
+      - '{{.go_env}} go install github.com/u-root/cpu/cmds/cpu'
+
+  clean:
+    cmds:
+      - rm -rf cache/go
