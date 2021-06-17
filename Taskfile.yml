@@ -1,0 +1,88 @@
+version: '3'
+
+tasks:
+
+  default:
+    deps: [image]
+
+  image:
+    desc: Build target installation option
+    cmds:
+      - make image
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+
+  init-config:
+    desc: Generate default configuration
+    cmds:
+      - make config
+    sources:
+      - contrib/default.config
+    generates:
+      - .config
+
+  check:
+    desc: Check for missing dependencies
+    cmds:
+      - make check
+
+  install-deps:
+    desc: Install Debian/Ubuntu dependencies
+    cmds:
+      - make install-deps
+    preconditions:
+      - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release|grep -q debian'
+        msg: "OS is not debian based"
+
+  toolchain:
+    desc: Build/Update toolchain
+    cmds:
+      - make toolchain
+
+  keygen:
+    desc: Generate all example keys
+    deps:
+      - keygen-sign
+      - keygen-cpu
+
+  keygen-sign:
+    desc: Generate example sign keys
+    cmds:
+      - make keygen-sign
+    generates:
+      - out/keys/signing_keys/*
+
+  keygen-cpu:
+    desc: Generate cpu ssh keys for debugging
+    cmds:
+      - make keygen-cpu
+    generates:
+      - out/keys/cpu_keys/*
+
+  kernel:
+    desc: Build LinuxBoot kernel
+    cmds:
+      - make kernel -j `nproc`
+
+  clean:
+    desc: Remove all build artifacts
+    cmds:
+      - rm -rf out
+
+  clean-keys:
+    desc: Remove all keys
+    cmds:
+      - rm -rf out/keys
+
+  clean-os:
+    desc: Remove os-packages
+    cmds:
+      - rm -rf out/os-packages
+
+  distclean:
+    desc: Remove all build artifacts, cache and config file
+    deps: [clean]
+    cmds:
+      - rm -rf cache
+      - rm -f .config
