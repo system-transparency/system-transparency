@@ -9,3 +9,4 @@
 /out/
 /.notes/
 **/*.old
+.task
