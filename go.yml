@@ -1,0 +1,34 @@
+version: '3'
+
+tasks:
+
+  all:
+    deps:
+      - u-root
+      - stmanager
+      - sinit-acm-grebber
+      - cpu
+
+  u-root:
+    cmds:
+      - '{{.go_env}} go get -d -u github.com/u-root/u-root'
+      - '{{.go_env}} go install github.com/u-root/u-root'
+
+  stmanager:
+    cmds:
+      - '{{.go_env}} go get -d -u github.com/system-transparency/stboot'
+      - '{{.go_env}} go install github.com/system-transparency/stboot/tools/stmanager'
+
+  sinit-acm-grebber:
+    cmds:
+      - '{{.go_env}} go get -d -u github.com/system-transparency/sinit-acm-grebber'
+      - '{{.go_env}} go install github.com/system-transparency/sinit-acm-grebber'
+
+  cpu:
+    cmds:
+      - '{{.go_env}} go get -d -u github.com/u-root/cpu/cmds/cpu'
+      - '{{.go_env}} go install github.com/u-root/cpu/cmds/cpu'
+
+  clean:
+    cmds:
+      - rm -rf cache/go

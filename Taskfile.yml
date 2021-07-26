@@ -1,44 +1,108 @@
 version: '3'
 
+vars:
+  # override go environment
+  # TODO: search an elegant solution
+  go_env: 'export GO111MODULE="off"; export GOPATH="${PWD}/cache/go"; '
+
+dotenv:
+  - .config
+
+includes:
+  go: ./go.yml
+  deps: ./dependencies.yml
+
 tasks:
 
   default:
     deps: [image]
 
-  image:
-    desc: Build target installation option
-    cmds:
-      - make image
-    preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
-
-  init-config:
+  config:
     desc: Generate default configuration
     cmds:
-      - make config
+      - "./scripts/config.sh -o .config"
     sources:
       - contrib/default.config
     generates:
       - .config
 
-  check:
-    desc: Check for missing dependencies
-    cmds:
-      - make check
-
-  install-deps:
-    desc: Install Debian/Ubuntu dependencies
-    cmds:
-      - make install-deps
-    preconditions:
-      - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$$/\1/p" /etc/os-release|grep -q debian'
-        msg: "OS is not debian based"
-
   toolchain:
     desc: Build/Update toolchain
+    deps:
+      - go:all
+
+######## stboot-installation ########
+
+  image:
+    desc: Build target installation option
+    # TODO: make target installation option optional
+    deps: [image-mbr]
+
+  image-mbr:
+    desc: Build MBR bootloader installation option
+    deps:
+      - mbr_boot_partition
+      - data_partition
     cmds:
-      - make toolchain
+      - './stboot-installation/mbr-bootloader/build_image.sh >/dev/null'
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+
+  image-efi:
+    desc: Build EFI application installation option
+    deps:
+      - efi_boot_partition
+      - data_partition
+    cmds:
+      - './stboot-installation/efi-application/build_image.sh >/dev/null'
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+
+  mbr_boot_partition:
+    deps:
+      - kernel
+      - host_config
+      - syslinux
+      - syslinux_config
+    cmds:
+      - './stboot-installation/mbr-bootloader/build_boot_filesystem.sh >/dev/null'
+    generates:
+      - out/stboot-installation/data_partition.ext4
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+
+  data_partition:
+    cmds:
+      - './stboot-installation/common/build_data_filesystem.sh >/dev/null'
+    sources:
+      - out/os-packages
+    generates:
+      - out/stboot-installation/data_partition.ext4
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+
+  host_config:
+    cmds:
+      - './stboot-installation/common/build_host_config.sh >/dev/null'
+
+  syslinux:
+    cmds:
+      - './stboot-installation/mbr-bootloader/fetch_syslinux.sh >/dev/null'
+        # TODO: integrate into the the script above
+      - 'cp cache/syslinux/syslinux-6.03/efi32/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTIA32.EFI'
+      - 'cp cache/syslinux/syslinux-6.03/efi64/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTX64.EFI'
+
+  syslinux_config:
+    cmds:
+      - './stboot-installation/mbr-bootloader/build_syslinux_config.sh >/dev/null'
+    status:
+      - 'test -f out/stboot-installation/mbr-bootloader/syslinux.cfg'
+
+######## keygen ########
 
   keygen:
     desc: Generate all example keys
@@ -48,22 +112,35 @@ tasks:
 
   keygen-sign:
     desc: Generate example sign keys
+    deps:
+      - go:stmanager
     cmds:
-      - make keygen-sign
+      - './scripts/make_signing_keys.sh -o out/keys/signing_keys/ >/dev/null'
     generates:
       - out/keys/signing_keys/*
 
   keygen-cpu:
     desc: Generate cpu ssh keys for debugging
     cmds:
-      - make keygen-cpu
+      - './scripts/make_cpu_keys.sh -o out/keys/cpu_keys/ >/dev/null'
     generates:
       - out/keys/cpu_keys/*
 
+######## LinuxBoot kernel ########
+
   kernel:
     desc: Build LinuxBoot kernel
+    deps:
+      - go:u-root
     cmds:
       - make kernel -j `nproc`
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+      - sh: test -f {{.ST_SIGNING_ROOT}}
+        msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task keygen-sign\""
+
+######## cleanup ########
 
   clean:
     desc: Remove all build artifacts
@@ -80,7 +157,7 @@ tasks:
     cmds:
       - rm -rf out/os-packages
 
-  distclean:
+  clean-all:
     desc: Remove all build artifacts, cache and config file
     deps: [clean]
     cmds:
