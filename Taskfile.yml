@@ -10,7 +10,7 @@ dotenv:
 
 includes:
   go: ./go.yml
-  deps: ./dependencies.yml
+  deps: ./deps.yml
 
 tasks:
 
@@ -81,6 +81,8 @@ tasks:
       - out/os-packages
     generates:
       - out/stboot-installation/data_partition.ext4
+    status:
+      - './.task_config.sh data_partition stboot-installation/common/build_data_filesystem.sh'
     preconditions:
       - sh: test -f .config
         msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
@@ -88,6 +90,10 @@ tasks:
   host_config:
     cmds:
       - './stboot-installation/common/build_host_config.sh >/dev/null'
+    generates:
+      - out/stboot-installation/host_configuration.json
+    status:
+      - './.task_config.sh host_config stboot-installation/common/build_host_config.sh'
 
   syslinux:
     cmds:
@@ -162,4 +168,5 @@ tasks:
     deps: [clean]
     cmds:
       - rm -rf cache
+      - rm -rf .task
       - rm -f .config
