@@ -30,10 +30,11 @@ tasks:
 
   # XXX: Does not update toolchain binary!
   # TODO: Force toolchain rebuild for this target only
+  # current workaround: task clean-toolchain toolchain
   toolchain:
-    desc: Build/Update toolchain
+    desc: Build toolchain
     deps:
-      - go:rebuild-all
+      - go:all
 
 ######## stboot-installation ########
 
@@ -214,6 +215,11 @@ tasks:
     desc: Remove all keys
     cmds:
       - rm -rf out/keys
+
+  clean-toolchain:
+    desc: Remove all go tools
+    deps:
+      - go:clean
 
   clean-os:
     desc: Remove os-packages
