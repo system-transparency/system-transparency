@@ -12,6 +12,8 @@ includes:
   go: ./go.yml
   deps: ./deps.yml
 
+output: 'prefixed'
+
 tasks:
 
   default:
@@ -47,6 +49,11 @@ tasks:
       - data_partition
     cmds:
       - './stboot-installation/mbr-bootloader/build_image.sh >/dev/null'
+    sources:
+      - out/stboot-installation/data_partition.ext4
+      - out/stboot-installation/mbr-bootloader/boot_partition.vfat
+    generates:
+      - out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img
     preconditions:
       - sh: test -f .config
         msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
@@ -70,8 +77,13 @@ tasks:
       - syslinux_config
     cmds:
       - './stboot-installation/mbr-bootloader/build_boot_filesystem.sh >/dev/null'
+    sources:
+      - out/stboot-installation/initramfs-linuxboot.cpio.gz
+      - out/stboot-installation/host_configuration.json
+      - cache/syslinux/syslinux-6.03/bios/mtools/syslinux
+      - out/stboot-installation/mbr-bootloader/syslinux.cfg
     generates:
-      - out/stboot-installation/data_partition.ext4
+      - out/stboot-installation/mbr-bootloader/boot_partition.vfat
     preconditions:
       - sh: test -f .config
         msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
@@ -117,10 +129,16 @@ tasks:
         # TODO: integrate into the the script above
       - 'cp cache/syslinux/syslinux-6.03/efi32/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTIA32.EFI'
       - 'cp cache/syslinux/syslinux-6.03/efi64/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTX64.EFI'
+    generates:
+      - cache/syslinux/syslinux-6.03/bios/mtools/syslinux
+    status:
+      - 'test -x cache/syslinux/syslinux-6.03/bios/mtools/syslinux'
 
   syslinux_config:
     cmds:
       - './stboot-installation/mbr-bootloader/build_syslinux_config.sh >/dev/null'
+    generates:
+      - out/stboot-installation/mbr-bootloader/syslinux.cfg
     status:
       - 'test -f out/stboot-installation/mbr-bootloader/syslinux.cfg'
 
@@ -158,7 +176,13 @@ tasks:
     deps:
       - initramfs
     cmds:
-      - make kernel -j `nproc`
+      - 'make -f modules/linux.mk OUT=out/stboot-installation CACHE=cache'
+    status:
+      - './.task_config.sh kernel modules/linux.mk'
+    sources:
+      - out/stboot-installation/initramfs-linuxboot.cpio.gz
+    generates:
+      - out/stboot-installation/linuxboot.vmlinuz
     preconditions:
       - sh: test -f .config
         msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""

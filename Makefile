@@ -213,12 +213,6 @@ include modules/check.mk
 include modules/go.mk
 include modules/swtpm.mk
 
-include operating-system/Makefile.inc
-include stboot-installation/common/Makefile.inc
-include stboot-installation/mbr-bootloader/Makefile.inc
-include stboot-installation/efi-application/Makefile.inc
-
-run-qemu =
 ifneq ($(strip $(wildcard $(DOTCONFIG))),)
 ifeq ($(strip $(ST_INSTALLATION_OPTION)),)
 $(error ST_INSTALLATION_OPTION is not set)
