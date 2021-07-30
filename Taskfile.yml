@@ -3,7 +3,7 @@ version: '3'
 vars:
   # override go environment
   # TODO: search an elegant solution
-  go_env: 'export GO111MODULE="off"; export GOPATH="${PWD}/cache/go"; '
+  go_env: 'GO111MODULE="off" GOPATH="${PWD}/cache/go"'
 
 dotenv:
   - .config
@@ -26,10 +26,12 @@ tasks:
     generates:
       - .config
 
+  # XXX: Does not update toolchain binary!
+  # TODO: Force toolchain rebuild for this target only
   toolchain:
     desc: Build/Update toolchain
     deps:
-      - go:all
+      - go:rebuild-all
 
 ######## stboot-installation ########
 

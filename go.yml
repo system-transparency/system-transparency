@@ -13,21 +13,38 @@ tasks:
     cmds:
       - '{{.go_env}} go get -d -u github.com/u-root/u-root'
       - '{{.go_env}} go install github.com/u-root/u-root'
+    generates:
+      - cache/go/bin/u-root
+    status:
+      - 'test -x cache/go/bin/u-root'
 
   stmanager:
     cmds:
       - '{{.go_env}} go get -d -u github.com/system-transparency/stboot'
       - '{{.go_env}} go install github.com/system-transparency/stboot/tools/stmanager'
+    generates:
+      - cache/go/bin/stmanager
+    status:
+      - 'test -x cache/go/bin/stmanager'
 
   sinit-acm-grebber:
     cmds:
       - '{{.go_env}} go get -d -u github.com/system-transparency/sinit-acm-grebber'
       - '{{.go_env}} go install github.com/system-transparency/sinit-acm-grebber'
+    generates:
+      - cache/go/bin/sinit-acm-grebber
+    status:
+      - 'test -x cache/go/bin/sinit-acm-grebber'
 
   cpu:
     cmds:
-      - '{{.go_env}} go get -d -u github.com/u-root/cpu/cmds/cpu'
-      - '{{.go_env}} go install github.com/u-root/cpu/cmds/cpu'
+      - '{{.go_env}} go get -d -u github.com/u-root/cpu/cmds/cpu{,d}'
+      - '{{.go_env}} go install github.com/u-root/cpu/cmds/cpu{,d}'
+    generates:
+      - cache/go/bin/cpu*
+    status:
+      - 'test -x cache/go/bin/cpu'
+      - 'test -x cache/go/bin/cpud'
 
   clean:
     cmds:
