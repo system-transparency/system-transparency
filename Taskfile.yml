@@ -96,6 +96,20 @@ tasks:
       - out/stboot-installation/host_configuration.json
     status:
       - './.task_config.sh host_config stboot-installation/common/build_host_config.sh'
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+
+  security_config:
+    cmds:
+      - './stboot-installation/common/build_security_config.sh >/dev/null'
+    generates:
+      - out/stboot-installation/security_configuration.json
+    status:
+      - './.task_config.sh security_config stboot-installation/common/build_security_config.sh'
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
 
   syslinux:
     cmds:
@@ -133,15 +147,32 @@ tasks:
       - './scripts/make_cpu_keys.sh -o out/keys/cpu_keys/ >/dev/null'
     generates:
       - out/keys/cpu_keys/*
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
 
 ######## LinuxBoot kernel ########
 
   kernel:
     desc: Build LinuxBoot kernel
     deps:
-      - go:u-root
+      - initramfs
     cmds:
       - make kernel -j `nproc`
+    preconditions:
+      - sh: test -f .config
+        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+
+  initramfs:
+    deps:
+      - go:u-root
+      - security_config
+    sources:
+      - out/stboot-installation/security_configuration.json
+    generates:
+      - out/stboot-installation/initramfs-linuxboot.cpio.gz
+    cmds:
+      - './stboot-installation/common/build_initramfs.sh >/dev/null'
     preconditions:
       - sh: test -f .config
         msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
