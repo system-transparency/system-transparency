@@ -1,9 +1,7 @@
 version: '3'
 
 vars:
-  # override go environment
-  # TODO: search an elegant solution
-  go_env: 'GO111MODULE="off" GOPATH="${PWD}/cache/go"'
+  GO_ENV: 'GO111MODULE="off" GOPATH="${PWD}/cache/go"'
 
 dotenv:
   - .config
@@ -14,19 +12,30 @@ includes:
 
 output: 'prefixed'
 
+## custom Anchors
+
+preconditions:
+  <<: &check-config
+    sh: test -f .config
+    msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+  <<: &check-key
+    sh: test -f {{.ST_SIGNING_ROOT}}
+    msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task keygen-sign\""
+
 tasks:
 
   default:
-    deps: [image]
+    deps:
+      - image
 
   config:
     desc: Generate default configuration
-    cmds:
-      - "./scripts/config.sh -o .config"
     sources:
       - contrib/default.config
     generates:
       - .config
+    cmds:
+      - ./scripts/config.sh -o .config
 
   # XXX: Does not update toolchain binary!
   # TODO: Force toolchain rebuild for this target only
@@ -46,38 +55,34 @@ tasks:
   image-mbr:
     desc: Build MBR bootloader installation option
     deps:
-      - mbr_boot_partition
-      - data_partition
-    cmds:
-      - './stboot-installation/mbr-bootloader/build_image.sh >/dev/null'
+      - mbr-boot
+      - data
     sources:
-      - out/stboot-installation/data_partition.ext4
+      - out/stboot-installation/data.ext4
       - out/stboot-installation/mbr-bootloader/boot_partition.vfat
     generates:
       - out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img
+    cmds:
+      - ./stboot-installation/mbr-bootloader/build_image.sh
     preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+      - *check-config
 
   image-efi:
     desc: Build EFI application installation option
     deps:
-      - efi_boot_partition
-      - data_partition
+      - efi-boot
+      - data
     cmds:
-      - './stboot-installation/efi-application/build_image.sh >/dev/null'
+      - ./stboot-installation/efi-application/build_image.sh
     preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+      - *check-config
 
-  mbr_boot_partition:
+  mbr-boot:
     deps:
       - kernel
-      - host_config
+      - host-config
       - syslinux
-      - syslinux_config
-    cmds:
-      - './stboot-installation/mbr-bootloader/build_boot_filesystem.sh >/dev/null'
+      - syslinux-config
     sources:
       - out/stboot-installation/initramfs-linuxboot.cpio.gz
       - out/stboot-installation/host_configuration.json
@@ -85,63 +90,61 @@ tasks:
       - out/stboot-installation/mbr-bootloader/syslinux.cfg
     generates:
       - out/stboot-installation/mbr-bootloader/boot_partition.vfat
-    preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
-
-  data_partition:
     cmds:
-      - './stboot-installation/common/build_data_filesystem.sh >/dev/null'
+      - ./stboot-installation/mbr-bootloader/build_boot_filesystem.sh
+    preconditions:
+      - *check-config
+
+  data:
     sources:
       - out/os-packages
     generates:
       - out/stboot-installation/data_partition.ext4
-    status:
-      - './.task_config.sh data_partition stboot-installation/common/build_data_filesystem.sh'
-    preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
-
-  host_config:
     cmds:
-      - './stboot-installation/common/build_host_config.sh >/dev/null'
+      - ./stboot-installation/common/build_data_filesystem.sh
+    status:
+      - ./.task_config.sh data stboot-installation/common/build_data_filesystem.sh
+    preconditions:
+      - *check-config
+
+  host-config:
     generates:
-      - out/stboot-installation/host_configuration.json
-    status:
-      - './.task_config.sh host_config stboot-installation/common/build_host_config.sh'
-    preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
-
-  security_config:
+      - out/stboot-installation/host-configuration.json
     cmds:
-      - './stboot-installation/common/build_security_config.sh >/dev/null'
+      - ./stboot-installation/common/build_host_config.sh
+    status:
+      - ./.task_config.sh host-config stboot-installation/common/build_host_config.sh
+    preconditions:
+      - *check-config
+
+  security-config:
     generates:
       - out/stboot-installation/security_configuration.json
+    cmds:
+      - ./stboot-installation/common/build_security_config.sh
     status:
-      - './.task_config.sh security_config stboot-installation/common/build_security_config.sh'
+      - ./.task_config.sh security-config stboot-installation/common/build_security_config.sh
     preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+      - *check-config
 
   syslinux:
-    cmds:
-      - './stboot-installation/mbr-bootloader/fetch_syslinux.sh >/dev/null'
-        # TODO: integrate into the the script above
-      - 'cp cache/syslinux/syslinux-6.03/efi32/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTIA32.EFI'
-      - 'cp cache/syslinux/syslinux-6.03/efi64/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTX64.EFI'
     generates:
       - cache/syslinux/syslinux-6.03/bios/mtools/syslinux
-    status:
-      - 'test -x cache/syslinux/syslinux-6.03/bios/mtools/syslinux'
-
-  syslinux_config:
     cmds:
-      - './stboot-installation/mbr-bootloader/build_syslinux_config.sh >/dev/null'
+      - ./stboot-installation/mbr-bootloader/fetch_syslinux.sh
+        # TODO: integrate into the the script above
+      - cp cache/syslinux/syslinux-6.03/efi32/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTIA32.EFI
+      - cp cache/syslinux/syslinux-6.03/efi64/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTX64.EFI
+    status:
+      - test -x cache/syslinux/syslinux-6.03/bios/mtools/syslinux
+
+  syslinux-config:
     generates:
       - out/stboot-installation/mbr-bootloader/syslinux.cfg
+    cmds:
+      - ./stboot-installation/mbr-bootloader/build_syslinux_config.sh
     status:
-      - 'test -f out/stboot-installation/mbr-bootloader/syslinux.cfg'
+      - test -f out/stboot-installation/mbr-bootloader/syslinux.cfg
 
 ######## keygen ########
 
@@ -155,20 +158,19 @@ tasks:
     desc: Generate example sign keys
     deps:
       - go:stmanager
-    cmds:
-      - './scripts/make_signing_keys.sh -o out/keys/signing_keys/ >/dev/null'
     generates:
       - out/keys/signing_keys/*
+    cmds:
+      - ./scripts/make_signing_keys.sh -o out/keys/signing_keys/
 
   keygen-cpu:
     desc: Generate cpu ssh keys for debugging
-    cmds:
-      - './scripts/make_cpu_keys.sh -o out/keys/cpu_keys/ >/dev/null'
     generates:
       - out/keys/cpu_keys/*
+    cmds:
+      - ./scripts/make_cpu_keys.sh -o out/keys/cpu_keys/
     preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+      - *check-config
 
 ######## LinuxBoot kernel ########
 
@@ -176,33 +178,30 @@ tasks:
     desc: Build LinuxBoot kernel
     deps:
       - initramfs
-    cmds:
-      - 'make -f modules/linux.mk OUT=out/stboot-installation CACHE=cache'
-    status:
-      - './.task_config.sh kernel modules/linux.mk'
     sources:
       - out/stboot-installation/initramfs-linuxboot.cpio.gz
     generates:
       - out/stboot-installation/linuxboot.vmlinuz
+    cmds:
+      - make -f modules/linux.mk OUT=out/stboot-installation CACHE=cache
+    status:
+      - ./.task_config.sh kernel modules/linux.mk
     preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+      - *check-config
 
   initramfs:
     deps:
       - go:u-root
-      - security_config
+      - security-config
     sources:
-      - out/stboot-installation/security_configuration.json
+      - out/stboot-installation/security-configuration.json
     generates:
       - out/stboot-installation/initramfs-linuxboot.cpio.gz
     cmds:
-      - './stboot-installation/common/build_initramfs.sh >/dev/null'
+      - ./stboot-installation/common/build_initramfs.sh
     preconditions:
-      - sh: test -f .config
-        msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
-      - sh: test -f {{.ST_SIGNING_ROOT}}
-        msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task keygen-sign\""
+      - *check-config
+      - *check-key
 
 ######## cleanup ########
 

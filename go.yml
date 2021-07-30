@@ -11,8 +11,8 @@ tasks:
 
   u-root:
     cmds:
-      - '{{.go_env}} go get -d -u github.com/u-root/u-root'
-      - '{{.go_env}} go install github.com/u-root/u-root'
+      - '{{.GO_ENV}} go get -d -u github.com/u-root/u-root'
+      - '{{.GO_ENV}} go install github.com/u-root/u-root'
     generates:
       - cache/go/bin/u-root
     status:
@@ -20,8 +20,8 @@ tasks:
 
   stmanager:
     cmds:
-      - '{{.go_env}} go get -d -u github.com/system-transparency/stboot'
-      - '{{.go_env}} go install github.com/system-transparency/stboot/tools/stmanager'
+      - '{{.GO_ENV}} go get -d -u github.com/system-transparency/stboot'
+      - '{{.GO_ENV}} go install github.com/system-transparency/stboot/tools/stmanager'
     generates:
       - cache/go/bin/stmanager
     status:
@@ -29,8 +29,8 @@ tasks:
 
   sinit-acm-grebber:
     cmds:
-      - '{{.go_env}} go get -d -u github.com/system-transparency/sinit-acm-grebber'
-      - '{{.go_env}} go install github.com/system-transparency/sinit-acm-grebber'
+      - '{{.GO_ENV}} go get -d -u github.com/system-transparency/sinit-acm-grebber'
+      - '{{.GO_ENV}} go install github.com/system-transparency/sinit-acm-grebber'
     generates:
       - cache/go/bin/sinit-acm-grebber
     status:
@@ -38,8 +38,8 @@ tasks:
 
   cpu:
     cmds:
-      - '{{.go_env}} go get -d -u github.com/u-root/cpu/cmds/cpu{,d}'
-      - '{{.go_env}} go install github.com/u-root/cpu/cmds/cpu{,d}'
+      - '{{.GO_ENV}} go get -d -u github.com/u-root/cpu/cmds/cpu{,d}'
+      - '{{.GO_ENV}} go install github.com/u-root/cpu/cmds/cpu{,d}'
     generates:
       - cache/go/bin/cpu*
     status:
