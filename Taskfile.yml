@@ -9,7 +9,7 @@ vars:
   MBR_IMAGE: out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img
   EFI_IMAGE: out/stboot-installation/efi-application/stboot_efi_installation.img
   MBR_BOOT_PART: out/stboot-installation/mbr-bootloader/boot_partition.vfat
-  EFI_IMAGE: out/stboot-installation/efi-application/stboot_efi_installation.img
+  EFI_BOOT_PART: out/stboot-installation/efi-application/boot_partition.vfat
   KERNEL_FILE: out/stboot-installation/linuxboot.vmlinuz
   INITRAMFS_FILE: out/stboot-installation/initramfs-linuxboot.cpio.gz
   HOST_CONFIG: out/stboot-installation/host_configuration.json
@@ -20,6 +20,24 @@ vars:
   SIGNKEYS_DIR: out/keys/signing_keys/
   CPUKEYS_DIR: out/keys/cpu_keys/
   OS_DIR: out/os-packages/
+  # scripts:
+  CONFIG_SCRIPT: ./scripts/config.sh
+  MBR_IMAGE_SCRIPT: ./stboot-installation/mbr-bootloader/build_image.sh
+  EFI_IMAGE_SCRIPT: ./stboot-installation/efi-application/build_image.sh
+  MBR_BOOT_PART_SCRIPT: ./stboot-installation/mbr-bootloader/build_boot_filesystem.sh
+  EFI_BOOT_PART_SCRIPT: ./stboot-installation/efi-application/build_boot_filesystem.sh
+  DATA_PART_SCRIPT: ./stboot-installation/common/build_data_filesystem.sh
+  INITRAMFS_SCRIPT: ./stboot-installation/common/build_initramfs.sh
+  HOST_CONFIG_SCRIPT: ./stboot-installation/common/build_host_config.sh
+  SECURITY_CONFIG_SCRIPT: ./stboot-installation/common/build_security_config.sh
+  SYSLINUX_BIN_SCRIPT: ./stboot-installation/mbr-bootloader/fetch_syslinux.sh
+  SYSLINUX_CONFIG_SCRIPT: ./stboot-installation/mbr-bootloader/build_syslinux_config.sh
+  KEYGEN_SIGN_SCRIPT: ./scripts/make_signing_keys.sh
+  KEYGEN_CPU_SCRIPT: ./scripts/make_cpu_keys.sh
+  # make modules
+  LINUX_MAKE: modules/linux.mk
+  # task helper script
+  CONFIG_HELPER: ./.task_config.sh
 
 dotenv:
   - .config
@@ -55,7 +73,7 @@ tasks:
     generates:
       - "{{.CONFIG}}"
     cmds:
-      - ./scripts/config.sh -o "{{.CONFIG}}"
+      - "{{.CONFIG_SCRIPT}} -o {{.CONFIG}}"
 
   # XXX: Does not update toolchain binary!
   # TODO: Force toolchain rebuild for this target only
@@ -85,7 +103,9 @@ tasks:
     generates:
       - "{{.MBR_IMAGE}}"
     cmds:
-      - ./stboot-installation/mbr-bootloader/build_image.sh -o "{{.MBR_IMAGE}}"
+      - "{{.MBR_IMAGE_SCRIPT}} -o {{.MBR_IMAGE}}"
+    status:
+      - "{{.CONFIG_HELPER}} image-mbr {{.MBR_IMAGE_SCRIPT}}"
     preconditions:
       - *check-config
 
@@ -100,7 +120,9 @@ tasks:
     generates:
       - "{{.EFI_IMAGE}}"
     cmds:
-      - ./stboot-installation/efi-application/build_image.sh -o "{{.EFI_IMAGE}}"
+      - "{{.EFI_IMAGE_SCRIPT}} -o {{.EFI_IMAGE}}"
+    status:
+      - "{{.CONFIG_HELPER}} image-efi {{.EFI_IMAGE_SCRIPT}}"
     preconditions:
       - *check-config
 
@@ -118,7 +140,9 @@ tasks:
     generates:
       - "{{.MBR_BOOT_PART}}"
     cmds:
-      - ./stboot-installation/mbr-bootloader/build_boot_filesystem.sh -o "{{.MBR_BOOT_PART}}"
+      - "{{.MBR_BOOT_PART_SCRIPT}} -o {{.MBR_BOOT_PART}}"
+    status:
+      - "{{.CONFIG_HELPER}} mbr-boot-part {{.MBR_BOOT_PART_SCRIPT}}"
     preconditions:
       - *check-config
 
@@ -132,7 +156,9 @@ tasks:
     generates:
       - "{{.EFI_BOOT_PART}}"
     cmds:
-      - ./stboot-installation/efi-application/build_boot_filesystem.sh -o "{{.EFI_BOOT_PART}}"
+      - "{{.EFI_BOOT_PART_SCRIPT}} -o {{.EFI_BOOT_PART}}"
+    status:
+      - "{{.CONFIG_HELPER}} efi-boot-part {{.EFI_BOOT_PART_SCRIPT}}"
     preconditions:
       - *check-config
 
@@ -142,9 +168,9 @@ tasks:
     generates:
       - "{{.DATA_PART}}"
     cmds:
-      - ./stboot-installation/common/build_data_filesystem.sh -o "{{.DATA_PART}}"
+      - "{{.DATA_PART_SCRIPT}} -o {{.DATA_PART}}"
     status:
-      - ./.task_config.sh data stboot-installation/common/build_data_filesystem.sh
+      - "{{.CONFIG_HELPER}} data-part {{.DATA_PART_SCRIPT}}"
     preconditions:
       - *check-config
 
@@ -152,9 +178,9 @@ tasks:
     generates:
       - "{{.HOST_CONFIG}}"
     cmds:
-      - ./stboot-installation/common/build_host_config.sh -o "{{.HOST_CONFIG}}"
+      - "{{.HOST_CONFIG_SCRIPT}} -o {{.HOST_CONFIG}}"
     status:
-      - ./.task_config.sh host-config stboot-installation/common/build_host_config.sh
+      - "{{.CONFIG_HELPER}} host-config {{.HOST_CONFIG_SCRIPT}}"
     preconditions:
       - *check-config
 
@@ -162,9 +188,9 @@ tasks:
     generates:
       - "{{.SECURITY_CONFIG}}"
     cmds:
-      - ./stboot-installation/common/build_security_config.sh -o "{{.SECURITY_CONFIG}}"
+      - "{{.SECURITY_CONFIG_SCRIPT}} -o {{.SECURITY_CONFIG}}"
     status:
-      - ./.task_config.sh security-config stboot-installation/common/build_security_config.sh
+      - "{{.CONFIG_HELPER}} security-config {{.SECURITY_CONFIG_SCRIPT}}"
     preconditions:
       - *check-config
 
@@ -172,7 +198,7 @@ tasks:
     generates:
       - "{{.SYSLINUX_BIN}}"
     cmds:
-      - ./stboot-installation/mbr-bootloader/fetch_syslinux.sh
+      - "{{.SYSLINUX_BIN_SCRIPT}}"
         # TODO: integrate into the the script above
       - cp cache/syslinux/syslinux-6.03/efi32/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTIA32.EFI
       - cp cache/syslinux/syslinux-6.03/efi64/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTX64.EFI
@@ -183,7 +209,7 @@ tasks:
     generates:
       - "{{.SYSLINUX_CONFIG}}"
     cmds:
-      - ./stboot-installation/mbr-bootloader/build_syslinux_config.sh -o "{{.SYSLINUX_CONFIG}}"
+      - "{{.SYSLINUX_CONFIG_SCRIPT}} -o {{.SYSLINUX_CONFIG}}"
     status:
       - test -f "{{.SYSLINUX_CONFIG}}"
 
@@ -202,14 +228,18 @@ tasks:
     generates:
       - "{{.SIGNKEYS_DIR}}/*"
     cmds:
-      - ./scripts/make_signing_keys.sh -o "{{.SIGNKEYS_DIR}}"
+      - "{{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
+    status:
+      - "{{.CONFIG_HELPER}} keygen-sign {{.KEYGEN_SIGN_SCRIPT}}"
 
   keygen-cpu:
     desc: Generate cpu ssh keys for debugging
     generates:
       - "{{.CPUKEYS_DIR}}/*"
     cmds:
-      - ./scripts/make_cpu_keys.sh -o "{{.SIGNKEYS_DIR}}"
+      - "{{.KEYGEN_CPU_SCRIPT}} -o {{.CPUKEYS_DIR}}"
+    status:
+      - "{{.CONFIG_HELPER}} keygen-cpu {{.KEYGEN_CPU_SCRIPT}}"
     preconditions:
       - *check-config
 
@@ -224,9 +254,9 @@ tasks:
     generates:
       - "{{.KERNEL_FILE}}"
     cmds:
-      - make -f modules/linux.mk OUT=out/stboot-installation CACHE=cache
+      - make -f "{{.LINUX_MAKE}}" OUT=out/stboot-installation CACHE=cache
     status:
-      - ./.task_config.sh kernel modules/linux.mk
+      - "{{.CONFIG_HELPER}} kernel {{.LINUX_MAKE}}"
     preconditions:
       - *check-config
 
@@ -239,7 +269,9 @@ tasks:
     generates:
       - "{{.INITRAMFS_FILE}}"
     cmds:
-      - ./stboot-installation/common/build_initramfs.sh
+      - "{{.INITRAMFS_SCRIPT}} -o {{.INITRAMFS_FILE}}"
+    status:
+      - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"
     preconditions:
       - *check-config
       - *check-key

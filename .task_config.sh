@@ -22,12 +22,10 @@ SCRIPT="${2}"
 # target subconfig file location
 SUBCONFIG="${CONFIG_DATA}/${NAME}"
 
-if [[ ! -f "${SUBCONFIG}" ]]; then
-	mkdir -p "${CONFIG_DATA}"
-	if ! touch "${SUBCONFIG}"; then
-		>&2 echo "Failed to create subconfig: \"${SUBCONFIG}\""
-		exit 1
-	fi
+# check if script exist
+if [[ ! -f "${SCRIPT}" ]]; then
+	>&2 echo "Script \"${SCRIPT}\" not found"
+	exit 1
 fi
 
 # check if config file exist
@@ -38,23 +36,30 @@ fi
 
 source "${CONFIG_FILE}"
 
-# check if script exist
-if [[ ! -f "${SCRIPT}" ]]; then
-	>&2 echo "Script \"${SCRIPT}\" not found"
+create_subconfig() {
+	CONFIG="$1"
+	touch "${CONFIG}"
+	# read all accuring configs into a sorted array
+	read -a CONFIG_LIST <<< "$(grep -o "${CONFIG_PAT}" "${SCRIPT}" | sort | uniq | tr '\n' ' ')"
+	# parse relevant configs to subconfig
+	for config in "${CONFIG_LIST[@]}"; do
+		echo "${config}=\"${!config:-}\"" >> "$CONFIG"
+	done
+}
+
+if [[ ! -f "${SUBCONFIG}" ]]; then
+	# create subconfig
+	mkdir -p "${CONFIG_DATA}"
+	create_subconfig "${SUBCONFIG}"
+	echo "subconfig created"
 	exit 1
 fi
-
-# read all accuring configs into a sorted array
-read -a CONFIG_LIST <<< "$(grep -o "${CONFIG_PAT}" "${SCRIPT}" | sort | uniq | tr '\n' ' ')"
 
 # create temporary subconfig
 tmp_subconfig="$(mktemp)"
 trap "rm -f ${tmp_subconfig}" EXIT
 
-# parse relevant configs to temporary subconfig
-for config in "${CONFIG_LIST[@]}"; do
-	echo "${config}=\"${!config:-}\"" >> $tmp_subconfig
-done
+create_subconfig "${tmp_subconfig}"
 
 # check if subconfig changed
 if diff "${tmp_subconfig}" "${SUBCONFIG}"; then

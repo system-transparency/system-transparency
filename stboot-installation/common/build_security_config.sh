@@ -9,9 +9,6 @@ set -o nounset
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../../" && pwd)"
 
-# import global configuration
-source "${DOTCONFIG:-.config}"
-
 out="${root}/out/stboot-installation"
 name="security_configuration.json"
 security_config="${out}/${name}"
@@ -36,4 +33,3 @@ cat >"${security_config}" <<EOL
 EOL
 
 cat "$(realpath --relative-to="${root}" "${security_config}")"
-
