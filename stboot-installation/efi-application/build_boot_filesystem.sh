@@ -15,6 +15,8 @@ fs="${out}/${name}"
 linuxboot_kernel="${out}/../linuxboot.vmlinuz"
 host_config="${root}/out/stboot-installation/host_configuration.json"
 
+mkdir -p "${out}"
+
 echo
 echo "[INFO]: Creating VFAT filesystems for STBOOT partition:"
 size_vfat=$((12*(1<<20)))

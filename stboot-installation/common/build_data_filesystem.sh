@@ -34,6 +34,8 @@ inode_size=256
 inode_ratio=16384
 size_ext4=$(echo "scale=6;(${size_data}*(1.10+(${inode_size}/${inode_ratio})))+1" | bc -l | xargs printf "%0.f")
 
+mkdir -p "${out}"
+
 echo
 echo "[INFO]: Creating EXT4 filesystems for STDATA partition:"
 

@@ -2,6 +2,24 @@ version: '3'
 
 vars:
   GO_ENV: 'GO111MODULE="off" GOPATH="${PWD}/cache/go"'
+  # target files:
+  CONFIG: .config
+  DEFAULT_CONFIG: contrib/default.config
+  DATA_PART: out/stboot-installation/data_partition.ext4
+  MBR_IMAGE: out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img
+  EFI_IMAGE: out/stboot-installation/efi-application/stboot_efi_installation.img
+  MBR_BOOT_PART: out/stboot-installation/mbr-bootloader/boot_partition.vfat
+  EFI_IMAGE: out/stboot-installation/efi-application/stboot_efi_installation.img
+  KERNEL_FILE: out/stboot-installation/linuxboot.vmlinuz
+  INITRAMFS_FILE: out/stboot-installation/initramfs-linuxboot.cpio.gz
+  HOST_CONFIG: out/stboot-installation/host_configuration.json
+  SECURITY_CONFIG: out/stboot-installation/security_configuration.json
+  SYSLINUX_BIN: cache/syslinux/syslinux-6.03/bios/mtools/syslinux
+  SYSLINUX_CONFIG: out/stboot-installation/mbr-bootloader/syslinux.cfg
+  # target directorys:
+  SIGNKEYS_DIR: out/keys/signing_keys/
+  CPUKEYS_DIR: out/keys/cpu_keys/
+  OS_DIR: out/os-packages/
 
 dotenv:
   - .config
@@ -12,15 +30,17 @@ includes:
 
 output: 'prefixed'
 
-## custom Anchors
+### custom Anchors
 
 preconditions:
   <<: &check-config
-    sh: test -f .config
-    msg: "Configuration (.config) file missing\nPlease provide a config file or run \"task config\""
+    sh: test -f "{{.CONFIG}}"
+    msg: "Configuration ({{.CONFIG}}) file missing\nPlease provide a config file or run \"task config\""
   <<: &check-key
-    sh: test -f {{.ST_SIGNING_ROOT}}
+    sh: test -f "{{.ST_SIGNING_ROOT}}"
     msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task keygen-sign\""
+
+###
 
 tasks:
 
@@ -31,11 +51,11 @@ tasks:
   config:
     desc: Generate default configuration
     sources:
-      - contrib/default.config
+      - "{{.DEFAULT_CONFIG}}"
     generates:
-      - .config
+      - "{{.CONFIG}}"
     cmds:
-      - ./scripts/config.sh -o .config
+      - ./scripts/config.sh -o "{{.CONFIG}}"
 
   # XXX: Does not update toolchain binary!
   # TODO: Force toolchain rebuild for this target only
@@ -51,57 +71,78 @@ tasks:
     desc: Build target installation option
     # TODO: make target installation option optional
     deps: [image-mbr]
+    preconditions:
+      - *check-config
 
   image-mbr:
     desc: Build MBR bootloader installation option
     deps:
-      - mbr-boot
-      - data
+      - mbr-boot-part
+      - data-part
     sources:
-      - out/stboot-installation/data.ext4
-      - out/stboot-installation/mbr-bootloader/boot_partition.vfat
+      - "{{.MBR_BOOT_PART}}"
+      - "{{.DATA_PART}}"
     generates:
-      - out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img
+      - "{{.MBR_IMAGE}}"
     cmds:
-      - ./stboot-installation/mbr-bootloader/build_image.sh
+      - ./stboot-installation/mbr-bootloader/build_image.sh -o "{{.MBR_IMAGE}}"
     preconditions:
       - *check-config
 
   image-efi:
     desc: Build EFI application installation option
     deps:
-      - efi-boot
-      - data
+      - efi-boot-part
+      - data-part
+    sources:
+      - "{{.EFI_BOOT_PART}}"
+      - "{{.DATA_PART}}"
+    generates:
+      - "{{.EFI_IMAGE}}"
     cmds:
-      - ./stboot-installation/efi-application/build_image.sh
+      - ./stboot-installation/efi-application/build_image.sh -o "{{.EFI_IMAGE}}"
     preconditions:
       - *check-config
 
-  mbr-boot:
+  mbr-boot-part:
     deps:
       - kernel
       - host-config
       - syslinux
       - syslinux-config
     sources:
-      - out/stboot-installation/initramfs-linuxboot.cpio.gz
-      - out/stboot-installation/host_configuration.json
-      - cache/syslinux/syslinux-6.03/bios/mtools/syslinux
-      - out/stboot-installation/mbr-bootloader/syslinux.cfg
+      - "{{.INITRAMFS_FILE}}"
+      - "{{.HOST_CONFIG}}"
+      - "{{.SYSLINUX_BIN}}"
+      - "{{.SYSLINUX_CONFIG}}"
     generates:
-      - out/stboot-installation/mbr-bootloader/boot_partition.vfat
+      - "{{.MBR_BOOT_PART}}"
     cmds:
-      - ./stboot-installation/mbr-bootloader/build_boot_filesystem.sh
+      - ./stboot-installation/mbr-bootloader/build_boot_filesystem.sh -o "{{.MBR_BOOT_PART}}"
     preconditions:
       - *check-config
 
-  data:
+  efi-boot-part:
+    deps:
+      - kernel
+      - host-config
     sources:
-      - out/os-packages
+      - "{{.INITRAMFS_FILE}}"
+      - "{{.HOST_CONFIG}}"
     generates:
-      - out/stboot-installation/data_partition.ext4
+      - "{{.EFI_BOOT_PART}}"
     cmds:
-      - ./stboot-installation/common/build_data_filesystem.sh
+      - ./stboot-installation/efi-application/build_boot_filesystem.sh -o "{{.EFI_BOOT_PART}}"
+    preconditions:
+      - *check-config
+
+  data-part:
+    sources:
+      - "{{.OS_DIR}}/**"
+    generates:
+      - "{{.DATA_PART}}"
+    cmds:
+      - ./stboot-installation/common/build_data_filesystem.sh -o "{{.DATA_PART}}"
     status:
       - ./.task_config.sh data stboot-installation/common/build_data_filesystem.sh
     preconditions:
@@ -109,9 +150,9 @@ tasks:
 
   host-config:
     generates:
-      - out/stboot-installation/host-configuration.json
+      - "{{.HOST_CONFIG}}"
     cmds:
-      - ./stboot-installation/common/build_host_config.sh
+      - ./stboot-installation/common/build_host_config.sh -o "{{.HOST_CONFIG}}"
     status:
       - ./.task_config.sh host-config stboot-installation/common/build_host_config.sh
     preconditions:
@@ -119,9 +160,9 @@ tasks:
 
   security-config:
     generates:
-      - out/stboot-installation/security_configuration.json
+      - "{{.SECURITY_CONFIG}}"
     cmds:
-      - ./stboot-installation/common/build_security_config.sh
+      - ./stboot-installation/common/build_security_config.sh -o "{{.SECURITY_CONFIG}}"
     status:
       - ./.task_config.sh security-config stboot-installation/common/build_security_config.sh
     preconditions:
@@ -129,22 +170,22 @@ tasks:
 
   syslinux:
     generates:
-      - cache/syslinux/syslinux-6.03/bios/mtools/syslinux
+      - "{{.SYSLINUX_BIN}}"
     cmds:
       - ./stboot-installation/mbr-bootloader/fetch_syslinux.sh
         # TODO: integrate into the the script above
       - cp cache/syslinux/syslinux-6.03/efi32/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTIA32.EFI
       - cp cache/syslinux/syslinux-6.03/efi64/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTX64.EFI
     status:
-      - test -x cache/syslinux/syslinux-6.03/bios/mtools/syslinux
+      - test -x "{{.SYSLINUX_BIN}}"
 
   syslinux-config:
     generates:
-      - out/stboot-installation/mbr-bootloader/syslinux.cfg
+      - "{{.SYSLINUX_CONFIG}}"
     cmds:
-      - ./stboot-installation/mbr-bootloader/build_syslinux_config.sh
+      - ./stboot-installation/mbr-bootloader/build_syslinux_config.sh -o "{{.SYSLINUX_CONFIG}}"
     status:
-      - test -f out/stboot-installation/mbr-bootloader/syslinux.cfg
+      - test -f "{{.SYSLINUX_CONFIG}}"
 
 ######## keygen ########
 
@@ -159,16 +200,16 @@ tasks:
     deps:
       - go:stmanager
     generates:
-      - out/keys/signing_keys/*
+      - "{{.SIGNKEYS_DIR}}/*"
     cmds:
-      - ./scripts/make_signing_keys.sh -o out/keys/signing_keys/
+      - ./scripts/make_signing_keys.sh -o "{{.SIGNKEYS_DIR}}"
 
   keygen-cpu:
     desc: Generate cpu ssh keys for debugging
     generates:
-      - out/keys/cpu_keys/*
+      - "{{.CPUKEYS_DIR}}/*"
     cmds:
-      - ./scripts/make_cpu_keys.sh -o out/keys/cpu_keys/
+      - ./scripts/make_cpu_keys.sh -o "{{.SIGNKEYS_DIR}}"
     preconditions:
       - *check-config
 
@@ -179,9 +220,9 @@ tasks:
     deps:
       - initramfs
     sources:
-      - out/stboot-installation/initramfs-linuxboot.cpio.gz
+      - "{{.INITRAMFS_FILE}}"
     generates:
-      - out/stboot-installation/linuxboot.vmlinuz
+      - "{{.KERNEL_FILE}}"
     cmds:
       - make -f modules/linux.mk OUT=out/stboot-installation CACHE=cache
     status:
@@ -194,9 +235,9 @@ tasks:
       - go:u-root
       - security-config
     sources:
-      - out/stboot-installation/security-configuration.json
+      - "{{.SECURITY_CONFIG}}"
     generates:
-      - out/stboot-installation/initramfs-linuxboot.cpio.gz
+      - "{{.INITRAMFS_FILE}}"
     cmds:
       - ./stboot-installation/common/build_initramfs.sh
     preconditions:
