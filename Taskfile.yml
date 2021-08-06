@@ -228,7 +228,7 @@ tasks:
     generates:
       - "{{.SIGNKEYS_DIR}}/*"
     cmds:
-      - "{{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
+      - "{{.GO_ENV}} {{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
     status:
       - "{{.CONFIG_HELPER}} keygen-sign {{.KEYGEN_SIGN_SCRIPT}}"
 
