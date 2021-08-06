@@ -269,7 +269,7 @@ tasks:
     generates:
       - "{{.INITRAMFS_FILE}}"
     cmds:
-      - "{{.INITRAMFS_SCRIPT}} -o {{.INITRAMFS_FILE}}"
+      - "{{.GO_ENV}} {{.INITRAMFS_SCRIPT}} -o {{.INITRAMFS_FILE}}"
     status:
       - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"
     preconditions:
