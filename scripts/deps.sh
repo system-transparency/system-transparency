@@ -27,6 +27,8 @@ deps_cmds+=(gcc)
 deps_dpkg+=(gcc)
 deps_cmds+=(bc)
 deps_dpkg+=(bc)
+deps_cmds+=(go)
+deps_dpkg+=(golang)
 deps_cmds+=(hexdump)
 deps_dpkg+=(bsdmainutils)
 ### linux kernel
