@@ -2,7 +2,10 @@
 
 set -Eeuo pipefail
 
-default_name="template.txt"
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root="$(cd "${dir}/../" && pwd)"
+
+default_name="security_configuration.json"
 output=
 
 while [ $# -gt 0 ]; do
@@ -23,7 +26,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-# append filename if output is a directory
+# append filename if not defined
 if [[ -z "${output}" ]] || [[ "${output}" == */ ]];
 then
   output="${output}${default_name}"
@@ -33,5 +36,16 @@ mkdir -p "$(dirname "${output}")"
 
 ########################################
 
-echo "${output}"
-echo "template file" > "${output}"
+version=1
+num_signatures=${ST_NUM_SIGNATURES}
+boot_mode=${ST_BOOT_MODE}
+use_ospkg_cache=${ST_USE_PKG_CACHE}
+
+cat >"${output}" <<EOL
+{
+  "version":${version},
+  "minimal_signatures_match": ${num_signatures},
+  "boot_mode": "${boot_mode}",
+  "use_ospkg_cache": ${use_ospkg_cache}
+}
+EOL

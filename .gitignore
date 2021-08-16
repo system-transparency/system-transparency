@@ -10,4 +10,4 @@
 /.notes/
 **/*.old
 .task
-task
+bin/task

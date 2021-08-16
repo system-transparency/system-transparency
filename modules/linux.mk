@@ -1,5 +1,7 @@
 include modules/Makefile.inc
 
+KERNEL ?= linuxboot.vmlinuz
+
 kernel := $(OUT)/linuxboot.vmlinuz
 gpg_dir := $(CACHE)/gnupg
 gpg_keyring := $(gpg_dir)/keyring.gpg
@@ -35,9 +37,9 @@ kernel_tarball_sign=linux-$(kernel_version).tar.sign
 kernel_dir := $(CACHE)/linux/kernel-$(subst .,_,$(kernel_version))
 kernel_target := $(kernel_dir)/$(kernel_image)
 
-all kernel: $(kernel)
+all kernel: $(KERNEL)
 
-$(kernel): % : $(kernel_target)
+$(KERNEL): % : $(kernel_target)
 	mkdir -p $(dir $@)
 	cp $< $@
 

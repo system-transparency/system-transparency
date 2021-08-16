@@ -1,5 +1,5 @@
-TASKBIN="${PWD}/task"
+TASKBIN="${PWD}/bin/task"
 
-[[ -x "${TASKBIN}" ]] || ./install-task.sh
+[[ -x "${TASKBIN}" ]] || scripts/install-task.sh
 
 alias task="${TASKBIN}"

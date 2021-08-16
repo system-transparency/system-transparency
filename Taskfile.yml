@@ -1,39 +1,43 @@
 version: '3'
 
 vars:
-  GO_ENV: 'GO111MODULE="off" GOPATH="${PWD}/cache/go"'
-  # target files:
+  GO_ENV: 'GO111MODULE="off" GOPATH="${PWD}/cache/go" PATH="${GOPATH}/bin:${PATH}"'
+  # Config file
   CONFIG: .config
   DEFAULT_CONFIG: contrib/default.config
-  DATA_PART: out/stboot-installation/data_partition.ext4
-  MBR_IMAGE: out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img
-  EFI_IMAGE: out/stboot-installation/efi-application/stboot_efi_installation.img
-  MBR_BOOT_PART: out/stboot-installation/mbr-bootloader/boot_partition.vfat
-  EFI_BOOT_PART: out/stboot-installation/efi-application/boot_partition.vfat
-  KERNEL_FILE: out/stboot-installation/linuxboot.vmlinuz
-  INITRAMFS_FILE: out/stboot-installation/initramfs-linuxboot.cpio.gz
-  HOST_CONFIG: out/stboot-installation/host_configuration.json
-  SECURITY_CONFIG: out/stboot-installation/security_configuration.json
-  SYSLINUX_BIN: cache/syslinux/syslinux-6.03/bios/mtools/syslinux
-  SYSLINUX_CONFIG: out/stboot-installation/mbr-bootloader/syslinux.cfg
-  # target directorys:
+  # Build Targets
+  MBR_IMAGE: out/stboot_mbr_installation.img
+  EFI_IMAGE: out/stboot_efi_installation.img
+  # Build Artifacts
+  DATA_PART: out/artifacts/data_partition.ext4
+  MBR_BOOT_PART: out/artifacts/boot_partition.vfat
+  EFI_BOOT_PART: out/artifacts/boot_partition.vfat
+  KERNEL_FILE: out/artifacts/linuxboot.vmlinuz
+  INITRAMFS_FILE: out/artifacts/initramfs-linuxboot.cpio.gz
+  INITRAMFS_INCLUDE: contrib/initramfs-includes
+  HOST_CONFIG: out/artifacts/host_configuration.json
+  SECURITY_CONFIG: out/artifacts/security_configuration.json
+  SYSLINUX_CONFIG: out/artifacts/syslinux.cfg
+  SYSLINUX_BIN: cache/syslinux/bios/mtools/syslinux
+  # Target Directories
   SIGNKEYS_DIR: out/keys/signing_keys/
   CPUKEYS_DIR: out/keys/cpu_keys/
   OS_DIR: out/os-packages/
-  # scripts:
+  SYSLINUX_DIR: cache/syslinux/
+  # Scripts
   CONFIG_SCRIPT: ./scripts/config.sh
-  MBR_IMAGE_SCRIPT: ./stboot-installation/mbr-bootloader/build_image.sh
-  EFI_IMAGE_SCRIPT: ./stboot-installation/efi-application/build_image.sh
-  MBR_BOOT_PART_SCRIPT: ./stboot-installation/mbr-bootloader/build_boot_filesystem.sh
-  EFI_BOOT_PART_SCRIPT: ./stboot-installation/efi-application/build_boot_filesystem.sh
-  DATA_PART_SCRIPT: ./stboot-installation/common/build_data_filesystem.sh
-  INITRAMFS_SCRIPT: ./stboot-installation/common/build_initramfs.sh
-  HOST_CONFIG_SCRIPT: ./stboot-installation/common/build_host_config.sh
-  SECURITY_CONFIG_SCRIPT: ./stboot-installation/common/build_security_config.sh
-  SYSLINUX_BIN_SCRIPT: ./stboot-installation/mbr-bootloader/fetch_syslinux.sh
-  SYSLINUX_CONFIG_SCRIPT: ./stboot-installation/mbr-bootloader/build_syslinux_config.sh
-  KEYGEN_SIGN_SCRIPT: ./scripts/make_signing_keys.sh
-  KEYGEN_CPU_SCRIPT: ./scripts/make_cpu_keys.sh
+  MBR_IMAGE_SCRIPT: ./scripts/mbr_image.sh
+  EFI_IMAGE_SCRIPT: ./scripts/efi_image.sh
+  MBR_BOOT_PART_SCRIPT: ./scripts/mbr_boot_partition.sh
+  EFI_BOOT_PART_SCRIPT: ./scripts/efi_boot_partition.sh
+  DATA_PART_SCRIPT: ./scripts/data_partition.sh
+  INITRAMFS_SCRIPT: ./scripts/initramfs.sh
+  HOST_CONFIG_SCRIPT: ./scripts/host_config.sh
+  SECURITY_CONFIG_SCRIPT: ./scripts/security_config.sh
+  SYSLINUX_BIN_SCRIPT: ./scripts/syslinux.sh
+  SYSLINUX_CONFIG_SCRIPT: ./scripts/syslinux_config.sh
+  KEYGEN_SIGN_SCRIPT: ./scripts/signing_keys.sh
+  KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
   # make modules
   LINUX_MAKE: modules/linux.mk
   # task helper script
@@ -103,9 +107,10 @@ tasks:
     generates:
       - "{{.MBR_IMAGE}}"
     cmds:
-      - "{{.MBR_IMAGE_SCRIPT}} -o {{.MBR_IMAGE}}"
+      - "{{.MBR_IMAGE_SCRIPT}} --boot {{.MBR_BOOT_PART}} --data {{.DATA_PART}} --syslinux-dir {{.SYSLINUX_DIR}} --output {{.MBR_IMAGE}}"
     status:
       - "{{.CONFIG_HELPER}} image-mbr {{.MBR_IMAGE_SCRIPT}}"
+      - "test -f {{.MBR_IMAGE}}"
     preconditions:
       - *check-config
 
@@ -120,9 +125,10 @@ tasks:
     generates:
       - "{{.EFI_IMAGE}}"
     cmds:
-      - "{{.EFI_IMAGE_SCRIPT}} -o {{.EFI_IMAGE}}"
+      - "{{.EFI_IMAGE_SCRIPT}} --boot {{.EFI_BOOT_PART}} --data {{.DATA_PART}} --output {{.EFI_IMAGE}}"
     status:
       - "{{.CONFIG_HELPER}} image-efi {{.EFI_IMAGE_SCRIPT}}"
+      - "test -f {{.EFI_IMAGE}}"
     preconditions:
       - *check-config
 
@@ -133,16 +139,16 @@ tasks:
       - syslinux
       - syslinux-config
     sources:
-      - "{{.INITRAMFS_FILE}}"
+      - "{{.KERNEL_FILE}}"
       - "{{.HOST_CONFIG}}"
-      - "{{.SYSLINUX_BIN}}"
       - "{{.SYSLINUX_CONFIG}}"
     generates:
       - "{{.MBR_BOOT_PART}}"
     cmds:
-      - "{{.MBR_BOOT_PART_SCRIPT}} -o {{.MBR_BOOT_PART}}"
+      - "{{.MBR_BOOT_PART_SCRIPT}} --syslinux-dir {{.SYSLINUX_DIR}} --syslinux-config {{.SYSLINUX_CONFIG}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.MBR_BOOT_PART}}"
     status:
       - "{{.CONFIG_HELPER}} mbr-boot-part {{.MBR_BOOT_PART_SCRIPT}}"
+      - "test -f {{.MBR_BOOT_PART}}"
     preconditions:
       - *check-config
 
@@ -156,9 +162,10 @@ tasks:
     generates:
       - "{{.EFI_BOOT_PART}}"
     cmds:
-      - "{{.EFI_BOOT_PART_SCRIPT}} -o {{.EFI_BOOT_PART}}"
+      - "{{.EFI_BOOT_PART_SCRIPT}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.EFI_BOOT_PART}}"
     status:
       - "{{.CONFIG_HELPER}} efi-boot-part {{.EFI_BOOT_PART_SCRIPT}}"
+      - "test -f {{.EFI_BOOT_PART}}"
     preconditions:
       - *check-config
 
@@ -168,9 +175,10 @@ tasks:
     generates:
       - "{{.DATA_PART}}"
     cmds:
-      - "{{.DATA_PART_SCRIPT}} -o {{.DATA_PART}}"
+      - "{{.DATA_PART_SCRIPT}} --ospkg-dir {{.OS_DIR}} -o {{.DATA_PART}}"
     status:
       - "{{.CONFIG_HELPER}} data-part {{.DATA_PART_SCRIPT}}"
+      - "test -f {{.DATA_PART}}"
     preconditions:
       - *check-config
 
@@ -181,6 +189,7 @@ tasks:
       - "{{.HOST_CONFIG_SCRIPT}} -o {{.HOST_CONFIG}}"
     status:
       - "{{.CONFIG_HELPER}} host-config {{.HOST_CONFIG_SCRIPT}}"
+      - "test -f {{.HOST_CONFIG}}"
     preconditions:
       - *check-config
 
@@ -191,6 +200,7 @@ tasks:
       - "{{.SECURITY_CONFIG_SCRIPT}} -o {{.SECURITY_CONFIG}}"
     status:
       - "{{.CONFIG_HELPER}} security-config {{.SECURITY_CONFIG_SCRIPT}}"
+      - "test -f {{.SECURITY_CONFIG}}"
     preconditions:
       - *check-config
 
@@ -198,20 +208,17 @@ tasks:
     generates:
       - "{{.SYSLINUX_BIN}}"
     cmds:
-      - "{{.SYSLINUX_BIN_SCRIPT}}"
-        # TODO: integrate into the the script above
-      - cp cache/syslinux/syslinux-6.03/efi32/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTIA32.EFI
-      - cp cache/syslinux/syslinux-6.03/efi64/efi/syslinux.efi out/stboot-installation/mbr-bootloader/BOOTX64.EFI
+      - "{{.SYSLINUX_BIN_SCRIPT}} -o {{.SYSLINUX_DIR}}"
     status:
-      - test -x "{{.SYSLINUX_BIN}}"
+      - "test -x {{.SYSLINUX_BIN}}"
 
   syslinux-config:
     generates:
       - "{{.SYSLINUX_CONFIG}}"
     cmds:
-      - "{{.SYSLINUX_CONFIG_SCRIPT}} -o {{.SYSLINUX_CONFIG}}"
+      - "{{.SYSLINUX_CONFIG_SCRIPT}} --kernel $(basename {{.KERNEL_FILE}}) -o {{.SYSLINUX_CONFIG}}"
     status:
-      - test -f "{{.SYSLINUX_CONFIG}}"
+      - "test -f {{.SYSLINUX_CONFIG}}"
 
 ######## keygen ########
 
@@ -231,6 +238,7 @@ tasks:
       - "{{.GO_ENV}} {{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
     status:
       - "{{.CONFIG_HELPER}} keygen-sign {{.KEYGEN_SIGN_SCRIPT}}"
+      - "test -d {{.SIGNKEYS_DIR}}"
 
   keygen-cpu:
     desc: Generate cpu ssh keys for debugging
@@ -254,7 +262,7 @@ tasks:
     generates:
       - "{{.KERNEL_FILE}}"
     cmds:
-      - make -f "{{.LINUX_MAKE}}" OUT=out/stboot-installation CACHE=cache
+      - "make -f {{.LINUX_MAKE}} KERNEL={{.KERNEL_FILE}}"
     status:
       - "{{.CONFIG_HELPER}} kernel {{.LINUX_MAKE}}"
     preconditions:
@@ -269,8 +277,9 @@ tasks:
     generates:
       - "{{.INITRAMFS_FILE}}"
     cmds:
-      - "{{.GO_ENV}} {{.INITRAMFS_SCRIPT}} -o {{.INITRAMFS_FILE}}"
+      - "{{.GO_ENV}} {{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -o {{.INITRAMFS_FILE}}"
     status:
+      - "test -f {{.INITRAMFS_FILE}}"
       - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"
     preconditions:
       - *check-config
@@ -281,12 +290,12 @@ tasks:
   clean:
     desc: Remove all build artifacts
     cmds:
-      - rm -rf out
+      - "rm -rf out"
 
   clean-keys:
     desc: Remove all keys
     cmds:
-      - rm -rf out/keys
+      - "rm -rf out/keys"
 
   clean-toolchain:
     desc: Remove all go tools
@@ -296,12 +305,12 @@ tasks:
   clean-os:
     desc: Remove os-packages
     cmds:
-      - rm -rf out/os-packages
+      - "rm -rf out/os-packages"
 
   clean-all:
     desc: Remove all build artifacts, cache and config file
     deps: [clean]
     cmds:
-      - rm -rf cache
-      - rm -rf .task
-      - rm -f .config
+      - "rm -rf cache"
+      - "rm -rf .task"
+      - "rm -f .config"

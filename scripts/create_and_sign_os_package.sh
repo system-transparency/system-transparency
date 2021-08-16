@@ -69,7 +69,7 @@ if [ -f "${local_boot_order_file}" ]; then
     done 
 fi
 if [ ! -f "${local_boot_order_file}" ]; then 
-    bash "${root}/stboot-installation/common/build_default_local_boot_order.sh"
+    bash "${root}/scripts/create_default_local_boot_order.sh"
 fi
 
 # hotfix for upload script

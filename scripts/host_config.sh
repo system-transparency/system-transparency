@@ -1,20 +1,37 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -o errexit
-set -o pipefail
-set -o nounset
-# set -o xtrace
+set -Eeuo pipefail
 
-# Set magic variables for current file & dir
-dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-root="$(cd "${dir}/../../" && pwd)"
+default_name="host_configuration.json"
+output=
 
-# import global configuration
-source "${DOTCONFIG:-.config}"
+while [ $# -gt 0 ]; do
+  i="$1"; shift 1
+  case "$i" in
+    --output|-o)
+      if test $# -gt 0; then
+        j="$1"; shift 1
+        output="$j"
+      else
+        >&2 echo "no output file specified"
+        exit 1
+      fi
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
-out="${root}/out/stboot-installation"
-name="host_configuration.json"
-host_config="${out}/${name}"
+# append filename if not defined
+if [[ -z "${output}" ]] || [[ "${output}" == */ ]];
+then
+  output="${output}${default_name}"
+fi
+
+mkdir -p "$(dirname "${output}")"
+
+########################################
 
 version=1
 network_mode=${ST_NETWORK_MODE}
@@ -28,13 +45,7 @@ url_array=$(printf '%s\n' "${provisioning_url[@]}" | jq -cR . | jq -cs .)
 identity=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
 authentication=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
 
-
-if [ ! -d "${out}" ]; then mkdir -p "${out}"; fi
-
-echo
-echo "[INFO]: Creating $(realpath --relative-to="${root}" "${host_config}")"
-
-cat >"${host_config}" <<EOL
+cat >"${output}" <<EOL
 {
    "version":${version},
    "network_mode":"${network_mode}",
@@ -47,5 +58,3 @@ cat >"${host_config}" <<EOL
    "authentication":"${authentication}"
 }
 EOL
-
-cat "$(realpath --relative-to="${root}" "${host_config}")"

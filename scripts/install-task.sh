@@ -9,7 +9,7 @@ usage() {
 $this: download go binaries for go-task/task
 
 Usage: $this [-b] bindir [-d] [tag]
-  -b sets bindir or installation directory, Defaults to ./.
+  -b sets bindir or installation directory, Defaults to ./bin
   -d turns on debug logging
    [tag] is a tag from
    https://github.com/go-task/task/releases
@@ -23,10 +23,10 @@ EOF
 }
 
 parse_args() {
-  #BINDIR is ./. unless set be ENV
+  #BINDIR is ./bin unless set be ENV
   # over-ridden by flag below
 
-  BINDIR=${BINDIR:-.}
+  BINDIR=${BINDIR:-./bin}
   while getopts "b:dh?x" arg; do
     case "$arg" in
       b) BINDIR="$OPTARG" ;;

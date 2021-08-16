@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-#set -o xtrace
 
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
+
 default_name="config"
 default_config="${root}/contrib/default.config"
 
-output=""
+output=
 
 while test $# -gt 0; do
   case "$1" in

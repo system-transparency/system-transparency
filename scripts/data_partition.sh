@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+default_name="data_partition.ext4"
+output=
+ospkg_dir=
+
+while [ $# -gt 0 ]; do
+  i="$1"; shift 1
+  case "$i" in
+    --output|-o)
+      if test $# -gt 0; then
+        j="$1"; shift 1
+        output="$j"
+      else
+        >&2 echo "no output file specified"
+        exit 1
+      fi
+      ;;
+    --ospkg-dir|-d)
+      if test $# -gt 0; then
+        j="$1"; shift 1
+        ospkg_dir="$j"
+      else
+        >&2 echo "no OS package directory specified"
+        >&2 echo "(--ospkg-dir <dir>)"
+        exit 1
+      fi
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+# append filename if not defined
+if [[ -z "${output}" ]] || [[ "${output}" == */ ]];
+then
+  output="${output}${default_name}"
+fi
+
+if [[ -z "${ospkg_dir}" ]];
+then
+  >&2 echo "OS package directory not defined!"
+  >&2 echo "(--ospkg-dir <dir>)"
+  exit 1
+fi
+
+mkdir -p "$(dirname "${output}")"
+mkdir -p "${ospkg_dir}"
+
+########################################
+
+boot_order_file="${ospkg_dir}/boot_order"
+
+toBytes() {
+ echo $1 | echo $((`sed 's/.*/\L\0/;s/t/Xg/;s/g/Xm/;s/m/Xk/;s/k/X/;s/b//;s/X/ *1024/g'`))
+}
+
+size_data_used=$(( $(du -b "${ospkg_dir}" | cut -f1) ))
+size_data_extra=$(toBytes "${ST_DATA_PARTITION_EXTRA_SPACE:-0}")
+
+size_data=$(( ${size_data_used} + ${size_data_extra} ))
+inode_size=256
+inode_ratio=16384
+size_ext4=$(echo "scale=6;(${size_data}*(1.10+(${inode_size}/${inode_ratio})))+1" | bc -l | xargs printf "%0.f")
+
+if [ -f "${output}.tmp" ]; then rm "${output}.tmp"; fi
+mkfs.ext4 -I "${inode_size}" -i "${inode_ratio}" -L "STDATA" "${output}.tmp" $((${size_ext4} >> 10))
+
+e2mkdir "${output}.tmp":/stboot
+e2mkdir "${output}.tmp":/stboot/etc
+e2mkdir "${output}.tmp":/stboot/os_pkgs
+e2mkdir "${output}.tmp":/stboot/os_pkgs/local
+e2mkdir "${output}.tmp":/stboot/os_pkgs/cache
+
+timestamp_file=$(mktemp)
+date +%s > "${timestamp_file}"
+e2cp "${timestamp_file}" "${output}.tmp":/stboot/etc
+rm "${timestamp_file}"
+
+ls -l "${ospkg_dir}"
+if [ -f "${boot_order_file}" ]; then e2cp "${boot_order_file}" "${output}.tmp":/stboot/os_pkgs/local; fi
+for i in "${ospkg_dir}"/*; do
+  [ -e "$i" ] || continue
+  e2cp "$i" "${output}.tmp":/stboot/os_pkgs/local
+done
+
+mv ${output}{.tmp,}
