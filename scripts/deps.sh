@@ -27,6 +27,8 @@ deps_cmds+=(gcc)
 deps_dpkg+=(gcc)
 deps_cmds+=(bc)
 deps_dpkg+=(bc)
+deps_cmds+=(hexdump)
+deps_dpkg+=(bsdmainutils)
 ### linux kernel
 deps_cmds+=(flex)
 deps_dpkg+=(flex)
