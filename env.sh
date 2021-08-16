@@ -1,5 +1,9 @@
-TASKBIN="${PWD}/bin/task"
+LOCALBIN="${PWD}/bin"
+TASKBIN="${LOCALBIN}/task"
 
 [[ -x "${TASKBIN}" ]] || scripts/install-task.sh
 
-alias task="${TASKBIN}"
+if [[ $PATH != *${LOCALBIN}* ]];
+then
+  export PATH=${LOCALBIN}:$PATH
+fi

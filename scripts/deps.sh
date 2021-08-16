@@ -25,6 +25,8 @@ deps_cmds+=(git)
 deps_dpkg+=(git)
 deps_cmds+=(gcc)
 deps_dpkg+=(gcc)
+deps_cmds+=(bc)
+deps_dpkg+=(bc)
 ### linux kernel
 deps_cmds+=(flex)
 deps_dpkg+=(flex)
@@ -160,12 +162,19 @@ function check {
 }
 
 function install {
+    SUDO=
     if [ "$(id -u)" -ne 0 ];
     then
-        >&2 echo Please run as root
-        exit 1
+        if sudo -v
+        then
+            SUDO="sudo"
+        else
+            >&2 echo Please run as root
+            exit 1
+        fi
     fi
-    DEBIAN_FRONTEND="noninteractive" apt-get update -yq && apt-get install -yq "${deps_dpkg[@]}"
+    export DEBIAN_FRONTEND="noninteractive"
+    $SUDO apt-get update -yq && $SUDO apt-get install -yq "${deps_dpkg[@]}"
 }
 
 if [[ "$#" -eq 0 ]]
