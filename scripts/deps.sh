@@ -33,6 +33,8 @@ deps_cmds+=(go)
 deps_dpkg+=(golang)
 deps_cmds+=(hexdump)
 deps_dpkg+=(bsdmainutils)
+deps_cmds+=(mkfs.vfat)
+deps_dpkg+=(dosfstools)
 ### linux kernel
 deps_cmds+=(flex)
 deps_dpkg+=(flex)
