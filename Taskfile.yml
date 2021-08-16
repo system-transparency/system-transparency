@@ -91,10 +91,17 @@ tasks:
 
   image:
     desc: Build target installation option
-    # TODO: make target installation option optional
-    deps: [image-mbr]
+    deps:
+      - "image-{{.ST_INSTALLATION_OPTION}}"
     preconditions:
       - *check-config
+
+  # dummy target for the case ST_INSTALLATION_OPTION is not defined
+  image-:
+    preconditions:
+      - *check-config
+      - sh: "test ! -z $ST_INSTALLATION_OPTION"
+        msg: "ST_INSTALLATION_OPTION not defined"
 
   image-mbr:
     desc: Build MBR bootloader installation option
