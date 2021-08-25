@@ -1,9 +1,15 @@
-LOCALBIN="${PWD}/bin"
-TASKBIN="${LOCALBIN}/task"
+TASKBIN="${PWD}/bin"
+GOBIN="${PWD}/cache/go/bin"
+TASK="${TASKBIN}/task"
 
-[[ -x "${TASKBIN}" ]] || scripts/install-task.sh
+[[ -x "${TASK}" ]] || scripts/install-task.sh -b "${TASKBIN}"
 
-if [[ $PATH != *${LOCALBIN}* ]];
+if [[ $PATH != *${TASKBIN}* ]];
 then
   export PATH=${LOCALBIN}:$PATH
+fi
+
+if [[ $PATH != *${GOBIN}* ]];
+then
+  export PATH=${GOBIN}:$PATH
 fi
