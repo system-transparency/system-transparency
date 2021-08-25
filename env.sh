@@ -12,5 +12,5 @@ GOBIN="${PWD}/cache/go/bin"
 TASK="${TASKBIN}/task"
 
 [[ -x "${TASK}" ]] || scripts/install-task.sh -b "${TASKBIN}"
-[[ $PATH != *${TASKBIN}* ]] || export PATH=${TASKBIN}:$PATH
-[[ $PATH != *${GOBIN}* ]] || export PATH=${GOBIN}:$PATH
+[[ $PATH != *${TASKBIN}* ]] && export PATH=${TASKBIN}:$PATH
+[[ $PATH != *${GOBIN}* ]] && export PATH=${GOBIN}:$PATH
