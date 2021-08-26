@@ -1,0 +1,40 @@
+version: '3'
+
+tasks:
+
+  all:
+    desc: Generate all example keys
+    deps:
+      - sign
+      - cpu
+
+  sign:
+    desc: Generate example sign keys
+    deps:
+      - :go:stmanager
+    generates:
+      - "{{.SIGNKEYS_DIR}}/*"
+    cmds:
+      - "{{.GO_ENV}} {{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
+    status:
+      - "{{.CONFIG_HELPER}} keygen-sign {{.KEYGEN_SIGN_SCRIPT}}"
+      - "test -d {{.SIGNKEYS_DIR}}"
+    vars:
+      SIGNKEYS_DIR: out/keys/signing_keys/
+
+  cpu:
+    desc: Generate cpu ssh keys for debugging
+    generates:
+      - "{{.CPUKEYS_DIR}}/*"
+    cmds:
+      - "{{.KEYGEN_CPU_SCRIPT}} -o {{.CPUKEYS_DIR}}"
+    status:
+      - "{{.CONFIG_HELPER}} keygen-cpu {{.KEYGEN_CPU_SCRIPT}}"
+    vars:
+      CPUKEYS_DIR: out/keys/cpu_keys/
+
+  clean:
+    desc: Remove all keys
+    cmds:
+      - "rm -rf out/keys"
+

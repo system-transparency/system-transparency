@@ -20,9 +20,6 @@ vars:
   SYSLINUX_CONFIG: out/artifacts/syslinux.cfg
   SYSLINUX_BIN: cache/syslinux/bios/mtools/syslinux
   # Target Directories
-  SIGNKEYS_DIR: out/keys/signing_keys/
-  CPUKEYS_DIR: out/keys/cpu_keys/
-  OS_DIR: out/os-packages/
   SYSLINUX_DIR: cache/syslinux/
   # Scripts
   CONFIG_SCRIPT: ./scripts/config.sh
@@ -49,6 +46,7 @@ dotenv:
 includes:
   go: ./go.yml
   deps: ./deps.yml
+  keygen: ./keygen.yml
 
 output: 'prefixed'
 
@@ -188,6 +186,8 @@ tasks:
       - "test -f {{.DATA_PART}}"
     preconditions:
       - *check-config
+    vars:
+      OS_DIR: out/os-packages/
 
   host-config:
     generates:
@@ -226,37 +226,6 @@ tasks:
       - "{{.SYSLINUX_CONFIG_SCRIPT}} --kernel $(basename {{.KERNEL_FILE}}) -o {{.SYSLINUX_CONFIG}}"
     status:
       - "test -f {{.SYSLINUX_CONFIG}}"
-
-######## keygen ########
-
-  keygen:
-    desc: Generate all example keys
-    deps:
-      - keygen-sign
-      - keygen-cpu
-
-  keygen-sign:
-    desc: Generate example sign keys
-    deps:
-      - go:stmanager
-    generates:
-      - "{{.SIGNKEYS_DIR}}/*"
-    cmds:
-      - "{{.GO_ENV}} {{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
-    status:
-      - "{{.CONFIG_HELPER}} keygen-sign {{.KEYGEN_SIGN_SCRIPT}}"
-      - "test -d {{.SIGNKEYS_DIR}}"
-
-  keygen-cpu:
-    desc: Generate cpu ssh keys for debugging
-    generates:
-      - "{{.CPUKEYS_DIR}}/*"
-    cmds:
-      - "{{.KEYGEN_CPU_SCRIPT}} -o {{.CPUKEYS_DIR}}"
-    status:
-      - "{{.CONFIG_HELPER}} keygen-cpu {{.KEYGEN_CPU_SCRIPT}}"
-    preconditions:
-      - *check-config
 
 ######## LinuxBoot kernel ########
 
@@ -298,11 +267,6 @@ tasks:
     desc: Remove all build artifacts
     cmds:
       - "rm -rf out"
-
-  clean-keys:
-    desc: Remove all keys
-    cmds:
-      - "rm -rf out/keys"
 
   clean-toolchain:
     desc: Remove all go tools

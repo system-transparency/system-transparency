@@ -5,10 +5,6 @@ set -o pipefail
 set -o nounset
 # set -o xtrace
 
-# Set magic variables for current file & dir
-dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-root="$(cd "${dir}/../" && pwd)"
-
 # commands dependencies
 declare -a deps_cmds
 # dpkg dependencies
