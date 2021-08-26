@@ -44,9 +44,9 @@ dotenv:
   - .config
 
 includes:
-  go: ./go.yml
-  deps: ./deps.yml
-  keygen: ./keygen.yml
+  go: ./tasks/go.yml
+  deps: ./tasks/deps.yml
+  keygen: ./tasks/keygen.yml
 
 output: 'prefixed'
 
