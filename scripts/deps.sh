@@ -163,10 +163,9 @@ function check_OVMF {
           found=1
         fi
     done
-   if [ "$found" -gt 0 ]; then
-     echo "OVMF found"
-   else
-     echo "OVMF not found found"
+   if [ "$found" -eq 0 ]; then
+     >&2 echo "OVMF not found found"
+     return 1
    fi
 }
 
