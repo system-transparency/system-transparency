@@ -6,6 +6,28 @@ on:
   - push
 
 jobs:
+
+  wip_debos:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Go
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install golang
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          source env.sh
+          task deps:install
+
+      - name: Build debos
+        run: |
+          source env.sh
+          task go:debos
+
   ubuntu20_network:
     runs-on: ubuntu-20.04
     steps:

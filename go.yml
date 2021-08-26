@@ -8,6 +8,7 @@ tasks:
       - stmanager
       - sinit-acm-grebber
       - cpu
+      - debos
 
   u-root:
     cmds:
@@ -45,6 +46,15 @@ tasks:
     status:
       - 'test -x cache/go/bin/cpu'
       - 'test -x cache/go/bin/cpud'
+
+  debos:
+    cmds:
+      - '{{.GO_ENV}} go get -d -u github.com/go-debos/debos/...'
+      - '{{.GO_ENV}} go install github.com/go-debos/debos/cmd/debos'
+    generates:
+      - cache/go/bin/debos
+    status:
+      - 'test -x cache/go/bin/debos'
 
   clean:
     cmds:

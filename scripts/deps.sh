@@ -60,6 +60,17 @@ deps_cmds+=(mcopy)
 deps_dpkg+=(mtools)
 ### syslinux
 deps_dpkg+=(libc6-i386)
+### debos
+deps_dpkg+=(ubuntu-keyring)
+deps_dpkg+=(libglib2.0-dev)
+deps_dpkg+=(libostree-dev)
+deps_pkgconf+=(glib-2.0)
+deps_pkgconf+=(gobject-2.0)
+deps_pkgconf+=(ostree-1)
+check_cmds+=(debootstrap)
+deps_dpkg+=(debootstrap)
+check_cmds+=(systemd-nspawn)
+deps_dpkg+=(systemd-container)
 ### qemu run
 deps_cmds+=(qemu-system-x86_64)
 deps_dpkg+=(qemu-kvm)
@@ -107,6 +118,7 @@ function check_GO {
 
    command -v go >/dev/null 2>&1 || {
       echo >&2 "GO required";
+      return 1
    }
 
    ver=$(go version | cut -d ' ' -f 3 | sed 's/go//')
@@ -120,13 +132,13 @@ function check_GO {
    fi
 }
 
-
 check_functions+=(check_swtpm)
 function check_swtpm {
    minver=("0" "2")
 
    command -v swtpm >/dev/null 2>&1 || {
       echo >&2 "swtpm required";
+      return 1
    }
 
    ver=$(swtpm --version | cut -d ' ' -f 4 | sed 's/,//')

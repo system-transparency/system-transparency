@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
 
 [ "$#" -ne 1 ] && echo "run: ${0} <mbr/efi>" && exit 1
 
