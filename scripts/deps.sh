@@ -26,7 +26,8 @@ deps_dpkg+=(make)
 deps_cmds+=(bc)
 deps_dpkg+=(bc)
 deps_cmds+=(go)
-deps_dpkg+=(golang)
+# check go version
+#deps_dpkg+=(golang)
 deps_cmds+=(hexdump)
 deps_dpkg+=(bsdmainutils)
 deps_cmds+=(mkfs.vfat)
@@ -106,7 +107,6 @@ function check_GO {
 
    command -v go >/dev/null 2>&1 || {
       echo >&2 "GO required";
-      exit 1;
    }
 
    ver=$(go version | cut -d ' ' -f 3 | sed 's/go//')
@@ -115,7 +115,8 @@ function check_GO {
 
    if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then
          echo "GO version ${majorver}.${minorver} is not supported. Needs version ${minver[0]}.${minver[1]} or later."
-         exit 1
+   else
+         deps_dpkg+=(golang)
    fi
 }
 
@@ -126,7 +127,6 @@ function check_swtpm {
 
    command -v swtpm >/dev/null 2>&1 || {
       echo >&2 "swtpm required";
-      exit 1;
    }
 
    ver=$(swtpm --version | cut -d ' ' -f 4 | sed 's/,//')
@@ -135,7 +135,6 @@ function check_swtpm {
 
    if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then
          echo "swtpm version ${majorver}.${minorver} is not supported. Needs version ${minver[0]}.${minver[1]} or later."
-         exit 1
    fi
 }
 
@@ -177,6 +176,7 @@ function install {
             exit 1
         fi
     fi
+    check_GO
     export DEBIAN_FRONTEND="noninteractive"
     $SUDO apt-get update -yq && $SUDO apt-get install -yq "${deps_dpkg[@]}"
 }
