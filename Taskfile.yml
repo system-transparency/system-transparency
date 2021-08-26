@@ -35,6 +35,7 @@ vars:
   SYSLINUX_CONFIG_SCRIPT: ./scripts/syslinux_config.sh
   KEYGEN_SIGN_SCRIPT: ./scripts/signing_keys.sh
   KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
+  QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
   # make modules
   LINUX_MAKE: modules/linux.mk
   # task helper script
@@ -260,6 +261,35 @@ tasks:
     preconditions:
       - *check-config
       - *check-key
+
+######## QEMU run ########
+
+  run:
+    desc: Run target installation with qemu
+    deps:
+      - "run-{{.ST_INSTALLATION_OPTION}}"
+    preconditions:
+      - *check-config
+
+  # dummy target for the case ST_INSTALLATION_OPTION is not defined
+  run-:
+    preconditions:
+      - *check-config
+      - sh: "test ! -z $ST_INSTALLATION_OPTION"
+        msg: "ST_INSTALLATION_OPTION not defined"
+
+  run-mbr:
+    deps:
+      - image-mbr
+    cmds:
+      - "{{.QEMU_RUN_SCRIPT}} -b mbr -i {{.MBR_IMAGE}}"
+
+  run-efi:
+    deps:
+      - image-efi
+    cmds:
+      - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.EFI_IMAGE}}"
+
 
 ######## cleanup ########
 

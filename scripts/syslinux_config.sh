@@ -54,5 +54,5 @@ cat <<EOF > "${output}"
 DEFAULT linuxboot
 
 LABEL linuxboot
-	KERNEL ${kernel}
+	KERNEL /${kernel}
 EOF

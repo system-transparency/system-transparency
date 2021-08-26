@@ -51,7 +51,8 @@ while [ $# -gt 0 ]; do
         j="$1"; shift 1
         linuxboot_kernel="$j"
       else
-        >&2 echo "no syslinux config specified"
+        >&2 echo "no kernel specified"
+        j>&2 echo "(--kernel <kernel>)"
         exit 1
       fi
       ;;

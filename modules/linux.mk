@@ -13,8 +13,8 @@ kernel_dev_2 := gregkh@kernel.org
 
 KERNEL_MAKE_FLAGS := ARCH=x86_64
 DEFAULT_CMDLINE="console=ttyS0,115200"
-# escape backslash
-_ST_LINUXBOOT_CMDLINE := $(shell echo '$(ST_LINUXBOOT_CMDLINE)' | sed 's/\\/\\\\/g')
+# escape Quotes
+_ST_LINUXBOOT_CMDLINE := $(shell echo '$(ST_LINUXBOOT_CMDLINE)' | sed 's/"/\\\\"/g')
 
 define KERNEL_MIRROR_PATH
 ifeq ($(findstring x2.6.,x$1),x2.6.)
@@ -121,8 +121,8 @@ ifneq ($(strip $(ST_LINUXBOOT_KERNEL_CONFIG)),)
 	@echo "Use configuration file $(patsubst "%",%,$(ST_LINUXBOOT_KERNEL_CONFIG))"
 	cp $(ST_LINUXBOOT_KERNEL_CONFIG) $@.tmp
 ifneq ($(strip $(ST_LINUXBOOT_CMDLINE)),)
-	@echo "WARN: Override CONFIG_CMDLINE with ST_LINUXBOOT_CMDLINE=$(_ST_LINUXBOOT_CMDLINE)"
-	sed -ie 's/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=$(_ST_LINUXBOOT_CMDLINE)/g' $@.tmp
+	@echo 'Overriding CONFIG_CMDLINE with ST_LINUXBOOT_CMDLINE'
+	sed -ie 's/CONFIG_CMDLINE=.*/CONFIG_CMDLINE="$(_ST_LINUXBOOT_CMDLINE)"/g' $@.tmp
 endif
 	mv $@.tmp $@
 endif

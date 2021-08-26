@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
-#set -x
+set -euo pipefail
 
 # config file location
 CONFIG_FILE='.config'
