@@ -20,6 +20,7 @@ tasks:
       - "{{.CONFIG_HELPER}} keygen-sign {{.KEYGEN_SIGN_SCRIPT}}"
       - "test -d {{.SIGNKEYS_DIR}}"
     vars:
+      KEYGEN_SIGN_SCRIPT: ./scripts/signing_keys.sh
       SIGNKEYS_DIR: out/keys/signing_keys/
 
   cpu:
@@ -31,6 +32,7 @@ tasks:
     status:
       - "{{.CONFIG_HELPER}} keygen-cpu {{.KEYGEN_CPU_SCRIPT}}"
     vars:
+      KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
       CPUKEYS_DIR: out/keys/cpu_keys/
 
   clean:

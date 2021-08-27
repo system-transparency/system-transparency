@@ -21,23 +21,6 @@ vars:
   SYSLINUX_BIN: cache/syslinux/bios/mtools/syslinux
   # Target Directories
   SYSLINUX_DIR: cache/syslinux/
-  # Scripts
-  CONFIG_SCRIPT: ./scripts/config.sh
-  MBR_IMAGE_SCRIPT: ./scripts/mbr_image.sh
-  EFI_IMAGE_SCRIPT: ./scripts/efi_image.sh
-  MBR_BOOT_PART_SCRIPT: ./scripts/mbr_boot_partition.sh
-  EFI_BOOT_PART_SCRIPT: ./scripts/efi_boot_partition.sh
-  DATA_PART_SCRIPT: ./scripts/data_partition.sh
-  INITRAMFS_SCRIPT: ./scripts/initramfs.sh
-  HOST_CONFIG_SCRIPT: ./scripts/host_config.sh
-  SECURITY_CONFIG_SCRIPT: ./scripts/security_config.sh
-  SYSLINUX_BIN_SCRIPT: ./scripts/syslinux.sh
-  SYSLINUX_CONFIG_SCRIPT: ./scripts/syslinux_config.sh
-  KEYGEN_SIGN_SCRIPT: ./scripts/signing_keys.sh
-  KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
-  QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
-  # make modules
-  LINUX_MAKE: modules/linux.mk
   # task helper script
   CONFIG_HELPER: ./.task_config.sh
 
@@ -77,6 +60,8 @@ tasks:
       - "{{.CONFIG}}"
     cmds:
       - "{{.CONFIG_SCRIPT}} -o {{.CONFIG}}"
+    vars:
+      CONFIG_SCRIPT: ./scripts/config.sh
 
   # XXX: Does not update toolchain binary!
   # TODO: Force toolchain rebuild for this target only
@@ -119,6 +104,8 @@ tasks:
       - "test -f {{.MBR_IMAGE}}"
     preconditions:
       - *check-config
+    vars:
+      MBR_IMAGE_SCRIPT: ./scripts/mbr_image.sh
 
   image-efi:
     desc: Build EFI application installation option
@@ -137,6 +124,8 @@ tasks:
       - "test -f {{.EFI_IMAGE}}"
     preconditions:
       - *check-config
+    vars:
+      EFI_IMAGE_SCRIPT: ./scripts/efi_image.sh
 
   mbr-boot-part:
     deps:
@@ -157,6 +146,8 @@ tasks:
       - "test -f {{.MBR_BOOT_PART}}"
     preconditions:
       - *check-config
+    vars:
+      MBR_BOOT_PART_SCRIPT: ./scripts/mbr_boot_partition.sh
 
   efi-boot-part:
     deps:
@@ -174,6 +165,8 @@ tasks:
       - "test -f {{.EFI_BOOT_PART}}"
     preconditions:
       - *check-config
+    vars:
+      EFI_BOOT_PART_SCRIPT: ./scripts/efi_boot_partition.sh
 
   data-part:
     sources:
@@ -188,6 +181,7 @@ tasks:
     preconditions:
       - *check-config
     vars:
+      DATA_PART_SCRIPT: ./scripts/data_partition.sh
       OS_DIR: out/os-packages/
 
   host-config:
@@ -200,6 +194,9 @@ tasks:
       - "test -f {{.HOST_CONFIG}}"
     preconditions:
       - *check-config
+    vars:
+      HOST_CONFIG_SCRIPT: ./scripts/host_config.sh
+
 
   security-config:
     generates:
@@ -211,6 +208,8 @@ tasks:
       - "test -f {{.SECURITY_CONFIG}}"
     preconditions:
       - *check-config
+    vars:
+      SECURITY_CONFIG_SCRIPT: ./scripts/security_config.sh
 
   syslinux:
     generates:
@@ -219,6 +218,8 @@ tasks:
       - "{{.SYSLINUX_BIN_SCRIPT}} -o {{.SYSLINUX_DIR}}"
     status:
       - "test -x {{.SYSLINUX_BIN}}"
+    vars:
+      SYSLINUX_BIN_SCRIPT: ./scripts/syslinux.sh
 
   syslinux-config:
     generates:
@@ -227,6 +228,9 @@ tasks:
       - "{{.SYSLINUX_CONFIG_SCRIPT}} --kernel $(basename {{.KERNEL_FILE}}) -o {{.SYSLINUX_CONFIG}}"
     status:
       - "test -f {{.SYSLINUX_CONFIG}}"
+    vars:
+      SYSLINUX_CONFIG_SCRIPT: ./scripts/syslinux_config.sh
+
 
 ######## LinuxBoot kernel ########
 
@@ -244,6 +248,8 @@ tasks:
       - "{{.CONFIG_HELPER}} kernel {{.LINUX_MAKE}}"
     preconditions:
       - *check-config
+    vars:
+      LINUX_MAKE: modules/linux.mk
 
   initramfs:
     deps:
@@ -261,6 +267,8 @@ tasks:
     preconditions:
       - *check-config
       - *check-key
+    vars:
+      INITRAMFS_SCRIPT: ./scripts/initramfs.sh
 
 ######## QEMU run ########
 
@@ -283,12 +291,16 @@ tasks:
       - image-mbr
     cmds:
       - "{{.QEMU_RUN_SCRIPT}} -b mbr -i {{.MBR_IMAGE}}"
+    vars:
+      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
 
   run-efi:
     deps:
       - image-efi
     cmds:
       - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.EFI_IMAGE}}"
+    vars:
+      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
 
 
 ######## cleanup ########
