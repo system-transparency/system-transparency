@@ -75,10 +75,13 @@ e2mkdir "${output}.tmp":/stboot/os_pkgs
 e2mkdir "${output}.tmp":/stboot/os_pkgs/local
 e2mkdir "${output}.tmp":/stboot/os_pkgs/cache
 
-timestamp_file=$(mktemp)
+timestamp_dir=$(mktemp -d)
+trap "rm -r ${timestamp_dir}" EXIT
+timestamp_file="${timestamp_dir}/system_time_fix"
 date +%s > "${timestamp_file}"
 e2cp "${timestamp_file}" "${output}.tmp":/stboot/etc
-rm "${timestamp_file}"
+rm -r "${timestamp_dir}"
+trap - EXIT
 
 ls -l "${ospkg_dir}"
 if [ -f "${boot_order_file}" ]; then e2cp "${boot_order_file}" "${output}.tmp":/stboot/os_pkgs/local; fi

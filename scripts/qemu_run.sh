@@ -7,6 +7,23 @@ root="$(cd "${dir}/../" && pwd)"
 
 image=
 boot=mbr
+ovmf=
+ovmf_locs=("/usr/share/OVMF/OVMF_CODE.fd" "/usr/share/edk2/ovmf/OVMF_CODE.fd")
+declare -a qemu_args
+
+function locate_ovmf {
+  for i in "${ovmf_locs[@]}"
+  do
+    if [ -f "$i" ]; then
+      ovmf="$i"
+      return 0
+    fi
+  done
+  if [ "$ovmf" == "" ]; then
+    >&2 echo "ERROR: OVMF not found"
+    return 1
+  fi
+}
 
 while [ $# -gt 0 ]; do
   i="$1"; shift 1
@@ -44,8 +61,12 @@ then
 fi
 
 case "$boot" in
-  mbr|efi)
-    break
+  mbr)
+    ;;
+  efi)
+    locate_ovmf
+    qemu_args+=("-bios")
+    qemu_args+=("${ovmf}")
     ;;
   *)
     >&2 echo "unknown boot mode: $boot"
@@ -56,6 +77,7 @@ esac
 ########################################
 
 mem=4096
+
 tpm=$(mktemp -d --suffix='-tpm')
 
 swtpm_setup --tpmstate $tpm --tpm2 --config ${root}/cache/swtpm/etc/swtpm_setup.conf \
@@ -64,13 +86,13 @@ swtpm_setup --tpmstate $tpm --tpm2 --config ${root}/cache/swtpm/etc/swtpm_setup.
 echo "Starting $tpm"
 swtpm socket --tpmstate dir=$tpm --tpm2 --ctrl type=unixio,path=/$tpm/swtpm-sock &
 
-args=()
 # use kvm if avaiable
 if [[ -w /dev/kvm ]]; then
-args+=("-enable-kvm")
+qemu_args+=("-enable-kvm")
 fi
 
 qemu-system-x86_64 \
+  -M q35 \
   -drive if=virtio,file="${image}",format=raw \
   -net user,hostfwd=tcp::2222-:2222 \
   -net nic \
@@ -81,6 +103,7 @@ qemu-system-x86_64 \
   -chardev socket,id=chrtpm,path=/$tpm/swtpm-sock \
   -tpmdev emulator,id=tpm0,chardev=chrtpm \
   -device tpm-tis,tpmdev=tpm0 \
-  -nographic "${args[@]}"
+  -nographic \
+  "${qemu_args[@]}"
 
 rm -r ${tpm:?}/*
