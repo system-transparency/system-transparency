@@ -254,6 +254,7 @@ tasks:
       - cpu-sshkeys
     sources:
       - "{{.SECURITY_CONFIG}}"
+      - "{{.ST_SIGNING_ROOT}}"
     generates:
       - "{{.INITRAMFS_FILE}}"
     cmds:
