@@ -2,59 +2,132 @@ version: '3'
 
 tasks:
 
+  get:
+    cmds:
+      - "{{.GO_ENV}} go get -d -u {{.REPO}}/..."
+    label: "get {{.NAME}}"
+    status:
+      - "test -f ${PWD}/cache/go/src/{{.REPO}}/.git/config"
+    run: when_changed
+    vars:
+        NAME: "{{.NAME}}"
+        REPO: "{{.REPO}}"
+
+  fetch:
+    cmds:
+      - "{{.GO_ENV}} git -C ${PWD}/cache/go/src/{{.REPO}} checkout --quiet"
+      - "{{.GO_ENV}} git -C ${PWD}/cache/go/src/{{.REPO}} fetch --all --quiet"
+    label: "fetch {{.NAME}}"
+    run: when_changed
+    vars:
+        NAME: "{{.NAME}}"
+        REPO: "{{.REPO}}"
+
+  checkout:
+    cmds:
+      - "{{.GO_ENV}} git -C ${PWD}/cache/go/src/{{.REPO}} checkout --quiet {{.BRANCH}}"
+    label: "checkout {{.NAME}}"
+    run: when_changed
+    vars:
+       NAME: "{{.NAME}}"
+       REPO: "{{.REPO}}"
+       BRANCH: "{{.BRANCH}}"
+
+  install:
+    cmds:
+      - "{{.GO_ENV}} go install {{.REPO}}/{{.DIR}}"
+    label: "install {{.NAME}}"
+    run: when_changed
+    vars:
+      <<: &go-vars
+        # binary name
+        NAME: "{{.NAME}}"
+        # package repository
+        REPO: "{{.REPO}}"
+        # package branch (optional)
+        BRANCH: "{{.BRANCH}}"
+        # package directory (optional)
+        DIR: "{{.DIR}}"
+
+  target:
+    cmds:
+      - task: get
+        vars: *go-vars
+      - task: fetch
+        vars: *go-vars
+      - task: checkout
+        vars: *go-vars
+      - task: install
+        vars: *go-vars
+    label: "{{.NAME}}"
+    status:
+      - "test -x ${PWD}/cache/go/bin/{{.NAME}}"
+      - "{{.GO_ENV}} git -C ${PWD}/cache/go/src/{{.REPO}} diff --quiet {{.BRANCH}}"
+    run: when_changed
+    vars: *go-vars
+
   all:
     deps:
       - u-root
+      - stboot
       - stmanager
       - sinit-acm-grebber
       - cpu
       - debos
 
+  update:
+    cmds:
+      - rm -rf cache/go/bin
+      - task: all
+
   u-root:
     cmds:
-      - '{{.GO_ENV}} go get -d -u github.com/u-root/u-root'
-      - '{{.GO_ENV}} go install github.com/u-root/u-root'
-    generates:
-      - cache/go/bin/u-root
-    status:
-      - 'test -x cache/go/bin/u-root'
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "u-root"
+      REPO: "github.com/u-root/u-root"
+      BRANCH: "{{.ST_UROOT_VERSION}}"
+
+  stboot:
+    deps:
+      - stmanager
 
   stmanager:
     cmds:
-      - '{{.GO_ENV}} go get -d -u github.com/system-transparency/stboot'
-      - '{{.GO_ENV}} go install github.com/system-transparency/stboot/tools/stmanager'
-    generates:
-      - cache/go/bin/stmanager
-    status:
-      - 'test -x cache/go/bin/stmanager'
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "stmanager"
+      REPO: "github.com/system-transparency/stboot"
+      BRANCH: "{{.ST_STBOOT_VERSION}}"
+      DIR: "tools/stmanager"
 
   sinit-acm-grebber:
     cmds:
-      - '{{.GO_ENV}} go get -d -u github.com/system-transparency/sinit-acm-grebber'
-      - '{{.GO_ENV}} go install github.com/system-transparency/sinit-acm-grebber'
-    generates:
-      - cache/go/bin/sinit-acm-grebber
-    status:
-      - 'test -x cache/go/bin/sinit-acm-grebber'
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "sinit-acm-grebber"
+      REPO: "github.com/system-transparency/sinit-acm-grebber"
 
   cpu:
     cmds:
-      - '{{.GO_ENV}} go get -d -u github.com/u-root/cpu/cmds/cpu{,d}'
-      - '{{.GO_ENV}} go install github.com/u-root/cpu/cmds/cpu{,d}'
-    generates:
-      - cache/go/bin/cpu*
-    status:
-      - 'test -x cache/go/bin/cpu'
-      - 'test -x cache/go/bin/cpud'
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "cpu"
+      REPO: "github.com/u-root/cpu"
+      DIR: "cmds/cpu"
 
   debos:
     cmds:
-      - '{{.GO_ENV}} go get -d -u github.com/go-debos/debos/...'
-      - '{{.GO_ENV}} go install github.com/go-debos/debos/cmd/debos'
-    generates:
-      - cache/go/bin/debos
-    status:
-      - 'test -x cache/go/bin/debos'
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "debos"
+      REPO: "github.com/go-debos/debos"
+      DIR: "cmd/debos"
 
   clean:
     cmds:

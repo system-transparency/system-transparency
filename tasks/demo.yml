@@ -1,0 +1,58 @@
+version: '3'
+
+tasks:
+  keygen:
+    desc: Generate example sign keys
+    deps:
+      - :go:stmanager
+    generates:
+      - "{{.SIGNKEYS_DIR}}/*"
+    cmds:
+      - "{{.GO_ENV}} {{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
+    status:
+      - "{{.CONFIG_HELPER}} keygen-sign {{.KEYGEN_SIGN_SCRIPT}}"
+      - "test -d {{.SIGNKEYS_DIR}}"
+    vars:
+      KEYGEN_SIGN_SCRIPT: ./scripts/signing_keys.sh
+      SIGNKEYS_DIR: out/keys/signing_keys/
+
+  ospkg:
+    desc: "Build demo os package"
+    deps:
+      - :go:stmanager
+      - ubuntu20
+    cmds:
+      - "{{.GO_ENV}} stmanager create --out '{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' --label='{{.LABEL}}' --kernel='{{.KERNEL}}' --initramfs='{{.INITRD}}' --cmd='{{.CMDLINE}}'"
+      - "{{.GO_ENV}} stmanager sign --key=out/keys/signing_keys/signing-key-1.key --cert=out/keys/signing_keys/signing-key-1.cert {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
+      - "{{.GO_ENV}} stmanager sign --key=out/keys/signing_keys/signing-key-2.key --cert=out/keys/signing_keys/signing-key-2.cert {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
+      - "echo {{.EXAMPLE_OSPKG}} > {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
+    status:
+      - "test -f {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
+      - "test -f {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
+    preconditions:
+      - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
+        msg: "OS is not debian based"
+      - sh: '! (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
+        msg: "{{.ST_LOCAL_OSPKG_DIR}} already contain OS packages. Remove them to create an example OS Package"
+    vars:
+      EXAMPLE_OSPKG_SCRIPT: "./scripts/example_os_package.sh"
+      EXAMPLE_OSPKG: "os-pkg-example-ubuntu20.zip"
+      LABEL: System Transparency Test OS
+      KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
+      INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz
+      CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
+
+  ubuntu20:
+    deps:
+      - :go:debos
+    cmds:
+      - "mkdir -p out/example-os"
+      - "debos --artifactdir=out/example-os --cpus=1 --environ-var=LC_ALL:C --environ-var=LANG:C --environ-var=TZ:UTC0 --environ-var=SOURCE_DATE_EPOCH:{{.SOURCE_DATE_EPOCH}} --template-var=suite:focal contrib/debos/ubuntu.yaml"
+    status:
+      - "test -f {{.UBUNTU20_KERNEL}}"
+      - "test -f {{.UBUNTU20_INITRD}}"
+    vars:
+      SOURCE_DATE_EPOCH:
+        sh: "git log -1 --format=format:%ct"
+      UBUNTU20_KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
+      UBUNTU20_INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz

@@ -4,7 +4,6 @@ set -Eeuo pipefail
 
 default_name="data_partition.ext4"
 output=
-ospkg_dir=
 
 while [ $# -gt 0 ]; do
   i="$1"; shift 1
@@ -15,16 +14,6 @@ while [ $# -gt 0 ]; do
         output="$j"
       else
         >&2 echo "no output file specified"
-        exit 1
-      fi
-      ;;
-    --ospkg-dir|-d)
-      if test $# -gt 0; then
-        j="$1"; shift 1
-        ospkg_dir="$j"
-      else
-        >&2 echo "no OS package directory specified"
-        >&2 echo "(--ospkg-dir <dir>)"
         exit 1
       fi
       ;;
@@ -40,14 +29,9 @@ then
   output="${output}${default_name}"
 fi
 
-if [[ -z "${ospkg_dir}" ]];
-then
-  >&2 echo "OS package directory not defined!"
-  >&2 echo "(--ospkg-dir <dir>)"
-  exit 1
-fi
-
 mkdir -p "$(dirname "${output}")"
+
+ospkg_dir="${ST_LOCAL_OSPKG_DIR}"
 mkdir -p "${ospkg_dir}"
 
 ########################################

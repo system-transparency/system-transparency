@@ -1,0 +1,51 @@
+{{- $architecture := or .architecture "amd64" -}}
+{{- $suite := or .suite "bionic" -}}
+{{ $image := or .image (printf "ubuntu-%s-%s" $suite $architecture) }}
+
+{{ $hostname := or "ubuntu" }}
+{{ $user := or "admin" }}
+# default password: admin
+{{ $password := "$1$VQIrG7bj$2X6AdR4UqAjPFpqUwbsY81" }}
+
+architecture: {{ $architecture }}
+
+actions:
+  # hotfix: wait to prevent network race condition
+  - action: run
+    description: Wait until network is up
+    command: sleep 5
+
+  - action: debootstrap
+    description: Install Ubuntu base system
+    keyring-file: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+    suite: {{ $suite }}
+    components:
+      - main
+      - restricted
+      - universe
+      - multiverse
+    mirror: http://archive.ubuntu.com/ubuntu
+    variant: minbase
+
+  - action: apt
+    description: Install packages
+    packages:
+      - linux-image-generic
+      - systemd
+
+  - action: run
+    description: Set hostname
+    chroot: true
+    command: |
+      echo {{ $hostname }} > /etc/hostname
+
+  - action: run
+    description: Clean up irreproducible data
+    chroot: true
+    script: scripts/cleanup_irreproducible_data.sh
+
+# This packs reproducibly
+  - action: run
+    description: Pack kernel and initrd
+    chroot: false
+    script: scripts/pack_reproducibly.sh {{ $image }}

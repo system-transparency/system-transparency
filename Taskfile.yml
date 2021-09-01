@@ -30,7 +30,7 @@ dotenv:
 includes:
   go: ./tasks/go.yml
   deps: ./tasks/deps.yml
-  keygen: ./tasks/keygen.yml
+  demo: ./tasks/demo.yml
 
 output: 'prefixed'
 
@@ -42,7 +42,7 @@ preconditions:
     msg: "Configuration ({{.CONFIG}}) file missing\nPlease provide a config file or run \"task config\""
   <<: &check-key
     sh: test -f "{{.ST_SIGNING_ROOT}}"
-    msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task keygen-sign\""
+    msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
 
 ###
 
@@ -63,13 +63,10 @@ tasks:
     vars:
       CONFIG_SCRIPT: ./scripts/config.sh
 
-  # XXX: Does not update toolchain binary!
-  # TODO: Force toolchain rebuild for this target only
-  # current workaround: task clean-toolchain toolchain
   toolchain:
     desc: Build toolchain
     deps:
-      - go:all
+      - go:update
 
 ######## stboot-installation ########
 
@@ -170,19 +167,17 @@ tasks:
 
   data-part:
     sources:
-      - "{{.OS_DIR}}/**"
+      - "{{.ST_LOCAL_OSPKG_DIR}}/**"
     generates:
       - "{{.DATA_PART}}"
     cmds:
-      - "{{.DATA_PART_SCRIPT}} --ospkg-dir {{.OS_DIR}} -o {{.DATA_PART}}"
+      - "{{.DATA_PART_SCRIPT}} -o {{.DATA_PART}}"
     status:
       - "{{.CONFIG_HELPER}} data-part {{.DATA_PART_SCRIPT}}"
-      - "test -f {{.DATA_PART}}"
     preconditions:
       - *check-config
     vars:
       DATA_PART_SCRIPT: ./scripts/data_partition.sh
-      OS_DIR: out/os-packages/
 
   host-config:
     generates:
@@ -254,7 +249,10 @@ tasks:
   initramfs:
     deps:
       - go:u-root
+      - go:stboot
       - security-config
+      # TODO: generate ssh keys only for debug build
+      - cpu-sshkeys
     sources:
       - "{{.SECURITY_CONFIG}}"
     generates:
@@ -269,6 +267,17 @@ tasks:
       - *check-key
     vars:
       INITRAMFS_SCRIPT: ./scripts/initramfs.sh
+
+  cpu-sshkeys:
+    generates:
+      - "{{.CPUKEYS_DIR}}/*"
+    cmds:
+      - "{{.KEYGEN_CPU_SCRIPT}} -o {{.CPUKEYS_DIR}}"
+    status:
+      - "{{.CONFIG_HELPER}} keygen-cpu {{.KEYGEN_CPU_SCRIPT}}"
+    vars:
+      KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
+      CPUKEYS_DIR: out/keys/cpu_keys/
 
 ######## QEMU run ########
 
@@ -302,7 +311,6 @@ tasks:
     vars:
       QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
 
-
 ######## cleanup ########
 
   clean:
@@ -314,11 +322,6 @@ tasks:
     desc: Remove all go tools
     deps:
       - go:clean
-
-  clean-os:
-    desc: Remove os-packages
-    cmds:
-      - "rm -rf out/os-packages"
 
   clean-all:
     desc: Remove all build artifacts, cache and config file

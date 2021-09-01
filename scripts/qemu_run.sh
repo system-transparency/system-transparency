@@ -76,7 +76,7 @@ esac
 
 ########################################
 
-mem=1G
+mem=4G
 
 tpm=$(mktemp -d --suffix='-tpm')
 
