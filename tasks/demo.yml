@@ -1,5 +1,10 @@
 version: '3'
 
+preconditions:
+  <<: &check-config
+    sh: test -f "{{.CONFIG}}"
+    msg: "Configuration ({{.CONFIG}}) file missing\nPlease provide a config file or run \"task config\""
+
 tasks:
   keygen:
     desc: Generate example sign keys
@@ -8,10 +13,14 @@ tasks:
     generates:
       - "{{.SIGNKEYS_DIR}}/*"
     cmds:
-      - "{{.GO_ENV}} {{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
+      - "{{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
     status:
       - "{{.CONFIG_HELPER}} keygen-sign {{.KEYGEN_SIGN_SCRIPT}}"
       - "test -d {{.SIGNKEYS_DIR}}"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.KEYS_DIR}}/signing-key-$i.key ]] || exit 1; done"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.KEYS_DIR}}/signing-key-$i.cert ]] || exit 1; done"
+    preconditions:
+      - *check-config
     vars:
       KEYGEN_SIGN_SCRIPT: ./scripts/signing_keys.sh
       SIGNKEYS_DIR: out/keys/signing_keys/
@@ -20,39 +29,43 @@ tasks:
     desc: "Build demo os package"
     deps:
       - :go:stmanager
-      - ubuntu20
+      - ubuntu
     cmds:
-      - "{{.GO_ENV}} stmanager create --out '{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' --label='{{.LABEL}}' --kernel='{{.KERNEL}}' --initramfs='{{.INITRD}}' --cmd='{{.CMDLINE}}'"
-      - "{{.GO_ENV}} stmanager sign --key=out/keys/signing_keys/signing-key-1.key --cert=out/keys/signing_keys/signing-key-1.cert {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
-      - "{{.GO_ENV}} stmanager sign --key=out/keys/signing_keys/signing-key-2.key --cert=out/keys/signing_keys/signing-key-2.cert {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
+      - "mkdir -p {{.ST_LOCAL_OSPKG_DIR}}"
+      - "stmanager create --out '{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' --label='{{.LABEL}}' --kernel={{.KERNEL}} --initramfs={{.INITRD}} --cmd='{{.CMDLINE}}'"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do stmanager sign --key={{.KEYS_DIR}}/signing-key-$i.key --cert={{.KEYS_DIR}}/signing-key-$i.cert {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
       - "echo {{.EXAMPLE_OSPKG}} > {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
     status:
       - "test -f {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
       - "test -f {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
     preconditions:
+      - *check-config
       - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
         msg: "OS is not debian based"
       - sh: '! (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
-        msg: "{{.ST_LOCAL_OSPKG_DIR}} already contain OS packages. Remove them to create an example OS Package"
+        msg: "Path \"{{.ST_LOCAL_OSPKG_DIR}}\" already contain OS packages. Remove them to create an example OS Package"
+      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.KEYS_DIR}}/signing-key-$i.key ]] || exit 1; done"
+        msg: "Missing sign key. Run \"task demo:keygen\" to generate examples keys and certificates"
+      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.KEYS_DIR}}/signing-key-$i.cert ]] || exit 1; done"
+        msg: "Missing sign certificate. Run \"task demo:keygen\" to generate examples keys and certificates"
     vars:
-      EXAMPLE_OSPKG_SCRIPT: "./scripts/example_os_package.sh"
+      KEYS_DIR:
+        sh: "dirname {{.ST_SIGNING_ROOT}}"
       EXAMPLE_OSPKG: "os-pkg-example-ubuntu20.zip"
       LABEL: System Transparency Test OS
       KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
       INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz
       CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
 
-  ubuntu20:
+  ubuntu:
     deps:
       - :go:debos
     cmds:
       - "mkdir -p out/example-os"
-      - "debos --artifactdir=out/example-os --cpus=1 --environ-var=LC_ALL:C --environ-var=LANG:C --environ-var=TZ:UTC0 --environ-var=SOURCE_DATE_EPOCH:{{.SOURCE_DATE_EPOCH}} --template-var=suite:focal contrib/debos/ubuntu.yaml"
+      - "debos --artifactdir=out/example-os --template-var=suite:focal contrib/debos/ubuntu.yaml"
     status:
-      - "test -f {{.UBUNTU20_KERNEL}}"
-      - "test -f {{.UBUNTU20_INITRD}}"
+      - "test -f {{.KERNEL}}"
+      - "test -f {{.INITRD}}"
     vars:
-      SOURCE_DATE_EPOCH:
-        sh: "git log -1 --format=format:%ct"
-      UBUNTU20_KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
-      UBUNTU20_INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz
+      KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
+      INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz

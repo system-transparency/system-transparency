@@ -4,10 +4,10 @@ tasks:
 
   get:
     cmds:
-      - "{{.GO_ENV}} go get -d -u {{.REPO}}/..."
+      - "go get -d -u {{.REPO}}/..."
     label: "get {{.NAME}}"
     status:
-      - "test -f ${PWD}/cache/go/src/{{.REPO}}/.git/config"
+      - "test -f cache/go/src/{{.REPO}}/.git/config"
     run: when_changed
     vars:
         NAME: "{{.NAME}}"
@@ -15,8 +15,8 @@ tasks:
 
   fetch:
     cmds:
-      - "{{.GO_ENV}} git -C ${PWD}/cache/go/src/{{.REPO}} checkout --quiet"
-      - "{{.GO_ENV}} git -C ${PWD}/cache/go/src/{{.REPO}} fetch --all --quiet"
+      - "git -C cache/go/src/{{.REPO}} checkout --quiet"
+      - "git -C cache/go/src/{{.REPO}} fetch --all --quiet"
     label: "fetch {{.NAME}}"
     run: when_changed
     vars:
@@ -25,7 +25,7 @@ tasks:
 
   checkout:
     cmds:
-      - "{{.GO_ENV}} git -C ${PWD}/cache/go/src/{{.REPO}} checkout --quiet {{.BRANCH}}"
+      - "git -C cache/go/src/{{.REPO}} checkout --quiet {{.BRANCH}}"
     label: "checkout {{.NAME}}"
     run: when_changed
     vars:
@@ -35,7 +35,7 @@ tasks:
 
   install:
     cmds:
-      - "{{.GO_ENV}} go install {{.REPO}}/{{.DIR}}"
+      - "go install {{.REPO}}/{{.DIR}}"
     label: "install {{.NAME}}"
     run: when_changed
     vars:
@@ -61,13 +61,14 @@ tasks:
         vars: *go-vars
     label: "{{.NAME}}"
     status:
-      - "test -x ${PWD}/cache/go/bin/{{.NAME}}"
-      - "{{.GO_ENV}} git -C ${PWD}/cache/go/src/{{.REPO}} diff --quiet {{.BRANCH}}"
+      - "test -x cache/go/bin/{{.NAME}}"
+      - "git -C cache/go/src/{{.REPO}} diff --quiet {{.BRANCH}}"
     run: when_changed
     vars: *go-vars
 
   all:
     deps:
+      - task
       - u-root
       - stboot
       - stmanager
@@ -79,6 +80,10 @@ tasks:
     cmds:
       - rm -rf cache/go/bin
       - task: all
+
+  task:
+    cmds:
+      - "scripts/install-task.sh -b bin"
 
   u-root:
     cmds:

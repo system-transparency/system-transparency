@@ -1,7 +1,6 @@
 version: '3'
 
 vars:
-  GO_ENV: 'GO111MODULE="off" GOPATH="${PWD}/cache/go" PATH="${GOPATH}/bin:${PATH}"'
   # Config file
   CONFIG: .config
   DEFAULT_CONFIG: contrib/default.config
@@ -258,7 +257,7 @@ tasks:
     generates:
       - "{{.INITRAMFS_FILE}}"
     cmds:
-      - "{{.GO_ENV}} {{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -o {{.INITRAMFS_FILE}}"
+      - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -o {{.INITRAMFS_FILE}}"
     status:
       - "test -f {{.INITRAMFS_FILE}}"
       - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"

@@ -7,10 +7,6 @@ set -o nounset
 kernel_out="$ARTIFACTDIR/$1.vmlinuz"
 archive_out="$ARTIFACTDIR/$1.cpio.gz"
 
-echo "set date of files to SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
-touch -hcd "@$SOURCE_DATE_EPOCH" "${ROOTDIR}/boot/vmlinuz-"*
-find ${ROOTDIR} | while read -r line ; do touch -hcd "@$SOURCE_DATE_EPOCH" "$line" ; done
-
 echo "moving kernel to ${kernel_out}"
 cp ${ROOTDIR}/boot/vmlinuz-* "${kernel_out}"
 rm -f ${ROOTDIR}/boot/vmlinuz-*

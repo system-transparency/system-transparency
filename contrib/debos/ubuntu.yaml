@@ -3,9 +3,9 @@
 {{ $image := or .image (printf "ubuntu-%s-%s" $suite $architecture) }}
 
 {{ $hostname := or "ubuntu" }}
-{{ $user := or "admin" }}
-# default password: admin
-{{ $password := "$1$VQIrG7bj$2X6AdR4UqAjPFpqUwbsY81" }}
+{{ $user := or "stboot" }}
+# default password: stboot
+{{ $password := "$1$E5U1z1oh$Xw.t4YBXwVpqe5lhHEth41" }}
 
 architecture: {{ $architecture }}
 
@@ -30,8 +30,28 @@ actions:
   - action: apt
     description: Install packages
     packages:
-      - linux-image-generic
+      - adduser
+      - perl
+      - sudo
+      - lshw
+      - usbutils
+      - util-linux
+      - bash
+      - pciutils
+      - iproute2
+      - netplan.io
+      - isc-dhcp-client
+      - udev
+      - nano
+      - openssh-server
+      - python3
       - systemd
+      - linux-image-generic
+      - linux-firmware
+
+  - action: overlay
+    description: Overlay - Add files to system
+    source: debos-overlays
 
   - action: run
     description: Set hostname
@@ -40,12 +60,14 @@ actions:
       echo {{ $hostname }} > /etc/hostname
 
   - action: run
-    description: Clean up irreproducible data
+    description: Add standard user
     chroot: true
-    script: scripts/cleanup_irreproducible_data.sh
+    command: |
+      useradd {{ $user }} -m -s /bin/bash
+      usermod -a -G sudo {{ $user }}
+      echo '{{ $user }}:{{ $password }}' | chpasswd -e
 
-# This packs reproducibly
   - action: run
-    description: Pack kernel and initrd
+    description: Pack reproducibly
     chroot: false
-    script: scripts/pack_reproducibly.sh {{ $image }}
+    script: scripts/pack.sh {{ $image }}
