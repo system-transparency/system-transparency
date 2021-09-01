@@ -50,7 +50,7 @@ tasks:
         msg: "Missing sign certificate. Run \"task demo:keygen\" to generate examples keys and certificates"
     vars:
       KEYS_DIR:
-        sh: "dirname {{.ST_SIGNING_ROOT}}"
+        sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || echo ."
       EXAMPLE_OSPKG: "os-pkg-example-ubuntu20.zip"
       LABEL: System Transparency Test OS
       KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
