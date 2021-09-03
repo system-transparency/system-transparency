@@ -340,7 +340,7 @@ tasks:
     cmds:
       - 'grep -Fxq "{{.SOURCE_ENV}}" {{.ENVRC}} 2>/dev/null || echo "{{.SOURCE_ENV}}" >> {{.ENVRC}}'
       - "direnv allow"
-    precondition:
+    preconditions:
       - sh: "command -v direnv &> /dev/null"
         msg: "Please install \"direnv\""
     vars:
