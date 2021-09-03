@@ -68,10 +68,16 @@ tasks:
       - :go:debos
     cmds:
       - "mkdir -p out/example-os"
-      - "debos --artifactdir=out/example-os --template-var=suite:focal contrib/debos/ubuntu.yaml"
+      - "{{.SUDO}} cache/go/bin/debos --artifactdir=out/example-os --template-var=suite:focal contrib/debos/ubuntu.yaml"
+      - 'if [ ! -z "{{.SUDO}}" ];then {{.SUDO}} chown $(id -u):$(id -g) {{.KERNEL}} {{.INITRD}};fi'
     status:
       - "test -f {{.KERNEL}}"
       - "test -f {{.INITRD}}"
+    preconditions:
+      - sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || sudo -v"
+        msg: "root privileges required when kvm virtualization is not available"
     vars:
+      SUDO:
+        sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || echo sudo"
       KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
       INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz
