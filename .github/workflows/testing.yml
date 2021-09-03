@@ -20,49 +20,53 @@ jobs:
 
       - name: Install dependencies
         run: |
-          . env.sh
+          . .envrc
           task deps:install
 
       - name: Build default config
         run: |
-          . env.sh
+          . .envrc
           task config
 
       - name: Generate example signing keys
         run: |
-          . env.sh
+          . .envrc
           task demo:keygen
 
       - name: Build MBR bootloader installation without ospkg
         run: |
-          . env.sh
+          . .envrc
           task image-mbr
 
       - name: Build EFI application installation without ospkg
         run: |
-          . env.sh
+          . .envrc
           task image-efi
 
       - name: Build example OS Package
         run: |
-          . env.sh
+          . .envrc
           task demo:ospkg
 
       - name: Rebuild MBR bootloader installation with ospkg
         run: |
-          . env.sh
+          . .envrc
           task image-mbr
 
       - name: Rebuild EFI application installation with ospkg
         run: |
-          . env.sh
+          . .envrc
           task image-efi
 
       - name: Test MBR bootloader installation using QEMU
-        run: .github/workflows/scripts/test-qemu.sh mbr
+        run: |
+          . .envrc
+          .github/workflows/scripts/test-qemu.sh mbr
 
       - name: Boot EFI application installation using QEMU
-        run: .github/workflows/scripts/test-qemu.sh efi
+        run: |
+          . .envrc
+          .github/workflows/scripts/test-qemu.sh efi
 
   ubuntu18:
     runs-on: ubuntu-18.04
@@ -77,46 +81,50 @@ jobs:
 
       - name: Install dependencies
         run: |
-          . env.sh
+          . .envrc
           task deps:install
 
       - name: Build default config
         run: |
-          . env.sh
+          . .envrc
           task config
 
       - name: Generate example signing keys
         run: |
-          . env.sh
+          . .envrc
           task demo:keygen
 
       - name: Build MBR bootloader installation without ospkg
         run: |
-          . env.sh
+          . .envrc
           task image-mbr
 
       - name: Build EFI application installation without ospkg
         run: |
-          . env.sh
+          . .envrc
           task image-efi
 
       - name: Build example OS Package
         run: |
-          . env.sh
+          . .envrc
           task demo:ospkg
 
       - name: Rebuild MBR bootloader installation with ospkg
         run: |
-          . env.sh
+          . .envrc
           task image-mbr
 
       - name: Rebuild EFI application installation with ospkg
         run: |
-          . env.sh
+          . .envrc
           task image-efi
 
       - name: Test MBR bootloader installation using QEMU
-        run: .github/workflows/scripts/test-qemu.sh mbr
+        run: |
+          . .envrc
+          .github/workflows/scripts/test-qemu.sh mbr
 
       - name: Boot EFI application installation using QEMU
-        run: .github/workflows/scripts/test-qemu.sh efi
+        run: |
+          . .envrc
+          .github/workflows/scripts/test-qemu.sh efi

@@ -1,4 +1,5 @@
 /.vscode/*
+.envrc
 /st.config
 /.envrc
 /cache/
