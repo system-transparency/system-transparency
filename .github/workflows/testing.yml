@@ -50,7 +50,7 @@ jobs:
           task config
 
       - name: Set boot mode to network
-        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' .config
+        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' st.config
 
       - name: Generate example sign keys
         run: |
@@ -89,7 +89,7 @@ jobs:
           task config
 
       - name: Set boot mode to network
-        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' .config
+        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' st.config
 
       - name: Generate example sign keys
         run: |
