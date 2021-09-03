@@ -20,6 +20,8 @@ vars:
   SYSLINUX_BIN: cache/syslinux/bios/mtools/syslinux
   # Target Directories
   SYSLINUX_DIR: cache/syslinux/
+  SIGNKEYS_DIR:
+    sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || echo invalid"
   # task helper script
   CONFIG_HELPER: ./.task_config.sh
 
@@ -260,8 +262,8 @@ tasks:
     cmds:
       - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -o {{.INITRAMFS_FILE}}"
     status:
-      - "test -f {{.INITRAMFS_FILE}}"
       - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"
+      - "test -f {{.INITRAMFS_FILE}}"
     preconditions:
       - *check-config
       - *check-key
