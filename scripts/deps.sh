@@ -58,6 +58,8 @@ deps_cmds+=(e2mkdir)
 deps_dpkg+=(e2tools)
 deps_cmds+=(mcopy)
 deps_dpkg+=(mtools)
+deps_cmds+=(parted)
+deps_dpkg+=(parted)
 ### syslinux
 deps_dpkg+=(libc6-i386)
 ### debos
