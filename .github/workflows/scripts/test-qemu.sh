@@ -11,12 +11,12 @@ IMAGE=
 case $1 in
 	"mbr")
 		LOG=/tmp/mbr-qemu.log
-		TARGET=run-mbr-bootloader
+		TARGET=run-mbr
 		IMAGE=stboot_mbr_installation.img
 		;;
 	"efi")
 		LOG=/tmp/efi-qemu.log
-		TARGET=run-efi-application
+		TARGET=run-efi
 		IMAGE=stboot_efi_installation.img
 		;;
 	*)
@@ -48,7 +48,7 @@ cleanup () {
 trap cleanup EXIT
 
 # run qemu
-make ${TARGET} </dev/null | tee /dev/stderr > "$LOG" &
+task ${TARGET} </dev/null | tee /dev/stderr > "$LOG" &
 
 i=0
 while [ "$i" -lt "$TIMEOUT" ]
