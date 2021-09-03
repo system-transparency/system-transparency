@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # config file location
-CONFIG_FILE='.config'
+CONFIG_FILE="${CONFIG}"
 # location to save target subconfigs
 CONFIG_DATA='.task/config'
 # config name pattern

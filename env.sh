@@ -17,12 +17,8 @@ TASK="${TASKBIN}/task"
 
 # export custom go environment
 export GOPATH="${PWD}/cache/go"
-echo "set GOPATH=${GOPATH}"
 export GO111MODULE="off"
-echo "set GO111MODULE=${GO111MODULE}"
 
 # extend PATH
-echo "add \"${TASKBIN}\" to PATH"
 [[ $PATH != *${TASKBIN}* ]] && export PATH=${TASKBIN}:$PATH
-echo "add \"${GOBIN}\" to PATH"
 [[ $PATH != *${GOBIN}* ]] && export PATH=${GOBIN}:$PATH

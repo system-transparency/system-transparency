@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   # Config file
-  CONFIG: .config
+  CONFIG: st.config
   DEFAULT_CONFIG: contrib/default.config
   # Build Targets
   MBR_IMAGE: out/stboot_mbr_installation.img
@@ -23,10 +23,10 @@ vars:
   SIGNKEYS_DIR:
     sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || echo invalid"
   # task helper script
-  CONFIG_HELPER: ./.task_config.sh
+  CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
 
 dotenv:
-  - .config
+  - "{{.CONFIG}}"
 
 includes:
   go: ./tasks/go.yml
@@ -331,4 +331,18 @@ tasks:
     cmds:
       - "rm -rf cache"
       - "rm -rf .task"
-      - "rm -f .config"
+      - "rm -f {{.CONFIG}}"
+
+######## setup environment ########
+
+  init-direnv:
+    desc: Setup direnv
+    cmds:
+      - 'grep -Fxq "{{.SOURCE_ENV}}" {{.ENVRC}} 2>/dev/null || echo "{{.SOURCE_ENV}}" >> {{.ENVRC}}'
+      - "direnv allow"
+    precondition:
+      - sh: "command -v direnv &> /dev/null"
+        msg: "Please install \"direnv\""
+    vars:
+      SOURCE_ENV: source env.sh
+      ENVRC: .envrc
