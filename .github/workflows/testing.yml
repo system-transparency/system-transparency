@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  wip_debos:
+  ubuntu20:
     runs-on: ubuntu-20.04
     steps:
       - name: Install Go
@@ -20,57 +20,54 @@ jobs:
 
       - name: Install dependencies
         run: |
-          source env.sh
-          task deps:install
-
-      - name: Build debos
-        run: |
-          source env.sh
-          task go:debos
-
-  ubuntu20_network:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Install Go
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install golang
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: |
-          source env.sh
+          . env.sh
           task deps:install
 
       - name: Build default config
         run: |
-          source env.sh
+          . env.sh
           task config
 
-      - name: Set boot mode to network
-        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' st.config
-
-      - name: Generate example sign keys
+      - name: Generate example signing keys
         run: |
-          source env.sh
-          task keygen:sign
+          . env.sh
+          task demo:keygen
 
-      - name: Build MBR bootloader installation
+      - name: Build MBR bootloader installation without ospkg
         run: |
-          source env.sh
+          . env.sh
           task image-mbr
 
-      - name: Build EFI application installation
+      - name: Build EFI application installation without ospkg
         run: |
-          source env.sh
+          . env.sh
           task image-efi
 
-  ubuntu18_network:
+      - name: Build example OS Package
+        run: |
+          . env.sh
+          task demo:ospkg
+
+      - name: Rebuild MBR bootloader installation with ospkg
+        run: |
+          . env.sh
+          task image-mbr
+
+      - name: Rebuild EFI application installation with ospkg
+        run: |
+          . env.sh
+          task image-efi
+
+      - name: Test MBR bootloader installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh mbr
+
+      - name: Boot EFI application installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh efi
+
+  ubuntu18:
     runs-on: ubuntu-18.04
     steps:
-      - name: Setup Go
+      - name: Install Go
         uses: actions/setup-go@v1
         with:
           go-version: 1.17
@@ -80,28 +77,46 @@ jobs:
 
       - name: Install dependencies
         run: |
-          source env.sh
+          . env.sh
           task deps:install
 
       - name: Build default config
         run: |
-          source env.sh
+          . env.sh
           task config
 
-      - name: Set boot mode to network
-        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' st.config
-
-      - name: Generate example sign keys
+      - name: Generate example signing keys
         run: |
-          source env.sh
-          task keygen:sign
+          . env.sh
+          task demo:keygen
 
-      - name: Build MBR bootloader installation
+      - name: Build MBR bootloader installation without ospkg
         run: |
-          source env.sh
+          . env.sh
           task image-mbr
 
-      - name: Build EFI application installation
+      - name: Build EFI application installation without ospkg
         run: |
-          source env.sh
+          . env.sh
           task image-efi
+
+      - name: Build example OS Package
+        run: |
+          . env.sh
+          task demo:ospkg
+
+      - name: Rebuild MBR bootloader installation with ospkg
+        run: |
+          . env.sh
+          task image-mbr
+
+      - name: Rebuild EFI application installation with ospkg
+        run: |
+          . env.sh
+          task image-efi
+
+      - name: Test MBR bootloader installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh mbr
+
+      - name: Boot EFI application installation using QEMU
+        run: .github/workflows/scripts/test-qemu.sh efi
