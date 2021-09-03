@@ -22,7 +22,7 @@ while [ $# -gt 0 ]; do
     --kernel|-k)
       if test $# -gt 0; then
         j="$1"; shift 1
-        kernel="$j"
+        kernel="$(basename $j)"
       else
         >&2 echo "no kernel file name specified"
         >&2 echo "(--kernel <kernel_name>"

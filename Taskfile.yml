@@ -221,7 +221,7 @@ tasks:
     generates:
       - "{{.SYSLINUX_CONFIG}}"
     cmds:
-      - "{{.SYSLINUX_CONFIG_SCRIPT}} --kernel $(basename {{.KERNEL_FILE}}) -o {{.SYSLINUX_CONFIG}}"
+      - "{{.SYSLINUX_CONFIG_SCRIPT}} --kernel {{.KERNEL_FILE}} -o {{.SYSLINUX_CONFIG}}"
     status:
       - "test -f {{.SYSLINUX_CONFIG}}"
     vars:
