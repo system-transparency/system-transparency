@@ -35,18 +35,6 @@ includes:
 
 output: 'prefixed'
 
-### custom Anchors
-
-preconditions:
-  <<: &check-config
-    sh: test -f "{{.CONFIG}}"
-    msg: "Configuration ({{.CONFIG}}) file missing\nPlease provide a config file or run \"task config\""
-  <<: &check-key
-    sh: test -f "{{.ST_SIGNING_ROOT}}"
-    msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
-
-###
-
 tasks:
 
   default:
@@ -76,7 +64,9 @@ tasks:
     deps:
       - "image-{{.ST_INSTALLATION_OPTION}}"
     preconditions:
-      - *check-config
+      - &check-config
+        sh: test -f "{{.CONFIG}}"
+        msg: "File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
 
   # dummy target for the case ST_INSTALLATION_OPTION is not defined
   image-:
@@ -266,7 +256,8 @@ tasks:
       - "test -f {{.INITRAMFS_FILE}}"
     preconditions:
       - *check-config
-      - *check-key
+      - sh: test -f "{{.ST_SIGNING_ROOT}}"
+        msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
     vars:
       INITRAMFS_SCRIPT: ./scripts/initramfs.sh
 
