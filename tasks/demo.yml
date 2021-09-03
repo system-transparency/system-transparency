@@ -7,30 +7,30 @@ preconditions:
 
 tasks:
   keygen:
-    desc: Generate example sign keys
+    desc: Generate example signing keys
     deps:
       - :go:stmanager
     generates:
-      - "{{.ST_SIGNING_ROOT}}"
-      - "{{.SIGNING_ROOT_KEY}}"
-      - "{{.SIGNKEYS_DIR}}/signing-key-*"
+      - "{{.DEMO_KEY_DIR}}/root.*"
+      - "{{.DEMO_KEY_DIR}}/signing-key-*"
     cmds:
-      - "{{.KEYGEN_SIGN_SCRIPT}} -o {{.SIGNKEYS_DIR}}"
+      - "{{.DEMO_KEYGEN_SCRIPT}} -o {{.DEMO_KEY_DIR}}"
     status:
-      - "{{.CONFIG_HELPER}} keygen-sign {{.KEYGEN_SIGN_SCRIPT}}"
-      - "test -f {{.ST_SIGNING_ROOT}}"
-      - "test -f {{.SIGNING_ROOT_KEY}}"
-      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.key ]] || exit 1; done"
-      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.cert ]] || exit 1; done"
+      - "{{.CONFIG_HELPER}} keygen {{.DEMO_KEYGEN_SCRIPT}}"
+      - "test -f {{.DEMO_KEY_DIR}}/root.key"
+      - "test -f {{.DEMO_KEY_DIR}}/root.cert"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.key ]]; done"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.cert ]]; done"
     preconditions:
       - *check-config
+      - sh: '[ "{{.ST_SIGNING_ROOT}}" = "{{.DEMO_KEY_DIR}}/root.cert" ]'
+        msg: 'Set ST_SIGNING_ROOT="{{.DEMO_KEY_DIR}}/root.cert" to generate example signing keys'
     vars:
-      KEYGEN_SIGN_SCRIPT: ./scripts/signing_keys.sh
-      SIGNING_ROOT_KEY:
-        sh: "ROOT_CERT={{.ST_SIGNING_ROOT}};echo ${ROOT_CERT%.*}.key"
+      DEMO_KEYGEN_SCRIPT: ./scripts/demo_signing_keys.sh
+      DEMO_KEY_DIR: out/keys/example_keys
 
   ospkg:
-    desc: "Build demo os package"
+    desc: "Build demo OS Package"
     deps:
       - :go:stmanager
       - ubuntu
@@ -52,9 +52,9 @@ tasks:
         msg: "OS is not debian based"
       - sh: '! (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
         msg: "Path \"{{.ST_LOCAL_OSPKG_DIR}}\" already contain OS packages. Remove them to create an example OS Package"
-      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.key ]] || exit 1; done"
+      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.key ]]; done"
         msg: "Missing sign key. Run \"task demo:keygen\" to generate examples keys and certificates"
-      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.cert ]] || exit 1; done"
+      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.cert ]]; done"
         msg: "Missing sign certificate. Run \"task demo:keygen\" to generate examples keys and certificates"
     vars:
       EXAMPLE_OSPKG: "os-pkg-example-ubuntu20.zip"

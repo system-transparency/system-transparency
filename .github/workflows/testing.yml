@@ -58,7 +58,7 @@ jobs:
           . .envrc
           task image-efi
 
-      - name: Test MBR bootloader installation using QEMU
+      - name: Boot MBR bootloader installation using QEMU
         run: |
           . .envrc
           .github/workflows/scripts/test-qemu.sh mbr
@@ -119,7 +119,7 @@ jobs:
           . .envrc
           task image-efi
 
-      - name: Test MBR bootloader installation using QEMU
+      - name: Boot MBR bootloader installation using QEMU
         run: |
           . .envrc
           .github/workflows/scripts/test-qemu.sh mbr
