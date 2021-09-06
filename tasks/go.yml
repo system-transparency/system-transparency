@@ -83,7 +83,7 @@ tasks:
 
   task:
     cmds:
-      - "scripts/install-task.sh -b bin"
+      - 'sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -b "bin"'
 
   u-root:
     cmds:
