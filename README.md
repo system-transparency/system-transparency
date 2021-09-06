@@ -3,7 +3,7 @@
 This repository contains tooling, configuration files and example data to form a build-, test- and development environment for _System Transparency_.
 
 _stboot_ is System Transparency Project’s official bootloader. It is a LinuxBoot distribution based on u-root.
-A LinuxBoot distribution is simply a Linux kernel and an initramfs. U-root is another project consisting of an initramfs builder, a collection of core Linux commands implemented in Go, and a collection of bootloaders. stboot is one of these bootloaders. Source code of stboot: https://github.com/u-root/u-root/tree/stboot/cmds/boot/stboot and https://github.com/u-root/u-root/tree/stboot/pkg/boot/stboot respectively.
+A LinuxBoot distribution is simply a Linux kernel and an initramfs. U-root is another project consisting of an initramfs builder, a collection of core Linux commands implemented in Go, and a collection of bootloaders. stboot is one of these bootloaders. Source code of stboot: https://github.com/system-transparency/stboot.
 
 The stboot program embedded in the initramfs acts as a bootloader to find the real OS - kernel and userland - for the host. The OS comes with one or more signatures to prove its validity. Furthermore, it supports Intel®'s Trusted Execution Technology (TXT) by booting the OS via tboot. All OS related artifacts are bundled together in an _OS Package_. An OS package consists of an archive file (ZIP) and descriptor file (JSON). OS packages can be created and managed with the _stmanager_ tool. Source code of stmanager: https://github.com/u-root/u-root/tree/stboot/tools/stmanager
 
@@ -39,44 +39,89 @@ stboot currently supports loading the OS packages from an HTTP/HTTPS server or f
         * [Usage](#Usage)
 * [Development](#Development)
 
+# Setup environment
+
+The operator machine should run a Linux system (tested with Ubuntu 18.04.2 LTS and 20.04.2 LTS).
+The System Transparency Repository provides a `.envrc` file to load the build environment. It installs the latest version of [Task](https://taskfile.dev) and configures a separate Go environment to prevent any conflicts. To load and unload the environment depending on the current directory, it is recommended to use [direnv](https://direnv.net/). Go to [Basic Installation](https://direnv.net/#basic-installation) to see how to proper setup direnv your shell.
+After restarting your shell you can enable direnv for the repository:
+
+```bash
+cd system-transparency
+direnv allow
+```
+
+As an alternative, you can load the environment directly without direnv:
+
+```bash
+source .envrc
+```
+
+However, this is only recommended on CI workflows since it makes the environment changes persistent in your currend shell session.
+
+# About task
+
+[Task](https://taskfile.dev) is a task runner / build tool that aims to be simpler and easier to use than, for example, [GNU Make](https://www.gnu.org/software/make/). It provides an awesome documentation and uses simple YAML schema to define tasks. For more information go to https://taskfile.dev or or run `task --help`.
+
+To see all available tasks:
+
+```bash
+task -l
+```
+
 # Prerequisites
 
-The operator machine should run a Linux system (tested with Ubuntu 18.04.2 LTS (Bionic Beaver) / Kernel 4.15.0-47-generic. Further system requirements and dependencies can be reviewed as follows:
+System Transparency requires some dependencies to build the complete installation image. You can check for missing dependencies:
+
 ```bash
-# Check for missing dependencies
-make check
+task deps:check
 ```
 
-# Installation
+In addition, it is possible to install all dependencies on Debian based environments (tested with Ubuntu 18.04.2 LTS and 20.04.2 LTS):
 
-With no changes applied to `.config` stboot builds with an example OS package. The required toolchain is set up automatically on the first use. To see all available _make_ targets run `make help`.
-## stboot Image
-```
-# make default configuration
-make config
-# modify configuration
-${EDITOR} .config
-# build stboot image
-make
-
-```
-## OS Package
-An example OS package used by default can be rebuilt with:
 ```bash
-# Generate sign keys
-make keygen-sign
-# build configures OS kernel and initramfs, create and signs an OS package
-make sign
+task deps:install
+```
+`Note: user requires privileges via sudo`
+
+## Migration to Task
+
+On previous vesions, System Transparency used GNU make to build the target installation. If your repository still has build artifacts from make, it is recommended to clean the complete repository before using it with task:
+
+```bash
+task clean-all
 ```
 
-Otherwise, to build a custom OS package use stmanager directly. Therefore, you need a kernel & initramfs which contains the complete userspace. Use one of the following or create your own. The following commands create OS kernel & initramfs using _debos_. If debos cannot be run native on your system, virtualization options will be used:
-``` bash
-# Build debian system described in operating-system/debos/debian.yaml
-make debian
-# Build ubuntu system described in operating-system/debos/ubuntu.yaml
-make ubuntu-18                    
-make ubuntu-20                    
+# Build Installation
+
+To generate a default configuration:
+
+```bash
+task config
 ```
+
+The config file `st.config` contains all available configuration variables with its description above.
+
+## Build Demo Installation
+
+to demonstrate how to build an System Transparency installation, it is possible to create an Image for demo purpose.
+
+First, generate all required key and certificate for the validation:
+
+```bash
+task demo:keygen
+```
+
+Afterwards, an example OS package can be build with:
+
+```bash
+task demo:ospkg
+```
+
+It builds an example Debian OS image with [debos](https://github.com/go-debos/debos) and uses stmanager to convert is to an OS package.
+
+
+[...]
+
 
 Once you have an OS kernel & initramfs containing the usersapce and optionally a tboot kernel and appropriate ACM for TXT create an OS package out of it:
 ``` bash
