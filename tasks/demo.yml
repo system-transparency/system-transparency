@@ -1,0 +1,83 @@
+version: '3'
+
+preconditions:
+  <<: &check-config
+    sh: test -f "{{.CONFIG}}"
+    msg: "Configuration ({{.CONFIG}}) file missing\nPlease provide a config file or run \"task config\""
+
+tasks:
+  keygen:
+    desc: Generate example signing keys
+    deps:
+      - :go:stmanager
+    generates:
+      - "{{.DEMO_KEY_DIR}}/root.*"
+      - "{{.DEMO_KEY_DIR}}/signing-key-*"
+    cmds:
+      - "{{.DEMO_KEYGEN_SCRIPT}} -o {{.DEMO_KEY_DIR}}"
+    status:
+      - "{{.CONFIG_HELPER}} keygen {{.DEMO_KEYGEN_SCRIPT}}"
+      - "test -f {{.DEMO_KEY_DIR}}/root.key"
+      - "test -f {{.DEMO_KEY_DIR}}/root.cert"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.key ]]; done"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.cert ]]; done"
+    preconditions:
+      - *check-config
+      - sh: '[ "{{.ST_SIGNING_ROOT}}" = "{{.DEMO_KEY_DIR}}/root.cert" ]'
+        msg: 'Set ST_SIGNING_ROOT="{{.DEMO_KEY_DIR}}/root.cert" to generate example signing keys'
+    vars:
+      DEMO_KEYGEN_SCRIPT: ./scripts/demo_signing_keys.sh
+      DEMO_KEY_DIR: out/keys/example_keys
+
+  ospkg:
+    desc: "Build demo OS Package"
+    deps:
+      - :go:stmanager
+      - ubuntu
+    sources:
+      - "{{.SIGNKEYS_DIR}}/signing-key-*}}"
+    generates:
+      - "{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
+    cmds:
+      - "mkdir -p {{.ST_LOCAL_OSPKG_DIR}}"
+      - "stmanager create --out '{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' --label='{{.LABEL}}' --kernel={{.KERNEL}} --initramfs={{.INITRD}} --cmd='{{.CMDLINE}}'"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do stmanager sign --key={{.SIGNKEYS_DIR}}/signing-key-$i.key --cert={{.SIGNKEYS_DIR}}/signing-key-$i.cert {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
+      - "echo {{.EXAMPLE_OSPKG}} > {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
+    status:
+      - "test -f {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
+      - "test -f {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
+    preconditions:
+      - *check-config
+      - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
+        msg: "OS is not debian based"
+      - sh: '! (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
+        msg: "Path \"{{.ST_LOCAL_OSPKG_DIR}}\" already contain OS packages. Remove them to create an example OS Package"
+      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.key ]]; done"
+        msg: "Missing sign key. Run \"task demo:keygen\" to generate examples keys and certificates"
+      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.cert ]]; done"
+        msg: "Missing sign certificate. Run \"task demo:keygen\" to generate examples keys and certificates"
+    vars:
+      EXAMPLE_OSPKG: "os-pkg-example-ubuntu20.zip"
+      LABEL: System Transparency Test OS
+      KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
+      INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz
+      CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
+
+  ubuntu:
+    deps:
+      - :go:debos
+    cmds:
+      - "mkdir -p out/example-os"
+      - "{{.SUDO}} cache/go/bin/debos --artifactdir=out/example-os --template-var=suite:focal contrib/debos/ubuntu.yaml"
+      - 'if [ ! -z "{{.SUDO}}" ];then {{.SUDO}} chown $(id -u):$(id -g) {{.KERNEL}} {{.INITRD}};fi'
+    status:
+      - "test -f {{.KERNEL}}"
+      - "test -f {{.INITRD}}"
+    preconditions:
+      - sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || sudo -v"
+        msg: "root privileges required when kvm virtualization is not available"
+    vars:
+      SUDO:
+        sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || echo sudo"
+      KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
+      INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz

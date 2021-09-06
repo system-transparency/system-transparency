@@ -1,0 +1,325 @@
+version: '3'
+
+vars:
+  # Config file
+  CONFIG: st.config
+  DEFAULT_CONFIG: contrib/default.config
+  # Build Targets
+  MBR_IMAGE: out/stboot_mbr_installation.img
+  EFI_IMAGE: out/stboot_efi_installation.img
+  # Build Artifacts
+  DATA_PART: out/artifacts/data_partition.ext4
+  MBR_BOOT_PART: out/artifacts/boot_partition.vfat
+  EFI_BOOT_PART: out/artifacts/boot_partition.vfat
+  KERNEL_FILE: out/artifacts/linuxboot.vmlinuz
+  INITRAMFS_FILE: out/artifacts/initramfs-linuxboot.cpio.gz
+  INITRAMFS_INCLUDE: contrib/initramfs-includes
+  HOST_CONFIG: out/artifacts/host_configuration.json
+  SECURITY_CONFIG: out/artifacts/security_configuration.json
+  SYSLINUX_CONFIG: out/artifacts/syslinux.cfg
+  SYSLINUX_BIN: cache/syslinux/bios/mtools/syslinux
+  # Target Directories
+  SYSLINUX_DIR: cache/syslinux/
+  SIGNKEYS_DIR:
+    sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || echo invalid"
+  # task helper script
+  CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
+
+dotenv:
+  - "{{.CONFIG}}"
+
+includes:
+  go: ./tasks/go.yml
+  deps: ./tasks/deps.yml
+  demo: ./tasks/demo.yml
+
+output: 'prefixed'
+
+tasks:
+
+  default:
+    deps:
+      - image
+
+  config:
+    desc: Generate default configuration
+    sources:
+      - "{{.DEFAULT_CONFIG}}"
+    generates:
+      - "{{.CONFIG}}"
+    cmds:
+      - "{{.CONFIG_SCRIPT}} -o {{.CONFIG}}"
+    vars:
+      CONFIG_SCRIPT: ./scripts/config.sh
+
+  toolchain:
+    desc: Build toolchain
+    deps:
+      - go:update
+
+######## stboot-installation ########
+
+  image:
+    desc: Build target installation option
+    deps:
+      - "image-{{.ST_INSTALLATION_OPTION}}"
+    preconditions:
+      - &check-config
+        sh: test -f "{{.CONFIG}}"
+        msg: "File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
+
+  # dummy target for the case ST_INSTALLATION_OPTION is not defined
+  image-:
+    preconditions:
+      - *check-config
+      - sh: "test ! -z $ST_INSTALLATION_OPTION"
+        msg: "ST_INSTALLATION_OPTION not defined"
+
+  image-mbr:
+    desc: Build MBR bootloader installation option
+    deps:
+      - mbr-boot-part
+      - data-part
+    sources:
+      - "{{.MBR_BOOT_PART}}"
+      - "{{.DATA_PART}}"
+    generates:
+      - "{{.MBR_IMAGE}}"
+    cmds:
+      - "{{.MBR_IMAGE_SCRIPT}} --boot {{.MBR_BOOT_PART}} --data {{.DATA_PART}} --syslinux-dir {{.SYSLINUX_DIR}} --output {{.MBR_IMAGE}}"
+    status:
+      - "{{.CONFIG_HELPER}} image-mbr {{.MBR_IMAGE_SCRIPT}}"
+      - "test -f {{.MBR_IMAGE}}"
+    preconditions:
+      - *check-config
+    vars:
+      MBR_IMAGE_SCRIPT: ./scripts/mbr_image.sh
+
+  image-efi:
+    desc: Build EFI application installation option
+    deps:
+      - efi-boot-part
+      - data-part
+    sources:
+      - "{{.EFI_BOOT_PART}}"
+      - "{{.DATA_PART}}"
+    generates:
+      - "{{.EFI_IMAGE}}"
+    cmds:
+      - "{{.EFI_IMAGE_SCRIPT}} --boot {{.EFI_BOOT_PART}} --data {{.DATA_PART}} --output {{.EFI_IMAGE}}"
+    status:
+      - "{{.CONFIG_HELPER}} image-efi {{.EFI_IMAGE_SCRIPT}}"
+      - "test -f {{.EFI_IMAGE}}"
+    preconditions:
+      - *check-config
+    vars:
+      EFI_IMAGE_SCRIPT: ./scripts/efi_image.sh
+
+  mbr-boot-part:
+    deps:
+      - kernel
+      - host-config
+      - syslinux
+      - syslinux-config
+    sources:
+      - "{{.KERNEL_FILE}}"
+      - "{{.HOST_CONFIG}}"
+      - "{{.SYSLINUX_CONFIG}}"
+    generates:
+      - "{{.MBR_BOOT_PART}}"
+    cmds:
+      - "{{.MBR_BOOT_PART_SCRIPT}} --syslinux-dir {{.SYSLINUX_DIR}} --syslinux-config {{.SYSLINUX_CONFIG}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.MBR_BOOT_PART}}"
+    status:
+      - "{{.CONFIG_HELPER}} mbr-boot-part {{.MBR_BOOT_PART_SCRIPT}}"
+      - "test -f {{.MBR_BOOT_PART}}"
+    preconditions:
+      - *check-config
+    vars:
+      MBR_BOOT_PART_SCRIPT: ./scripts/mbr_boot_partition.sh
+
+  efi-boot-part:
+    deps:
+      - kernel
+      - host-config
+    sources:
+      - "{{.INITRAMFS_FILE}}"
+      - "{{.HOST_CONFIG}}"
+    generates:
+      - "{{.EFI_BOOT_PART}}"
+    cmds:
+      - "{{.EFI_BOOT_PART_SCRIPT}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.EFI_BOOT_PART}}"
+    status:
+      - "{{.CONFIG_HELPER}} efi-boot-part {{.EFI_BOOT_PART_SCRIPT}}"
+      - "test -f {{.EFI_BOOT_PART}}"
+    preconditions:
+      - *check-config
+    vars:
+      EFI_BOOT_PART_SCRIPT: ./scripts/efi_boot_partition.sh
+
+  data-part:
+    sources:
+      - "{{.ST_LOCAL_OSPKG_DIR}}/**"
+    generates:
+      - "{{.DATA_PART}}"
+    cmds:
+      - "{{.DATA_PART_SCRIPT}} -o {{.DATA_PART}}"
+    status:
+      - "{{.CONFIG_HELPER}} data-part {{.DATA_PART_SCRIPT}}"
+    preconditions:
+      - *check-config
+    vars:
+      DATA_PART_SCRIPT: ./scripts/data_partition.sh
+
+  host-config:
+    generates:
+      - "{{.HOST_CONFIG}}"
+    cmds:
+      - "{{.HOST_CONFIG_SCRIPT}} -o {{.HOST_CONFIG}}"
+    status:
+      - "{{.CONFIG_HELPER}} host-config {{.HOST_CONFIG_SCRIPT}}"
+      - "test -f {{.HOST_CONFIG}}"
+    preconditions:
+      - *check-config
+    vars:
+      HOST_CONFIG_SCRIPT: ./scripts/host_config.sh
+
+
+  security-config:
+    generates:
+      - "{{.SECURITY_CONFIG}}"
+    cmds:
+      - "{{.SECURITY_CONFIG_SCRIPT}} -o {{.SECURITY_CONFIG}}"
+    status:
+      - "{{.CONFIG_HELPER}} security-config {{.SECURITY_CONFIG_SCRIPT}}"
+      - "test -f {{.SECURITY_CONFIG}}"
+    preconditions:
+      - *check-config
+    vars:
+      SECURITY_CONFIG_SCRIPT: ./scripts/security_config.sh
+
+  syslinux:
+    generates:
+      - "{{.SYSLINUX_BIN}}"
+    cmds:
+      - "{{.SYSLINUX_BIN_SCRIPT}} -o {{.SYSLINUX_DIR}}"
+    status:
+      - "test -x {{.SYSLINUX_BIN}}"
+    vars:
+      SYSLINUX_BIN_SCRIPT: ./scripts/syslinux.sh
+
+  syslinux-config:
+    generates:
+      - "{{.SYSLINUX_CONFIG}}"
+    cmds:
+      - "{{.SYSLINUX_CONFIG_SCRIPT}} --kernel {{.KERNEL_FILE}} -o {{.SYSLINUX_CONFIG}}"
+    status:
+      - "test -f {{.SYSLINUX_CONFIG}}"
+    vars:
+      SYSLINUX_CONFIG_SCRIPT: ./scripts/syslinux_config.sh
+
+
+######## LinuxBoot kernel ########
+
+  kernel:
+    desc: Build LinuxBoot kernel
+    deps:
+      - initramfs
+    sources:
+      - "{{.INITRAMFS_FILE}}"
+    generates:
+      - "{{.KERNEL_FILE}}"
+    cmds:
+      - "make -f {{.LINUX_MAKE}} KERNEL={{.KERNEL_FILE}}"
+    status:
+      - "{{.CONFIG_HELPER}} kernel {{.LINUX_MAKE}}"
+    preconditions:
+      - *check-config
+    vars:
+      LINUX_MAKE: modules/linux.mk
+
+  initramfs:
+    deps:
+      - go:u-root
+      - go:stboot
+      - security-config
+      # TODO: generate ssh keys only for debug build
+      - cpu-sshkeys
+    sources:
+      - "{{.SECURITY_CONFIG}}"
+      - "{{.ST_SIGNING_ROOT}}"
+    generates:
+      - "{{.INITRAMFS_FILE}}"
+    cmds:
+      - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -o {{.INITRAMFS_FILE}}"
+    status:
+      - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"
+      - "test -f {{.INITRAMFS_FILE}}"
+    preconditions:
+      - *check-config
+      - sh: test -f "{{.ST_SIGNING_ROOT}}"
+        msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
+    vars:
+      INITRAMFS_SCRIPT: ./scripts/initramfs.sh
+
+  cpu-sshkeys:
+    generates:
+      - "{{.CPUKEYS_DIR}}/*"
+    cmds:
+      - "{{.KEYGEN_CPU_SCRIPT}} -o {{.CPUKEYS_DIR}}"
+    status:
+      - "{{.CONFIG_HELPER}} keygen-cpu {{.KEYGEN_CPU_SCRIPT}}"
+    vars:
+      KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
+      CPUKEYS_DIR: out/keys/cpu_keys/
+
+######## QEMU run ########
+
+  run:
+    desc: Run target installation with qemu
+    deps:
+      - "run-{{.ST_INSTALLATION_OPTION}}"
+    preconditions:
+      - *check-config
+
+  # dummy target for the case ST_INSTALLATION_OPTION is not defined
+  run-:
+    preconditions:
+      - *check-config
+      - sh: "test ! -z $ST_INSTALLATION_OPTION"
+        msg: "ST_INSTALLATION_OPTION not defined"
+
+  run-mbr:
+    deps:
+      - image-mbr
+    cmds:
+      - "{{.QEMU_RUN_SCRIPT}} -b mbr -i {{.MBR_IMAGE}}"
+    vars:
+      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
+
+  run-efi:
+    deps:
+      - image-efi
+    cmds:
+      - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.EFI_IMAGE}}"
+    vars:
+      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
+
+######## cleanup ########
+
+  clean:
+    desc: Remove all build artifacts
+    cmds:
+      - "rm -rf out"
+
+  clean-toolchain:
+    desc: Remove all go tools
+    deps:
+      - go:clean
+
+  clean-all:
+    desc: Remove all build artifacts, cache and config file
+    deps: [clean]
+    cmds:
+      - "rm -rf cache"
+      - "rm -rf .task"
+      - "rm -f {{.CONFIG}}"

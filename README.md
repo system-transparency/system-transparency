@@ -1,20 +1,21 @@
 # System Transparency Tooling
 
-This repository contains tooling, configuration files and example data to form a build-, test- and development environment for _System Transparency_.
+This repository contains tooling, configuration files and demos to form a build-, test- and development environment for _System Transparency_.
 
-_stboot_ is System Transparency Project’s official bootloader. It is a LinuxBoot distribution based on u-root.
-A LinuxBoot distribution is simply a Linux kernel and an initramfs. U-root is another project consisting of an initramfs builder, a collection of core Linux commands implemented in Go, and a collection of bootloaders. stboot is one of these bootloaders. Source code of stboot: https://github.com/u-root/u-root/tree/stboot/cmds/boot/stboot and https://github.com/u-root/u-root/tree/stboot/pkg/boot/stboot respectively.
+_stboot_ is System Transparency Project’s official bootloader. It is a [LinuxBoot](https://www.linuxboot.org/) distribution based on [u-root](https://github.com/u-root/u-root). Source code of stboot can be found at https://github.com/system-transparency/stboot.
 
-The stboot program embedded in the initramfs acts as a bootloader to find the real OS - kernel and userland - for the host. The OS comes with one or more signatures to prove its validity. Furthermore, it supports Intel®'s Trusted Execution Technology (TXT) by booting the OS via tboot. All OS related artifacts are bundled together in an _OS Package_. An OS package consists of an archive file (ZIP) and descriptor file (JSON). OS packages can be created and managed with the _stmanager_ tool. Source code of stmanager: https://github.com/u-root/u-root/tree/stboot/tools/stmanager
+With System Transparency, all OS related artifacts including the userland are bundled together in a signed [OS Package](#OS-Package). The core idea is that stboot verifies this OS package before booting. For more details on signature verification, further security mechanisms and features of stboot see [Features](#Features)
 
-stboot currently supports loading the OS packages from an HTTP/HTTPS server or from local storage. To learn more about the various aspects, take a look at the [feature list](#features).
-
-* [Intro](#System-Transparency-Tooling)
 * [Prerequisites](#Prerequisites)
+    * [Task - our build tool](#About-task)
+    * [Environment](#Environment)
+    * [Build Dependencies](#Build-Dependencies)
+    * [Demo Files](#Demo-Files)
 * [Installation](#Installation)
-    * [stboot](#stboot-image)
-    * [OS Package](#OS-Package)
-    * [Installation Test](#Installation-Test)
+    * [Configure](#Configure)
+    * [Build](#Build)
+    * [Test](#Test)
+* [OS Package](#OS-Package)
 * [Deployment](#Deployment)
     * [MBR Bootloader Installation](#Leased-server-with-MBR-bootloader-installation)
     * [EFI Application Installation](#Leased-server-with-EFI-application-installation)
@@ -40,63 +41,122 @@ stboot currently supports loading the OS packages from an HTTP/HTTPS server or f
 * [Development](#Development)
 
 # Prerequisites
+Your machine should run a Linux system (tested with Ubuntu 18.04.2 LTS and 20.04.2 LTS).
 
-The operator machine should run a Linux system (tested with Ubuntu 18.04.2 LTS (Bionic Beaver) / Kernel 4.15.0-47-generic. Further system requirements and dependencies can be reviewed as follows:
+## About task
+
+[Task](https://taskfile.dev) is a task runner / build tool that aims to be simpler and easier to use than, for example, [GNU Make](https://www.gnu.org/software/make/). It provides a remarkable documentation and uses simple YAML schema to define tasks. For more information, go to https://taskfile.dev or run `task --help`.
+
+To see all available tasks:
+
 ```bash
-# Check for missing dependencies
-make check
+task -l
 ```
+### Migration to Task
+
+On previous versions, System Transparency used GNU make to build the target installation. If your repository still has build artifacts from make, it is recommended to clean the complete repository before using it with task:
+
+```bash
+task clean-all
+```
+
+## Environment
+
+The System Transparency Repository provides a `.envrc` file to load the build environment. It installs the latest version of [Task](https://taskfile.dev) and configures a separate Go environment to prevent any conflicts. To load and unload the environment depending on the current directory, it is recommended to use [direnv](https://direnv.net/). Go to [Basic Installation](https://direnv.net/#basic-installation) to see how to proper setup direnv your shell.
+After restarting your shell, you can enable direnv for the repository:
+
+```bash
+cd system-transparency
+direnv allow
+```
+
+As an alternative, you can load the environment directly without direnv:
+
+```bash
+source .envrc
+```
+
+However, this is only recommended on CI workflows since it makes the environment changes persistent in your current shell session.
+
+## Build Dependencies
+This is work in progress.
+
+System Transparency requires some dependencies to build the complete installation image. You can check for missing dependencies:
+
+```bash
+task deps:check
+```
+
+In addition, it is possible to install all dependencies on Debian based environments (tested with Ubuntu 18.04.2 LTS and 20.04.2 LTS):
+
+```bash
+task deps:install
+```
+`Note: user requires privileges via sudo`
+
+
+## Demo Files
+
+To see System Transparency in action you need a signed OS package to be loaded by stboot, it is possible to create an Image for demo purpose.
+
+First, generate all required key and certificate for the signature verification:
+
+```bash
+task demo:keygen
+```
+
+Afterwards, an example OS package can be built with:
+
+```bash
+task demo:ospkg
+```
+
+It builds an example Debian OS image with [debos](https://github.com/go-debos/debos) and uses stmanager to convert it to an OS package.
+
 
 # Installation
+To bring System Transparency to your systems, you need to deploy an installation image. Run the following to create an image.
+See [Deployment](#Deployment) for the supported scenarios.
 
-With no changes applied to `.config` stboot builds with an example OS package. The required toolchain is set up automatically on the first use. To see all available _make_ targets run `make help`.
-## stboot Image
-```
-# make default configuration
-make config
-# modify configuration
-${EDITOR} .config
-# build stboot image
-make
+## Configure
 
-```
-## OS Package
-An example OS package used by default can be rebuilt with:
+To generate a default configuration:
+
 ```bash
-# Generate sign keys
-make keygen-sign
-# build configures OS kernel and initramfs, create and signs an OS package
-make sign
+task config
 ```
 
-Otherwise, to build a custom OS package use stmanager directly. Therefore, you need a kernel & initramfs which contains the complete userspace. Use one of the following or create your own. The following commands create OS kernel & initramfs using _debos_. If debos cannot be run native on your system, virtualization options will be used:
-``` bash
-# Build debian system described in operating-system/debos/debian.yaml
-make debian
-# Build ubuntu system described in operating-system/debos/ubuntu.yaml
-make ubuntu-18                    
-make ubuntu-20                    
+The config file `st.config` contains all available configuration variables. Take a look at the descriptions provided in this file for details.
+
+## Build 
+```bash
+task image
 ```
 
-Once you have an OS kernel & initramfs containing the usersapce and optionally a tboot kernel and appropriate ACM for TXT create an OS package out of it:
-``` bash
-# Create a new OS package
-./cache/go/bin/stmanager create --kernel=your-kernel.vmlinuz --initramfs=your-initramfs.cpio
-# Sign the OS package (multiple times)
-./cache/go/bin/stmanager sign --key=your.key --cert=your.cert <OS package>
-
-# See help for all options
-./cache/go/bin/stmanager --help-long
-
-```
-According to the configured boot mode place the OS package(s) at the STDATA partition of the stboot image or upload to a provisioning server. See [Boot Modes](#Boot-Modes)
-
-## Installation Test
+## Test
 ``` bash 
 
 # run target installation
 make run-qemu
 ```
+
+# OS-Package
+An OS package consists of an archive file (ZIP) and descriptor file (JSON). The archive contains the boot files (kernel, initramfs, etc.) and descriptor file contains the signatures and other metadata.
+
+OS packages can be created and managed with the _stmanager_ tool. Source code of stmanager: https://github.com/system-transparency/stboot/tree/main/tools/stmanager
+
+Once you have an OS kernel & initramfs containing the usersapce and optionally a tboot kernel and appropriate ACM for TXT create an OS package out of it:
+``` bash
+# Create a new OS package
+stmanager create --kernel=<your_OS_kernel> --initramfs=<your_OS_initramfs>
+# Sign the OS package (multiple times)
+stmanager sign --key=<your.key> --cert=<your.cert> <OS package>
+
+# See help for all options
+stmanager --help-long
+
+```
+According to the configured boot mode, place the OS package(s) at the STDATA partition of the stboot image or upload to a provisioning server. See [Boot Modes](#Boot-Modes)
 
 # Deployment
 Regarding deployment, we defined three real world scenarios which should at least support a high chance that we have covered a lot of hardware systems. The installation option can by set via `ST_INSTALLATION_OPTION` in `.config`.

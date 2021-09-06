@@ -1,0 +1,139 @@
+version: '3'
+
+tasks:
+
+  get:
+    cmds:
+      - "go get -d -u {{.REPO}}/..."
+    label: "get {{.NAME}}"
+    status:
+      - "test -f cache/go/src/{{.REPO}}/.git/config"
+    run: when_changed
+    vars:
+        NAME: "{{.NAME}}"
+        REPO: "{{.REPO}}"
+
+  fetch:
+    cmds:
+      - "git -C cache/go/src/{{.REPO}} checkout --quiet"
+      - "git -C cache/go/src/{{.REPO}} fetch --all --quiet"
+    label: "fetch {{.NAME}}"
+    run: when_changed
+    vars:
+        NAME: "{{.NAME}}"
+        REPO: "{{.REPO}}"
+
+  checkout:
+    cmds:
+      - "git -C cache/go/src/{{.REPO}} checkout --quiet {{.BRANCH}}"
+    label: "checkout {{.NAME}}"
+    run: when_changed
+    vars:
+       NAME: "{{.NAME}}"
+       REPO: "{{.REPO}}"
+       BRANCH: "{{.BRANCH}}"
+
+  install:
+    cmds:
+      - "go install {{.REPO}}/{{.DIR}}"
+    label: "install {{.NAME}}"
+    run: when_changed
+    vars:
+      <<: &go-vars
+        # binary name
+        NAME: "{{.NAME}}"
+        # package repository
+        REPO: "{{.REPO}}"
+        # package branch (optional)
+        BRANCH: "{{.BRANCH}}"
+        # package directory (optional)
+        DIR: "{{.DIR}}"
+
+  target:
+    cmds:
+      - task: get
+        vars: *go-vars
+      - task: fetch
+        vars: *go-vars
+      - task: checkout
+        vars: *go-vars
+      - task: install
+        vars: *go-vars
+    label: "{{.NAME}}"
+    status:
+      - "test -x cache/go/bin/{{.NAME}}"
+      - "git -C cache/go/src/{{.REPO}} diff --quiet {{.BRANCH}}"
+    run: when_changed
+    vars: *go-vars
+
+  all:
+    deps:
+      - task
+      - u-root
+      - stboot
+      - stmanager
+      - sinit-acm-grebber
+      - cpu
+      - debos
+
+  update:
+    cmds:
+      - rm -rf cache/go/bin
+      - task: all
+
+  task:
+    cmds:
+      - 'sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -b "bin"'
+
+  u-root:
+    cmds:
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "u-root"
+      REPO: "github.com/u-root/u-root"
+      BRANCH: "{{.ST_UROOT_VERSION}}"
+
+  stboot:
+    deps:
+      - stmanager
+
+  stmanager:
+    cmds:
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "stmanager"
+      REPO: "github.com/system-transparency/stboot"
+      BRANCH: "{{.ST_STBOOT_VERSION}}"
+      DIR: "tools/stmanager"
+
+  sinit-acm-grebber:
+    cmds:
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "sinit-acm-grebber"
+      REPO: "github.com/system-transparency/sinit-acm-grebber"
+
+  cpu:
+    cmds:
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "cpu"
+      REPO: "github.com/u-root/cpu"
+      DIR: "cmds/cpu"
+
+  debos:
+    cmds:
+      - task: target
+        vars: *go-vars
+    vars:
+      NAME: "debos"
+      REPO: "github.com/go-debos/debos"
+      DIR: "cmd/debos"
+
+  clean:
+    cmds:
+      - rm -rf cache/go

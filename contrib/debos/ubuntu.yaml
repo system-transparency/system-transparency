@@ -1,0 +1,73 @@
+{{- $architecture := or .architecture "amd64" -}}
+{{- $suite := or .suite "bionic" -}}
+{{ $image := or .image (printf "ubuntu-%s-%s" $suite $architecture) }}
+
+{{ $hostname := or "ubuntu" }}
+{{ $user := or "stboot" }}
+# default password: stboot
+{{ $password := "$1$E5U1z1oh$Xw.t4YBXwVpqe5lhHEth41" }}
+
+architecture: {{ $architecture }}
+
+actions:
+  # hotfix: wait to prevent network race condition
+  - action: run
+    description: Wait until network is up
+    command: sleep 5
+
+  - action: debootstrap
+    description: Install Ubuntu base system
+    keyring-file: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+    suite: {{ $suite }}
+    components:
+      - main
+      - restricted
+      - universe
+      - multiverse
+    mirror: http://archive.ubuntu.com/ubuntu
+    variant: minbase
+
+  - action: apt
+    description: Install packages
+    packages:
+      - adduser
+      - perl
+      - sudo
+      - lshw
+      - usbutils
+      - util-linux
+      - bash
+      - pciutils
+      - iproute2
+      - netplan.io
+      - isc-dhcp-client
+      - udev
+      - nano
+      - openssh-server
+      - python3
+      - systemd
+      - linux-image-generic
+      - linux-firmware
+
+  - action: overlay
+    description: Overlay - Add files to system
+    source: debos-overlays
+
+  - action: run
+    description: Set hostname
+    chroot: true
+    command: |
+      echo {{ $hostname }} > /etc/hostname
+
+  - action: run
+    description: Add standard user
+    chroot: true
+    command: |
+      useradd {{ $user }} -m -s /bin/bash
+      usermod -a -G sudo {{ $user }}
+      echo '{{ $user }}:{{ $password }}' | chpasswd -e
+
+  - action: run
+    description: Pack reproducibly
+    chroot: false
+    script: scripts/pack.sh {{ $image }}

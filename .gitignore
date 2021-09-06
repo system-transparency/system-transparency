@@ -1,11 +1,9 @@
 /.vscode/*
-/.config
+.envrc
+/st.config
+/.envrc
 /cache/
-/.newest-ospkg.zip
-/stboot-installation/mbr-bootloader/user_modified.defconfig
-/stboot-installation/mbr-bootloader/*.defconfig.patch
-/stboot-installation/efi-application/user_modified.defconfig
-/stboot-installation/efi-application/*.defconfig.patch
 /out/
-/.notes/
 **/*.old
+.task
+bin/task

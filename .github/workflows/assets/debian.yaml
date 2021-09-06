@@ -1,0 +1,57 @@
+{{- $architecture := or .architecture "amd64" -}}
+{{- $suite := or .suite "buster" -}}
+{{ $image := or .image (printf "debian-%s-%s" $suite $architecture) }}
+
+{{ $hostname := or "debian" }}
+# default root password: root
+{{ $password := "$1$6LwZ8PFR$EZc4VFCZOJ9aRfZ2NYuqE0" }}
+
+architecture: {{ $architecture }}
+
+actions:
+  # hotfix: wait to prevent network race condition
+  - action: run
+    description: Wait until network is up
+    command: sleep 5
+
+  - action: debootstrap
+    description: Install Debian base system
+    suite: {{ $suite }}
+    components:
+      - main
+      - contrib
+      - non-free
+    mirror: https://snapshot.debian.org/archive/debian/20191004T111800Z/
+    variant: minbase
+
+  - action: apt
+    description: Install packages
+    packages:
+      - adduser
+      - netplan.io
+      - firmware-linux
+      - linux-image-amd64
+      - openssh-server
+      - openvpn
+      - systemd
+
+  - action: overlay
+    description: Overlay - Add files to system
+    source: debos-overlays
+
+  - action: run
+    description: Set hostname
+    chroot: true
+    command: |
+      echo {{ $hostname }} > /etc/hostname
+
+  - action: run
+    description: Set root password
+    chroot: true
+    command: |
+      echo 'root:{{ $password }}' | chpasswd -e
+
+  - action: run
+    description: Pack
+    chroot: false
+    script: scripts/pack.sh {{ $image }}
