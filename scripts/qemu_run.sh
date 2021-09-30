@@ -8,7 +8,7 @@ root="$(cd "${dir}/../" && pwd)"
 image=
 boot=mbr
 ovmf=
-ovmf_locs=("/usr/share/OVMF/OVMF_CODE.fd" "/usr/share/edk2/ovmf/OVMF_CODE.fd")
+ovmf_locs=("/usr/share/OVMF/OVMF_CODE.fd" "/usr/share/edk2/ovmf/OVMF_CODE.fd" "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd")
 declare -a qemu_args
 
 function locate_ovmf {
