@@ -1,10 +1,10 @@
 # System Transparency Tooling
 
-This repository contains tooling, configuration files and demos to form a build-, test- and development environment for _System Transparency_.
+This repository contains tooling, configuration files and, demos to form a build-, test- and development environment for _System Transparency_.
 
-_stboot_ is System Transparency Project’s official bootloader. It is a [LinuxBoot](https://www.linuxboot.org/) distribution based on [u-root](https://github.com/u-root/u-root). Source code of stboot can be found at https://github.com/system-transparency/stboot.
+_stboot_ is System Transparency Project’s official bootloader. It is a [LinuxBoot](https://www.linuxboot.org/) distribution based on [u-root](https://github.com/u-root/u-root). The source code of stboot can be found at https://github.com/system-transparency/stboot.
 
-With System Transparency, all OS related artifacts including the userland are bundled together in a signed [OS Package](#OS-Package). The core idea is that stboot verifies this OS package before booting. For more details on signature verification, further security mechanisms and features of stboot see [Features](#Features)
+With System Transparency, all OS-related artifacts including the userland are bundled together in a signed [OS Package](#OS-Package). The core idea is that stboot verifies this OS package before booting. For more details on signature verification, further security mechanisms and features of stboot see [Features](#Features)
 
 * [Prerequisites](#Prerequisites)
     * [Task - our build tool](#About-task)
@@ -45,7 +45,7 @@ Your machine should run a Linux system (tested with Ubuntu 18.04.2 LTS and 20.04
 
 ## About task
 
-[Task](https://taskfile.dev) is a task runner / build tool that aims to be simpler and easier to use than, for example, [GNU Make](https://www.gnu.org/software/make/). It provides a remarkable documentation and uses simple YAML schema to define tasks. For more information, go to https://taskfile.dev or run `task --help`.
+[Task](https://taskfile.dev) is a task runner/build tool that aims to be simpler and easier to use than, for example, [GNU Make](https://www.gnu.org/software/make/). It provides remarkable documentation and uses a simple YAML schema to define tasks. For more information, go to https://taskfile.dev or run `task --help`.
 
 To see all available tasks:
 
@@ -54,7 +54,7 @@ task -l
 ```
 ### Migration to Task
 
-On previous versions, System Transparency used GNU make to build the target installation. If your repository still has build artifacts from make, it is recommended to clean the complete repository before using it with task:
+In previous versions, System Transparency used GNU make to build the target installation. If your repository still has build artifacts from make, it is recommended to clean the complete repository before using it with task:
 
 ```bash
 task clean-all
@@ -62,7 +62,7 @@ task clean-all
 
 ## Environment
 
-The System Transparency Repository provides a `.envrc` file to load the build environment. It installs the latest version of [Task](https://taskfile.dev) and configures a separate Go environment to prevent any conflicts. To load and unload the environment depending on the current directory, it is recommended to use [direnv](https://direnv.net/). Go to [Basic Installation](https://direnv.net/#basic-installation) to see how to proper setup direnv your shell.
+The System Transparency Repository provides a `.envrc` file to load the build environment. It installs the latest version of [Task](https://taskfile.dev) and configures a separate Go environment to prevent any conflicts. To load and unload the environment depending on the current directory, it is recommended to use [direnv](https://direnv.net/). Go to [Basic Installation](https://direnv.net/#basic-installation) to see how to properly setup direnv your shell.
 After restarting your shell, you can enable direnv for the repository:
 
 ```bash
@@ -97,15 +97,15 @@ task deps:install
 
 ## Demo Files
 
-To see System Transparency in action you need a signed OS package to be loaded by stboot, it is possible to create an Image for demo purpose.
+To see System Transparency in action you need a signed OS package to be loaded by stboot, it is possible to create an Image for demo purposes.
 
-First, generate all required key and certificate for the signature verification:
+First, generate all required keys and certificates for the signature verification:
 
 ```bash
 task demo:keygen
 ```
 
-Afterwards, an example OS package can be built with:
+Afterward, an example OS package can be built with:
 
 ```bash
 task demo:ospkg
@@ -141,11 +141,11 @@ make run-qemu
 ```
 
 # OS-Package
-An OS package consists of an archive file (ZIP) and descriptor file (JSON). The archive contains the boot files (kernel, initramfs, etc.) and descriptor file contains the signatures and other metadata.
+An OS package consists of an archive file (ZIP) and descriptor file (JSON). The archive contains the boot files (kernel, initramfs, etc.) and the descriptor file contains the signatures and other metadata.
 
 OS packages can be created and managed with the _stmanager_ tool. Source code of stmanager: https://github.com/system-transparency/stboot/tree/main/tools/stmanager
 
-Once you have an OS kernel & initramfs containing the usersapce and optionally a tboot kernel and appropriate ACM for TXT create an OS package out of it:
+Once you have an OS kernel & initramfs containing the userspace and optionally a tboot kernel and appropriate ACM for TXT create an OS package out of it:
 ``` bash
 # Create a new OS package
 stmanager create --kernel=<your_OS_kernel> --initramfs=<your_OS_initramfs>
@@ -156,13 +156,13 @@ stmanager sign --key=<your.key> --cert=<your.cert> <OS package>
 stmanager --help-long
 
 ```
-According to the configured boot mode, place the OS package(s) at the STDATA partition of the stboot image or upload to a provisioning server. See [Boot Modes](#Boot-Modes)
+According to the configured boot mode, place the OS package(s) at the STDATA partition of the stboot image or upload it to a provisioning server. See [Boot Modes](#Boot-Modes)
 
 # Deployment
-Regarding deployment, we defined three real world scenarios which should at least support a high chance that we have covered a lot of hardware systems. The installation option can by set via `ST_INSTALLATION_OPTION` in `.config`.
+Regarding deployment, we defined three real-world scenarios which should at least support a high chance that we have covered a lot of hardware systems. The installation option can be set via `ST_INSTALLATION_OPTION` in `.config`.
 
 ## Leased server with MBR bootloader installation
-Bringing system transparency to already existing hardware which can’t be transformed to open source firmware machines is troublesome. Therefore, we need to propose a solution which even works on those limited systems. This scenario is especially helpful for a server landscape with mixed firmware like BIOS and UEFI. Syslinux is used as an intermediate bootloader. There is both, valid boot code in the MBR (for legacy systems) and a .efi file on the first partition (for EFI systems) to load stboot. The disadvantage is that there is no guarantied TPM measurement of the stboot code in the installation option.
+Bringing system transparency to already existing hardware that can’t be transformed to open source firmware machines is troublesome. Therefore, we need to propose a solution which even works on those limited systems. This scenario is especially helpful for a server landscape with mixed firmware like BIOS and UEFI. Syslinux is used as an intermediate bootloader. There is both, valid boot code in the MBR (for legacy systems) and a .efi file on the first partition (for EFI systems) to load stboot. The disadvantage is that there is no guaranteed TPM measurement of the stboot code in the installation option.
 
 When built as an MBR bootloader there is one artifact `out/stboot-installation/mbr-bootloader/stboot_mbr_installation.img`containing:
 * SYSLINUX (for the Master Boot Record)
@@ -172,26 +172,26 @@ When built as an MBR bootloader there is one artifact `out/stboot-installation/m
     * LinuxBoot files
     * Host configuration for stboot
 * An Ext4 partition named STDATA containing
-    * An OS package if boot method is set to _local_.
+    * An OS package if the boot method is set to _local_.
     * An empty directory for use as a cache if the boot method is set to _network_.
 
 You need to write this image to the hard drive of the host.
 
 ## Leased server with EFI application installation
-In this scenario we have a closed source UEFI firmware which cannot easily be modified. In order to deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as an EFI application. The idea is to take advantage of the TPM measurements done by the efi firmware. stboot (kernel + initramfs compiled into this kernel) is build as an EFI executable / efi application in this installation option. This artifact resides at partition marked as ESP (EFI special partition). The efi firmware measures this file before execution (even with secure boot disabled in our tests). 
+In this scenario, we have a closed source UEFI firmware that cannot easily be modified. To deploy _stboot_ underneath, we will use the Linux EFI stub kernel feature and compile the kernel as an EFI application. The idea is to take advantage of the TPM measurements done by the efi firmware. stboot (kernel + initramfs compiled into this kernel) is built as an EFI executable / efi application in this installation option. This artifact resides at a partition marked as ESP (EFI special partition). The efi firmware measures this file before execution (even with secure boot disabled in our tests). 
 
 When built as an EFI application there is one artifact `out/stboot-installation/efi-application/stboot_efi_installation.img` containing:
 * A VFAT/FAT32 partition named STBOOT marked as an EFI system partition containing:
     * LinuxBoot files compiled as an EFI stub
     * Host configuration for stboot
 *An Ext4 partition named STDATA containing:
-    * An OS package if boot method is set to _local_.
+    * An OS package if the boot method is set to _local_.
     * An empty directory for use as a cache if the boot method is set to _network_.
 
 You need to write this image to the hard drive of the host.
 
 ## Colocated server with coreboot payload installation
-In this scenario we can place our own server in the data center. This server already contains Open Source firmware and is able to boot a Linux kernel payload after hardware initialization.
+In this scenario, we can place our own server in the data center. This server already contains Open Source firmware and can boot a Linux kernel payload after hardware initialization.
 
 _WORK IN PROGRESS_
 
@@ -201,8 +201,8 @@ When built as a coreboot payload there will be two artifacts:
     * A VFAT/FAT32 partition named STBOOT containing:
         * Host configuration for stboot
     * An Ext4 partition named STDATA containing:
-        * An OS package if boot method is set to _local_.
-        * An empty directory for use as a cache if boot method is set to _network_.
+        * An OS package if the boot method is set to _local_.
+        * An empty directory for use as a cache if the boot method is set to _network_.
 
 You need to write the coreboot.rom to the SPI Flash of the host and write the image to the hard drive of the host.
 To build and flash the coreboot-rom including _stboot_ as a payload, please refer to [these instructions](stboot-installation/coreboot-payload/#deploy-coreboot-rom). 
@@ -215,25 +215,25 @@ Most options can be set in `run.config`. See the descriptions there for details.
 A subset of the configuration options in `.config` end up in two JSON files which stboot reads in during the boot process:
 
 ### host_configuration.json
-This file is written to the root directory of the STBOOT partition. It contains host specific data and resides on the STBOOT partition, so it can easily be modified during an orchestration process. It contains a single JSON object that stboot parses. The JSON object has the following fields:
+This file is written to the root directory of the STBOOT partition. It contains host-specific data and resides on the STBOOT partition, so it can easily be modified during an orchestration process. It contains a single JSON object that stboot parses. The JSON object has the following fields:
 
 #### `version ` - JSON number
-Version number of the host configuration.
+The version number of the host configuration.
 
 #### `network_mode` - JSON string
-Valid values are `"static"` or `"dhcp"`. In network boot mode it determines the setup of the network interface. Either the DHCP protolol is used or a static IP setup using the values of the fields `host_ip` and `gateway`.
+Valid values are `"static"` or `"dhcp"`. In network boot mode it determines the setup of the network interface. Either the DHCP protocol is used or a static IP setup using the values of the fields `host_ip` and `gateway`.
 
 #### `host_ip` - JSON string
-Only relevant in network bootmode and when `network_mode` is set to `"static"`. The machine's network IP address is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
+Only relevant in network boot mode and when `network_mode` is set to `"static"`. The machine's network IP address is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
 
 #### `gateway` - JSON string
-Only relevant in network bootmode and when `network_mode` is set to `"static"`. The machine's network default gateway is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
+Only relevant in network boot mode and when `network_mode` is set to `"static"`. The machine's network default gateway is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
 
 #### `dns` - JSON string
-Optional setting to pass a custom DNS server when using network boot mode. The value will be prefixed with `nameserver ` and then written to `/etc/resolv.conf` inside the LinuxBoot initramfs. If no own setting is provided, `8.8.8.8` is used.
+Optional setting to pass a custom DNS server when using network boot mode. The value will be prefixed with `nameserver` and then written to `/etc/resolv.conf` inside the LinuxBoot initramfs. If no own setting is provided, `8.8.8.8` is used.
 
 #### `network_interface` - JSON string
-Optional setting to choose a specific network interface via its MAC address when using network boot mode. The MAC is supposed to be passed in IEEE 802 MAC-48, EUI-48 or EUI-64 formt, e.g `00:00:5e:00:53:01`.  If empty or if the desired network interface cannot be found, the first existing and successfully setup one will be used.
+Optional setting to choose a specific network interface via its MAC address when using network boot mode. The MAC is supposed to be passed in IEEE 802 MAC-48, EUI-48, or EUI-64 format, e.g `00:00:5e:00:53:01`.  If empty or if the desired network interface cannot be found, the first existing and successfully setup one will be used.
 
 #### `provisioning_urls` - JSON array of strings
 A list of provisioning server URLs. See also [Network Boot](#Network-Boot). The URLs must include the scheme (`http://` or `https://`).
@@ -257,13 +257,13 @@ An example host_configuration.json file could look like this:
     "authentication":"C2F3F516A79F756E7D3128B77077B4A8AEF61E888499FD99AE92E6D4F2E7653C"
 }
 ```
-All values can be managed via `.config` so although you can easily modify this file on the image, generally it is recommended not to edit this file manually but control the values via the general configuration.
+All values can be managed via `.config` so although you can easily modify this file on the image. Generally, it is recommended not to edit this file manually but control the values via the general configuration.
 
 ### security_configuration.json
-This file is compiled into the LinuxBoot initramfs at `/etc/security_configuration.json`. It contains the following security critical fields it is not recommended editing this file manually. It contains a single JSON object that stboot parses. The JSON object has the following fields:
+This file is compiled into the LinuxBoot initramfs at `/etc/security_configuration.json`. It contains the following security-critical fields it is not recommended to edit this file manually. It contains a single JSON object that stboot parses. The JSON object has the following fields:
 
 #### `version ` - JSON number
-Version number of the security configuration.
+The version number of the security configuration.
 
 #### `min_valid_sigs_required ` - JSON number
 This value determines the minimum number of signatures that must be valid during the validation of an OS package. See [Signature Verification](#Signature-Verification)
@@ -295,7 +295,7 @@ make mbr-kernel-updatedefconfig
 
 # Features
 
-stboot extensively validates the state of the system and all data it will use in its control flow. In case of any error it will reboot the system. At the end of the control flow stboot will use kexec to hand over the control to the kernel provided in the OS package. From that point on stboot has no longer control over the system.
+stboot extensively validates the state of the system and all data it will use in its control flow. In case of any error, it will reboot the system. At the end of the control flow, stboot will use kexec to hand over the control to the kernel provided in the OS package. From that point on stboot has no longer control over the system.
 
 ## System Time Validation
 A proper system time is important for validating certificates. It is the responsibility of the operator to set the system time correctly. However, stboot performs the following check:
@@ -303,13 +303,13 @@ A proper system time is important for validating certificates. It is the respons
 * Look at the system time, look at the timestamp on `STDATA/stboot/etc/system_time_fix`
 * Set system time to the latest.
 
-The OS is allowed to update this file. Especially if it’s an embedded system without a RTC.
+The OS is allowed to update this file. Especially if it’s an embedded system without an RTC.
 
 ## Boot Modes
 stboot supports two boot methods - Network and Local. In _Network_ mode stboot loads an OS package from a provisioning server. In _Local_ mode stboot loads an OS package from the STDATA partition on a local disk. Only one boot method at a time may be configured.
 
 ### Network Boot
-Network boot can be configured using either DHCP or a static network configuration. In case of static network stboot uses IP address, netmask, default gateway, and DNS server from `host_configuration.json`. The latest downloaded and verified OS package can be cached depending on settings in `security_configuration.json`. Older ones are removed. The cache directory is separate from the directory used by the Local boot method.
+Network boot can be configured using either DHCP or a static network configuration. In the case of a static network, stboot uses IP address, netmask, default gateway, and DNS server from `host_configuration.json`. The latest downloaded and verified OS package can be cached depending on settings in `security_configuration.json`. Older ones are removed. The cache directory is separate from the directory used by the Local boot method.
 
 Provisioning Server Communication:
 * The HTTPS root certificates are stored in the LinuxBoot initramfs
@@ -323,10 +323,10 @@ Provisioning URLs:
     * e.g. https://provisioning.foo.net/api/v1/?id=$ID&auth=$AUTH 
     * e.g. https://provisioning.bar.net/api/v1/$ID
 
-These URLs are supposed to server the OS package descriptor.
+These URLs are supposed to serve the OS package descriptor.
 
 For each provisioning server URL in `host_configuration.json`:
-* Try downloading the OS package descriptor (json file).
+* Try downloading the OS package descriptor (JSON file).
 * Extract the OS package URL.
 * Check the filename in the OS package URL. (must be `.zip`)
     * Compare the provisioning server OS package filename with the one in the cache. Download if they don’t match.
@@ -334,7 +334,7 @@ For each provisioning server URL in `host_configuration.json`:
 
 In case the provisioning server is down the operator has to choose whether to fall back on the local cache or fail. This choice results in either risking a downgrading attack or a DoS attack.
 
-* Save the path name to the OS package which is about to be booted in `STDATA/stboot/etc/current_ospkg_pathname`
+* Save the pathname to the OS package which is about to be booted in `STDATA/stboot/etc/current_ospkg_pathname`
      * (all caps note in case of uncached network loaded OS package)
 * Cache path: `STDATA/stboot/os_pkgs/cache/`
 
@@ -342,9 +342,9 @@ In case the provisioning server is down the operator has to choose whether to fa
 * Local storage: `STDATA/stboot/os_pkgs/local/`
 * Try OS packages in the order they are listed in the file
 `STDATA/stboot/os_pkgs/local/boot_order`
-* Save the path name to the OS package which is about to be booted in `STDATA/stboot/etc/current_ospkg_pathname`
+* Save the pathname to the OS package which is about to be booted in `STDATA/stboot/etc/current_ospkg_pathname`
 
-If OS package signature verification fails, or OS package is invalid, stboot will move on to the next OS package.
+If OS package signature verification fails, or the OS package is invalid, stboot will move on to the next OS package.
 The operator should notice that the old OS package had been booted, and infer that the new OS package is invalid.
 If OS package signature verification succeeds, OS package is valid, but running OS is inaccessible (due to failure during kexec or later), this is out of scope for stboot’s responsibility.
 
@@ -359,7 +359,7 @@ Two files are involved, the OS package itself and a corresponding descriptor fil
 * SOMENAME.zip (package file)
 * SOMENAME.json (descriptor file)
 
-Verification process in stboot:
+The verification process in stboot:
 * Validate the document format.
 * For each signature certificate tuple:
     * Validate the certificate against the root certificate.
@@ -381,7 +381,7 @@ If the machine has a TPM, supports Intel TXT, and the OS package contains tboot 
 
 If the machine has a TPM but doesn’t support Intel TXT, or if the OS package doesn’t contain tboot, stboot will use the TPM to measure the OS package before executing it.
 
-If the machine does not have a TPM, stboot will execute the OS package without measuring it. In this case it doesn’t matter if the machine supports Intel TXT or the OS package contains tboot, as Intel TXT requires a TPM.
+If the machine does not have a TPM, stboot will execute the OS package without measuring it. In this case, it doesn’t matter if the machine supports Intel TXT or the OS package contains tboot, as Intel TXT requires a TPM.
 
 Note that stboot will always verify the signatures on the OS package before executing it, regardless of what platform security features are available on the machine.
 
@@ -389,7 +389,7 @@ Note that stboot will always verify the signatures on the OS package before exec
 # Debugging
 
 ## Console Output
-The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in `.config`. Beside usual kernel parameters you can pass flags to stboot via the special parameter `uroot.uinitargs`. 
+The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in `.config`. Besides the usual kernel parameters, you can pass flags to stboot via the special parameter `uroot.uinitargs`.
 * To enable debug output in stboot pass `-debug`
 * To see not only the LinuxBoot kernel's but also stboot's output on all defined consoles (not on the last one defined only) pass `-klog`
 
@@ -403,11 +403,11 @@ Examples:
 By setting `ST_LINUXBOOT_VARIANT=full` in `.config` the LinuxBoot initramfs will contain a shell and u-root's core commands (https://github.com/u-root/u-root/tree/stboot/cmds/core) in addition to stboot itself. So while stboot is running you can press `ctrl+c` to exit. You are then dropped into a shell and can inspect the system and use u-roots core commands.
 
 ## Remote Debugging Using the CPU Command
-In order to do extensive remote debugging of the host, you can use u-root's cpu command. Since the stboot image running on the host has much fewer tools and services than usual Linux operating systems, the `cpu` command is a well suited option for debugging the host remotely.
+To do extensive remote debugging of the host, you can use u-root's cpu command. Since the stboot image running on the host has much fewer tools and services than usual Linux operating systems, the `cpu` command is a well-suited option for debugging the host remotely.
 It connects to the host, bringing all your local tools and environment with you.
 
 ### Preparation
-You need to set `ST_LINUXBOOT_VARIANT=debug` in `.config` in order to include the cpu daemon into the LinuxBoot initramfs.
+You need to set `ST_LINUXBOOT_VARIANT=debug` in `.config` to include the cpu daemon into the LinuxBoot initramfs.
 
 The cpu command (the counterpart to the daemon) should be installed on your system as part of the toolchain. Try to run it:
 
