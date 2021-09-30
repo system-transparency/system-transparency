@@ -137,7 +137,7 @@ task image
 ``` bash 
 
 # run target installation
-make run-qemu
+task run
 ```
 
 # OS-Package
@@ -282,16 +282,6 @@ An example security_configuration.json file could look like this:
   "boot_mode": "local",
   "use_ospkg_cache": false
 }
-
-```
-
-## Modify LinuxBoot kernel config
-```bash
-# Run MBR bootloader kernel menuconfig
-make mbr-kernel-menuconfig
-# Update MBR bootloader kernel defconfig
-make mbr-kernel-updatedefconfig
-```
 
 # Features
 
@@ -444,10 +434,10 @@ cpu -key out/keys/cpu_keys/cpu_rsa <host>
 
 This will connect you to the remote server and bring all your tools and environment with it. Be aware that this process might take up to a few minutes depending on the size of your environment and the power of the remote machine.
 
-You can test it for example with your stboot MBR installation option running in qemu:
+You can test it by running in qemu:
 ``` bash 
-# run MBR bootloader installation in qemu
-make run-mbr-bootloader
+# run installation in qemu
+task run
 # interrupt stboot while booting
 ctrl+c
 # start the cpu daemon
