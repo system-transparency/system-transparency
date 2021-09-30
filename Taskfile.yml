@@ -293,6 +293,7 @@ tasks:
       - image-mbr
     cmds:
       - "{{.QEMU_RUN_SCRIPT}} -b mbr -i {{.MBR_IMAGE}}"
+    interactive: true
     vars:
       QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
 
@@ -301,6 +302,7 @@ tasks:
       - image-efi
     cmds:
       - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.EFI_IMAGE}}"
+    interactive: true
     vars:
       QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
 
