@@ -8,7 +8,7 @@ root="$(cd "${dir}/../" && pwd)"
 image=
 boot=mbr
 ovmf=
-ovmf_locs=("/usr/share/OVMF/OVMF_CODE.fd" "/usr/share/edk2/ovmf/OVMF_CODE.fd")
+ovmf_locs=("/usr/share/OVMF/OVMF_CODE.fd" "/usr/share/edk2/ovmf/OVMF_CODE.fd" "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd")
 declare -a qemu_args
 
 function locate_ovmf {
@@ -77,10 +77,38 @@ esac
 ########################################
 
 mem=4G
-
+swtpm_dir=${root}/cache/swtpm
 tpm=$(mktemp -d --suffix='-tpm')
 
-swtpm_setup --tpmstate $tpm --tpm2 --config ${root}/cache/swtpm/etc/swtpm_setup.conf \
+mkdir -p "${swtpm_dir}"
+
+if [ ! -f "${swtpm_dir}/swtpm-localca.conf" ]; then
+  cat <<EOF > "${swtpm_dir}/swtpm-localca.conf"
+statedir = ${swtpm_dir}/var/lib/swtpm-localca
+signingkey = ${swtpm_dir}/var/lib/swtpm-localca/signkey.pem
+issuercert = ${swtpm_dir}/var/lib/swtpm-localca/issuercert.pem
+certserial = ${swtpm_dir}/var/lib/swtpm-localca/certserial
+EOF
+fi
+
+if [ ! -f "${swtpm_dir}/swtpm-localca.options" ]; then
+  cat <<EOF > "${swtpm_dir}/swtpm-localca.options"
+--platform-manufacturer SystemTransparency
+--platform-version 2.12
+--platform-model QEMU
+EOF
+fi
+
+if [ ! -f "${swtpm_dir}/swtpm_setup.conf" ]; then
+   cat <<EOF > "${swtpm_dir}/swtpm_setup.conf"
+# Program invoked for creating certificates
+create_certs_tool= /usr/share/swtpm/swtpm-localca
+create_certs_tool_config = ${swtpm_dir}/swtpm-localca.conf
+create_certs_tool_options = ${swtpm_dir}/swtpm-localca.options
+EOF
+fi
+
+swtpm_setup --tpmstate $tpm --tpm2 --config ${swtpm_dir}/swtpm_setup.conf \
   --create-ek-cert --create-platform-cert --lock-nvram
 
 echo "Starting $tpm"
