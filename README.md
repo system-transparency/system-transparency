@@ -282,6 +282,7 @@ An example security_configuration.json file could look like this:
   "boot_mode": "local",
   "use_ospkg_cache": false
 }
+```
 
 # Features
 
