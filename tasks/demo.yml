@@ -50,7 +50,7 @@ tasks:
       - *check-config
       - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
         msg: "OS is not debian based"
-      - sh: '! (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
+      - sh: '[ ! -z "{{.ST_LOCAL_OSPKG_DIR}}" ] && ! (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
         msg: "Path \"{{.ST_LOCAL_OSPKG_DIR}}\" already contain OS packages. Remove them to create an example OS Package"
       - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.key ]]; done"
         msg: "Missing sign key. Run \"task demo:keygen\" to generate examples keys and certificates"
@@ -66,6 +66,8 @@ tasks:
   ubuntu:
     deps:
       - :go:debos
+      - task: :deps:check-cmd
+        vars: {CMD: "debootstrap"}
     cmds:
       - "mkdir -p out/example-os"
       - "{{.SUDO}} cache/go/bin/debos --artifactdir=out/example-os --template-var=suite:focal contrib/debos/ubuntu.yaml"

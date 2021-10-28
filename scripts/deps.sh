@@ -17,6 +17,8 @@ declare -a deps_pkgconf
 ### core
 deps_cmds+=(wget)
 deps_dpkg+=(wget)
+deps_cmds+=(xz)
+deps_dpkg+=(xz-utils)
 deps_cmds+=(git)
 deps_dpkg+=(git)
 deps_cmds+=(gcc)
@@ -26,12 +28,13 @@ deps_dpkg+=(make)
 deps_cmds+=(bc)
 deps_dpkg+=(bc)
 deps_cmds+=(go)
-# check go version
-#deps_dpkg+=(golang)
+deps_dpkg+=(golang)
 deps_cmds+=(hexdump)
 deps_dpkg+=(bsdmainutils)
 deps_cmds+=(mkfs.vfat)
 deps_dpkg+=(dosfstools)
+deps_cmds+=(udevadm)
+deps_dpkg+=(udev)
 ### linux kernel
 deps_cmds+=(flex)
 deps_dpkg+=(flex)
@@ -43,39 +46,17 @@ deps_pkgconf+=(libelf)
 deps_dpkg+=(libelf-dev)
 deps_cmds+=(gpg)
 deps_dpkg+=(gpg)
-# XXX: add zlib dpkg
-deps_pkgconf+=(zlib)
-# XXX: add libcrypto dpkg
-deps_pkgconf+=(libcrypto)
-### tboot
-deps_cmds+=(hg)
-deps_dpkg+=(mercurial)
-deps_dpkg+=(trousers)
-### stboot installation
 deps_cmds+=(jq)
 deps_dpkg+=(jq)
 deps_cmds+=(e2mkdir)
 deps_dpkg+=(e2tools)
+deps_cmds+=(mmd)
 deps_cmds+=(mcopy)
 deps_dpkg+=(mtools)
 deps_cmds+=(parted)
 deps_dpkg+=(parted)
 ### syslinux
 deps_dpkg+=(libc6-i386)
-### debos
-deps_dpkg+=(ubuntu-keyring)
-deps_dpkg+=(libglib2.0-dev)
-deps_dpkg+=(libostree-dev)
-deps_pkgconf+=(glib-2.0)
-deps_pkgconf+=(gobject-2.0)
-deps_pkgconf+=(ostree-1)
-check_cmds+=(debootstrap)
-deps_dpkg+=(debootstrap)
-check_cmds+=(systemd-nspawn)
-deps_dpkg+=(systemd-container)
-### qemu run
-deps_cmds+=(qemu-system-x86_64)
-deps_dpkg+=(qemu-kvm)
 
 declare -a check_functions
 
@@ -107,19 +88,12 @@ function check_i386_libc {
     fi
 }
 
-check_functions+=(check_MISC)
-function check_MISC {
-    tmp_out=$(mktemp)
-    trap "rm $tmp_out" EXIT
-    printf "#include <trousers/tss.h>\n" | gcc -x c - -Wl,--defsym=main=0 -o $tmp_out >/dev/null 2>&1 || echo "libtspi-dev/trousers-devel package is required"
-}
-
 check_functions+=(check_GO)
 function check_GO {
    minver=("1" "13")
 
    command -v go >/dev/null 2>&1 || {
-      echo >&2 "GO required";
+      echo >&2 "Go required";
       return 1
    }
 
@@ -131,43 +105,6 @@ function check_GO {
          echo "GO version ${majorver}.${minorver} is not supported. Needs version ${minver[0]}.${minver[1]} or later."
    else
          deps_dpkg+=(golang)
-   fi
-}
-
-check_functions+=(check_swtpm)
-function check_swtpm {
-   minver=("0" "2")
-
-   command -v swtpm >/dev/null 2>&1 || {
-      echo >&2 "swtpm required";
-      return 1
-   }
-
-   ver=$(swtpm --version | cut -d ' ' -f 4 | sed 's/,//')
-   majorver="$(echo $ver | cut -d . -f 1)"
-   minorver="$(echo $ver | cut -d . -f 2)"
-
-   if [ "$majorver" -le "${minver[0]}" ] && [ "$minorver" -lt "${minver[1]}" ]; then
-         echo "swtpm version ${majorver}.${minorver} is not supported. Needs version ${minver[0]}.${minver[1]} or later."
-   fi
-}
-
-ovmf_locs=( "/usr/share/OVMF/OVMF_CODE.fd" \
-            "/usr/share/edk2/ovmf/OVMF_CODE.fd" )
-
-check_functions+=(check_OVMF)
-function check_OVMF {
-
-    found=0
-    for i in "${ovmf_locs[@]}"
-    do
-        if [ -f "$i" ]; then
-          found=1
-        fi
-    done
-   if [ "$found" -eq 0 ]; then
-     >&2 echo "OVMF not found found"
-     return 1
    fi
 }
 
@@ -189,7 +126,6 @@ function install {
             exit 1
         fi
     fi
-    check_GO
     export DEBIAN_FRONTEND="noninteractive"
     $SUDO apt-get update -yq && $SUDO apt-get install -yq "${deps_dpkg[@]}"
 }

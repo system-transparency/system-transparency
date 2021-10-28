@@ -15,3 +15,17 @@ tasks:
       - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
         msg: "OS is not debian based"
 
+  check-cmd:
+    run: always
+    preconditions:
+      - sh: "command -v {{.CMD}} >/dev/null 2>&1"
+        msg: "command not found: \"{{.CMD}}\""
+
+  check-pkg:
+    run: when_changed
+    deps:
+      - task: check-cmd
+        vars: {CMD: "pkg-config"}
+    preconditions:
+      - sh: "[[ -z {{.PKG}} ]] || pkg-config {{.PKG}} >/dev/null 2>&1"
+        msg: "package not found: \"{{.PKG}}\""
