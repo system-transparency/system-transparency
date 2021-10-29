@@ -66,14 +66,14 @@ tasks:
     preconditions:
       - &check-config
         sh: "[ -f {{.CONFIG}} ]"
-        msg: "File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
+        msg: "[ERROR] File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
 
   # dummy target for the case ST_INSTALLATION_OPTION is not defined
   image-:
     preconditions:
       - *check-config
       - sh: "test ! -z $ST_INSTALLATION_OPTION"
-        msg: "ST_INSTALLATION_OPTION not defined"
+        msg: "[ERROR] ST_INSTALLATION_OPTION not defined"
 
   image-mbr:
     desc: Build MBR bootloader installation option
@@ -264,7 +264,7 @@ tasks:
     preconditions:
       - *check-config
       - sh: test -f "{{.ST_SIGNING_ROOT}}"
-        msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
+        msg: "[ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
     vars:
       INITRAMFS_SCRIPT: ./scripts/initramfs.sh
       UROOT_REPO: "cache/go/src/github.com/u-root/u-root"
@@ -295,7 +295,7 @@ tasks:
     preconditions:
       - *check-config
       - sh: "test ! -z $ST_INSTALLATION_OPTION"
-        msg: "ST_INSTALLATION_OPTION not defined"
+        msg: "[ERROR] ST_INSTALLATION_OPTION not defined"
 
   run-mbr:
     deps:
