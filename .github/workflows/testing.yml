@@ -46,22 +46,20 @@ jobs:
           . .envrc
           task image-efi
 
-      # TODO: install swtpm for Qemu runtime test
+      - name: Build example OS Package
+        run: |
+          . .envrc
+          task demo:ospkg
 
-      #- name: Build example OS Package
-      #  run: |
-      #    . .envrc
-      #    task demo:ospkg
+      - name: Rebuild MBR bootloader installation with ospkg
+        run: |
+          . .envrc
+          task image-mbr
 
-      #- name: Rebuild MBR bootloader installation with ospkg
-      #  run: |
-      #    . .envrc
-      #    task image-mbr
-
-      #- name: Rebuild EFI application installation with ospkg
-      #  run: |
-      #    . .envrc
-      #    task image-efi
+      - name: Rebuild EFI application installation with ospkg
+        run: |
+          . .envrc
+          task image-efi
 
       #- name: Boot MBR bootloader installation using QEMU
       #  run: |
@@ -112,12 +110,15 @@ jobs:
           . .envrc
           task image-efi
 
-      # TODO: install swtpm for Qemu runtime test
-
+      ## BUG: debos does not work on Ubuntu 18.04
+      #
       #- name: Build example OS Package
       #  run: |
       #    . .envrc
       #    task demo:ospkg
+
+      #- name: Set Boot Mode to local
+      #  run: sed -i 's/ST_BOOT_MODE=network/ST_BOOT_MODE=local/' st.config
 
       #- name: Rebuild MBR bootloader installation with ospkg
       #  run: |
