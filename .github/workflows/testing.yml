@@ -33,6 +33,9 @@ jobs:
           . .envrc
           task demo:keygen
 
+      - name: Set Boot Mode to network
+        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' st.config
+
       - name: Build MBR bootloader installation without ospkg
         run: |
           . .envrc
@@ -95,6 +98,9 @@ jobs:
         run: |
           . .envrc
           task demo:keygen
+
+      - name: Set Boot Mode to network
+        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' st.config
 
       - name: Build MBR bootloader installation without ospkg
         run: |
