@@ -247,6 +247,8 @@ tasks:
     sources:
       - "{{.SECURITY_CONFIG}}"
       - "{{.ST_SIGNING_ROOT}}"
+      - "{{.UROOT_REPO}}/**"
+      - "{{.STBOOT_REPO}}/**"
     generates:
       - "{{.INITRAMFS_FILE}}"
     cmds:
@@ -260,6 +262,8 @@ tasks:
         msg: "root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
     vars:
       INITRAMFS_SCRIPT: ./scripts/initramfs.sh
+      UROOT_REPO: "cache/go/src/github.com/u-root/u-root"
+      STBOOT_REPO: "cache/go/src/github.com/system-transparency/stboot"
 
   cpu-sshkeys:
     generates:
