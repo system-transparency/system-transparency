@@ -15,8 +15,8 @@ declare -a deps_pkgconf
 
 ### XXX: find a better way to organise dependencies
 ### core
-deps_cmds+=(wget)
-deps_dpkg+=(wget)
+deps_cmds+=(curl)
+deps_dpkg+=(curl)
 deps_cmds+=(xz)
 deps_dpkg+=(xz-utils)
 deps_cmds+=(git)
