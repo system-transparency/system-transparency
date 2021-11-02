@@ -34,15 +34,9 @@ MATCH+=("Ubuntu 18.04 LTS ubuntu ttyS0")
 MATCH+=("Debian GNU/Linux 10 debian ttyS0")
 
 cleanup () {
-	make_pid=$(pgrep -f ${TARGET})
-	qemu_pid=$(pgrep -f ${IMAGE})
-	for pid in "${make_pid} ${qemu_pid}"
-	do
-		if [ ! -z "${qemu_pid}" ];
-		then
-			kill -TERM "${qemu_pid}"
-		fi
-	done
+	qemu_pid=$(pgrep -f "qemu-system-x86_64.*${IMAGE}")
+	kill -TERM "${qemu_pid}"
+	pkill -TERM -P $$
 }
 
 trap cleanup EXIT
