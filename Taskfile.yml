@@ -9,8 +9,8 @@ vars:
   EFI_IMAGE: out/stboot_efi_installation.img
   # Build Artifacts
   DATA_PART: out/artifacts/data_partition.ext4
-  MBR_BOOT_PART: out/artifacts/boot_partition.vfat
-  EFI_BOOT_PART: out/artifacts/boot_partition.vfat
+  MBR_BOOT_PART: out/artifacts/mbr_boot_partition.vfat
+  EFI_BOOT_PART: out/artifacts/efi_boot_partition.vfat
   KERNEL_FILE: out/artifacts/linuxboot.vmlinuz
   INITRAMFS_FILE: out/artifacts/initramfs-linuxboot.cpio.gz
   INITRAMFS_INCLUDE: contrib/initramfs-includes
