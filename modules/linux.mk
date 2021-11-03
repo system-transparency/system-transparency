@@ -74,7 +74,7 @@ $(tarball_dir)/linux-%.tar.xz:
 	mkdir -p $(tarball_dir)
 	@echo "Get $($*_kernel_tarball)"
 	$(eval $(call KERNEL_MIRROR_PATH,$*))
-	wget -qP $(tarball_dir) $($*_kernel_mirror_path)/$($*_kernel_tarball)
+	(cd $(tarball_dir) && curl -LOs $($*_kernel_mirror_path)/$($*_kernel_tarball))
 
 # fetch linux tarball signature
 $(tarball_dir)/linux-%.tar.sign:
@@ -82,7 +82,7 @@ $(tarball_dir)/linux-%.tar.sign:
 	mkdir -p $(tarball_dir)
 	@echo "Get $($*_kernel_sign)"
 	$(eval $(call KERNEL_MIRROR_PATH,$*))
-	wget -qP $(tarball_dir) $($*_kernel_mirror_path)/$($*_kernel_sign)
+	(cd $(tarball_dir) && curl -LOs $($*_kernel_mirror_path)/$($*_kernel_sign))
 
 # TODO: verify sha256sum signature
 # fetch linux tarball sha256
@@ -92,7 +92,7 @@ $(tarball_dir)/linux-%.tar.asc:
 	mkdir -p $(tarball_dir)
 	@echo "Get $($*_kernel_sha)"
 	$(eval $(call KERNEL_MIRROR_PATH,$*))
-	wget -qP $(tarball_dir) -O - $($*_kernel_mirror_path)/sha256sums.asc \
+	(cd $(tarball_dir) && curl -Ls $($*_kernel_mirror_path)/sha256sums.asc) \
 		| grep "$($*_kernel_tarball)" > $@
 
 # check linux tarball sha256sum

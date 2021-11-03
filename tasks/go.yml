@@ -74,7 +74,7 @@ tasks:
       - stmanager
       - sinit-acm-grebber
       - cpu
-      - debos
+      #- debos
 
   update:
     cmds:
@@ -129,6 +129,15 @@ tasks:
     cmds:
       - task: target
         vars: *go-vars
+    deps:
+      # libglib2.0-dev
+      - task: :deps:check-pkg
+        vars: {PKG: "glib-2.0"}
+      - task: :deps:check-pkg
+        vars: {PKG: "gobject-2.0"}
+      # libostree-dev
+      - task: :deps:check-pkg
+        vars: {PKG: "ostree-1"}
     vars:
       NAME: "debos"
       REPO: "github.com/go-debos/debos"

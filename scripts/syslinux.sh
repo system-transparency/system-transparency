@@ -33,5 +33,5 @@ syslinux_src="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/"
 syslinux_tar="syslinux-${VERSION}.tar.xz"
 
 echo "[INFO]: Downloading Syslinux Bootloader v${VERSION}"
-wget -q "${syslinux_src}/${syslinux_tar}" -P "${output}"
+(cd "${output}" && curl -LOs "${syslinux_src}/${syslinux_tar}")
 tar --strip 1 -xf "${output}/${syslinux_tar}" -C "${output}"

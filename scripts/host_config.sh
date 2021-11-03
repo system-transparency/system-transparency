@@ -42,8 +42,8 @@ host_network_interface=${ST_HOST_NETWORK_INTERFACE}
 provisioning_url=("${ST_PROVISIONING_SERVER_URL[@]}")
 url_array=$(printf '%s\n' "${provisioning_url[@]}" | jq -cR . | jq -cs .)
 
-identity=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
-authentication=$(hexdump -n 32 -e '8/4 "%08X"' /dev/urandom)
+identity=$(openssl rand -hex 32)
+authentication=$(openssl rand -hex 32)
 
 cat >"${output}" <<EOL
 {

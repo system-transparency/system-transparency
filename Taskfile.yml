@@ -65,7 +65,7 @@ tasks:
       - "image-{{.ST_INSTALLATION_OPTION}}"
     preconditions:
       - &check-config
-        sh: test -f "{{.CONFIG}}"
+        sh: "[ -f {{.CONFIG}} ]"
         msg: "File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
 
   # dummy target for the case ST_INSTALLATION_OPTION is not defined
@@ -294,6 +294,12 @@ tasks:
 
   run-mbr:
     deps:
+      - task: deps:check-cmd
+        vars: {CMD: "swtpm"}
+      - task: deps:check-cmd
+        vars: {CMD: "swtpm_setup"}
+      - task: deps:check-cmd
+        vars: {CMD: "qemu-system-x86_64"}
       - image-mbr
     cmds:
       - "{{.QEMU_RUN_SCRIPT}} -b mbr -i {{.MBR_IMAGE}}"
@@ -303,6 +309,12 @@ tasks:
 
   run-efi:
     deps:
+      - task: deps:check-cmd
+        vars: {CMD: "swtpm"}
+      - task: deps:check-cmd
+        vars: {CMD: "swtpm_setup"}
+      - task: deps:check-cmd
+        vars: {CMD: "qemu-system-x86_64"}
       - image-efi
     cmds:
       - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.EFI_IMAGE}}"
