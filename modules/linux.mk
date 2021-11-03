@@ -61,6 +61,8 @@ all kernel: $(KERNEL)
 $(KERNEL): % : $(kernel_target)
 	mkdir -p $(dir $@)
 	cp $< $@
+	# Bug: remove to rebuild if initramfs changes
+	rm $<
 
 $(gpg_keyring):
 	mkdir -p -m 700 "$(gpg_dir)"

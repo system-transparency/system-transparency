@@ -33,6 +33,11 @@ jobs:
           . .envrc
           task demo:keygen
 
+      - name: Set Boot Mode to network
+        run: |
+          sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
+          sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
+
       - name: Build MBR bootloader installation without ospkg
         run: |
           . .envrc
@@ -43,32 +48,75 @@ jobs:
           . .envrc
           task image-efi
 
-      # TODO: install swtpm for Qemu runtime test
+      - name: Set Boot Mode to local
+        run: |
+          sed -i '/^ST_BOOT_MODE=network/s/^/#/g' st.config
+          sed -i '/^#ST_BOOT_MODE=local/s/^#//g' st.config
 
-      #- name: Build example OS Package
-      #  run: |
-      #    . .envrc
-      #    task demo:ospkg
+      - name: Install debos and virtualization dependencies
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install debootstrap systemd-container qemu-system-x86 libglib2.0-dev libostree-dev
 
-      #- name: Rebuild MBR bootloader installation with ospkg
-      #  run: |
-      #    . .envrc
-      #    task image-mbr
+      - name: Build example OS Package
+        run: |
+          . .envrc
+          task demo:ospkg
 
-      #- name: Rebuild EFI application installation with ospkg
-      #  run: |
-      #    . .envrc
-      #    task image-efi
+      - name: Rebuild MBR bootloader installation with ospkg
+        run: |
+          . .envrc
+          task image-mbr
 
-      #- name: Boot MBR bootloader installation using QEMU
-      #  run: |
-      #    . .envrc
-      #    .github/workflows/scripts/test-qemu.sh mbr
+      - name: Rebuild EFI application installation with ospkg
+        run: |
+          . .envrc
+          task image-efi
 
-      #- name: Boot EFI application installation using QEMU
-      #  run: |
-      #    . .envrc
-      #    .github/workflows/scripts/test-qemu.sh efi
+      # TODO: install pre-build package
+      - name: Install libtpms
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install curl gawk \
+          automake autoconf libtool gcc build-essential libssl-dev dh-exec \
+          pkg-config dh-autoreconf
+          tmp=$(mktemp -d)
+          cd $tmp
+          curl -LO https://github.com/stefanberger/libtpms/archive/refs/tags/v0.9.0.tar.gz
+          tar -xf v0.9.0.tar.gz
+          cd libtpms-0.9.0
+          dpkg-buildpackage -us -uc -j$(nproc) >/dev/null
+          cd ..
+          sudo dpkg -i *.deb
+          cd
+          rm -r $tmp
+
+      # TODO: install pre-build package
+      - name: Install swtpm
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install dpkg-dev \
+          debhelper libssl-dev libtool net-tools libfuse-dev libglib2.0-dev \
+          libgmp-dev expect libtasn1-dev socat python3-twisted gnutls-dev \
+          gnutls-bin libjson-glib-dev python3-setuptools softhsm2 \
+          libseccomp-dev gawk libtpms-dev trousers
+          tmp=$(mktemp -d)
+          cd $tmp
+          curl -LO https://github.com/stefanberger/swtpm/archive/refs/tags/v0.6.1.tar.gz
+          tar -xf v0.6.1.tar.gz
+          cd swtpm-0.6.1
+          dpkg-buildpackage -us -uc -j$(nproc) >/dev/null
+          cd ..
+          sudo dpkg -i *.deb
+          cd
+          rm -r $tmp
+
+      - name: Boot MBR bootloader installation using QEMU
+        run: |
+          . .envrc
+          .github/workflows/scripts/test-qemu.sh mbr
+
+      - name: Boot EFI application installation using QEMU
+        run: |
+          . .envrc
+          .github/workflows/scripts/test-qemu.sh efi
 
   ubuntu18:
     runs-on: ubuntu-18.04
@@ -96,6 +144,9 @@ jobs:
           . .envrc
           task demo:keygen
 
+      - name: Set Boot Mode to network
+        run: sed -i 's/ST_BOOT_MODE=local/ST_BOOT_MODE=network/' st.config
+
       - name: Build MBR bootloader installation without ospkg
         run: |
           . .envrc
@@ -106,12 +157,15 @@ jobs:
           . .envrc
           task image-efi
 
-      # TODO: install swtpm for Qemu runtime test
-
+      ## BUG: debos does not work on Ubuntu 18.04
+      #
       #- name: Build example OS Package
       #  run: |
       #    . .envrc
       #    task demo:ospkg
+
+      #- name: Set Boot Mode to local
+      #  run: sed -i 's/ST_BOOT_MODE=network/ST_BOOT_MODE=local/' st.config
 
       #- name: Rebuild MBR bootloader installation with ospkg
       #  run: |
