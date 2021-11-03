@@ -53,6 +53,10 @@ jobs:
           sed -i '/^ST_BOOT_MODE=network/s/^/#/g' st.config
           sed -i '/^#ST_BOOT_MODE=local/s/^#//g' st.config
 
+      - name: Install debos and virtualization dependencies
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install debootstrap systemd-container qemu-system-x86 libglib2.0-dev libostree-dev
+
       - name: Build example OS Package
         run: |
           . .envrc

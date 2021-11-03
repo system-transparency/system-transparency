@@ -68,6 +68,8 @@ tasks:
       - :go:debos
       - task: :deps:check-cmd
         vars: {CMD: "debootstrap"}
+      - task: :deps:check-cmd
+        vars: {CMD: "systemd-nspawn"}
     cmds:
       - "mkdir -p out/example-os"
       - "{{.SUDO}} cache/go/bin/debos --artifactdir=out/example-os --template-var=suite:focal contrib/debos/ubuntu.yaml"
