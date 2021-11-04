@@ -34,12 +34,12 @@ mkdir -p "$(dirname "${output}")"
 ########################################
 
 version=1
-network_mode=${ST_NETWORK_MODE}
-host_ip=${ST_HOST_IP}
-host_gateway=${ST_HOST_GATEWAY}
-host_dns=${ST_HOST_DNS}
-host_network_interface=${ST_HOST_NETWORK_INTERFACE}
-provisioning_url=("${ST_PROVISIONING_SERVER_URL[@]}")
+network_mode=${ST_NETWORK_MODE:-}
+host_ip=${ST_HOST_IP:-}
+host_gateway=${ST_HOST_GATEWAY:-}
+host_dns=${ST_HOST_DNS:-}
+host_network_interface=${ST_HOST_NETWORK_INTERFACE:-}
+provisioning_url=("${ST_PROVISIONING_SERVER_URL[@]:-}")
 url_array=$(printf '%s\n' "${provisioning_url[@]}" | jq -cR . | jq -cs .)
 
 identity=$(openssl rand -hex 32)
