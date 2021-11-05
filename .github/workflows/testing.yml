@@ -206,6 +206,54 @@ jobs:
           . .envrc
           .github/workflows/scripts/test-qemu.sh mbr
 
+  run-network-hybrid:
+    runs-on: ubuntu-20.04
+    needs:
+      - build-ubuntu20
+      - build-swtpm
+    steps:
+      - name: Download swtpm debs
+        uses: actions/download-artifact@v2
+        with:
+          name: swtpm-debs
+          path: /tmp/swtpm
+
+      - name: Install qemu and swtpm
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86 /tmp/swtpm/*.deb
+          rm -r /tmp/swtpm
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build default config
+        run: |
+          . .envrc
+          task config
+
+      - name: Set Boot Mode to network
+        run: |
+          sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
+          sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
+
+      - name: Download network installations
+        uses: actions/download-artifact@v2
+        with:
+          name: stboot_network_images
+          path: out
+
+      - name: Download example OS Package
+        uses: actions/download-artifact@v2
+        with:
+          name: ospkg
+          path: out/ospkgs
+
+      - name: Boot MBR bootloader installation using QEMU with EFI firmware
+        run: |
+          . .envrc
+          .github/workflows/scripts/test-qemu.sh mbr efi
+
   run-network-efi:
     runs-on: ubuntu-20.04
     needs:
@@ -290,6 +338,43 @@ jobs:
         run: |
           . .envrc
           .github/workflows/scripts/test-qemu.sh mbr
+
+  run-local-hybrid:
+    runs-on: ubuntu-20.04
+    needs:
+      - build-ubuntu20
+      - build-swtpm
+    steps:
+      - name: Download swtpm debs
+        uses: actions/download-artifact@v2
+        with:
+          name: swtpm-debs
+          path: /tmp/swtpm
+
+      - name: Install qemu and swtpm
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86 /tmp/swtpm/*.deb
+          rm -r /tmp/swtpm
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build default config
+        run: |
+          . .envrc
+          task config
+
+      - name: Download local installations
+        uses: actions/download-artifact@v2
+        with:
+          name: stboot_local_images
+          path: out
+
+      - name: Boot MBR bootloader installation using QEMU with EFI firmware
+        run: |
+          . .envrc
+          .github/workflows/scripts/test-qemu.sh mbr efi
 
   run-local-efi:
     runs-on: ubuntu-20.04
