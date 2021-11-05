@@ -59,8 +59,8 @@ tasks:
     vars:
       EXAMPLE_OSPKG: "os-pkg-example-ubuntu20.zip"
       LABEL: System Transparency Test OS
-      KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
-      INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz
+      KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz
+      INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
       CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
 
   ubuntu:
@@ -71,8 +71,8 @@ tasks:
       - task: :deps:check-cmd
         vars: {CMD: "systemd-nspawn"}
     cmds:
-      - "mkdir -p out/example-os"
-      - "{{.SUDO}} cache/go/bin/debos --artifactdir=out/example-os --template-var=suite:focal contrib/debos/ubuntu.yaml"
+      - "mkdir -p cache/debos"
+      - "{{.SUDO}} cache/go/bin/debos --artifactdir=cache/debos --template-var=suite:focal contrib/debos/ubuntu.yaml"
       - 'if [ ! -z "{{.SUDO}}" ];then {{.SUDO}} chown $(id -u):$(id -g) {{.KERNEL}} {{.INITRD}};fi'
     status:
       - "test -f {{.KERNEL}}"
@@ -83,5 +83,5 @@ tasks:
     vars:
       SUDO:
         sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || echo sudo"
-      KERNEL: out/example-os/ubuntu-focal-amd64.vmlinuz
-      INITRD: out/example-os/ubuntu-focal-amd64.cpio.gz
+      KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz
+      INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
