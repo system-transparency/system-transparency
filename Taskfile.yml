@@ -85,6 +85,7 @@ tasks:
       - "{{.DATA_PART}}"
     generates:
       - "{{.MBR_IMAGE}}"
+    method: timestamp
     cmds:
       - "{{.MBR_IMAGE_SCRIPT}} --boot {{.MBR_BOOT_PART}} --data {{.DATA_PART}} --syslinux-dir {{.SYSLINUX_DIR}} --output {{.MBR_IMAGE}}"
     status:
@@ -105,6 +106,7 @@ tasks:
       - "{{.DATA_PART}}"
     generates:
       - "{{.EFI_IMAGE}}"
+    method: timestamp
     cmds:
       - "{{.EFI_IMAGE_SCRIPT}} --boot {{.EFI_BOOT_PART}} --data {{.DATA_PART}} --output {{.EFI_IMAGE}}"
     status:
@@ -127,6 +129,7 @@ tasks:
       - "{{.SYSLINUX_CONFIG}}"
     generates:
       - "{{.MBR_BOOT_PART}}"
+    method: timestamp
     cmds:
       - "{{.MBR_BOOT_PART_SCRIPT}} --syslinux-dir {{.SYSLINUX_DIR}} --syslinux-config {{.SYSLINUX_CONFIG}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.MBR_BOOT_PART}}"
     status:
@@ -146,6 +149,7 @@ tasks:
       - "{{.HOST_CONFIG}}"
     generates:
       - "{{.EFI_BOOT_PART}}"
+    method: timestamp
     cmds:
       - "{{.EFI_BOOT_PART_SCRIPT}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.EFI_BOOT_PART}}"
     status:
@@ -161,6 +165,7 @@ tasks:
       - "{{.ST_LOCAL_OSPKG_DIR}}/**"
     generates:
       - "{{.DATA_PART}}"
+    method: timestamp
     cmds:
       - "{{.DATA_PART_SCRIPT}} -o {{.DATA_PART}}"
     status:
@@ -233,6 +238,7 @@ tasks:
       - "{{.INITRAMFS_FILE}}"
     generates:
       - "{{.KERNEL_FILE}}"
+    method: timestamp
     cmds:
       - "make -f {{.LINUX_MAKE}} KERNEL={{.KERNEL_FILE}}"
     status:
@@ -256,6 +262,7 @@ tasks:
       - "{{.STBOOT_REPO}}/**"
     generates:
       - "{{.INITRAMFS_FILE}}"
+    method: timestamp
     cmds:
       - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -o {{.INITRAMFS_FILE}}"
     status:
