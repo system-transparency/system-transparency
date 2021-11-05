@@ -78,7 +78,7 @@ tasks:
       - "test -f {{.KERNEL}}"
       - "test -f {{.INITRD}}"
     preconditions:
-      - sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || sudo -v"
+      - sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || command -v sudo 2>/dev/null"
         msg: "[ERROR] root privileges required when kvm virtualization is not available"
     vars:
       SUDO:
