@@ -145,7 +145,7 @@ tasks:
       - kernel
       - host-config
     sources:
-      - "{{.INITRAMFS_FILE}}"
+      - "{{.KERNEL_FILE}}"
       - "{{.HOST_CONFIG}}"
     generates:
       - "{{.EFI_BOOT_PART}}"
@@ -240,7 +240,7 @@ tasks:
       - "{{.KERNEL_FILE}}"
     method: timestamp
     cmds:
-      - "make -f {{.LINUX_MAKE}} KERNEL={{.KERNEL_FILE}}"
+      - "make -f {{.LINUX_MAKE}} KERNEL={{.KERNEL_FILE}} CONFIG={{.CONFIG}}"
     status:
       - "{{.CONFIG_HELPER}} kernel {{.LINUX_MAKE}}"
     preconditions:
