@@ -312,6 +312,21 @@ tasks:
     vars:
       QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
 
+  run-mbr-efi:
+    deps:
+      - task: deps:check-cmd
+        vars: {CMD: "swtpm"}
+      - task: deps:check-cmd
+        vars: {CMD: "swtpm_setup"}
+      - task: deps:check-cmd
+        vars: {CMD: "qemu-system-x86_64"}
+      - image-mbr
+    cmds:
+      - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.MBR_IMAGE}}"
+    interactive: true
+    vars:
+      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
+
   run-efi:
     deps:
       - task: deps:check-cmd
