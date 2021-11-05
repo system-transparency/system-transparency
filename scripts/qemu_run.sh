@@ -5,8 +5,12 @@ set -Eeuo pipefail
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "${dir}/../" && pwd)"
 
+ospkg_dir="$ST_LOCAL_OSPKG_DIR"
+boot_mode="$ST_BOOT_MODE"
+
 image=
 boot=mbr
+python_http_server="python3 -m http.server 8080"
 ovmf=
 ovmf_locs=("/usr/share/OVMF/OVMF_CODE.fd" "/usr/share/edk2/ovmf/OVMF_CODE.fd" "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd")
 declare -a qemu_args
@@ -69,7 +73,32 @@ case "$boot" in
     qemu_args+=("${ovmf}")
     ;;
   *)
-    >&2 echo "unknown boot mode: $boot"
+    >&2 echo "unknown boot type: $boot"
+    exit 1
+esac
+
+cleanup () {
+  http_pid=$(pgrep -f "$python_http_server")
+  [ -z "$http_pid" ] || kill -TERM "${http_pid}"
+  pkill -TERM -P $$
+  [ -z "$tpm" ] || rm -r $tpm
+}
+
+trap cleanup 0
+
+case "$boot_mode" in
+  local)
+    ;;
+  network)
+    if [ -d "$ospkg_dir" ];then
+      (cd $ospkg_dir && $python_http_server) &
+    else
+      echo "OS Package directory $ospkg_dir required"
+      exit 1
+    fi
+      ;;
+    *)
+    >&2 echo "unknown boot mode: $boot_mode"
     exit 1
 esac
 
@@ -133,5 +162,3 @@ qemu-system-x86_64 \
   -device tpm-tis,tpmdev=tpm0 \
   -nographic \
   "${qemu_args[@]}"
-
-rm -r ${tpm:?}/*

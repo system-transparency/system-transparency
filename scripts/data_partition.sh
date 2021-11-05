@@ -34,6 +34,8 @@ mkdir -p "$(dirname "${output}")"
 ospkg_dir="${ST_LOCAL_OSPKG_DIR}"
 mkdir -p "${ospkg_dir}"
 
+boot_mode="${ST_BOOT_MODE}"
+
 ########################################
 
 boot_order_file="${ospkg_dir}/boot_order"
@@ -67,11 +69,13 @@ e2cp "${timestamp_file}" "${output}.tmp":/stboot/etc
 rm -r "${timestamp_dir}"
 trap - EXIT
 
-ls -l "${ospkg_dir}"
-if [ -f "${boot_order_file}" ]; then e2cp "${boot_order_file}" "${output}.tmp":/stboot/os_pkgs/local; fi
-for i in "${ospkg_dir}"/*; do
-  [ -e "$i" ] || continue
-  e2cp "$i" "${output}.tmp":/stboot/os_pkgs/local
-done
+if [ "${boot_mode}" = "local" ];then
+  ls -l "${ospkg_dir}"
+  if [ -f "${boot_order_file}" ]; then e2cp "${boot_order_file}" "${output}.tmp":/stboot/os_pkgs/local; fi
+  for i in "${ospkg_dir}"/*; do
+    [ -e "$i" ] || continue
+    e2cp "$i" "${output}.tmp":/stboot/os_pkgs/local
+  done
+fi
 
 mv ${output}{.tmp,}

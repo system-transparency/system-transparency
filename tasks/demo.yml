@@ -40,7 +40,7 @@ tasks:
       - "{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
     cmds:
       - "mkdir -p {{.ST_LOCAL_OSPKG_DIR}}"
-      - "stmanager create --out '{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' --label='{{.LABEL}}' --kernel={{.KERNEL}} --initramfs={{.INITRD}} --cmd='{{.CMDLINE}}'"
+      - "stmanager create --out '{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' --label='{{.LABEL}}' --kernel={{.KERNEL}} --initramfs={{.INITRD}} --cmd='{{.CMDLINE}}' --url=http://10.0.2.2:8080/os-pkg-example-ubuntu20.zip"
       - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do stmanager sign --key={{.SIGNKEYS_DIR}}/signing-key-$i.key --cert={{.SIGNKEYS_DIR}}/signing-key-$i.cert {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
       - "echo {{.EXAMPLE_OSPKG}} > {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
     status:
