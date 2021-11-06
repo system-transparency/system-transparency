@@ -33,7 +33,8 @@ kernel_dev_2 := gregkh@kernel.org
 KERNEL_MAKE_FLAGS := ARCH=x86_64
 DEFAULT_CMDLINE="console=ttyS0,115200"
 # escape Quotes
-_ST_LINUXBOOT_CMDLINE := $(shell echo '$(ST_LINUXBOOT_CMDLINE)' | sed 's/"/\\\\"/g')
+_ST_LINUXBOOT_CMDLINE := $(shell echo '$(ST_LINUXBOOT_CMDLINE)' | sed 's/"/\\"/g')
+__ST_LINUXBOOT_CMDLINE := $(shell echo '$(_ST_LINUXBOOT_CMDLINE)' | sed 's/"/\\"/g')
 
 define KERNEL_MIRROR_PATH
 ifeq ($(findstring x2.6.,x$1),x2.6.)
@@ -136,14 +137,14 @@ $(kernel_target): $(kernel_dir)/.config  $(initramfs)
 	$(MAKE) -C $(kernel_dir) $(KERNEL_MAKE_FLAGS) bzImage
 	touch $@
 
-$(kernel_dir)/.config: $(DOTCONFIG) $(kernel_dir)/.unpack $(patsubst "%",%,$(ST_LINUXBOOT_KERNEL_CONFIG))
+$(kernel_dir)/.config: $(CONFIG) $(kernel_dir)/.unpack $(patsubst "%",%,$(ST_LINUXBOOT_KERNEL_CONFIG))
 	@echo "Configure kernel $(kernel_version)"
 ifneq ($(strip $(ST_LINUXBOOT_KERNEL_CONFIG)),)
 	@echo "Use configuration file $(patsubst "%",%,$(ST_LINUXBOOT_KERNEL_CONFIG))"
 	cp $(ST_LINUXBOOT_KERNEL_CONFIG) $@.tmp
 ifneq ($(strip $(ST_LINUXBOOT_CMDLINE)),)
-	@echo 'Overriding CONFIG_CMDLINE with ST_LINUXBOOT_CMDLINE'
-	sed -ie 's/CONFIG_CMDLINE=.*/CONFIG_CMDLINE="$(_ST_LINUXBOOT_CMDLINE)"/g' $@.tmp
+	@echo 'Overriding CONFIG_CMDLINE with ST_LINUXBOOT_CMDLINE="$(_ST_LINUXBOOT_CMDLINE)"'
+	sed -ie 's/CONFIG_CMDLINE=.*/CONFIG_CMDLINE="$(__ST_LINUXBOOT_CMDLINE)"/g' $@.tmp
 endif
 	mv $@.tmp $@
 endif
@@ -160,7 +161,7 @@ $(kernel_dir)/.unpack: $(tarball_dir)/$(kernel_tarball).valid
 	fi
 	touch $@
 
-kernel-updatedefconfig: $(kernel_dir)/.config $(DOTCONFIG)
+kernel-updatedefconfig: $(kernel_dir)/.config $(CONFIG)
 	@echo "Update defconfig $(ST_LINUXBOOT_KERNEL_CONFIG)"
 	$(MAKE) -C $(kernel_dir) $(KERNEL_MAKE_FLAGS) savedefconfig
 	sed -ie "s/CONFIG_CMDLINE=.*/CONFIG_CMDLINE=\"$(subst $\",,$(DEFAULT_CMDLINE))\"/" $(kernel_dir)/defconfig
@@ -174,7 +175,7 @@ kernel-updatedefconfig: $(kernel_dir)/.config $(DOTCONFIG)
 	fi
 	rsync -c $(kernel_dir)/defconfig $(ST_LINUXBOOT_KERNEL_CONFIG); \
 
-kernel-%: $(DOTCONFIG) $(kernel_dir)/.config
+kernel-%: $(CONFIG) $(kernel_dir)/.config
 	$(MAKE) -C $(kernel_dir) $(KERNEL_MAKE_FLAGS) $*
 
 .PHONY: all kernel kernel-%
