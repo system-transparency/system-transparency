@@ -271,7 +271,7 @@ tasks:
       - "test -f {{.INITRAMFS_FILE}}"
     preconditions:
       - *check-config
-      - sh: test -f "{{.ST_SIGNING_ROOT}}"
+      - sh: test -e "{{.ST_SIGNING_ROOT}}"
         msg: "[ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
     vars:
       INITRAMFS_SCRIPT: ./scripts/initramfs.sh
