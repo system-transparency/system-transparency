@@ -88,7 +88,7 @@ function check_i386_libc {
 
 check_functions+=(check_GO)
 function check_GO {
-   minver=("1" "13")
+   minver=("1" "16")
 
    command -v go >/dev/null 2>&1 || {
       echo >&2 "Go required";
