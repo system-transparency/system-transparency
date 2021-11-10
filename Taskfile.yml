@@ -252,6 +252,7 @@ tasks:
     deps:
       - go:u-root
       - go:stboot
+      - go:cpu
       - security-config
       # TODO: generate ssh keys only for debug build
       - cpu-sshkeys
