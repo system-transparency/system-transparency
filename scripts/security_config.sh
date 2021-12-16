@@ -44,7 +44,7 @@ use_ospkg_cache=${ST_USE_PKG_CACHE}
 cat >"${output}" <<EOL
 {
   "version":${version},
-  "minimal_signatures_match": ${num_signatures},
+  "min_valid_sigs_required": ${num_signatures},
   "boot_mode": "${boot_mode}",
   "use_ospkg_cache": ${use_ospkg_cache}
 }

@@ -280,7 +280,7 @@ An example security_configuration.json file could look like this:
 ``` json
 {
   "version": 1,
-  "minimal_signatures_match": 2,
+  "min_valid_sigs_required": 2,
   "boot_mode": "local",
   "use_ospkg_cache": false
 }
