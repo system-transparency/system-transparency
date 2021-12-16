@@ -9,29 +9,6 @@ on:
       - main
 
 jobs:
-  build-example-os:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Install Go and debos dependencies
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install golang \
-          debootstrap systemd-container libglib2.0-dev libostree-dev
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Build example OS
-        run: |
-          . .envrc
-          task demo:ubuntu
-
-      - name: Upload example OS
-        uses: actions/upload-artifact@v2
-        with:
-          name: example-os
-          path: cache/debos
-
   # TODO: Use pre-build packages
   build-swtpm:
     runs-on: ubuntu-20.04
@@ -73,17 +50,16 @@ jobs:
 
   build-ubuntu20:
     runs-on: ubuntu-20.04
-    needs: build-example-os
     steps:
       - name: Install Go 1.17
         uses: actions/setup-go@v1
         with:
           go-version: 1.17
-      - name: Install debos dependencies
+      - name: Install dependencies
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install \
-          debootstrap systemd-container libglib2.0-dev libostree-dev
+          wget debootstrap systemd-container libglib2.0-dev libostree-dev
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -104,10 +80,11 @@ jobs:
           task demo:keygen
 
       - name: Download example OS
-        uses: actions/download-artifact@v2
-        with:
-          name: example-os
-          path: cache/debos
+        run: |
+          mkdir -p cache/debos
+          cd cache/debos
+          wget https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.cpio.gz
+          wget https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.vmlinuz
 
       - name: Generate and Sign OS Package
         run: |
@@ -424,10 +401,10 @@ jobs:
   build-ubuntu18:
     runs-on: ubuntu-18.04
     steps:
-      - name: Install Go 1.16
+      - name: Install Go 1.17
         uses: actions/setup-go@v1
         with:
-          go-version: 1.16
+          go-version: 1.17
 
       - name: Checkout
         uses: actions/checkout@v2
