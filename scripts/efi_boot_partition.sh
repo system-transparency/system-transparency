@@ -80,14 +80,21 @@ mkdir -p "$(dirname "${output}")"
 
 ########################################
 
+tot_size=$(du -cb \
+              ${linuxboot_kernel} \
+              ${host_config} | tail -1 | awk '{print $1}')
+
 echo "Creating VFAT filesystems for STBOOT partition:"
-size_vfat=$((12*(1<<20)))
+size_vfat=$((tot_size + (1<<20)))
 
 echo "Using kernel: ${linuxboot_kernel}"
 
 # mkoutput.vfat requires size as an (undefined) block-count; seem to be units of 1k
 if [ -f "${output}.tmp" ]; then rm "${output}.tmp"; fi
-mkfs.vfat -C -n "STBOOT" "${output}.tmp" $((size_vfat >> 10))
+
+vfat_blocks=$((size_vfat >> 10))
+vfat_blocks=$(((($vfat_blocks+32)&~31)))
+mkfs.vfat -C -n "STBOOT" "${output}.tmp" $vfat_blocks
 
 echo "Installing STBOOT.EFI"
 mmd -i "${output}.tmp" ::EFI
