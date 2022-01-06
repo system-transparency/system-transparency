@@ -188,7 +188,7 @@ jobs:
       - name: Boot MBR bootloader installation using QEMU
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh mbr
+          .github/scripts/test-qemu.sh mbr
 
   run-network-hybrid:
     runs-on: ubuntu-20.04
@@ -236,7 +236,7 @@ jobs:
       - name: Boot MBR bootloader installation using QEMU with EFI firmware
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh mbr efi
+          .github/scripts/test-qemu.sh mbr efi
 
   run-network-efi:
     runs-on: ubuntu-20.04
@@ -284,7 +284,7 @@ jobs:
       - name: Boot EFI application installation using QEMU
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh efi
+          .github/scripts/test-qemu.sh efi
 
   run-local-mbr:
     runs-on: ubuntu-20.04
@@ -321,7 +321,7 @@ jobs:
       - name: Boot MBR bootloader installation using QEMU
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh mbr
+          .github/scripts/test-qemu.sh mbr
 
   run-local-hybrid:
     runs-on: ubuntu-20.04
@@ -358,7 +358,7 @@ jobs:
       - name: Boot MBR bootloader installation using QEMU with EFI firmware
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh mbr efi
+          .github/scripts/test-qemu.sh mbr efi
 
   run-local-efi:
     runs-on: ubuntu-20.04
@@ -395,7 +395,7 @@ jobs:
       - name: Boot EFI application installation using QEMU
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh efi
+          .github/scripts/test-qemu.sh efi
 
 
   build-ubuntu18:
