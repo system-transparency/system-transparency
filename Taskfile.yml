@@ -5,21 +5,15 @@ vars:
   CONFIG: st.config
   DEFAULT_CONFIG: contrib/default.config
   # Build Targets
-  MBR_IMAGE: out/stboot_mbr_installation.img
-  EFI_IMAGE: out/stboot_efi_installation.img
+  IMAGE: out/stboot.img
   # Build Artifacts
   DATA_PART: out/artifacts/data_partition.ext4
-  MBR_BOOT_PART: out/artifacts/mbr_boot_partition.vfat
-  EFI_BOOT_PART: out/artifacts/efi_boot_partition.vfat
+  BOOT_PART: out/artifacts/boot_partition.vfat
   KERNEL_FILE: out/artifacts/linuxboot.vmlinuz
   INITRAMFS_FILE: out/artifacts/initramfs-linuxboot.cpio.gz
   INITRAMFS_INCLUDE: contrib/initramfs-includes
   HOST_CONFIG: out/artifacts/host_configuration.json
   SECURITY_CONFIG: out/artifacts/security_configuration.json
-  SYSLINUX_CONFIG: out/artifacts/syslinux.cfg
-  SYSLINUX_BIN: cache/syslinux/bios/mtools/syslinux
-  # Target Directories
-  SYSLINUX_DIR: cache/syslinux/
   SIGNKEYS_DIR:
     sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || echo invalid"
   # task helper script
@@ -58,90 +52,30 @@ tasks:
     deps:
       - go:update
 
-######## stboot-installation ########
-
   image:
-    desc: Build target installation option
+    desc: Build stboot disk image
     deps:
-      - "image-{{.ST_INSTALLATION_OPTION}}"
+      - boot-part
+      - data-part
+    sources:
+      - "{{.BOOT_PART}}"
+      - "{{.DATA_PART}}"
+    generates:
+      - "{{.IMAGE}}"
+    method: timestamp
+    cmds:
+      - "{{.IMAGE_SCRIPT}} --boot {{.BOOT_PART}} --data {{.DATA_PART}} --output {{.IMAGE}}"
+    status:
+      - "{{.CONFIG_HELPER}} image {{.IMAGE_SCRIPT}}"
+      - "test -f {{.IMAGE}}"
     preconditions:
       - &check-config
         sh: "[ -f {{.CONFIG}} ]"
         msg: "[ERROR] File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
-
-  # dummy target for the case ST_INSTALLATION_OPTION is not defined
-  image-:
-    preconditions:
-      - *check-config
-      - sh: "test ! -z $ST_INSTALLATION_OPTION"
-        msg: "[ERROR] ST_INSTALLATION_OPTION not defined"
-
-  image-mbr:
-    desc: Build MBR bootloader installation option
-    deps:
-      - mbr-boot-part
-      - data-part
-    sources:
-      - "{{.MBR_BOOT_PART}}"
-      - "{{.DATA_PART}}"
-    generates:
-      - "{{.MBR_IMAGE}}"
-    method: timestamp
-    cmds:
-      - "{{.MBR_IMAGE_SCRIPT}} --boot {{.MBR_BOOT_PART}} --data {{.DATA_PART}} --syslinux-dir {{.SYSLINUX_DIR}} --output {{.MBR_IMAGE}}"
-    status:
-      - "{{.CONFIG_HELPER}} image-mbr {{.MBR_IMAGE_SCRIPT}}"
-      - "test -f {{.MBR_IMAGE}}"
-    preconditions:
-      - *check-config
     vars:
-      MBR_IMAGE_SCRIPT: ./scripts/mbr_image.sh
+      IMAGE_SCRIPT: ./scripts/image.sh
 
-  image-efi:
-    desc: Build EFI application installation option
-    deps:
-      - efi-boot-part
-      - data-part
-    sources:
-      - "{{.EFI_BOOT_PART}}"
-      - "{{.DATA_PART}}"
-    generates:
-      - "{{.EFI_IMAGE}}"
-    method: timestamp
-    cmds:
-      - "{{.EFI_IMAGE_SCRIPT}} --boot {{.EFI_BOOT_PART}} --data {{.DATA_PART}} --output {{.EFI_IMAGE}}"
-    status:
-      - "{{.CONFIG_HELPER}} image-efi {{.EFI_IMAGE_SCRIPT}}"
-      - "test -f {{.EFI_IMAGE}}"
-    preconditions:
-      - *check-config
-    vars:
-      EFI_IMAGE_SCRIPT: ./scripts/efi_image.sh
-
-  mbr-boot-part:
-    deps:
-      - kernel
-      - host-config
-      - syslinux
-      - syslinux-config
-    sources:
-      - "{{.KERNEL_FILE}}"
-      - "{{.HOST_CONFIG}}"
-      - "{{.SYSLINUX_CONFIG}}"
-    generates:
-      - "{{.MBR_BOOT_PART}}"
-    method: timestamp
-    cmds:
-      - "{{.MBR_BOOT_PART_SCRIPT}} --syslinux-dir {{.SYSLINUX_DIR}} --syslinux-config {{.SYSLINUX_CONFIG}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.MBR_BOOT_PART}}"
-    status:
-      - "{{.CONFIG_HELPER}} mbr-boot-part {{.MBR_BOOT_PART_SCRIPT}}"
-      - "test -f {{.MBR_BOOT_PART}}"
-    preconditions:
-      - *check-config
-    vars:
-      MBR_BOOT_PART_SCRIPT: ./scripts/mbr_boot_partition.sh
-
-  efi-boot-part:
+  boot-part:
     deps:
       - kernel
       - host-config
@@ -149,17 +83,17 @@ tasks:
       - "{{.KERNEL_FILE}}"
       - "{{.HOST_CONFIG}}"
     generates:
-      - "{{.EFI_BOOT_PART}}"
+      - "{{.BOOT_PART}}"
     method: timestamp
     cmds:
-      - "{{.EFI_BOOT_PART_SCRIPT}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.EFI_BOOT_PART}}"
+      - "{{.BOOT_PART_SCRIPT}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.BOOT_PART}}"
     status:
-      - "{{.CONFIG_HELPER}} efi-boot-part {{.EFI_BOOT_PART_SCRIPT}}"
-      - "test -f {{.EFI_BOOT_PART}}"
+      - "{{.CONFIG_HELPER}} boot-part {{.BOOT_PART_SCRIPT}}"
+      - "test -f {{.BOOT_PART}}"
     preconditions:
       - *check-config
     vars:
-      EFI_BOOT_PART_SCRIPT: ./scripts/efi_boot_partition.sh
+      BOOT_PART_SCRIPT: ./scripts/boot_partition.sh
 
   data-part:
     sources:
@@ -194,7 +128,6 @@ tasks:
     vars:
       HOST_CONFIG_SCRIPT: ./scripts/host_config.sh
 
-
   security-config:
     generates:
       - "{{.SECURITY_CONFIG}}"
@@ -207,29 +140,6 @@ tasks:
       - *check-config
     vars:
       SECURITY_CONFIG_SCRIPT: ./scripts/security_config.sh
-
-  syslinux:
-    generates:
-      - "{{.SYSLINUX_BIN}}"
-    cmds:
-      - "{{.SYSLINUX_BIN_SCRIPT}} -o {{.SYSLINUX_DIR}}"
-    status:
-      - "test -x {{.SYSLINUX_BIN}}"
-    vars:
-      SYSLINUX_BIN_SCRIPT: ./scripts/syslinux.sh
-
-  syslinux-config:
-    generates:
-      - "{{.SYSLINUX_CONFIG}}"
-    cmds:
-      - "{{.SYSLINUX_CONFIG_SCRIPT}} --kernel {{.KERNEL_FILE}} -o {{.SYSLINUX_CONFIG}}"
-    status:
-      - "test -f {{.SYSLINUX_CONFIG}}"
-    vars:
-      SYSLINUX_CONFIG_SCRIPT: ./scripts/syslinux_config.sh
-
-
-######## LinuxBoot kernel ########
 
   kernel:
     desc: Build LinuxBoot kernel
@@ -310,20 +220,6 @@ tasks:
 ######## QEMU run ########
 
   run:
-    desc: Run target installation with qemu
-    deps:
-      - "run-{{.ST_INSTALLATION_OPTION}}"
-    preconditions:
-      - *check-config
-
-  # dummy target for the case ST_INSTALLATION_OPTION is not defined
-  run-:
-    preconditions:
-      - *check-config
-      - sh: "test ! -z $ST_INSTALLATION_OPTION"
-        msg: "[ERROR] ST_INSTALLATION_OPTION not defined"
-
-  run-mbr:
     deps:
       - task: deps:check-cmd
         vars: {CMD: "swtpm"}
@@ -331,39 +227,9 @@ tasks:
         vars: {CMD: "swtpm_setup"}
       - task: deps:check-cmd
         vars: {CMD: "qemu-system-x86_64"}
-      - image-mbr
+      - image
     cmds:
-      - "{{.QEMU_RUN_SCRIPT}} -b mbr -i {{.MBR_IMAGE}}"
-    interactive: true
-    vars:
-      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
-
-  run-mbr-efi:
-    deps:
-      - task: deps:check-cmd
-        vars: {CMD: "swtpm"}
-      - task: deps:check-cmd
-        vars: {CMD: "swtpm_setup"}
-      - task: deps:check-cmd
-        vars: {CMD: "qemu-system-x86_64"}
-      - image-mbr
-    cmds:
-      - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.MBR_IMAGE}}"
-    interactive: true
-    vars:
-      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
-
-  run-efi:
-    deps:
-      - task: deps:check-cmd
-        vars: {CMD: "swtpm"}
-      - task: deps:check-cmd
-        vars: {CMD: "swtpm_setup"}
-      - task: deps:check-cmd
-        vars: {CMD: "qemu-system-x86_64"}
-      - image-efi
-    cmds:
-      - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.EFI_IMAGE}}"
+      - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.IMAGE}}"
     interactive: true
     vars:
       QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
