@@ -60,11 +60,6 @@ jobs:
           path: out/ospkgs/*
           retention-days: 1
 
-      - name: Set boot mode to network
-        run: |
-          sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
-          sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
-
       - name: Build network mode disk image
         run: |
           . .envrc
@@ -120,7 +115,7 @@ jobs:
           . .envrc
           task config
 
-      - name: Set Boot Mode to network
+      - name: Set boot mode to network
         run: |
           sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
           sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
@@ -168,6 +163,11 @@ jobs:
           . .envrc
           task config
 
+      - name: Set boot mode to local
+        run: |
+          sed -i '/^ST_BOOT_MODE=network/s/^/#/g' st.config
+          sed -i '/^#ST_BOOT_MODE=local/s/^#//g' st.config
+
       - name: Download local installations
         uses: actions/download-artifact@v2
         with:
@@ -205,11 +205,6 @@ jobs:
         run: |
           . .envrc
           task demo:keygen
-
-      - name: Set boot mode to network
-        run: |
-          sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
-          sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
 
       - name: Build stboot image without ospkg
         run: |
