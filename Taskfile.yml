@@ -5,6 +5,7 @@ vars:
   CONFIG: st.config
   DEFAULT_CONFIG: contrib/default.config
   # Build Targets
+  ISO: out/stboot.iso
   IMAGE: out/stboot.img
   # Build Artifacts
   DATA_PART: out/artifacts/data_partition.ext4
@@ -51,6 +52,21 @@ tasks:
     desc: Build toolchain
     deps:
       - go:update
+
+  iso:
+    desc: Build stboot iso image
+    deps:
+      - boot-part
+    sources:
+      - "{{.BOOT_PART}}"
+    generates:
+      - "{{.ISO}}"
+    cmds:
+      - "rm -rf cache/iso"
+      - "mkdir -p cache/iso"
+      - "cp {{.BOOT_PART}} cache/iso/boot_partition.vfat"
+      - "xorriso -as mkisofs -R -f -e boot_partition.vfat -no-emul-boot -o {{.ISO}} cache/iso"
+    run: once
 
   image:
     desc: Build stboot disk image
@@ -233,6 +249,23 @@ tasks:
     interactive: true
     vars:
       QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
+
+  run-iso:
+    deps:
+      - task: deps:check-cmd
+        vars: {CMD: "swtpm"}
+      - task: deps:check-cmd
+        vars: {CMD: "swtpm_setup"}
+      - task: deps:check-cmd
+        vars: {CMD: "qemu-system-x86_64"}
+      - iso
+    cmds:
+      - "{{.QEMU_RUN_SCRIPT}} -i {{.ISO}}"
+    interactive: true
+    vars:
+      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
+
+######## cleanup ########
 
   clean:
     desc: Remove all build artifacts

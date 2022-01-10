@@ -53,8 +53,8 @@ deps_cmds+=(mcopy)
 deps_dpkg+=(mtools)
 deps_cmds+=(parted)
 deps_dpkg+=(parted)
-### syslinux
-deps_dpkg+=(libc6-i386)
+### iso
+deps_dpkg+=(xorriso)
 
 declare -a check_functions
 
