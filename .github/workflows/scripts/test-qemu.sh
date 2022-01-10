@@ -4,24 +4,8 @@ set -Eeuo pipefail
 
 TIMEOUT=300
 LOG=
-TARGET=${1:-mbr}
-IMAGE=
-case $TARGET in
-	"mbr")
-		LOG=/tmp/mbr-qemu.log
-		IMAGE=stboot_mbr_installation.img
-		;;
-	"efi")
-		LOG=/tmp/efi-qemu.log
-		IMAGE=stboot_efi_installation.img
-		;;
-	*)
-		echo "unknown installation: $TARGET."
-		exit 1
-		;;
-esac
-
-BOOTLOADER=${2:-$TARGET}
+LOG=/tmp/qemu.log
+IMAGE=stboot.img
 
 declare -a MATCH
 #Ubuntu Focal
@@ -42,7 +26,7 @@ trap cleanup 0
 # run qemu
 source st.config
 ST_LOCAL_OSPKG_DIR=$ST_LOCAL_OSPKG_DIR ST_BOOT_MODE=$ST_BOOT_MODE ./scripts/qemu_run.sh \
-    -b "${BOOTLOADER}" -i "out/${IMAGE}" </dev/null | tee /dev/stderr > "$LOG" &
+	-i "out/${IMAGE}" </dev/null | tee /dev/stderr > "$LOG" &
 
 i=0
 while [ "$i" -lt "$TIMEOUT" ]

@@ -48,7 +48,7 @@ jobs:
           wget https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.cpio.gz
           wget https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.vmlinuz
 
-      - name: Generate and Sign OS Package
+      - name: Generate and sign OS Package
         run: |
           . .envrc
           task demo:ospkg
@@ -60,51 +60,41 @@ jobs:
           path: out/ospkgs/*
           retention-days: 1
 
-      - name: Set Boot Mode to network
+      - name: Set boot mode to network
         run: |
           sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
           sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
 
-      - name: Build network MBR bootloader installation
+      - name: Build network mode disk image
         run: |
           . .envrc
-          task image-mbr
-
-      - name: Build network EFI application installation
-        run: |
-          . .envrc
-          task image-efi
+          task image
 
       - name: Upload network installations
         uses: actions/upload-artifact@v2
         with:
-          name: stboot_network_images
-          path: out/stboot_*_installation.img
+          name: stboot_network_image
+          path: out/stboot.img
           retention-days: 1
 
-      - name: Set Boot Mode to local
+      - name: Set boot mode to local
         run: |
           sed -i '/^ST_BOOT_MODE=network/s/^/#/g' st.config
           sed -i '/^#ST_BOOT_MODE=local/s/^#//g' st.config
 
-      - name: Build local MBR bootloader installation
+      - name: Build local mode disk image
         run: |
           . .envrc
-          task image-mbr
+          task image
 
-      - name: Build local EFI application installation
-        run: |
-          . .envrc
-          task image-efi
-
-      - name: Upload local installations
+      - name: Upload local installation
         uses: actions/upload-artifact@v2
         with:
-          name: stboot_local_images
-          path: out/stboot_*_installation.img
+          name: stboot_local_image
+          path: out/stboot.img
           retention-days: 1
 
-  run-network-mbr:
+  run-network:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
@@ -138,7 +128,7 @@ jobs:
       - name: Download network installations
         uses: actions/download-artifact@v2
         with:
-          name: stboot_network_images
+          name: stboot_network_image
           path: out
 
       - name: Download example OS Package
@@ -147,108 +137,12 @@ jobs:
           name: ospkg
           path: out/ospkgs
 
-      - name: Boot MBR bootloader installation using QEMU
-        run: |
-          . .envrc
-          .github/workflows/scripts/test-qemu.sh mbr
-
-  run-network-hybrid:
-    runs-on: ubuntu-20.04
-    needs:
-      - build-ubuntu20
-    steps:
-      - name: Install QEMU
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
-
-      - name: Install swtpm v0.7.0
-        run: |
-          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Build default config
-        run: |
-          . .envrc
-          task config
-
-      - name: Set Boot Mode to network
-        run: |
-          sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
-          sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
-
-      - name: Download network installations
-        uses: actions/download-artifact@v2
-        with:
-          name: stboot_network_images
-          path: out
-
-      - name: Download example OS Package
-        uses: actions/download-artifact@v2
-        with:
-          name: ospkg
-          path: out/ospkgs
-
-      - name: Boot MBR bootloader installation using QEMU with EFI firmware
-        run: |
-          . .envrc
-          .github/workflows/scripts/test-qemu.sh mbr efi
-
-  run-network-efi:
-    runs-on: ubuntu-20.04
-    needs:
-      - build-ubuntu20
-    steps:
-      - name: Install QEMU
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
-
-      - name: Install swtpm v0.7.0
-        run: |
-          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Build default config
-        run: |
-          . .envrc
-          task config
-
-      - name: Set Boot Mode to network
-        run: |
-          sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
-          sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
-
-      - name: Download network installations
-        uses: actions/download-artifact@v2
-        with:
-          name: stboot_network_images
-          path: out
-
-      - name: Download example OS Package
-        uses: actions/download-artifact@v2
-        with:
-          name: ospkg
-          path: out/ospkgs
-
-      - name: Boot EFI application installation using QEMU
+      - name: Boot stboot image using QEMU
         run: |
           . .envrc
           .github/workflows/scripts/test-qemu.sh efi
 
-  run-local-mbr:
+  run-local:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
@@ -277,84 +171,10 @@ jobs:
       - name: Download local installations
         uses: actions/download-artifact@v2
         with:
-          name: stboot_local_images
+          name: stboot_local_image
           path: out
 
-      - name: Boot MBR bootloader installation using QEMU
-        run: |
-          . .envrc
-          .github/workflows/scripts/test-qemu.sh mbr
-
-  run-local-hybrid:
-    runs-on: ubuntu-20.04
-    needs:
-      - build-ubuntu20
-    steps:
-      - name: Install QEMU
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
-
-      - name: Install swtpm v0.7.0
-        run: |
-          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Build default config
-        run: |
-          . .envrc
-          task config
-
-      - name: Download local installations
-        uses: actions/download-artifact@v2
-        with:
-          name: stboot_local_images
-          path: out
-
-      - name: Boot MBR bootloader installation using QEMU with EFI firmware
-        run: |
-          . .envrc
-          .github/workflows/scripts/test-qemu.sh mbr efi
-
-  run-local-efi:
-    runs-on: ubuntu-20.04
-    needs:
-      - build-ubuntu20
-    steps:
-      - name: Install QEMU
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
-
-      - name: Install swtpm v0.7.0
-        run: |
-          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Build default config
-        run: |
-          . .envrc
-          task config
-
-      - name: Download local installations
-        uses: actions/download-artifact@v2
-        with:
-          name: stboot_local_images
-          path: out
-
-      - name: Boot EFI application installation using QEMU
+      - name: Boot stboot image using QEMU
         run: |
           . .envrc
           .github/workflows/scripts/test-qemu.sh efi
@@ -386,17 +206,12 @@ jobs:
           . .envrc
           task demo:keygen
 
-      - name: Set Boot Mode to network
+      - name: Set boot mode to network
         run: |
           sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
           sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
 
-      - name: Build MBR bootloader installation without ospkg
+      - name: Build stboot image without ospkg
         run: |
           . .envrc
-          task image-mbr
-
-      - name: Build EFI application installation without ospkg
-        run: |
-          . .envrc
-          task image-efi
+          task image
