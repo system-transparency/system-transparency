@@ -9,44 +9,6 @@ on:
       - main
 
 jobs:
-  # TODO: Use pre-build packages
-  build-swtpm:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Install build dependencies
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install curl gawk \
-          automake autoconf libtool gcc build-essential libssl-dev dh-exec \
-          pkg-config dh-autoreconf dpkg-dev debhelper net-tools libfuse-dev \
-          libglib2.0-dev libgmp-dev expect libtasn1-dev socat python3-twisted \
-          gnutls-dev gnutls-bin libjson-glib-dev python3-setuptools softhsm2 \
-          libseccomp-dev gawk trousers
-
-      - name: Build and install libtpms
-        run: |
-          curl -LO https://github.com/stefanberger/libtpms/archive/refs/tags/v0.9.0.tar.gz
-          tar -xf v0.9.0.tar.gz
-          cd libtpms-0.9.0
-          dpkg-buildpackage -us -uc -j$(nproc) >/dev/null
-          cd ..
-          sudo dpkg -i *.deb
-
-      - name: Build swtpm
-        run: |
-          curl -LO https://github.com/stefanberger/swtpm/archive/refs/tags/v0.6.1.tar.gz
-          tar -xf v0.6.1.tar.gz
-          cd swtpm-0.6.1
-          dpkg-buildpackage -us -uc -j$(nproc) >/dev/null
-          cd ..
-          sudo dpkg -i *.deb
-
-      - name: Upload swtpm debs
-        uses: actions/upload-artifact@v2
-        with:
-          name: swtpm-debs
-          path: '*.deb'
-          retention-days: 1
 
   build-ubuntu20:
     runs-on: ubuntu-20.04
@@ -146,19 +108,19 @@ jobs:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
-      - build-swtpm
     steps:
-      - name: Download swtpm debs
-        uses: actions/download-artifact@v2
-        with:
-          name: swtpm-debs
-          path: /tmp/swtpm
-
-      - name: Install qemu and swtpm
+      - name: Install QEMU
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86 /tmp/swtpm/*.deb
-          rm -r /tmp/swtpm
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
+
+      - name: Install swtpm v0.7.0
+        run: |
+          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -194,19 +156,19 @@ jobs:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
-      - build-swtpm
     steps:
-      - name: Download swtpm debs
-        uses: actions/download-artifact@v2
-        with:
-          name: swtpm-debs
-          path: /tmp/swtpm
-
-      - name: Install qemu and swtpm
+      - name: Install QEMU
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86 /tmp/swtpm/*.deb
-          rm -r /tmp/swtpm
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
+
+      - name: Install swtpm v0.7.0
+        run: |
+          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -242,19 +204,19 @@ jobs:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
-      - build-swtpm
     steps:
-      - name: Download swtpm debs
-        uses: actions/download-artifact@v2
-        with:
-          name: swtpm-debs
-          path: /tmp/swtpm
-
-      - name: Install qemu and swtpm
+      - name: Install QEMU
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86 /tmp/swtpm/*.deb
-          rm -r /tmp/swtpm
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
+
+      - name: Install swtpm v0.7.0
+        run: |
+          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -290,19 +252,19 @@ jobs:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
-      - build-swtpm
     steps:
-      - name: Download swtpm debs
-        uses: actions/download-artifact@v2
-        with:
-          name: swtpm-debs
-          path: /tmp/swtpm
-
-      - name: Install qemu and swtpm
+      - name: Install QEMU
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86 /tmp/swtpm/*.deb
-          rm -r /tmp/swtpm
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
+
+      - name: Install swtpm v0.7.0
+        run: |
+          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -327,19 +289,19 @@ jobs:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
-      - build-swtpm
     steps:
-      - name: Download swtpm debs
-        uses: actions/download-artifact@v2
-        with:
-          name: swtpm-debs
-          path: /tmp/swtpm
-
-      - name: Install qemu and swtpm
+      - name: Install QEMU
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86 /tmp/swtpm/*.deb
-          rm -r /tmp/swtpm
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
+
+      - name: Install swtpm v0.7.0
+        run: |
+          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -364,19 +326,19 @@ jobs:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
-      - build-swtpm
     steps:
-      - name: Download swtpm debs
-        uses: actions/download-artifact@v2
-        with:
-          name: swtpm-debs
-          path: /tmp/swtpm
-
-      - name: Install qemu and swtpm
+      - name: Install QEMU
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86 /tmp/swtpm/*.deb
-          rm -r /tmp/swtpm
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
+
+      - name: Install swtpm v0.7.0
+        run: |
+          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
+          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
 
       - name: Checkout
         uses: actions/checkout@v2
