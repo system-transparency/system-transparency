@@ -229,7 +229,7 @@ tasks:
         vars: {CMD: "qemu-system-x86_64"}
       - image
     cmds:
-      - "{{.QEMU_RUN_SCRIPT}} -b efi -i {{.IMAGE}}"
+      - "{{.QEMU_RUN_SCRIPT}} -i {{.IMAGE}}"
     interactive: true
     vars:
       QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh

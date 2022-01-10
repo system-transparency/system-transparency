@@ -42,16 +42,6 @@ while [ $# -gt 0 ]; do
         exit 1
       fi
       ;;
-    --bootloader|-b)
-      if test $# -gt 0; then
-        j="$1"; shift 1
-        boot="$j"
-      else
-        >&2 echo "no boot mode specified"
-        >&2 echo "(--bootloader <mbr/efi>)"
-        exit 1
-      fi
-      ;;
     *)
       break
       ;;
@@ -64,18 +54,8 @@ then
   exit 1
 fi
 
-case "$boot" in
-  mbr)
-    ;;
-  efi)
-    locate_ovmf
-    qemu_args+=("-bios")
-    qemu_args+=("${ovmf}")
-    ;;
-  *)
-    >&2 echo "unknown boot type: $boot"
-    exit 1
-esac
+locate_ovmf
+qemu_args+=("-bios" "${ovmf}")
 
 cleanup () {
   http_pid=$(pgrep -f "$python_http_server")
