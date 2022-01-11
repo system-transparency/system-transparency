@@ -42,6 +42,7 @@ tasks:
     deps:
       - disk
       - iso
+    run: once
 
   config:
     desc: Generate default configuration
@@ -94,6 +95,7 @@ tasks:
       - &check-config
         sh: "[ -f {{.CONFIG}} ]"
         msg: "[ERROR] File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
+    run: once
     vars:
       IMAGE_SCRIPT: ./scripts/image.sh
 
@@ -114,6 +116,7 @@ tasks:
       - "test -f {{.BOOT_PART}}"
     preconditions:
       - *check-config
+    run: once
     vars:
       BOOT_PART_SCRIPT: ./scripts/boot_partition.sh
 
@@ -134,6 +137,7 @@ tasks:
         Please provide an OS Package or run \"task demo:ospkg\" to generate an example OS Package"
       - sh: '[ -z "$ST_BOOT_MODE" ] || [ "$ST_BOOT_MODE" != "local" ] || [ -f "{{.ST_LOCAL_OSPKG_DIR}}/boot_order" ]'
         msg: "[ERROR] Local Boot requires {{.ST_LOCAL_OSPKG_DIR}}/boot_order file"
+    run: once
     vars:
       DATA_PART_SCRIPT: ./scripts/data_partition.sh
 
@@ -147,6 +151,7 @@ tasks:
       - "test -f {{.HOST_CONFIG}}"
     preconditions:
       - *check-config
+    run: once
     vars:
       HOST_CONFIG_SCRIPT: ./scripts/host_config.sh
 
@@ -160,6 +165,7 @@ tasks:
       - "test -f {{.SECURITY_CONFIG}}"
     preconditions:
       - *check-config
+    run: once
     vars:
       SECURITY_CONFIG_SCRIPT: ./scripts/security_config.sh
 
@@ -178,6 +184,7 @@ tasks:
       - "{{.CONFIG_HELPER}} kernel {{.LINUX_MAKE}}"
     preconditions:
       - *check-config
+    run: once
     vars:
       LINUX_MAKE: modules/linux.mk
 
@@ -223,6 +230,7 @@ tasks:
       - *check-config
       - sh: test -e "{{.ST_SIGNING_ROOT}}"
         msg: "[ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
+    run: once
     vars:
       INITRAMFS_SCRIPT: ./scripts/initramfs.sh
       UROOT_REPO: "cache/go/src/github.com/u-root/u-root"
@@ -235,6 +243,7 @@ tasks:
       - "{{.KEYGEN_CPU_SCRIPT}} -o {{.CPUKEYS_DIR}}"
     status:
       - "{{.CONFIG_HELPER}} keygen-cpu {{.KEYGEN_CPU_SCRIPT}}"
+    run: once
     vars:
       KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
       CPUKEYS_DIR: out/keys/cpu_keys/
