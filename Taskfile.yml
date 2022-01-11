@@ -34,8 +34,14 @@ output: 'prefixed'
 tasks:
 
   default:
+    cmds:
+      - task: images
+
+  images:
+    desc: Build stboot images
     deps:
-      - image
+      - disk
+      - iso
 
   config:
     desc: Generate default configuration
@@ -68,7 +74,7 @@ tasks:
       - "xorriso -as mkisofs -R -f -e boot_partition.vfat -no-emul-boot -o {{.ISO}} cache/iso"
     run: once
 
-  image:
+  disk:
     desc: Build stboot disk image
     deps:
       - boot-part
@@ -235,7 +241,8 @@ tasks:
 
 ######## QEMU run ########
 
-  run:
+  run-disk:
+    desc: Run stboot disk image in QEMU
     deps:
       - task: deps:check-cmd
         vars: {CMD: "swtpm"}
@@ -243,7 +250,7 @@ tasks:
         vars: {CMD: "swtpm_setup"}
       - task: deps:check-cmd
         vars: {CMD: "qemu-system-x86_64"}
-      - image
+      - disk
     cmds:
       - "{{.QEMU_RUN_SCRIPT}} -i {{.IMAGE}}"
     interactive: true
@@ -251,6 +258,7 @@ tasks:
       QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
 
   run-iso:
+    desc: Run stboot iso image in QEMU
     deps:
       - task: deps:check-cmd
         vars: {CMD: "swtpm"}
