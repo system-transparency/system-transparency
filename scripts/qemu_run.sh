@@ -61,7 +61,6 @@ cleanup () {
   http_pid=$(pgrep -f "$python_http_server")
   [ -z "$http_pid" ] || kill -TERM "${http_pid}"
   pkill -TERM -P $$
-  [ -z "$tpm" ] || rm -r $tpm
 }
 
 trap cleanup 0
@@ -86,42 +85,6 @@ esac
 ########################################
 
 mem=4G
-swtpm_dir=${root}/cache/swtpm
-tpm=$(mktemp -d --suffix='-tpm')
-
-mkdir -p "${swtpm_dir}"
-
-if [ ! -f "${swtpm_dir}/swtpm-localca.conf" ]; then
-  cat <<EOF > "${swtpm_dir}/swtpm-localca.conf"
-statedir = ${swtpm_dir}/var/lib/swtpm-localca
-signingkey = ${swtpm_dir}/var/lib/swtpm-localca/signkey.pem
-issuercert = ${swtpm_dir}/var/lib/swtpm-localca/issuercert.pem
-certserial = ${swtpm_dir}/var/lib/swtpm-localca/certserial
-EOF
-fi
-
-if [ ! -f "${swtpm_dir}/swtpm-localca.options" ]; then
-  cat <<EOF > "${swtpm_dir}/swtpm-localca.options"
---platform-manufacturer SystemTransparency
---platform-version 2.12
---platform-model QEMU
-EOF
-fi
-
-if [ ! -f "${swtpm_dir}/swtpm_setup.conf" ]; then
-   cat <<EOF > "${swtpm_dir}/swtpm_setup.conf"
-# Program invoked for creating certificates
-create_certs_tool= /usr/share/swtpm/swtpm-localca
-create_certs_tool_config = ${swtpm_dir}/swtpm-localca.conf
-create_certs_tool_options = ${swtpm_dir}/swtpm-localca.options
-EOF
-fi
-
-swtpm_setup --tpmstate $tpm --tpm2 --config ${swtpm_dir}/swtpm_setup.conf \
-  --create-ek-cert --create-platform-cert --lock-nvram
-
-echo "Starting $tpm"
-swtpm socket --tpmstate dir=$tpm --tpm2 --ctrl type=unixio,path=/$tpm/swtpm-sock &
 
 # use kvm if avaiable
 if [[ -w /dev/kvm ]]; then
@@ -137,8 +100,5 @@ qemu-system-x86_64 \
   -device virtio-rng-pci,rng=rng0 \
   -rtc base=localtime \
   -m "${mem}" \
-  -chardev socket,id=chrtpm,path=/$tpm/swtpm-sock \
-  -tpmdev emulator,id=tpm0,chardev=chrtpm \
-  -device tpm-tis,tpmdev=tpm0 \
   -nographic \
   "${qemu_args[@]}"
