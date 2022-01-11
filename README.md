@@ -130,16 +130,16 @@ task config
 
 The config file `st.config` contains all available configuration variables. Take a look at the descriptions provided in this file for details.
 
-## Build 
+## Build
 ```bash
-task image
+task disk
 ```
 
 ## Test
-``` bash 
+``` bash
 
 # run target installation
-task run
+task run-disk
 ```
 
 # OS-Package

@@ -60,10 +60,10 @@ jobs:
           path: out/ospkgs/*
           retention-days: 1
 
-      - name: Build network mode disk image
+      - name: Build network mode disk images
         run: |
           . .envrc
-          task image
+          task images
 
       - name: Upload network installations
         uses: actions/upload-artifact@v2
@@ -80,7 +80,7 @@ jobs:
       - name: Build local mode disk image
         run: |
           . .envrc
-          task image
+          task images
 
       - name: Upload local installation
         uses: actions/upload-artifact@v2
@@ -209,4 +209,4 @@ jobs:
       - name: Build stboot image without ospkg
         run: |
           . .envrc
-          task image
+          task images
