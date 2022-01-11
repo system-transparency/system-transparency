@@ -99,14 +99,6 @@ jobs:
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
 
-      - name: Install swtpm v0.7.0
-        run: |
-          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
-
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -146,14 +138,6 @@ jobs:
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
-
-      - name: Install swtpm v0.7.0
-        run: |
-          wget https://github.com/system-transparency/libtpms/releases/download/v0.9.0/libtpms0_0.9.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-libs_0.7.0_amd64.deb
-          wget https://github.com/system-transparency/swtpm/releases/download/v0.7.0/swtpm-tools_0.7.0_amd64.deb
-          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install ./*.deb
 
       - name: Checkout
         uses: actions/checkout@v2

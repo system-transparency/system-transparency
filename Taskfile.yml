@@ -245,10 +245,6 @@ tasks:
     desc: Run stboot disk image in QEMU
     deps:
       - task: deps:check-cmd
-        vars: {CMD: "swtpm"}
-      - task: deps:check-cmd
-        vars: {CMD: "swtpm_setup"}
-      - task: deps:check-cmd
         vars: {CMD: "qemu-system-x86_64"}
       - disk
     cmds:
@@ -260,10 +256,6 @@ tasks:
   run-iso:
     desc: Run stboot iso image in QEMU
     deps:
-      - task: deps:check-cmd
-        vars: {CMD: "swtpm"}
-      - task: deps:check-cmd
-        vars: {CMD: "swtpm_setup"}
       - task: deps:check-cmd
         vars: {CMD: "qemu-system-x86_64"}
       - iso
