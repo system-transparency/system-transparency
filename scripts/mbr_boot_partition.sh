@@ -105,14 +105,26 @@ syslinux_e64="${syslinux_dir}/efi64/com32/elflink/ldlinux/ldlinux.e64"
 syslinux_efi64="${syslinux_dir}/efi64/efi/syslinux.efi"
 efi64_name="BOOTX64.EFI"
 
+tot_size=$(du -cb \
+              ${linuxboot_kernel} \
+              ${syslinux_config} \
+              ${host_config} \
+              ${syslinux_e32} \
+              ${syslinux_e64} \
+              ${syslinux_efi32} \
+              ${syslinux_efi64} | tail -1 | awk '{print $1}')
+
 echo "Creating VFAT filesystems for STBOOT partition:"
-size_vfat=$((12*(1<<20)))
+size_vfat=$((tot_size + (1<<20)))
 
 echo "Using kernel: ${linuxboot_kernel}"
 
 # mkoutput.vfat requires size as an (undefined) block-count; seem to be units of 1k
 if [ -f "${output}.tmp" ]; then rm "${output}.tmp"; fi
-mkfs.vfat -C -n "STBOOT" "${output}.tmp" $((size_vfat >> 10))
+
+vfat_blocks=$((size_vfat >> 10))
+vfat_blocks=$(((($vfat_blocks+32)&~31)))
+mkfs.vfat -C -n "STBOOT" "${output}.tmp" $vfat_blocks
 
 echo "Installing Syslinux"
 mmd -i "${output}.tmp" ::boot
