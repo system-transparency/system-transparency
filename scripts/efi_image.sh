@@ -81,9 +81,7 @@ mkdir -p "$(dirname "${output}")"
 ########################################
 
 alignment=1048576
-#size_vfat=$((12*(1<<20)))
 size_vfat=$(du -b "${boot_part}" | cut -f1)
-#size_ext4=$((767*(1<<20)))
 size_ext4=$(du -b "${data_part}" | cut -f1)
 
 offset_vfat=$(( alignment/512 ))
