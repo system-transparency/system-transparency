@@ -41,13 +41,13 @@ fi
 
 ########################################
 
-echo "Using 'stmanager keygen' to create a CA and a set of ${key_num} signing keys, certified by it"
+echo "Using 'stmgr keygen' to create a CA and a set of ${key_num} signing keys, certified by it"
 
 # Self-sign root certificate
-stmanager keygen --isCA --certOut="${output}/root.cert" --keyOut="${output}/root.key"
+stmgr keygen certificate -isCA -certOut="${output}/root.cert" -keyOut="${output}/root.key"
 
 # Signing keys
 for I in $(seq 1 ${key_num})
 do
-    stmanager keygen --rootCert="${output}/root.cert" --rootKey="${output}/root.key" --certOut="${output}/signing-key-${I}.cert" --keyOut="${output}/signing-key-${I}.key"
+    stmgr keygen certificate -rootCert="${output}/root.cert" -rootKey="${output}/root.key" -certOut="${output}/signing-key-${I}.cert" -keyOut="${output}/signing-key-${I}.key"
 done
