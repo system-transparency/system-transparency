@@ -24,6 +24,7 @@ vars:
     sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || echo invalid"
   # task helper script
   CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
+  GOBIN: cache/go/bin
 
 dotenv:
   - "{{.CONFIG}}"
@@ -248,14 +249,31 @@ tasks:
     vars:
       LINUX_MAKE: modules/linux.mk
 
+  # serially fetch u-root dependencies
+  u-root-packages:
+    cmds:
+      - task: go:checkout
+        vars:
+          REPO: github.com/u-root/u-root
+          BRANCH: "{{.ST_UROOT_VERSION}}"
+      - task: go:checkout
+        vars:
+          REPO: github.com/system-transparency/stboot
+          BRANCH: "{{.ST_STBOOT_VERSION}}"
+      - task: go:get
+        vars:
+          REPO: github.com/u-root/cpu
+
   initramfs:
     deps:
       - go:u-root
-      - go:stboot
       - go:cpu
       - security-config
       # TODO: generate ssh keys only for debug build
       - cpu-sshkeys
+      - u-root-packages
+    env:
+      GO111MODULE: off
     sources:
       - "{{.SECURITY_CONFIG}}"
       - "{{.ST_SIGNING_ROOT}}"
@@ -350,8 +368,6 @@ tasks:
     vars:
       QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
 
-######## cleanup ########
-
   clean:
     desc: Remove all build artifacts
     cmds:
@@ -364,7 +380,9 @@ tasks:
 
   clean-all:
     desc: Remove all build artifacts, cache and config file
-    deps: [clean]
+    deps:
+      - clean
+      - go:clean
     cmds:
       - "rm -rf cache"
       - "rm -rf .task"

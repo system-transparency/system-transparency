@@ -2,133 +2,120 @@ version: '3'
 
 tasks:
 
+  # XXX: It is not safe to run "get" and "checkout" task concurrently.
+  #      If a repository gets updated during a checkout, an error due to
+  #      conflicting git commands may be caused.
   get:
     cmds:
-      - "go get -d -u {{.REPO}}/..."
-    label: "get {{.NAME}}"
+      - "go get -d {{.REPO}}/..."
+    env:
+      GO111MODULE: off
+    label: "get {{.REPO}}"
+    preconditions:
+      - sh: '[ -n "{{.REPO}}" ]'
+        msg: "task bug: REPO not defined"
+    run: when_changed
     status:
       - "test -f cache/go/src/{{.REPO}}/.git/config"
-    run: when_changed
     vars:
-        NAME: "{{.NAME}}"
-        REPO: "{{.REPO}}"
-
-  fetch:
-    cmds:
-      - "git -C cache/go/src/{{.REPO}} checkout --quiet"
-      - "git -C cache/go/src/{{.REPO}} fetch --all --quiet"
-    label: "fetch {{.NAME}}"
-    run: when_changed
-    vars:
-        NAME: "{{.NAME}}"
         REPO: "{{.REPO}}"
 
   checkout:
     cmds:
+      - "git -C cache/go/src/{{.REPO}} fetch --quiet"
       - "git -C cache/go/src/{{.REPO}} checkout --quiet {{.BRANCH}}"
-    label: "checkout {{.NAME}}"
+    env:
+      GO111MODULE: off
+    deps:
+      - task: get
+        vars:
+          REPO: "{{.REPO}}"
+    label: "go:checkout {{.REPO}}@{{.BRANCH}}"
+    preconditions:
+      - sh: '[ -n "{{.REPO}}" ]'
+        msg: "task bug: REPO not defined"
+      - sh: '[ -n "{{.BRANCH}}" ]'
+        msg: "task bug: BRANCH not defined"
     run: when_changed
+    status:
+      - "test -f cache/go/src/{{.REPO}}/.git/HEAD"
+      - "git -C cache/go/src/{{.REPO}} diff --no-patch --exit-code {{.BRANCH}} >/dev/null 2>&1"
     vars:
-       NAME: "{{.NAME}}"
-       REPO: "{{.REPO}}"
-       BRANCH: "{{.BRANCH}}"
+        REPO: "{{.REPO}}"
+        BRANCH: "{{.BRANCH}}"
 
   install:
     cmds:
-      - "go install {{.REPO}}/{{.DIR}}"
-    label: "install {{.NAME}}"
+      - 'go install {{.PACKAGE}}@{{.VERSION}}'
+      # create version file
+      - cmd: 'echo "{{.VERSION}}" > {{.GOBIN}}/.{{.NAME}}'
+        silent: true
+    label: "go:install {{.NAME}}"
+    preconditions:
+      - sh: '[ -n "{{.NAME}}" ]'
+        msg: "task bug: NAME not defined"
+      - sh: '[ -n "{{.PACKAGE}}" ]'
+        msg: "task bug: PACKAGE not defined"
     run: when_changed
-    vars:
-      <<: &go-vars
-        # binary name
-        NAME: "{{.NAME}}"
-        # package repository
-        REPO: "{{.REPO}}"
-        # package branch (optional)
-        BRANCH: "{{.BRANCH}}"
-        # package directory (optional)
-        DIR: "{{.DIR}}"
-
-  target:
-    cmds:
-      - task: get
-        vars: *go-vars
-      - task: fetch
-        vars: *go-vars
-      - task: checkout
-        vars: *go-vars
-      - task: install
-        vars: *go-vars
-    label: "{{.NAME}}"
     status:
-      - "test -x cache/go/bin/{{.NAME}}"
-      - "git -C cache/go/src/{{.REPO}} diff --quiet {{.BRANCH}}"
-    run: when_changed
-    vars: *go-vars
+      - "test -x {{.GOBIN}}/{{.NAME}}"
+      # check version file
+      - 'grep -q {{.VERSION}} {{.GOBIN}}/.{{.NAME}}'
+    vars:
+      VERSION: '{{default "latest" .VERSION}}'
 
   all:
     deps:
       - task
       - u-root
-      - stboot
       - stmanager
-      - sinit-acm-grebber
       - cpu
-      #- debos
 
   update:
     cmds:
-      - rm -rf cache/go/bin
+      - "rm -rf {{.GOBIN}}"
       - task: all
+    run: once
 
   task:
     cmds:
-      - 'sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -b "bin"'
+      - task: install
+        vars:
+          NAME: task
+          PACKAGE: github.com/go-task/task/v3/cmd/task
+          VERSION: v3.10.0
+    run: once
 
   u-root:
     cmds:
-      - task: target
-        vars: *go-vars
-    vars:
-      NAME: "u-root"
-      REPO: "github.com/u-root/u-root"
-      BRANCH: "{{.ST_UROOT_VERSION}}"
-
-  stboot:
-    deps:
-      - stmanager
+      - task: install
+        vars:
+          NAME: u-root
+          PACKAGE: github.com/u-root/u-root
+          VERSION: "{{.ST_UROOT_VERSION}}"
+    run: once
 
   stmanager:
     cmds:
-      - task: target
-        vars: *go-vars
-    vars:
-      NAME: "stmanager"
-      REPO: "github.com/system-transparency/stboot"
-      BRANCH: "{{.ST_STBOOT_VERSION}}"
-      DIR: "tools/stmanager"
-
-  sinit-acm-grebber:
-    cmds:
-      - task: target
-        vars: *go-vars
-    vars:
-      NAME: "sinit-acm-grebber"
-      REPO: "github.com/system-transparency/sinit-acm-grebber"
+      - task: install
+        vars:
+          NAME: stmanager
+          PACKAGE: github.com/system-transparency/stboot/tools/stmanager
+          VERSION: "{{.ST_STBOOT_VERSION}}"
+    run: once
 
   cpu:
     cmds:
-      - task: target
-        vars: *go-vars
-    vars:
-      NAME: "cpu"
-      REPO: "github.com/u-root/cpu"
-      DIR: "cmds/cpu"
+      - task: install
+        vars:
+          NAME: cpu
+          PACKAGE: github.com/u-root/cpu/cmds/cpu
+          VERSION: 4e8a556
+    run: once
 
   debos:
     cmds:
-      - task: target
-        vars: *go-vars
+      - 'go get github.com/go-debos/debos/cmd/debos'
     deps:
       # libglib2.0-dev
       - task: :deps:check-pkg
@@ -138,11 +125,17 @@ tasks:
       # libostree-dev
       - task: :deps:check-pkg
         vars: {PKG: "ostree-1"}
-    vars:
-      NAME: "debos"
-      REPO: "github.com/go-debos/debos"
-      DIR: "cmd/debos"
+      - task: get
+        vars:
+          REPO: github.com/go-debos/debos
+    env:
+      GO111MODULE: off
+    run: once
+    status:
+      - "test -x cache/go/bin/cpu"
 
   clean:
     cmds:
+      - "[ ! -d cache/go ] || chmod +w -R cache/go"
       - rm -rf cache/go
+    run: once
