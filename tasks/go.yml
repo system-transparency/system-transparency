@@ -68,8 +68,7 @@ tasks:
     deps:
       - task
       - u-root
-      - stmanager
-      - cpu
+      - stmgr
 
   update:
     cmds:
@@ -95,13 +94,12 @@ tasks:
           VERSION: "{{.ST_UROOT_VERSION}}"
     run: once
 
-  stmanager:
+  stmgr:
     cmds:
       - task: install
         vars:
-          NAME: stmanager
-          PACKAGE: github.com/system-transparency/stboot/tools/stmanager
-          VERSION: "{{.ST_STBOOT_VERSION}}"
+          NAME: stmgr
+          PACKAGE: github.com/system-transparency/stmgr
     run: once
 
   cpu:

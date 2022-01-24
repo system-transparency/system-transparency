@@ -113,7 +113,7 @@ Afterward, an example OS package can be built with:
 task demo:ospkg
 ```
 
-It builds an example Debian OS image with [debos](https://github.com/go-debos/debos) and uses stmanager to convert it to an OS package.
+It builds an example Debian OS image with [debos](https://github.com/go-debos/debos) and uses stmgr to convert it to an OS package.
 
 
 # Installation
@@ -145,17 +145,17 @@ task run
 # OS-Package
 An OS package consists of an archive file (ZIP) and descriptor file (JSON). The archive contains the boot files (kernel, initramfs, etc.) and the descriptor file contains the signatures and other metadata.
 
-OS packages can be created and managed with the _stmanager_ tool. Source code of stmanager: https://github.com/system-transparency/stboot/tree/main/tools/stmanager
+OS packages can be created and managed with the _stmgr_ tool. Source code of stmgr: https://github.com/system-transparency/stmgr/tree/main/tools/stmgr
 
 Once you have an OS kernel & initramfs containing the userspace and optionally a tboot kernel and appropriate ACM for TXT create an OS package out of it:
 ``` bash
 # Create a new OS package
-stmanager create --kernel=<your_OS_kernel> --initramfs=<your_OS_initramfs>
+stmgr ospkg create -kernel=<your_OS_kernel> -initramfs=<your_OS_initramfs>
 # Sign the OS package (multiple times)
-stmanager sign --key=<your.key> --cert=<your.cert> <OS package>
+stmgr ospkg sign -key=<your.key> -cert=<your.cert> -ospkg=<OS package>
 
 # See help for all options
-stmanager --help-long
+stman -help
 
 ```
 According to the configured boot mode, place the OS package(s) at the STDATA partition of the stboot image or upload it to a provisioning server. See [Boot Modes](#Boot-Modes)
