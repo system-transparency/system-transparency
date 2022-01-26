@@ -73,6 +73,9 @@ tasks:
       - "mkdir -p cache/iso"
       - "cp {{.BOOT_PART}} cache/iso/boot_partition.vfat"
       - "xorriso -as mkisofs -R -f -e boot_partition.vfat -no-emul-boot -o {{.ISO}} cache/iso"
+    preconditions:
+      - sh: '[ "{{.ST_BOOT_MODE}}" == "network" ]'
+        msg: "ISO image does only support network boot mode"
     run: once
 
   disk:
