@@ -20,6 +20,16 @@ while [ $# -gt 0 ]; do
         exit 1
       fi
       ;;
+    --host-config|-h)
+      if test $# -gt 0; then
+        j="$1"; shift 1
+        host_config="$j"
+      else
+        >&2 echo "no host config specified"
+        >&2 echo "(--host-config <config>)"
+        exit 1
+      fi
+      ;;
     --security-config|-s)
       if test $# -gt 0; then
         j="$1"; shift 1
@@ -59,9 +69,22 @@ then
   exit 1
 fi
 
+if [[ -z "${host_config}" ]];
+then
+  >&2 echo "no host config specified"
+  >&2 echo "(--host-config <config>)"
+  exit 1
+fi
+
 if [[ ! -f "${security_config}" ]];
 then
   >&2 echo "security config \"${security_config}\" does not exist"
+  exit 1
+fi
+
+if [[ ! -f "${host_config}" ]];
+then
+  >&2 echo "host config \"${host_config}\" not found"
   exit 1
 fi
 
@@ -103,6 +126,7 @@ case $variant in
     echo "Creating minimal initramfs including stboot only"
     u-root -build=bb -uinitcmd=stboot -defaultsh="" -o "${output%.*}.tmp" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
+    -files "${host_config}:etc/$(basename "${host_config}")" \
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
     github.com/u-root/u-root/cmds/core/init \
@@ -112,6 +136,7 @@ case $variant in
     echo "[INFO]: creating initramfs including debugging tools"
     u-root -build=bb -uinitcmd=stboot -o "${output%.*}.tmp" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
+    -files "${host_config}:etc/$(basename "${host_config}")" \
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
     -files "${include_dir}/netsetup.elv:netsetup.elv" \
@@ -127,6 +152,7 @@ case $variant in
     echo "Creating initramfs including all u-root core tools"
     u-root -build=bb -uinitcmd=stboot -o "${output%.*}.tmp" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
+    -files "${host_config}:etc/$(basename "${host_config}")" \
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
     -files "${include_dir}/netsetup.elv:netsetup.elv" \

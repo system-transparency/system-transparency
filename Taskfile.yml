@@ -102,15 +102,13 @@ tasks:
   boot-part:
     deps:
       - kernel
-      - host-config
     sources:
       - "{{.KERNEL_FILE}}"
-      - "{{.HOST_CONFIG}}"
     generates:
       - "{{.BOOT_PART}}"
     method: timestamp
     cmds:
-      - "{{.BOOT_PART_SCRIPT}} --host-config {{.HOST_CONFIG}} --kernel {{.KERNEL_FILE}} -o {{.BOOT_PART}}"
+      - "{{.BOOT_PART_SCRIPT}} --kernel {{.KERNEL_FILE}} -o {{.BOOT_PART}}"
     status:
       - "{{.CONFIG_HELPER}} boot-part {{.BOOT_PART_SCRIPT}}"
       - "test -f {{.BOOT_PART}}"
@@ -208,6 +206,7 @@ tasks:
       - go:u-root
       - go:cpu
       - security-config
+      - host-config
       # TODO: generate ssh keys only for debug build
       - cpu-sshkeys
       - u-root-packages
@@ -218,11 +217,12 @@ tasks:
       - "{{.ST_SIGNING_ROOT}}"
       - "{{.UROOT_REPO}}/**"
       - "{{.STBOOT_REPO}}/**"
+      - "{{.HOST_CONFIG}}"
     generates:
       - "{{.INITRAMFS_FILE}}"
     method: timestamp
     cmds:
-      - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -o {{.INITRAMFS_FILE}}"
+      - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -h {{.HOST_CONFIG}} -o {{.INITRAMFS_FILE}}"
     status:
       - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"
       - "test -f {{.INITRAMFS_FILE}}"

@@ -19,16 +19,6 @@ while [ $# -gt 0 ]; do
         exit 1
       fi
       ;;
-    --host-config)
-      if test $# -gt 0; then
-        j="$1"; shift 1
-        host_config="$j"
-      else
-        >&2 echo "no host config specified"
-        >&2 echo "(--host-config <config>)"
-        exit 1
-      fi
-      ;;
     --kernel)
       if test $# -gt 0; then
         j="$1"; shift 1
@@ -57,22 +47,9 @@ then
   exit 1
 fi
 
-if [[ -z "${host_config}" ]];
-then
-  >&2 echo "no host config specified"
-  >&2 echo "(--host-config <config>)"
-  exit 1
-fi
-
 if [[ ! -f "${linuxboot_kernel}" ]];
 then
   >&2 echo "kernel \"${linuxboot_kernel}\" not found"
-  exit 1
-fi
-
-if [[ ! -f "${host_config}" ]];
-then
-  >&2 echo "host config \"${host_config}\" not found"
   exit 1
 fi
 
@@ -80,9 +57,7 @@ mkdir -p "$(dirname "${output}")"
 
 ########################################
 
-tot_size=$(du -cb \
-              ${linuxboot_kernel} \
-              ${host_config} | tail -1 | awk '{print $1}')
+tot_size=$(du -cb ${linuxboot_kernel} | tail -1 | awk '{print $1}')
 
 echo "Creating VFAT filesystems for STBOOT partition:"
 size_vfat=$((tot_size + (1<<20)))
@@ -101,9 +76,6 @@ mmd -i "${output}.tmp" ::EFI
 mmd -i "${output}.tmp" ::EFI/BOOT
 
 mcopy -i "${output}.tmp" "${linuxboot_kernel}" ::/EFI/BOOT/BOOTX64.EFI
-
-echo "Writing host cofiguration"
-mcopy -i "${output}.tmp" "${host_config}" ::
 
 mv ${output}{.tmp,}
 
