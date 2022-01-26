@@ -60,16 +60,23 @@ jobs:
           path: out/ospkgs/*
           retention-days: 1
 
-      - name: Build network mode disk images
+      - name: Build network mode images
         run: |
           . .envrc
           task images
 
-      - name: Upload network installations
+      - name: Upload network mode disk installations
         uses: actions/upload-artifact@v2
         with:
-          name: stboot_network_image
+          name: stboot_network_disk
           path: out/stboot.img
+          retention-days: 1
+
+      - name: Upload network mode iso installations
+        uses: actions/upload-artifact@v2
+        with:
+          name: stboot_network_iso
+          path: out/stboot.iso
           retention-days: 1
 
       - name: Set boot mode to local
@@ -80,16 +87,16 @@ jobs:
       - name: Build local mode disk image
         run: |
           . .envrc
-          task images
+          task disk
 
-      - name: Upload local installation
+      - name: Upload local mode disk installation
         uses: actions/upload-artifact@v2
         with:
-          name: stboot_local_image
+          name: stboot_local_disk
           path: out/stboot.img
           retention-days: 1
 
-  run-network:
+  run-disk-network:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
@@ -112,10 +119,10 @@ jobs:
           sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
           sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
 
-      - name: Download network installations
+      - name: Download network mode disk installations
         uses: actions/download-artifact@v2
         with:
-          name: stboot_network_image
+          name: stboot_network_disk
           path: out
 
       - name: Download example OS Package
@@ -124,12 +131,52 @@ jobs:
           name: ospkg
           path: out/ospkgs
 
-      - name: Boot stboot image using QEMU
+      - name: Boot stboot disk in network mode using QEMU
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh efi
+          .github/workflows/scripts/test-qemu.sh out/stboot.img
 
-  run-local:
+  run-iso-network:
+    runs-on: ubuntu-20.04
+    needs:
+      - build-ubuntu20
+    steps:
+      - name: Install QEMU
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build default config
+        run: |
+          . .envrc
+          task config
+
+      - name: Set boot mode to network
+        run: |
+          sed -i '/^ST_BOOT_MODE=local/s/^/#/g' st.config
+          sed -i '/^#ST_BOOT_MODE=network/s/^#//g' st.config
+
+      - name: Download network mode iso installations
+        uses: actions/download-artifact@v2
+        with:
+          name: stboot_network_iso
+          path: out
+
+      - name: Download example OS Package
+        uses: actions/download-artifact@v2
+        with:
+          name: ospkg
+          path: out/ospkgs
+
+      - name: Boot stboot iso in network mode using QEMU
+        run: |
+          . .envrc
+          .github/workflows/scripts/test-qemu.sh out/stboot.iso
+
+  run-disk-local:
     runs-on: ubuntu-20.04
     needs:
       - build-ubuntu20
@@ -152,17 +199,16 @@ jobs:
           sed -i '/^ST_BOOT_MODE=network/s/^/#/g' st.config
           sed -i '/^#ST_BOOT_MODE=local/s/^#//g' st.config
 
-      - name: Download local installations
+      - name: Download local mode disk installations
         uses: actions/download-artifact@v2
         with:
-          name: stboot_local_image
+          name: stboot_local_disk
           path: out
 
-      - name: Boot stboot image using QEMU
+      - name: Boot stboot disk in local mode using QEMU
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh efi
-
+          .github/workflows/scripts/test-qemu.sh out/stboot.img
 
   build-ubuntu18:
     runs-on: ubuntu-18.04
