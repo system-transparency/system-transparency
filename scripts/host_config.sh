@@ -55,6 +55,7 @@ cat >"${output}" <<EOL
    "network_interface":"${host_network_interface}",
    "provisioning_urls": ${url_array},
    "identity":"${identity}",
-   "authentication":"${authentication}"
+   "authentication":"${authentication}",
+   "timestamp":$(date +%s)
 }
 EOL
