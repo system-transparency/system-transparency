@@ -13,7 +13,6 @@ vars:
   KERNEL_FILE: out/artifacts/linuxboot.vmlinuz
   INITRAMFS_FILE: out/artifacts/initramfs-linuxboot.cpio.gz
   INITRAMFS_INCLUDE: contrib/initramfs-includes
-  HOST_CONFIG: out/artifacts/host_configuration.json
   SECURITY_CONFIG: out/artifacts/security_configuration.json
   SIGNKEYS_DIR:
     sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || echo invalid"
@@ -142,20 +141,6 @@ tasks:
     vars:
       DATA_PART_SCRIPT: ./scripts/data_partition.sh
 
-  host-config:
-    generates:
-      - "{{.HOST_CONFIG}}"
-    cmds:
-      - "{{.HOST_CONFIG_SCRIPT}} -o {{.HOST_CONFIG}}"
-    status:
-      - "{{.CONFIG_HELPER}} host-config {{.HOST_CONFIG_SCRIPT}}"
-      - "test -f {{.HOST_CONFIG}}"
-    preconditions:
-      - *check-config
-    run: once
-    vars:
-      HOST_CONFIG_SCRIPT: ./scripts/host_config.sh
-
   security-config:
     generates:
       - "{{.SECURITY_CONFIG}}"
@@ -209,29 +194,32 @@ tasks:
       - go:u-root
       - go:cpu
       - security-config
-      - host-config
       # TODO: generate ssh keys only for debug build
       - cpu-sshkeys
       - u-root-packages
     env:
       GO111MODULE: off
     sources:
+      - "{{.ST_HOST_CONFIG}}"
       - "{{.SECURITY_CONFIG}}"
       - "{{.ST_SIGNING_ROOT}}"
       - "{{.UROOT_REPO}}/**"
       - "{{.STBOOT_REPO}}/**"
-      - "{{.HOST_CONFIG}}"
     generates:
       - "{{.INITRAMFS_FILE}}"
     method: timestamp
     cmds:
-      - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -h {{.HOST_CONFIG}} -o {{.INITRAMFS_FILE}}"
+      - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -h {{.ST_HOST_CONFIG}} -o {{.INITRAMFS_FILE}}"
     status:
       - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"
       - "test -f {{.INITRAMFS_FILE}}"
     preconditions:
       - *check-config
-      - sh: test -e "{{.ST_SIGNING_ROOT}}"
+      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ]"
+        msg: "[ERROR] Configuration ST_HOST_CONFIG not defined in {{.CONFIG}}"
+      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ] && [ -f \"{{.ST_HOST_CONFIG}}\" ]"
+        msg: "[ERROR] Host configuration file \"{{.ST_HOST_CONFIG}}\" missing"
+      - sh: "[ -e \"{{.ST_SIGNING_ROOT}}\" ]"
         msg: "[ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
     run: once
     vars:
