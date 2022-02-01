@@ -122,6 +122,7 @@ tasks:
 
   data-part:
     sources:
+      - "{{.CONFIG}}"
       - "{{.ST_LOCAL_OSPKG_DIR}}/**"
     generates:
       - "{{.DATA_PART}}"
@@ -130,13 +131,16 @@ tasks:
       - "{{.DATA_PART_SCRIPT}} -o {{.DATA_PART}}"
     status:
       - "{{.CONFIG_HELPER}} data-part {{.DATA_PART_SCRIPT}}"
+      - "[ -f {{.DATA_PART}} ] && [ -z \"$(ls -A {{.ST_LOCAL_OSPKG_DIR}})\" ]"
     preconditions:
       - *check-config
       - sh: '[ -z "$ST_BOOT_MODE" ] || [ "$ST_BOOT_MODE" != "local" ] || (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | read)'
-        msg: "[ERROR] Path \"{{.ST_LOCAL_OSPKG_DIR}}\" does not contain any OS package, which is required in Local Boot Mode.\n
-        Please provide an OS Package or run \"task demo:ospkg\" to generate an example OS Package"
+        msg: |
+          [ERROR] Path "{{.ST_LOCAL_OSPKG_DIR}}" does not contain any OS package, which is required in Local Boot Mode.
+          Please provide an OS Package or run "task demo:ospkg" to generate an example OS Package"
       - sh: '[ -z "$ST_BOOT_MODE" ] || [ "$ST_BOOT_MODE" != "local" ] || [ -f "{{.ST_LOCAL_OSPKG_DIR}}/boot_order" ]'
-        msg: "[ERROR] Local Boot requires {{.ST_LOCAL_OSPKG_DIR}}/boot_order file"
+        msg: |
+          [ERROR] Local Boot requires {{.ST_LOCAL_OSPKG_DIR}}/boot_order file"
     run: once
     vars:
       DATA_PART_SCRIPT: ./scripts/data_partition.sh
