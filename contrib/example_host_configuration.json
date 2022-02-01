@@ -1,0 +1,12 @@
+{
+   "version":1,
+   "network_mode":"dhcp",
+   "host_ip":"",
+   "gateway":"",
+   "dns":"",
+   "network_interface":"",
+   "provisioning_urls": ["http://10.0.2.2:8080/os-pkg-example-ubuntu20.json"],
+   "identity":"627f9c9559279933fe9c28db711a82bb3bce818830053d3208b6d61742f204bb",
+   "authentication":"72ebf721dc7755217d8a809ac1818a72a094930c3e3728d2e8a9aa0e2a3465c3",
+   "timestamp":null
+}

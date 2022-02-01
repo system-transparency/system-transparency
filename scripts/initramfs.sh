@@ -126,7 +126,7 @@ case $variant in
     echo "Creating minimal initramfs including stboot only"
     u-root -build=bb -uinitcmd=stboot -defaultsh="" -o "${output%.*}.tmp" \
     -files "${security_config}:etc/$(basename "${security_config}")" \
-    -files "${host_config}:etc/$(basename "${host_config}")" \
+    -files "${host_config}:etc/host_configuration.json" \
     -files "${signing_root}:etc/${signing_root_name}" \
     -files "${https_roots}:etc/$(basename "${https_roots}")" \
     github.com/u-root/u-root/cmds/core/init \
