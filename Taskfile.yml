@@ -3,7 +3,6 @@ version: '3'
 vars:
   # Config file
   CONFIG: st.config
-  DEFAULT_CONFIG: contrib/default.config
   # Build Targets
   ISO: out/stboot.iso
   IMAGE: out/stboot.img
@@ -12,21 +11,20 @@ vars:
   BOOT_PART: out/artifacts/boot_partition.vfat
   KERNEL_FILE: out/artifacts/linuxboot.vmlinuz
   INITRAMFS_FILE: out/artifacts/initramfs-linuxboot.cpio.gz
-  INITRAMFS_INCLUDE: contrib/initramfs-includes
   SECURITY_CONFIG: out/artifacts/security_configuration.json
-  SIGNKEYS_DIR:
-    sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || echo invalid"
+  # cpu ssh keys
+  CPUKEYS_DIR: out/keys/cpu_keys
   # task helper script
   CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
-  GOBIN: cache/go/bin
 
 dotenv:
   - "{{.CONFIG}}"
 
 includes:
-  go: ./tasks/go.yml
-  deps: ./tasks/deps.yml
   demo: ./tasks/demo.yml
+  deps: ./tasks/deps.yml
+  go: ./tasks/go.yml
+  stboot: ./tasks/stboot.yml
 
 output: 'prefixed'
 
@@ -53,6 +51,7 @@ tasks:
       - "{{.CONFIG_SCRIPT}} -o {{.CONFIG}}"
     vars:
       CONFIG_SCRIPT: ./scripts/config.sh
+      DEFAULT_CONFIG: contrib/default.config
 
   toolchain:
     desc: Build toolchain
@@ -162,7 +161,7 @@ tasks:
   kernel:
     desc: Build LinuxBoot kernel
     deps:
-      - initramfs
+      - stboot:initramfs
     sources:
       - "{{.INITRAMFS_FILE}}"
     generates:
@@ -178,59 +177,6 @@ tasks:
     vars:
       LINUX_MAKE: modules/linux.mk
 
-  # serially fetch u-root dependencies
-  u-root-packages:
-    cmds:
-      - task: go:checkout
-        vars:
-          REPO: github.com/u-root/u-root
-          BRANCH: "{{.ST_UROOT_VERSION}}"
-      - task: go:checkout
-        vars:
-          REPO: github.com/system-transparency/stboot
-          BRANCH: "{{.ST_STBOOT_VERSION}}"
-      - task: go:get
-        vars:
-          REPO: github.com/u-root/cpu
-
-  initramfs:
-    deps:
-      - go:u-root
-      - go:cpu
-      - security-config
-      # TODO: generate ssh keys only for debug build
-      - cpu-sshkeys
-      - u-root-packages
-    env:
-      GO111MODULE: off
-    sources:
-      - "{{.ST_HOST_CONFIG}}"
-      - "{{.SECURITY_CONFIG}}"
-      - "{{.ST_SIGNING_ROOT}}"
-      - "{{.UROOT_REPO}}/**"
-      - "{{.STBOOT_REPO}}/**"
-    generates:
-      - "{{.INITRAMFS_FILE}}"
-    method: timestamp
-    cmds:
-      - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -h {{.ST_HOST_CONFIG}} -o {{.INITRAMFS_FILE}}"
-    status:
-      - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"
-      - "test -f {{.INITRAMFS_FILE}}"
-    preconditions:
-      - *check-config
-      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ]"
-        msg: "[ERROR] Configuration ST_HOST_CONFIG not defined in {{.CONFIG}}"
-      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ] && [ -f \"{{.ST_HOST_CONFIG}}\" ]"
-        msg: "[ERROR] Host configuration file \"{{.ST_HOST_CONFIG}}\" missing"
-      - sh: "[ -e \"{{.ST_SIGNING_ROOT}}\" ]"
-        msg: "[ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
-    run: once
-    vars:
-      INITRAMFS_SCRIPT: ./scripts/initramfs.sh
-      UROOT_REPO: "cache/go/src/github.com/u-root/u-root"
-      STBOOT_REPO: "cache/go/src/github.com/system-transparency/stboot"
-
   cpu-sshkeys:
     generates:
       - "{{.CPUKEYS_DIR}}/*"
@@ -241,7 +187,6 @@ tasks:
     run: once
     vars:
       KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
-      CPUKEYS_DIR: out/keys/cpu_keys/
 
 ######## QEMU run ########
 

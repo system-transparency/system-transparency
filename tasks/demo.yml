@@ -62,6 +62,8 @@ tasks:
       KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz
       INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
       CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
+      SIGNKEYS_DIR:
+        sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || true"
 
   ubuntu:
     deps:

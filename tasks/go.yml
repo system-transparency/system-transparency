@@ -1,5 +1,12 @@
 version: '3'
 
+vars:
+  UROOT_REPO: github.com/u-root/u-root
+  STBOOT_REPO: github.com/system-transparency/stboot
+  CPU_REPO: github.com/u-root/cpu
+  CPU_VERSION: 4e8a556
+  GOBIN: cache/go/bin
+
 tasks:
 
   # XXX: It is not safe to run "get" and "checkout" task concurrently.
@@ -90,7 +97,7 @@ tasks:
       - task: install
         vars:
           NAME: u-root
-          PACKAGE: github.com/u-root/u-root
+          PACKAGE: "{{.UROOT_REPO}}"
           VERSION: "{{.ST_UROOT_VERSION}}"
     run: once
 
@@ -107,8 +114,8 @@ tasks:
       - task: install
         vars:
           NAME: cpu
-          PACKAGE: github.com/u-root/cpu/cmds/cpu
-          VERSION: 4e8a556
+          PACKAGE: "{{.CPU_REPO}}/cmds/cpu"
+          VERSION: "{{.CPU_VERSION}}"
     run: once
 
   debos:
@@ -130,7 +137,33 @@ tasks:
       GO111MODULE: off
     run: once
     status:
-      - "test -x cache/go/bin/cpu"
+      - "test -x cache/go/bin/debos"
+
+  # Fetch/checkout Repos into GOPATH for u-root build runtime
+
+  checkout-cpu:
+    cmds:
+      - task: :go:checkout
+        vars:
+          REPO: "{{.CPU_REPO}}"
+          BRANCH: "{{.CPU_VERSION}}"
+    run: once
+
+  checkout-uroot:
+    cmds:
+      - task: :go:checkout
+        vars:
+          REPO: "{{.UROOT_REPO}}"
+          BRANCH: "{{.ST_UROOT_VERSION}}"
+    run: once
+
+  checkout-stboot:
+    cmds:
+      - task: :go:checkout
+        vars:
+          REPO: "{{.STBOOT_REPO}}"
+          BRANCH: "{{.ST_STBOOT_VERSION}}"
+    run: once
 
   clean:
     cmds:
