@@ -48,9 +48,14 @@ tasks:
     generates:
       - "{{.CONFIG}}"
     cmds:
-      - "{{.CONFIG_SCRIPT}} -o {{.CONFIG}}"
+      - cmd: >-
+             if [ -f {{.CONFIG}} ]; then
+             echo Moving old config to {{.CONFIG}}.old;
+             mv {{.CONFIG}} {{.CONFIG}}.old;
+             fi
+        silent: true
+      - cp {{.DEFAULT_CONFIG}} {{.CONFIG}}
     vars:
-      CONFIG_SCRIPT: ./scripts/config.sh
       DEFAULT_CONFIG: contrib/default.config
 
   toolchain:
