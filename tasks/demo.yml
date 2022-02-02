@@ -14,11 +14,28 @@ tasks:
       - "{{.DEMO_KEY_DIR}}/root.*"
       - "{{.DEMO_KEY_DIR}}/signing-key-*"
     cmds:
-      - "{{.DEMO_KEYGEN_SCRIPT}} -o {{.DEMO_KEY_DIR}}"
+      - cmd: mkdir -p {{.DEMO_KEY_DIR}}
+        silent: true
+      - cmd: >
+             CMD="stmgr keygen certificate -isCA
+             -certOut="{{.DEMO_KEY_DIR}}/root.cert"
+             -keyOut="{{.DEMO_KEY_DIR}}/root.key"";
+             echo $CMD;
+             $CMD;
+        silent: true
+      - cmd: >
+             for I in {1..{{.ST_NUM_SIGNATURES}}}; do
+             CMD="stmgr keygen certificate -rootCert={{.DEMO_KEY_DIR}}/root.cert
+             -rootKey={{.DEMO_KEY_DIR}}/root.key
+             -certOut={{.DEMO_KEY_DIR}}/signing-key-${I}.cert
+             -keyOut={{.DEMO_KEY_DIR}}/signing-key-${I}.key";
+             echo $CMD;
+             $CMD;
+             done
+        silent: true
     status:
-      - "{{.CONFIG_HELPER}} keygen {{.DEMO_KEYGEN_SCRIPT}}"
-      - "test -f {{.DEMO_KEY_DIR}}/root.key"
-      - "test -f {{.DEMO_KEY_DIR}}/root.cert"
+      - "[ -f {{.DEMO_KEY_DIR}}/root.key ]"
+      - "[ -f {{.DEMO_KEY_DIR}}/root.cert ]"
       - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.key ]]; done"
       - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.cert ]]; done"
     preconditions:
@@ -26,7 +43,6 @@ tasks:
       - sh: '[ "{{.ST_SIGNING_ROOT}}" = "{{.DEMO_KEY_DIR}}/root.cert" ]'
         msg: '[ERROR] Set ST_SIGNING_ROOT="{{.DEMO_KEY_DIR}}/root.cert" to generate example signing keys'
     vars:
-      DEMO_KEYGEN_SCRIPT: ./scripts/demo_signing_keys.sh
       DEMO_KEY_DIR: out/keys/example_keys
 
   ospkg:
