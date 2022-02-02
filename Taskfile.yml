@@ -150,18 +150,27 @@ tasks:
       DATA_PART_SCRIPT: ./scripts/data_partition.sh
 
   security-config:
+    sources:
+      - "{{.CONFIG}}"
     generates:
       - "{{.SECURITY_CONFIG}}"
     cmds:
-      - "{{.SECURITY_CONFIG_SCRIPT}} -o {{.SECURITY_CONFIG}}"
+      - cmd: mkdir -p $(dirname {{.SECURITY_CONFIG}})
+        silent: true
+      - |-
+        cat > "{{.SECURITY_CONFIG}}" <<EOL
+        {
+          "version":1,
+          "min_valid_sigs_required": {{.ST_NUM_SIGNATURES}},
+          "boot_mode": "{{.ST_BOOT_MODE}}",
+          "use_ospkg_cache": {{.ST_USE_PKG_CACHE}}
+        }
+        EOL
     status:
-      - "{{.CONFIG_HELPER}} security-config {{.SECURITY_CONFIG_SCRIPT}}"
       - "test -f {{.SECURITY_CONFIG}}"
     preconditions:
       - *check-config
     run: once
-    vars:
-      SECURITY_CONFIG_SCRIPT: ./scripts/security_config.sh
 
   kernel:
     desc: Build LinuxBoot kernel
