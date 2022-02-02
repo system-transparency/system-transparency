@@ -186,12 +186,19 @@ tasks:
     generates:
       - "{{.CPUKEYS_DIR}}/*"
     cmds:
-      - "{{.KEYGEN_CPU_SCRIPT}} -o {{.CPUKEYS_DIR}}"
+      - cmd: mkdir -p {{.CPUKEYS_DIR}}
+        silent: true
+      - ssh-keygen -b 2048 -t rsa -f {{.CPU_HOST_KEY}} -q -N "" <<< y >/dev/null
+      - ssh-keygen -b 2048 -t rsa -f {{.CPU_CLIENT_KEY}} -q -N "" <<< y >/dev/null
     status:
-      - "{{.CONFIG_HELPER}} keygen-cpu {{.KEYGEN_CPU_SCRIPT}}"
+      - "[ -f {{.CPU_HOST_KEY}} ]"
+      - "[ -f {{.CPU_HOST_KEY}}.pub ]"
+      - "[ -f {{.CPU_CLIENT_KEY}} ]"
+      - "[ -f {{.CPU_CLIENT_KEY}}.pub ]"
     run: once
     vars:
-      KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
+      CPU_HOST_KEY: "{{.CPUKEYS_DIR}}/ssh_host_rsa_key"
+      CPU_CLIENT_KEY: "{{.CPUKEYS_DIR}}/cpu_rsa"
 
 ######## QEMU run ########
 
