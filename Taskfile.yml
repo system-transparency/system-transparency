@@ -67,6 +67,7 @@ tasks:
   iso:
     desc: Build stboot iso image
     deps:
+      - check-config
       - boot-part
     sources:
       - "{{.BOOT_PART}}"
@@ -85,6 +86,7 @@ tasks:
   disk:
     desc: Build stboot disk image
     deps:
+      - check-config
       - boot-part
       - data-part
     sources:
@@ -98,16 +100,13 @@ tasks:
     status:
       - "{{.CONFIG_HELPER}} image {{.IMAGE_SCRIPT}}"
       - "test -f {{.IMAGE}}"
-    preconditions:
-      - &check-config
-        sh: "[ -f {{.CONFIG}} ]"
-        msg: "[ERROR] File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
     run: once
     vars:
       IMAGE_SCRIPT: ./scripts/image.sh
 
   boot-part:
     deps:
+      - check-config
       - kernel
     sources:
       - "{{.KERNEL_FILE}}"
@@ -119,13 +118,13 @@ tasks:
     status:
       - "{{.CONFIG_HELPER}} boot-part {{.BOOT_PART_SCRIPT}}"
       - "test -f {{.BOOT_PART}}"
-    preconditions:
-      - *check-config
     run: once
     vars:
       BOOT_PART_SCRIPT: ./scripts/boot_partition.sh
 
   data-part:
+    deps:
+      - check-config
     sources:
       - "{{.CONFIG}}"
       - "{{.ST_LOCAL_OSPKG_DIR}}/**"
@@ -138,7 +137,6 @@ tasks:
       - "{{.CONFIG_HELPER}} data-part {{.DATA_PART_SCRIPT}}"
       - "[ -f {{.DATA_PART}} ] && [ -z \"$(ls -A {{.ST_LOCAL_OSPKG_DIR}})\" ]"
     preconditions:
-      - *check-config
       - sh: '[ -z "$ST_BOOT_MODE" ] || [ "$ST_BOOT_MODE" != "local" ] || (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | read)'
         msg: |
           [ERROR] Path "{{.ST_LOCAL_OSPKG_DIR}}" does not contain any OS package, which is required in Local Boot Mode.
@@ -151,6 +149,8 @@ tasks:
       DATA_PART_SCRIPT: ./scripts/data_partition.sh
 
   security-config:
+    deps:
+      - check-config
     sources:
       - "{{.CONFIG}}"
     generates:
@@ -169,13 +169,12 @@ tasks:
         EOL
     status:
       - "test -f {{.SECURITY_CONFIG}}"
-    preconditions:
-      - *check-config
     run: once
 
   kernel:
     desc: Build LinuxBoot kernel
     deps:
+      - check-config
       - stboot:initramfs
     sources:
       - "{{.INITRAMFS_FILE}}"
@@ -186,8 +185,6 @@ tasks:
       - "make -f {{.LINUX_MAKE}} KERNEL={{.KERNEL_FILE}} CONFIG={{.CONFIG}}"
     status:
       - "{{.CONFIG_HELPER}} kernel {{.LINUX_MAKE}}"
-    preconditions:
-      - *check-config
     run: once
     vars:
       LINUX_MAKE: modules/linux.mk
@@ -209,6 +206,17 @@ tasks:
     vars:
       CPU_HOST_KEY: "{{.CPUKEYS_DIR}}/ssh_host_rsa_key"
       CPU_CLIENT_KEY: "{{.CPUKEYS_DIR}}/cpu_rsa"
+
+######## checks ########
+
+  # TODO: add config file validation
+  check-config:
+    preconditions:
+      - sh: '[ -f "{{.CONFIG}}" ]'
+        msg: |-
+          [ERROR] File "{{.CONFIG}}" missing
+          Please provide a configuration file or run "task config"
+    run: once
 
 ######## cleanup ########
 

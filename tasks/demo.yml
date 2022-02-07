@@ -1,14 +1,10 @@
 version: '3'
 
-preconditions:
-  <<: &check-config
-    sh: test -f "{{.CONFIG}}"
-    msg: "[ERROR] Configuration ({{.CONFIG}}) file missing\nPlease provide a config file or run \"task config\""
-
 tasks:
   keygen:
     desc: Generate example signing keys
     deps:
+      - :check-config
       - :go:stmgr
     generates:
       - "{{.DEMO_KEY_DIR}}/root.*"
@@ -39,7 +35,6 @@ tasks:
       - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.key ]]; done"
       - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.cert ]]; done"
     preconditions:
-      - *check-config
       - sh: '[ "{{.ST_SIGNING_ROOT}}" = "{{.DEMO_KEY_DIR}}/root.cert" ]'
         msg: '[ERROR] Set ST_SIGNING_ROOT="{{.DEMO_KEY_DIR}}/root.cert" to generate example signing keys'
     vars:
@@ -48,6 +43,7 @@ tasks:
   ospkg:
     desc: "Build demo OS Package"
     deps:
+      - :check-config
       - :go:stmgr
       - ubuntu
     sources:
@@ -63,7 +59,6 @@ tasks:
       - "test -f {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
       - "test -f {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
     preconditions:
-      - *check-config
       - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
         msg: "[ERROR] OS is not debian based"
       - sh: '[ ! -z "{{.ST_LOCAL_OSPKG_DIR}}" ] && ! (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'

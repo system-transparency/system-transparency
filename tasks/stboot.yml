@@ -10,6 +10,7 @@ tasks:
   u-root:
     label: initramfs
     deps:
+      - :check-config
       - :go:u-root
       - :security-config
       - :go:checkout-uroot
@@ -34,9 +35,6 @@ tasks:
     preconditions:
       - sh: "[ -n \"{{.OUTPUT}}\" ]"
         msg: "task bug: OUTPUT not defined"
-      - &check-config
-        sh: "[ -f {{.CONFIG}} ]"
-        msg: "[ERROR] File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
       - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ]"
         msg: "[ERROR] Configuration ST_HOST_CONFIG not defined in {{.CONFIG}}"
       - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ] && [ -f \"{{.ST_HOST_CONFIG}}\" ]"
@@ -61,6 +59,8 @@ tasks:
 
   initramfs:
     desc: "Build compressed LinuxBoot initramfs"
+    deps:
+      - :check-config
     sources:
       - "{{.INITRAMFS_VARIANT}}"
     generates:
@@ -70,7 +70,6 @@ tasks:
       - gzip -kf {{.INITRAMFS_VARIANT}}
       - mv {{.INITRAMFS_VARIANT}}.gz {{.INITRAMFS_FILE}}
     preconditions:
-      - *check-config
       - sh: "[ -n \"{{.ST_LINUXBOOT_VARIANT}}\" ]"
         msg: "[ERROR] Configuration ST_LINUXBOOT_VARIANT not defined in {{.CONFIG}}"
       - sh: "[ -n \"{{.ST_LINUXBOOT_VARIANT}}\" ] && [ \"minimal\" = \"minimal\" ]"
