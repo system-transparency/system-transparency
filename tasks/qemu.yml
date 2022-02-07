@@ -1,0 +1,76 @@
+version: '3'
+
+vars:
+  QEMU_MEM: 4G
+  OVMF_LOCATIONS: >-
+    /usr/share/OVMF/OVMF_CODE.fd
+    /usr/share/edk2/ovmf/OVMF_CODE.fd
+    /usr/share/edk2-ovmf/x64/OVMF_CODE.fd
+
+tasks:
+  # internal use only
+  qemu:
+    deps:
+      - task: :deps:check-cmd
+        vars: {CMD: "qemu-system-x86_64"}
+    interactive: true
+    cmds:
+      - >-
+        qemu-system-x86_64
+        {{.QEMU_ARGS}}
+    preconditions:
+      - sh: '[ -n "{{.OVMF}}" ]'
+        msg: "[ERROR] OVMF edk2 image not found"
+    run: once
+    vars:
+      OVMF:
+        sh: |
+          for f in {{.OVMF_LOCATIONS}}; do
+          if [ -f "$f" ]; then
+          echo $f
+          break
+          fi
+          done
+      EDK2_ARG: -bios {{.OVMF}}
+      KVM_ARG:
+        sh: '[ ! -w /dev/kvm ] || echo "-enable-kvm"'
+      QEMU_ARGS: >-
+        {{.KVM_ARG}}
+        {{.EDK2_ARG}}
+        -M q35
+        -net user,hostfwd=tcp::2222-:2222
+        -net nic
+        -object rng-random,filename=/dev/urandom,id=rng0
+        -device virtio-rng-pci,rng=rng0
+        -rtc base=localtime
+        -m {{.QEMU_MEM}}
+        -nographic
+        {{.QEMU_ARGS}}
+
+  disk:
+    desc: Run stboot disk image in QEMU
+    cmds:
+      - task: qemu
+        vars:
+          QEMU_ARGS: >-
+            -hda {{.IMAGE}}
+    preconditions:
+      - sh: '[ -f "{{.IMAGE}}" ]'
+        msg: |-
+             [ERROR] Image "{{.IMAGE}}" missing.
+             Run "task disk" to build stboot disk image
+    run: once
+
+  iso:
+    desc: Run stboot iso image in QEMU
+    cmds:
+      - task: qemu
+        vars:
+          QEMU_ARGS: >-
+            -cdrom {{.ISO}}
+    preconditions:
+      - sh: '[ -f "{{.ISO}}" ]'
+        msg: |-
+             [ERROR] Image "{{.ISO}}" missing.
+             Run "task iso" to build stboot iso image
+    run: once

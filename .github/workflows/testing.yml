@@ -134,7 +134,8 @@ jobs:
       - name: Boot stboot disk in network mode using QEMU
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh out/stboot.img
+          task demo:server &
+          .github/workflows/scripts/test-qemu.sh disk
 
   run-iso-network:
     runs-on: ubuntu-20.04
@@ -174,7 +175,8 @@ jobs:
       - name: Boot stboot iso in network mode using QEMU
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh out/stboot.iso
+          task demo:server &
+          .github/workflows/scripts/test-qemu.sh iso
 
   run-disk-local:
     runs-on: ubuntu-20.04
@@ -208,7 +210,7 @@ jobs:
       - name: Boot stboot disk in local mode using QEMU
         run: |
           . .envrc
-          .github/workflows/scripts/test-qemu.sh out/stboot.img
+          .github/workflows/scripts/test-qemu.sh disk
 
   build-ubuntu18:
     runs-on: ubuntu-18.04

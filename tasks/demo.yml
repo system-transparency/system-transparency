@@ -81,6 +81,21 @@ tasks:
       SIGNKEYS_DIR:
         sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || true"
 
+  server:
+    desc: Run http server to serve ospkgs on port {{.PORT}}
+    deps:
+    - task: :deps:check-cmd
+      vars: {CMD: "python3"}
+    cmds:
+      - cd {{.ST_LOCAL_OSPKG_DIR}}; python3 -m http.server {{.PORT}}
+    preconditions:
+      - sh: find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | read
+        msg: |-
+          [ERROR] Path "{{.ST_LOCAL_OSPKG_DIR}}" does not contain any OS packages
+          Run "task demo:ospkg" to generate an example OS Package"
+    vars:
+      PORT: 8080
+
   ubuntu:
     deps:
       - :go:debos

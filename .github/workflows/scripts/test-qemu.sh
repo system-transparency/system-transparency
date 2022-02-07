@@ -5,7 +5,7 @@ set -Eeuo pipefail
 TIMEOUT=300
 LOG=
 LOG=/tmp/qemu.log
-IMAGE=$1
+TARGET=$1
 
 declare -a MATCH
 #Ubuntu Focal
@@ -15,18 +15,8 @@ MATCH+=("Ubuntu 18.04 LTS ubuntu ttyS0")
 #Debian Buster
 MATCH+=("Debian GNU/Linux 10 debian ttyS0")
 
-cleanup () {
-	qemu_pid=$(pgrep -f "qemu-system-x86_64.*${IMAGE}")
-	[ -z "$qemu_pid" ] || kill -TERM "${qemu_pid}"
-	pkill -TERM -P $$
-}
-
-trap cleanup 0
-
 # run qemu
-source st.config
-ST_LOCAL_OSPKG_DIR=$ST_LOCAL_OSPKG_DIR ST_BOOT_MODE=$ST_BOOT_MODE ./scripts/qemu_run.sh \
-	-i "${IMAGE}" </dev/null | tee /dev/stderr > "$LOG" &
+task qemu:$TARGET </dev/null | tee /dev/stderr > "$LOG" &
 
 i=0
 while [ "$i" -lt "$TIMEOUT" ]
