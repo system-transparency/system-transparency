@@ -33,7 +33,7 @@ tasks:
 
   default:
     cmds:
-      - task: images
+      - task -l
 
   images:
     desc: Build stboot images
