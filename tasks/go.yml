@@ -2,9 +2,13 @@ version: '3'
 
 vars:
   UROOT_REPO: github.com/u-root/u-root
+  UROOT_VERSION: 78ac944
   STBOOT_REPO: github.com/system-transparency/stboot
+  STBOOT_VERSION: 60705e0
+  STMGR_REPO: github.com/system-transparency/stmgr
+  STMGR_VERSION: 1c1394b
   CPU_REPO: github.com/u-root/cpu
-  CPU_VERSION: 4e8a556
+  CPU_VERSION: a901912
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
@@ -101,7 +105,7 @@ tasks:
         vars:
           NAME: u-root
           PACKAGE: "{{.UROOT_REPO}}"
-          VERSION: "{{.ST_UROOT_VERSION}}"
+          VERSION: "{{.UROOT_VERSION}}"
     run: once
 
   stmgr:
@@ -109,7 +113,8 @@ tasks:
       - task: install
         vars:
           NAME: stmgr
-          PACKAGE: github.com/system-transparency/stmgr
+          PACKAGE: "{{.STMGR_REPO}}"
+          VERSION: "{{.STMGR_VERSION}}"
     run: once
 
   cpu:
@@ -157,7 +162,7 @@ tasks:
       - task: :go:checkout
         vars:
           REPO: "{{.UROOT_REPO}}"
-          BRANCH: "{{.ST_UROOT_VERSION}}"
+          BRANCH: "{{.UROOT_VERSION}}"
     run: once
 
   checkout-stboot:
@@ -165,7 +170,7 @@ tasks:
       - task: :go:checkout
         vars:
           REPO: "{{.STBOOT_REPO}}"
-          BRANCH: "{{.ST_STBOOT_VERSION}}"
+          BRANCH: "{{.STBOOT_VERSION}}"
     run: once
 
   clean:
