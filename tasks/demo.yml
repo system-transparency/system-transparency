@@ -1,37 +1,49 @@
 version: '3'
 
-preconditions:
-  <<: &check-config
-    sh: test -f "{{.CONFIG}}"
-    msg: "[ERROR] Configuration ({{.CONFIG}}) file missing\nPlease provide a config file or run \"task config\""
-
 tasks:
   keygen:
     desc: Generate example signing keys
     deps:
+      - :check-config
       - :go:stmgr
     generates:
       - "{{.DEMO_KEY_DIR}}/root.*"
       - "{{.DEMO_KEY_DIR}}/signing-key-*"
     cmds:
-      - "{{.DEMO_KEYGEN_SCRIPT}} -o {{.DEMO_KEY_DIR}}"
+      - cmd: mkdir -p {{.DEMO_KEY_DIR}}
+        silent: true
+      - cmd: >
+             CMD="stmgr keygen certificate -isCA
+             -certOut="{{.DEMO_KEY_DIR}}/root.cert"
+             -keyOut="{{.DEMO_KEY_DIR}}/root.key"";
+             echo $CMD;
+             $CMD;
+        silent: true
+      - cmd: >
+             for I in {1..{{.ST_NUM_SIGNATURES}}}; do
+             CMD="stmgr keygen certificate -rootCert={{.DEMO_KEY_DIR}}/root.cert
+             -rootKey={{.DEMO_KEY_DIR}}/root.key
+             -certOut={{.DEMO_KEY_DIR}}/signing-key-${I}.cert
+             -keyOut={{.DEMO_KEY_DIR}}/signing-key-${I}.key";
+             echo $CMD;
+             $CMD;
+             done
+        silent: true
     status:
-      - "{{.CONFIG_HELPER}} keygen {{.DEMO_KEYGEN_SCRIPT}}"
-      - "test -f {{.DEMO_KEY_DIR}}/root.key"
-      - "test -f {{.DEMO_KEY_DIR}}/root.cert"
+      - "[ -f {{.DEMO_KEY_DIR}}/root.key ]"
+      - "[ -f {{.DEMO_KEY_DIR}}/root.cert ]"
       - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.key ]]; done"
       - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.cert ]]; done"
     preconditions:
-      - *check-config
       - sh: '[ "{{.ST_SIGNING_ROOT}}" = "{{.DEMO_KEY_DIR}}/root.cert" ]'
         msg: '[ERROR] Set ST_SIGNING_ROOT="{{.DEMO_KEY_DIR}}/root.cert" to generate example signing keys'
     vars:
-      DEMO_KEYGEN_SCRIPT: ./scripts/demo_signing_keys.sh
       DEMO_KEY_DIR: out/keys/example_keys
 
   ospkg:
     desc: "Build demo OS Package"
     deps:
+      - :check-config
       - :go:stmgr
       - ubuntu
     sources:
@@ -47,7 +59,6 @@ tasks:
       - "test -f {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
       - "test -f {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
     preconditions:
-      - *check-config
       - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
         msg: "[ERROR] OS is not debian based"
       - sh: '[ ! -z "{{.ST_LOCAL_OSPKG_DIR}}" ] && ! (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
@@ -62,6 +73,23 @@ tasks:
       KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz
       INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
       CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
+      SIGNKEYS_DIR:
+        sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || true"
+
+  server:
+    desc: Run http server to serve ospkgs on port {{.PORT}}
+    deps:
+    - task: :deps:check-cmd
+      vars: {CMD: "python3"}
+    cmds:
+      - cd {{.ST_LOCAL_OSPKG_DIR}}; python3 -m http.server {{.PORT}}
+    preconditions:
+      - sh: find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | read
+        msg: |-
+          [ERROR] Path "{{.ST_LOCAL_OSPKG_DIR}}" does not contain any OS packages
+          Run "task demo:ospkg" to generate an example OS Package
+    vars:
+      PORT: 8080
 
   ubuntu:
     deps:

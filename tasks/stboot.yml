@@ -1,0 +1,128 @@
+version: '3'
+
+vars:
+  INITRAMFS_INCLUDE: contrib/initramfs-includes
+  # WORKAROUND: remove kexec and sluinit from core pkgs to prevent build errors
+  UROOT_CORE_PKGS: "{{.UROOT_REPO}}/cmds/core/{basename,bind,blkid,cat,chmod,chroot,cmp,comm,cp,cpio,date,dd,df,dhclient,dirname,dmesg,echo,elvish,false,find,free,fusermount,gpgv,gpt,grep,gzip,hexdump,hostname,hwclock,id,init,insmod,io,ip,kill,lddfiles,ln,lockmsrs,losetup,ls,lsdrivers,lsmod,man,md5sum,mkdir,mkfifo,mknod,mktemp,more,mount,msr,mv,netcat,ntpdate,pci,ping,printenv,ps,pwd,readlink,rm,rmmod,rsdp,scp,seq,shasum,shutdown,sleep,sort,sshd,strace,strings,stty,switch_root,sync,tail,tar,tee,tr,true,truncate,ts,umount,uname,uniq,unmount,unshare,uptime,watchdog,watchdogd,wc,wget,which,yes}"
+
+tasks:
+  # internal use only
+  u-root:
+    label: initramfs
+    deps:
+      - :check-config
+      - :go:u-root
+      - :security-config
+      - :go:checkout-uroot
+      - :go:checkout-stboot
+    sources:
+      - "{{.SECURITY_CONFIG}}"
+      - "{{.ST_HOST_CONFIG}}"
+      - "{{.ST_SIGNING_ROOT}}"
+      - "{{.HTTPS_ROOT}}"
+      - "cache/go/src/{{.UROOT_REPO}}/**"
+      - "cache/go/src/{{.STBOOT_REPO}}/**"
+    generates:
+      - "{{.OUTPUT}}"
+    method: timestamp
+    cmds:
+      - >
+        u-root -build=bb -uinitcmd=stboot -defaultsh="" -o {{.OUTPUT}}.tmp
+        {{.FILES_ARGS}} {{.PKGS_ARGS}}
+      - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
+    env:
+      GO111MODULE: off
+    preconditions:
+      - sh: "[ -n \"{{.OUTPUT}}\" ]"
+        msg: "task bug: OUTPUT not defined"
+      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ]"
+        msg: "[ERROR] Configuration ST_HOST_CONFIG not defined in {{.CONFIG}}"
+      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ] && [ -f \"{{.ST_HOST_CONFIG}}\" ]"
+        msg: "[ERROR] Host configuration file \"{{.ST_HOST_CONFIG}}\" missing"
+      - sh: "[ -e \"{{.ST_SIGNING_ROOT}}\" ]"
+        msg: "[ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
+    run: when_changed
+    vars:
+      HTTPS_ROOT: contrib/initramfs-includes/https_roots.pem
+      FILES: >-
+        {{.SECURITY_CONFIG}}:etc/security_configuration.json
+        {{.ST_HOST_CONFIG}}:etc/host_configuration.json
+        {{.ST_SIGNING_ROOT}}:etc/ospkg_signing_root.pem
+        {{.HTTPS_ROOT}}:etc/https_roots.pem
+        {{.FILES}}
+      FILES_ARGS:
+        sh: for f in {{.FILES}}; do echo -n "-files $f "; done
+      PKGS_ARGS: >-
+        {{.STBOOT_REPO}}
+        {{.PKGS}}
+      OUTPUT: "{{.OUTPUT}}"
+
+  initramfs:
+    desc: "Build compressed LinuxBoot initramfs"
+    deps:
+      - :check-config
+    sources:
+      - "{{.CONFIG}}"
+      - "{{.INITRAMFS_VARIANT}}"
+    generates:
+      - "{{.INITRAMFS_FILE}}"
+    method: timestamp
+    cmds:
+      - task: initramfs-{{.ST_LINUXBOOT_VARIANT}}
+      - gzip -kf {{.INITRAMFS_VARIANT}}
+      - mv {{.INITRAMFS_VARIANT}}.gz {{.INITRAMFS_FILE}}
+    preconditions:
+      - sh: "[ -n \"{{.ST_LINUXBOOT_VARIANT}}\" ]"
+        msg: "[ERROR] Configuration ST_LINUXBOOT_VARIANT not defined in {{.CONFIG}}"
+      - sh: "[ -n \"{{.ST_LINUXBOOT_VARIANT}}\" ] && [ \"minimal\" = \"minimal\" ]"
+        msg: "[ERROR] Unknown linuxboot variant: \"{{.ST_LINUXBOOT_VARIANT}}\""
+    run: once
+    vars:
+      INITRAMFS_VARIANT: out/artifacts/initramfs-linuxboot-{{.ST_LINUXBOOT_VARIANT}}.cpio
+
+  initramfs-minimal:
+    cmds:
+      - task: u-root
+        vars:
+          PKGS: >-
+            {{.UROOT_REPO}}/cmds/core/init
+          OUTPUT: out/artifacts/initramfs-linuxboot-minimal.cpio
+    run: once
+
+  initramfs-full:
+    deps:
+      - :go:cpu
+      - :go:checkout-cpu
+      - :cpu-sshkeys
+    cmds:
+      - task: u-root
+        vars:
+          FILES: >-
+            {{.INITRAMFS_INCLUDE}}/netsetup.elv:netsetup.elv
+            {{.INITRAMFS_INCLUDE}}/start_cpu.elv:start_cpu.elv
+            {{.CPUKEYS_DIR}}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key
+            {{.CPUKEYS_DIR}}/cpu_rsa.pub:cpu_rsa.pub
+          PKGS: >-
+            {{.UROOT_CORE_PKGS}}
+            github.com/u-root/cpu/cmds/cpud
+          OUTPUT: out/artifacts/initramfs-linuxboot-full.cpio
+    run: once
+
+  initramfs-debug:
+    deps:
+      - :go:cpu
+      - :go:checkout-cpu
+      - :cpu-sshkeys
+    cmds:
+      - task: u-root
+        vars:
+          PKGS: >-
+            {{.UROOT_CORE_PKGS}}
+            github.com/u-root/cpu/cmds/cpud
+          FILES: >-
+            {{.INITRAMFS_INCLUDE}}/netsetup.elv:netsetup.elv
+            {{.INITRAMFS_INCLUDE}}/start_cpu.elv:start_cpu.elv
+            {{.CPUKEYS_DIR}}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key
+            {{.CPUKEYS_DIR}}/cpu_rsa.pub:cpu_rsa.pub
+          OUTPUT: out/artifacts/initramfs-linuxboot-debug.cpio
+    run: once

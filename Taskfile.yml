@@ -3,7 +3,6 @@ version: '3'
 vars:
   # Config file
   CONFIG: st.config
-  DEFAULT_CONFIG: contrib/default.config
   # Build Targets
   ISO: out/stboot.iso
   IMAGE: out/stboot.img
@@ -12,21 +11,21 @@ vars:
   BOOT_PART: out/artifacts/boot_partition.vfat
   KERNEL_FILE: out/artifacts/linuxboot.vmlinuz
   INITRAMFS_FILE: out/artifacts/initramfs-linuxboot.cpio.gz
-  INITRAMFS_INCLUDE: contrib/initramfs-includes
   SECURITY_CONFIG: out/artifacts/security_configuration.json
-  SIGNKEYS_DIR:
-    sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || echo invalid"
+  # cpu ssh keys
+  CPUKEYS_DIR: out/keys/cpu_keys
   # task helper script
   CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
-  GOBIN: cache/go/bin
 
 dotenv:
   - "{{.CONFIG}}"
 
 includes:
-  go: ./tasks/go.yml
-  deps: ./tasks/deps.yml
   demo: ./tasks/demo.yml
+  deps: ./tasks/deps.yml
+  go: ./tasks/go.yml
+  qemu: ./tasks/qemu.yml
+  stboot: ./tasks/stboot.yml
 
 output: 'prefixed'
 
@@ -34,7 +33,8 @@ tasks:
 
   default:
     cmds:
-      - task: images
+      - task -l
+    interactive: true
 
   images:
     desc: Build stboot images
@@ -50,9 +50,15 @@ tasks:
     generates:
       - "{{.CONFIG}}"
     cmds:
-      - "{{.CONFIG_SCRIPT}} -o {{.CONFIG}}"
+      - cmd: >-
+             if [ -f {{.CONFIG}} ]; then
+             echo Moving old config to {{.CONFIG}}.old;
+             mv {{.CONFIG}} {{.CONFIG}}.old;
+             fi
+        silent: true
+      - cp {{.DEFAULT_CONFIG}} {{.CONFIG}}
     vars:
-      CONFIG_SCRIPT: ./scripts/config.sh
+      DEFAULT_CONFIG: contrib/default.config
 
   toolchain:
     desc: Build toolchain
@@ -62,6 +68,7 @@ tasks:
   iso:
     desc: Build stboot iso image
     deps:
+      - check-config
       - boot-part
     sources:
       - "{{.BOOT_PART}}"
@@ -80,6 +87,7 @@ tasks:
   disk:
     desc: Build stboot disk image
     deps:
+      - check-config
       - boot-part
       - data-part
     sources:
@@ -90,19 +98,13 @@ tasks:
     method: timestamp
     cmds:
       - "{{.IMAGE_SCRIPT}} --boot {{.BOOT_PART}} --data {{.DATA_PART}} --output {{.IMAGE}}"
-    status:
-      - "{{.CONFIG_HELPER}} image {{.IMAGE_SCRIPT}}"
-      - "test -f {{.IMAGE}}"
-    preconditions:
-      - &check-config
-        sh: "[ -f {{.CONFIG}} ]"
-        msg: "[ERROR] File \"{{.CONFIG}}\" missing\nPlease provide a configuration file or run \"task config\""
     run: once
     vars:
       IMAGE_SCRIPT: ./scripts/image.sh
 
   boot-part:
     deps:
+      - check-config
       - kernel
     sources:
       - "{{.KERNEL_FILE}}"
@@ -111,17 +113,15 @@ tasks:
     method: timestamp
     cmds:
       - "{{.BOOT_PART_SCRIPT}} --kernel {{.KERNEL_FILE}} -o {{.BOOT_PART}}"
-    status:
-      - "{{.CONFIG_HELPER}} boot-part {{.BOOT_PART_SCRIPT}}"
-      - "test -f {{.BOOT_PART}}"
-    preconditions:
-      - *check-config
     run: once
     vars:
       BOOT_PART_SCRIPT: ./scripts/boot_partition.sh
 
   data-part:
+    deps:
+      - check-config
     sources:
+      - "{{.CONFIG}}"
       - "{{.ST_LOCAL_OSPKG_DIR}}/**"
     generates:
       - "{{.DATA_PART}}"
@@ -129,36 +129,54 @@ tasks:
     cmds:
       - "{{.DATA_PART_SCRIPT}} -o {{.DATA_PART}}"
     status:
-      - "{{.CONFIG_HELPER}} data-part {{.DATA_PART_SCRIPT}}"
+      - "{{.CONFIG_HELPER}} data-part {{.DEPS}}"
+      - "[ -f {{.DATA_PART}} ] && [ -z \"$(ls -A {{.ST_LOCAL_OSPKG_DIR}})\" ]"
     preconditions:
-      - *check-config
       - sh: '[ -z "$ST_BOOT_MODE" ] || [ "$ST_BOOT_MODE" != "local" ] || (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | read)'
-        msg: "[ERROR] Path \"{{.ST_LOCAL_OSPKG_DIR}}\" does not contain any OS package, which is required in Local Boot Mode.\n
-        Please provide an OS Package or run \"task demo:ospkg\" to generate an example OS Package"
+        msg: |
+          [ERROR] Path "{{.ST_LOCAL_OSPKG_DIR}}" does not contain any OS package, which is required in Local Boot Mode.
+          Please provide an OS Package or run "task demo:ospkg" to generate an example OS Package
       - sh: '[ -z "$ST_BOOT_MODE" ] || [ "$ST_BOOT_MODE" != "local" ] || [ -f "{{.ST_LOCAL_OSPKG_DIR}}/boot_order" ]'
-        msg: "[ERROR] Local Boot requires {{.ST_LOCAL_OSPKG_DIR}}/boot_order file"
+        msg: |
+          [ERROR] Local Boot requires {{.ST_LOCAL_OSPKG_DIR}}/boot_order file
     run: once
     vars:
       DATA_PART_SCRIPT: ./scripts/data_partition.sh
+      DEPS: >-
+        ST_DATA_PARTITION_EXTRA_SPACE
 
   security-config:
+    deps:
+      - check-config
     generates:
       - "{{.SECURITY_CONFIG}}"
     cmds:
-      - "{{.SECURITY_CONFIG_SCRIPT}} -o {{.SECURITY_CONFIG}}"
+      - cmd: mkdir -p $(dirname {{.SECURITY_CONFIG}})
+        silent: true
+      - |-
+        cat > "{{.SECURITY_CONFIG}}" <<EOL
+        {
+          "version":1,
+          "min_valid_sigs_required": {{.ST_NUM_SIGNATURES}},
+          "boot_mode": "{{.ST_BOOT_MODE}}",
+          "use_ospkg_cache": {{.ST_USE_PKG_CACHE}}
+        }
+        EOL
     status:
-      - "{{.CONFIG_HELPER}} security-config {{.SECURITY_CONFIG_SCRIPT}}"
-      - "test -f {{.SECURITY_CONFIG}}"
-    preconditions:
-      - *check-config
+      - "{{.CONFIG_HELPER}} security-config {{.DEPS}}"
+      - "[ -f {{.SECURITY_CONFIG}} ]"
     run: once
     vars:
-      SECURITY_CONFIG_SCRIPT: ./scripts/security_config.sh
+      DEPS: >-
+        ST_NUM_SIGNATURES
+        ST_BOOT_MODE
+        ST_USE_PKG_CACHE
 
   kernel:
     desc: Build LinuxBoot kernel
     deps:
-      - initramfs
+      - check-config
+      - stboot:initramfs
     sources:
       - "{{.INITRAMFS_FILE}}"
     generates:
@@ -167,103 +185,44 @@ tasks:
     cmds:
       - "make -f {{.LINUX_MAKE}} KERNEL={{.KERNEL_FILE}} CONFIG={{.CONFIG}}"
     status:
-      - "{{.CONFIG_HELPER}} kernel {{.LINUX_MAKE}}"
-    preconditions:
-      - *check-config
+      - "{{.CONFIG_HELPER}} kernel {{.DEPS}}"
+      - "[ -f {{.KERNEL_FILE}} ]"
     run: once
     vars:
       LINUX_MAKE: modules/linux.mk
-
-  # serially fetch u-root dependencies
-  u-root-packages:
-    cmds:
-      - task: go:checkout
-        vars:
-          REPO: github.com/u-root/u-root
-          BRANCH: "{{.ST_UROOT_VERSION}}"
-      - task: go:checkout
-        vars:
-          REPO: github.com/system-transparency/stboot
-          BRANCH: "{{.ST_STBOOT_VERSION}}"
-      - task: go:get
-        vars:
-          REPO: github.com/u-root/cpu
-
-  initramfs:
-    deps:
-      - go:u-root
-      - go:cpu
-      - security-config
-      # TODO: generate ssh keys only for debug build
-      - cpu-sshkeys
-      - u-root-packages
-    env:
-      GO111MODULE: off
-    sources:
-      - "{{.ST_HOST_CONFIG}}"
-      - "{{.SECURITY_CONFIG}}"
-      - "{{.ST_SIGNING_ROOT}}"
-      - "{{.UROOT_REPO}}/**"
-      - "{{.STBOOT_REPO}}/**"
-    generates:
-      - "{{.INITRAMFS_FILE}}"
-    method: timestamp
-    cmds:
-      - "{{.INITRAMFS_SCRIPT}} -i {{.INITRAMFS_INCLUDE}} -s {{.SECURITY_CONFIG}} -h {{.ST_HOST_CONFIG}} -o {{.INITRAMFS_FILE}}"
-    status:
-      - "{{.CONFIG_HELPER}} initramfs {{.INITRAMFS_SCRIPT}}"
-      - "test -f {{.INITRAMFS_FILE}}"
-    preconditions:
-      - *check-config
-      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ]"
-        msg: "[ERROR] Configuration ST_HOST_CONFIG not defined in {{.CONFIG}}"
-      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ] && [ -f \"{{.ST_HOST_CONFIG}}\" ]"
-        msg: "[ERROR] Host configuration file \"{{.ST_HOST_CONFIG}}\" missing"
-      - sh: "[ -e \"{{.ST_SIGNING_ROOT}}\" ]"
-        msg: "[ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
-    run: once
-    vars:
-      INITRAMFS_SCRIPT: ./scripts/initramfs.sh
-      UROOT_REPO: "cache/go/src/github.com/u-root/u-root"
-      STBOOT_REPO: "cache/go/src/github.com/system-transparency/stboot"
+      DEPS: >-
+        ST_LINUXBOOT_CMDLINE
+        ST_LINUXBOOT_KERNEL_VERSION
+        ST_LINUXBOOT_KERNEL_CONFIG
 
   cpu-sshkeys:
     generates:
       - "{{.CPUKEYS_DIR}}/*"
     cmds:
-      - "{{.KEYGEN_CPU_SCRIPT}} -o {{.CPUKEYS_DIR}}"
+      - cmd: mkdir -p {{.CPUKEYS_DIR}}
+        silent: true
+      - ssh-keygen -b 2048 -t rsa -f {{.CPU_HOST_KEY}} -q -N "" <<< y >/dev/null
+      - ssh-keygen -b 2048 -t rsa -f {{.CPU_CLIENT_KEY}} -q -N "" <<< y >/dev/null
     status:
-      - "{{.CONFIG_HELPER}} keygen-cpu {{.KEYGEN_CPU_SCRIPT}}"
+      - "[ -f {{.CPU_HOST_KEY}} ]"
+      - "[ -f {{.CPU_HOST_KEY}}.pub ]"
+      - "[ -f {{.CPU_CLIENT_KEY}} ]"
+      - "[ -f {{.CPU_CLIENT_KEY}}.pub ]"
     run: once
     vars:
-      KEYGEN_CPU_SCRIPT: ./scripts/cpu_keys.sh
-      CPUKEYS_DIR: out/keys/cpu_keys/
+      CPU_HOST_KEY: "{{.CPUKEYS_DIR}}/ssh_host_rsa_key"
+      CPU_CLIENT_KEY: "{{.CPUKEYS_DIR}}/cpu_rsa"
 
-######## QEMU run ########
+######## checks ########
 
-  run-disk:
-    desc: Run stboot disk image in QEMU
-    deps:
-      - task: deps:check-cmd
-        vars: {CMD: "qemu-system-x86_64"}
-      - disk
-    cmds:
-      - "{{.QEMU_RUN_SCRIPT}} -i {{.IMAGE}}"
-    interactive: true
-    vars:
-      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
-
-  run-iso:
-    desc: Run stboot iso image in QEMU
-    deps:
-      - task: deps:check-cmd
-        vars: {CMD: "qemu-system-x86_64"}
-      - iso
-    cmds:
-      - "{{.QEMU_RUN_SCRIPT}} -i {{.ISO}}"
-    interactive: true
-    vars:
-      QEMU_RUN_SCRIPT: ./scripts/qemu_run.sh
+  # TODO: add config file validation
+  check-config:
+    preconditions:
+      - sh: '[ -f "{{.CONFIG}}" ]'
+        msg: |-
+          [ERROR] File "{{.CONFIG}}" missing
+          Please provide a configuration file or run "task config"
+    run: once
 
 ######## cleanup ########
 
