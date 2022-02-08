@@ -131,10 +131,14 @@ jobs:
           name: ospkg
           path: out/ospkgs
 
-      - name: Boot stboot disk in network mode using QEMU
+      - name: Start http server to serve OS Package
         run: |
           . .envrc
           task demo:server &
+
+      - name: Boot stboot disk in network mode using QEMU
+        run: |
+          . .envrc
           .github/workflows/scripts/test-qemu.sh disk
 
   run-iso-network:
@@ -172,10 +176,14 @@ jobs:
           name: ospkg
           path: out/ospkgs
 
-      - name: Boot stboot iso in network mode using QEMU
+      - name: Start http server to serve OS Package
         run: |
           . .envrc
           task demo:server &
+
+      - name: Boot stboot iso in network mode using QEMU
+        run: |
+          . .envrc
           .github/workflows/scripts/test-qemu.sh iso
 
   run-disk-local:
