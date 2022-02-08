@@ -164,8 +164,14 @@ tasks:
         }
         EOL
     status:
-      - "test -f {{.SECURITY_CONFIG}}"
+      - "{{.CONFIG_HELPER}} security-config {{.DEPS}}"
+      - "[ -f {{.SECURITY_CONFIG}} ]"
     run: once
+    vars:
+      DEPS: >-
+        ST_NUM_SIGNATURES
+        ST_BOOT_MODE
+        ST_USE_PKG_CACHE
 
   kernel:
     desc: Build LinuxBoot kernel
@@ -181,6 +187,7 @@ tasks:
       - "make -f {{.LINUX_MAKE}} KERNEL={{.KERNEL_FILE}} CONFIG={{.CONFIG}}"
     status:
       - "{{.CONFIG_HELPER}} kernel {{.DEPS}}"
+      - "[ -f {{.KERNEL_FILE}} ]"
     run: once
     vars:
       LINUX_MAKE: modules/linux.mk
