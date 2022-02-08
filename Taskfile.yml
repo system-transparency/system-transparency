@@ -97,9 +97,6 @@ tasks:
     method: timestamp
     cmds:
       - "{{.IMAGE_SCRIPT}} --boot {{.BOOT_PART}} --data {{.DATA_PART}} --output {{.IMAGE}}"
-    status:
-      - "{{.CONFIG_HELPER}} image {{.IMAGE_SCRIPT}}"
-      - "test -f {{.IMAGE}}"
     run: once
     vars:
       IMAGE_SCRIPT: ./scripts/image.sh
@@ -115,9 +112,6 @@ tasks:
     method: timestamp
     cmds:
       - "{{.BOOT_PART_SCRIPT}} --kernel {{.KERNEL_FILE}} -o {{.BOOT_PART}}"
-    status:
-      - "{{.CONFIG_HELPER}} boot-part {{.BOOT_PART_SCRIPT}}"
-      - "test -f {{.BOOT_PART}}"
     run: once
     vars:
       BOOT_PART_SCRIPT: ./scripts/boot_partition.sh
@@ -134,7 +128,7 @@ tasks:
     cmds:
       - "{{.DATA_PART_SCRIPT}} -o {{.DATA_PART}}"
     status:
-      - "{{.CONFIG_HELPER}} data-part {{.DATA_PART_SCRIPT}}"
+      - "{{.CONFIG_HELPER}} data-part {{.DEPS}}"
       - "[ -f {{.DATA_PART}} ] && [ -z \"$(ls -A {{.ST_LOCAL_OSPKG_DIR}})\" ]"
     preconditions:
       - sh: '[ -z "$ST_BOOT_MODE" ] || [ "$ST_BOOT_MODE" != "local" ] || (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | read)'
@@ -147,6 +141,8 @@ tasks:
     run: once
     vars:
       DATA_PART_SCRIPT: ./scripts/data_partition.sh
+      DEPS: >-
+        ST_DATA_PARTITION_EXTRA_SPACE
 
   security-config:
     deps:
@@ -184,10 +180,14 @@ tasks:
     cmds:
       - "make -f {{.LINUX_MAKE}} KERNEL={{.KERNEL_FILE}} CONFIG={{.CONFIG}}"
     status:
-      - "{{.CONFIG_HELPER}} kernel {{.LINUX_MAKE}}"
+      - "{{.CONFIG_HELPER}} kernel {{.DEPS}}"
     run: once
     vars:
       LINUX_MAKE: modules/linux.mk
+      DEPS: >-
+        ST_LINUXBOOT_CMDLINE
+        ST_LINUXBOOT_KERNEL_VERSION
+        ST_LINUXBOOT_KERNEL_CONFIG
 
   cpu-sshkeys:
     generates:

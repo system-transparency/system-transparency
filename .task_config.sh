@@ -6,26 +6,19 @@ set -euo pipefail
 CONFIG_FILE="${CONFIG}"
 # location to save target subconfigs
 CONFIG_DATA='.task/config'
-# config name pattern
-# XXX: define a naming convention
-CONFIG_PAT='ST_[A-Z_]*'
 
-if [[ "$#" -ne 2 ]]; then
-	echo "Usage ${0##*/} <name> <script>"
+if [[ "$#" -lt 2 ]]; then
+	echo "Usage ${0##*/} <name> [config_name list]"
 	exit 1
 fi
 
+# parse args
 NAME="${1}"
-SCRIPT="${2}"
+shift 1
+CONFIG_LIST=( "$@" )
 
 # target subconfig file location
 SUBCONFIG="${CONFIG_DATA}/${NAME}"
-
-# check if script exist
-if [[ ! -f "${SCRIPT}" ]]; then
-	>&2 echo "Script \"${SCRIPT}\" not found"
-	exit 1
-fi
 
 # check if config file exist
 if [[ ! -f "${CONFIG_FILE}" ]]; then
@@ -38,8 +31,6 @@ source "${CONFIG_FILE}"
 create_subconfig() {
 	CONFIG="$1"
 	touch "${CONFIG}"
-	# read all accuring configs into a sorted array
-	read -a CONFIG_LIST <<< "$(grep -o "${CONFIG_PAT}" "${SCRIPT}" | sort | uniq | tr '\n' ' ')"
 	# parse relevant configs to subconfig
 	for config in "${CONFIG_LIST[@]}"; do
 		echo "${config}=\"${!config:-}\"" >> "$CONFIG"
