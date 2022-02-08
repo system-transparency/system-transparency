@@ -158,8 +158,7 @@ tasks:
         {
           "version":1,
           "min_valid_sigs_required": {{.ST_NUM_SIGNATURES}},
-          "boot_mode": "{{.ST_BOOT_MODE}}",
-          "use_ospkg_cache": {{.ST_USE_PKG_CACHE}}
+          "boot_mode": "{{.ST_BOOT_MODE}}"
         }
         EOL
     status:
@@ -170,7 +169,6 @@ tasks:
       DEPS: >-
         ST_NUM_SIGNATURES
         ST_BOOT_MODE
-        ST_USE_PKG_CACHE
 
   kernel:
     desc: Build LinuxBoot kernel
