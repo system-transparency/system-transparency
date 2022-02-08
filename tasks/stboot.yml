@@ -62,9 +62,11 @@ tasks:
     deps:
       - :check-config
     sources:
+      - "{{.CONFIG}}"
       - "{{.INITRAMFS_VARIANT}}"
     generates:
       - "{{.INITRAMFS_FILE}}"
+    method: timestamp
     cmds:
       - task: initramfs-{{.ST_LINUXBOOT_VARIANT}}
       - gzip -kf {{.INITRAMFS_VARIANT}}

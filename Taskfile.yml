@@ -148,8 +148,6 @@ tasks:
   security-config:
     deps:
       - check-config
-    sources:
-      - "{{.CONFIG}}"
     generates:
       - "{{.SECURITY_CONFIG}}"
     cmds:
