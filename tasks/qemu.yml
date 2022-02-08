@@ -53,7 +53,7 @@ tasks:
       - task: qemu
         vars:
           QEMU_ARGS: >-
-            -hda {{.IMAGE}}
+            -drive format=raw,file={{.IMAGE}}
     preconditions:
       - sh: '[ -f "{{.IMAGE}}" ]'
         msg: |-
