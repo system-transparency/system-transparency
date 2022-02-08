@@ -87,7 +87,7 @@ tasks:
       - sh: find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | read
         msg: |-
           [ERROR] Path "{{.ST_LOCAL_OSPKG_DIR}}" does not contain any OS packages
-          Run "task demo:ospkg" to generate an example OS Package"
+          Run "task demo:ospkg" to generate an example OS Package
     vars:
       PORT: 8080
 
