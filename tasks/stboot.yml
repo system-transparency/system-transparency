@@ -27,8 +27,8 @@ tasks:
     method: timestamp
     cmds:
       - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd=stboot -defaultsh="" -o {{.OUTPUT}}.tmp
-        {{.FILES_ARGS}} {{.PKGS_ARGS}}
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.ST_STBOOT_ARGS}}" -defaultsh=""
+        -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
     env:
       GO111MODULE: off
@@ -55,6 +55,7 @@ tasks:
     run: when_changed
     vars:
       DEPS: >-
+        ST_STBOOT_ARGS
         ST_HOST_CONFIG_FILE
         ST_HOST_CONFIG_LOCATION
       HTTPS_ROOT: contrib/initramfs-includes/https_roots.pem
