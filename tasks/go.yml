@@ -6,6 +6,9 @@ vars:
   CPU_REPO: github.com/u-root/cpu
   CPU_VERSION: 4e8a556
   GOBIN: cache/go/bin
+  GOPATH:
+    sh: echo "$PWD/cache/go"
+  GOPREFIX: GOPATH={{.GOPATH}}
 
 tasks:
 
@@ -14,7 +17,7 @@ tasks:
   #      conflicting git commands may be caused.
   get:
     cmds:
-      - "go get -d {{.REPO}}/..."
+      - "{{.GOPREFIX}} go get -d {{.REPO}}/..."
     env:
       GO111MODULE: off
     label: "get {{.REPO}}"
@@ -53,7 +56,7 @@ tasks:
 
   install:
     cmds:
-      - 'go install {{.PACKAGE}}@{{.VERSION}}'
+      - '{{.GOPREFIX}} go install {{.PACKAGE}}@{{.VERSION}}'
       # create version file
       - cmd: 'echo "{{.VERSION}}" > {{.GOBIN}}/.{{.NAME}}'
         silent: true
@@ -120,7 +123,7 @@ tasks:
 
   debos:
     cmds:
-      - 'go get github.com/go-debos/debos/cmd/debos'
+      - '{{.GOPREFIX}} go get github.com/go-debos/debos/cmd/debos'
     deps:
       # libglib2.0-dev
       - task: :deps:check-pkg

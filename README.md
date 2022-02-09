@@ -57,18 +57,18 @@ task clean-all
 
 ## Environment
 
-The System Transparency Repository provides a `.envrc` file to load the build environment. It installs the latest version of [Task](https://taskfile.dev) and configures a separate Go environment to prevent any conflicts. To load and unload the environment depending on the current directory, it is recommended to use [direnv](https://direnv.net/). Go to [Basic Installation](https://direnv.net/#basic-installation) to see how to properly setup direnv your shell.
+The System Transparency Repository provides a `setup.env` file to load the build environment. It installs the latest version of [Task](https://taskfile.dev) and configures a separate GOPATH to prevent any conflicts. To load and unload the environment depending on the current directory, it is recommended to use [direnv](https://direnv.net/). Go to [Basic Installation](https://direnv.net/#basic-installation) to see how to properly setup direnv for your shell.
 After restarting your shell, you can enable direnv for the repository:
 
 ```bash
-cd system-transparency
+echo "source setup.env" > .envrc
 direnv allow
 ```
 
 As an alternative, you can load the environment directly without direnv:
 
 ```bash
-source .envrc
+source setup.env
 ```
 
 However, this is only recommended on CI workflows since it makes the environment changes persistent in your current shell session.

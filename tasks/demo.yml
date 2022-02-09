@@ -13,7 +13,7 @@ tasks:
       - cmd: mkdir -p {{.DEMO_KEY_DIR}}
         silent: true
       - cmd: >
-             CMD="stmgr keygen certificate -isCA
+             CMD="{{.GOBIN}}/stmgr keygen certificate -isCA
              -certOut="{{.DEMO_KEY_DIR}}/root.cert"
              -keyOut="{{.DEMO_KEY_DIR}}/root.key"";
              echo $CMD;
@@ -21,7 +21,7 @@ tasks:
         silent: true
       - cmd: >
              for I in {1..{{.ST_NUM_SIGNATURES}}}; do
-             CMD="stmgr keygen certificate -rootCert={{.DEMO_KEY_DIR}}/root.cert
+             CMD="{{.GOBIN}}/stmgr keygen certificate -rootCert={{.DEMO_KEY_DIR}}/root.cert
              -rootKey={{.DEMO_KEY_DIR}}/root.key
              -certOut={{.DEMO_KEY_DIR}}/signing-key-${I}.cert
              -keyOut={{.DEMO_KEY_DIR}}/signing-key-${I}.key";
@@ -52,8 +52,8 @@ tasks:
       - "{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
     cmds:
       - "mkdir -p {{.ST_LOCAL_OSPKG_DIR}}"
-      - "stmgr ospkg create -out '{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' -label='{{.LABEL}}' -kernel={{.KERNEL}} -initramfs={{.INITRD}} -cmdline='{{.CMDLINE}}' -url=http://10.0.2.2:8080/os-pkg-example-ubuntu20.zip"
-      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do stmgr ospkg sign -key={{.SIGNKEYS_DIR}}/signing-key-$i.key -cert={{.SIGNKEYS_DIR}}/signing-key-$i.cert -ospkg {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
+      - "{{.GOBIN}}/stmgr ospkg create -out '{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' -label='{{.LABEL}}' -kernel={{.KERNEL}} -initramfs={{.INITRD}} -cmdline='{{.CMDLINE}}' -url=http://10.0.2.2:8080/os-pkg-example-ubuntu20.zip"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do {{.GOBIN}}/stmgr ospkg sign -key={{.SIGNKEYS_DIR}}/signing-key-$i.key -cert={{.SIGNKEYS_DIR}}/signing-key-$i.cert -ospkg {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
       - "echo {{.EXAMPLE_OSPKG}} > {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
     status:
       - "test -f {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"

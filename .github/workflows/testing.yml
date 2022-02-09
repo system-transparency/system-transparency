@@ -17,6 +17,10 @@ jobs:
         uses: actions/setup-go@v1
         with:
           go-version: 1.17
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+
       - name: Install dependencies
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
@@ -28,17 +32,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          . .envrc
           task deps:install
 
       - name: Build default config
         run: |
-          . .envrc
           task config
 
       - name: Generate example signing keys
         run: |
-          . .envrc
           task demo:keygen
 
       - name: Download example OS
@@ -50,7 +51,6 @@ jobs:
 
       - name: Generate and sign OS Package
         run: |
-          . .envrc
           task demo:ospkg
 
       - name: Upload example OS Package
@@ -62,7 +62,6 @@ jobs:
 
       - name: Build network mode images
         run: |
-          . .envrc
           task images
 
       - name: Upload network mode disk installations
@@ -86,7 +85,6 @@ jobs:
 
       - name: Build local mode disk image
         run: |
-          . .envrc
           task disk
 
       - name: Upload local mode disk installation
@@ -106,12 +104,14 @@ jobs:
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
 
+      - name: Install Task
+        uses: arduino/setup-task@v1
+
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Build default config
         run: |
-          . .envrc
           task config
 
       - name: Set boot mode to network
@@ -133,12 +133,10 @@ jobs:
 
       - name: Start http server to serve OS Package
         run: |
-          . .envrc
           task demo:server &
 
       - name: Boot stboot disk in network mode using QEMU
         run: |
-          . .envrc
           .github/workflows/scripts/test-qemu.sh disk
 
   run-iso-network:
@@ -151,12 +149,14 @@ jobs:
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
 
+      - name: Install Task
+        uses: arduino/setup-task@v1
+
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Build default config
         run: |
-          . .envrc
           task config
 
       - name: Set boot mode to network
@@ -178,12 +178,10 @@ jobs:
 
       - name: Start http server to serve OS Package
         run: |
-          . .envrc
           task demo:server &
 
       - name: Boot stboot iso in network mode using QEMU
         run: |
-          . .envrc
           .github/workflows/scripts/test-qemu.sh iso
 
   run-disk-local:
@@ -196,12 +194,14 @@ jobs:
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install qemu-system-x86
 
+      - name: Install Task
+        uses: arduino/setup-task@v1
+
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Build default config
         run: |
-          . .envrc
           task config
 
       - name: Set boot mode to local
@@ -217,7 +217,6 @@ jobs:
 
       - name: Boot stboot disk in local mode using QEMU
         run: |
-          . .envrc
           .github/workflows/scripts/test-qemu.sh disk
 
   build-ubuntu18:
@@ -228,25 +227,24 @@ jobs:
         with:
           go-version: 1.17
 
+      - name: Install Task
+        uses: arduino/setup-task@v1
+
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Install dependencies
         run: |
-          . .envrc
           task deps:install
 
       - name: Build default config
         run: |
-          . .envrc
           task config
 
       - name: Generate example signing keys
         run: |
-          . .envrc
           task demo:keygen
 
       - name: Build stboot image without ospkg
         run: |
-          . .envrc
           task images
