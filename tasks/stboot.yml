@@ -27,7 +27,7 @@ tasks:
     method: timestamp
     cmds:
       - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.ST_STBOOT_ARGS}}" -defaultsh=""
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.HOST_CONFIG_ARG}} {{.ST_STBOOT_ARGS}}" -defaultsh=""
         -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
     env:
@@ -58,6 +58,20 @@ tasks:
         ST_STBOOT_ARGS
         ST_HOST_CONFIG_FILE
         ST_HOST_CONFIG_LOCATION
+      HOST_CONFIG_ARG:
+        sh: |
+          arg="{{.ST_HOST_CONFIG_LOCATION}}"
+          case $arg in
+            initramfs)
+              echo "-host-config /etc/host_configuration.json"
+              ;;
+            cdrom)
+              echo "-host-config cdrom:host_configuration.json"
+              ;;
+            efivar*|legacy)
+              echo "-host-config $i"
+              ;;
+          esac
       HTTPS_ROOT: contrib/initramfs-includes/https_roots.pem
       FILE_HOST_CONFIG:
         sh: >-

@@ -77,10 +77,27 @@ tasks:
       - "{{.ISO}}"
     cmds:
       - "rm -rf cache/iso"
-      - "mkdir -p cache/iso"
+      - "mkdir -p cache/iso; {{.CMD_COPY_HOST_CONFIG}}"
       - "cp {{.BOOT_PART}} cache/iso/boot_partition.vfat"
       - "xorriso -as mkisofs -R -f -e boot_partition.vfat -no-emul-boot -o {{.ISO}} cache/iso"
+    preconditions:
+      - sh: >-
+          [ "{{.ST_HOST_CONFIG_LOCATION}}" != "cdrom" ] ||
+          [ -n "{{.ST_HOST_CONFIG_FILE}}" ]
+        msg: |-
+          [ERROR] Configuration ST_HOST_CONFIG_FILE not defined in {{.CONFIG}}.
+      - sh: >-
+          [ "{{.ST_HOST_CONFIG_LOCATION}}" != "cdrom" ] ||
+          [ -f "{{.ST_HOST_CONFIG_FILE}}" ]
+        msg: |-
+          [ERROR] Host configuration file {{.ST_HOST_CONFIG_FILE}} missing.
     run: once
+    vars:
+      CMD_COPY_HOST_CONFIG:
+        sh: |
+          if [ "{{.ST_HOST_CONFIG_LOCATION}}" = "cdrom" ]; then
+          echo "cp {{.ST_HOST_CONFIG_FILE}} cache/iso/host_configuration.json"
+          fi
 
   disk:
     desc: Build stboot disk image
@@ -176,6 +193,7 @@ tasks:
       - stboot:initramfs
     sources:
       - "{{.INITRAMFS_FILE}}"
+      - "{{.ST_LINUXBOOT_KERNEL_CONFIG}}"
     generates:
       - "{{.KERNEL_FILE}}"
     method: timestamp
