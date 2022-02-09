@@ -124,14 +124,24 @@ tasks:
       - kernel
     sources:
       - "{{.KERNEL_FILE}}"
+      - "{{.ST_HOST_CONFIG_FILE}}"
     generates:
       - "{{.BOOT_PART}}"
     method: timestamp
     cmds:
-      - "{{.BOOT_PART_SCRIPT}} --kernel {{.KERNEL_FILE}} -o {{.BOOT_PART}}"
+      - "{{.BOOT_PART_SCRIPT}} {{.HOST_CONFIG_ARG}} --kernel {{.KERNEL_FILE}} -o {{.BOOT_PART}}"
+    status:
+      - "{{.CONFIG_HELPER}} boot-part {{.DEPS}}"
+      - "[ -f {{.BOOT_PART}} ]"
     run: once
     vars:
       BOOT_PART_SCRIPT: ./scripts/boot_partition.sh
+      HOST_CONFIG_ARG:
+        sh: >
+          [ "{{.ST_HOST_CONFIG_LOCATION}}" != "legacy" ] ||
+          echo "--host-config {{.ST_HOST_CONFIG_FILE}}"
+      DEPS: >-
+        ST_HOST_CONFIG_LOCATION
 
   data-part:
     deps:

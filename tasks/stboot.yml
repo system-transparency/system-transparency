@@ -69,7 +69,7 @@ tasks:
               echo "-host-config cdrom:host_configuration.json"
               ;;
             efivar*|legacy)
-              echo "-host-config $i"
+              echo "-host-config $arg"
               ;;
           esac
       HTTPS_ROOT: contrib/initramfs-includes/https_roots.pem

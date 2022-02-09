@@ -19,6 +19,16 @@ while [ $# -gt 0 ]; do
         exit 1
       fi
       ;;
+    --host-config)
+      if test $# -gt 0; then
+        j="$1"; shift 1
+        host_config="$j"
+      else
+        >&2 echo "no host config specified"
+        >&2 echo "(--host-config <config>)"
+        exit 1
+      fi
+      ;;
     --kernel)
       if test $# -gt 0; then
         j="$1"; shift 1
@@ -53,6 +63,13 @@ then
   exit 1
 fi
 
+if [[ -n "${host_config}" ]] && [[ ! -f "${host_config}" ]];
+then
+  >&2 echo "host config \"${host_config}\" not found"
+  exit 1
+fi
+
+
 mkdir -p "$(dirname "${output}")"
 
 ########################################
@@ -76,6 +93,11 @@ mmd -i "${output}.tmp" ::EFI
 mmd -i "${output}.tmp" ::EFI/BOOT
 
 mcopy -i "${output}.tmp" "${linuxboot_kernel}" ::/EFI/BOOT/BOOTX64.EFI
+
+if [ -n "${host_config}" ]; then
+	echo "Writing host cofiguration"
+	mcopy -i "${output}.tmp" "${host_config}" ::/host_configuration.json
+fi
 
 mv ${output}{.tmp,}
 
