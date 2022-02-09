@@ -17,7 +17,7 @@ tasks:
       - :go:checkout-stboot
     sources:
       - "{{.SECURITY_CONFIG}}"
-      - "{{.ST_HOST_CONFIG}}"
+      - "{{.ST_HOST_CONFIG_FILE}}"
       - "{{.ST_SIGNING_ROOT}}"
       - "{{.HTTPS_ROOT}}"
       - "cache/go/src/{{.UROOT_REPO}}/**"
@@ -35,18 +35,36 @@ tasks:
     preconditions:
       - sh: "[ -n \"{{.OUTPUT}}\" ]"
         msg: "task bug: OUTPUT not defined"
-      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ]"
-        msg: "[ERROR] Configuration ST_HOST_CONFIG not defined in {{.CONFIG}}"
-      - sh: "[ -n \"{{.ST_HOST_CONFIG}}\" ] && [ -f \"{{.ST_HOST_CONFIG}}\" ]"
-        msg: "[ERROR] Host configuration file \"{{.ST_HOST_CONFIG}}\" missing"
+      - sh: >-
+          [ "{{.ST_HOST_CONFIG_LOCATION}}" != "initramfs" ] ||
+          [ -n "{{.ST_HOST_CONFIG_FILE}}" ]
+        msg: |-
+          [ERROR] Configuration ST_HOST_CONFIG_FILE not defined in {{.CONFIG}}.
+      - sh: >-
+          [ "{{.ST_HOST_CONFIG_LOCATION}}" != "initramfs" ] ||
+          [ -f "{{.ST_HOST_CONFIG_FILE}}" ]
+        msg: |-
+          [ERROR] Host configuration file {{.ST_HOST_CONFIG_FILE}} missing.
       - sh: "[ -e \"{{.ST_SIGNING_ROOT}}\" ]"
-        msg: "[ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing\nPlease provide a certificate or run \"task demo:keygen\" to generate example keys"
+        msg: |-
+          [ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing.
+          Please provide a certificate or run "task demo:keygen" to generate example keys.
+    status:
+      - "{{.CONFIG_HELPER}} initramfs {{.DEPS}}"
+      - "[ -f {{.INITRAMFS_FILE}} ]"
     run: when_changed
     vars:
+      DEPS: >-
+        ST_HOST_CONFIG_FILE
+        ST_HOST_CONFIG_LOCATION
       HTTPS_ROOT: contrib/initramfs-includes/https_roots.pem
+      FILE_HOST_CONFIG:
+        sh: >-
+          [ "{{.ST_HOST_CONFIG_LOCATION}}" != "initramfs" ] ||
+          echo {{.ST_HOST_CONFIG_FILE}}:etc/host_configuration.json
       FILES: >-
+        {{.FILE_HOST_CONFIG}}
         {{.SECURITY_CONFIG}}:etc/security_configuration.json
-        {{.ST_HOST_CONFIG}}:etc/host_configuration.json
         {{.ST_SIGNING_ROOT}}:etc/ospkg_signing_root.pem
         {{.HTTPS_ROOT}}:etc/https_roots.pem
         {{.FILES}}

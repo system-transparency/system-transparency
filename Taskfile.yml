@@ -69,6 +69,7 @@ tasks:
     desc: Build stboot iso image
     deps:
       - check-config
+      - check-iso
       - boot-part
     sources:
       - "{{.BOOT_PART}}"
@@ -79,15 +80,13 @@ tasks:
       - "mkdir -p cache/iso"
       - "cp {{.BOOT_PART}} cache/iso/boot_partition.vfat"
       - "xorriso -as mkisofs -R -f -e boot_partition.vfat -no-emul-boot -o {{.ISO}} cache/iso"
-    preconditions:
-      - sh: '[ "{{.ST_BOOT_MODE}}" == "network" ]'
-        msg: "ISO image does only support network boot mode"
     run: once
 
   disk:
     desc: Build stboot disk image
     deps:
       - check-config
+      - check-disk
       - boot-part
       - data-part
     sources:
@@ -220,6 +219,20 @@ tasks:
         msg: |-
           [ERROR] File "{{.CONFIG}}" missing
           Please provide a configuration file or run "task config"
+    run: once
+
+  check-disk:
+    preconditions:
+      - sh: '[ "{{.ST_HOST_CONFIG_LOCATION}}" != "cdrom" ]'
+        msg: '[ERROR] disk image does not support ST_HOST_CONFIG_LOCATION="cdrom".'
+    run: once
+
+  check-iso:
+    preconditions:
+      - sh: '[ "{{.ST_BOOT_MODE}}" == "network" ]'
+        msg: '[ERROR] ISO image does only support network boot mode'
+      - sh: '[ "{{.ST_HOST_CONFIG_LOCATION}}" != "legacy" ]'
+        msg: '[ERROR] ISO image does not support ST_HOST_CONFIG_LOCATION="legacy".'
     run: once
 
 ######## cleanup ########
