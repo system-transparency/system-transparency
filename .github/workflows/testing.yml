@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-  build-ubuntu20:
+  build:
     runs-on: ubuntu-20.04
     steps:
       - name: Install Go 1.17
@@ -25,7 +25,7 @@ jobs:
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qq update
           DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy install \
-          wget debootstrap systemd-container libglib2.0-dev libostree-dev
+          debootstrap systemd-container libglib2.0-dev libostree-dev
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -46,8 +46,8 @@ jobs:
         run: |
           mkdir -p cache/debos
           cd cache/debos
-          wget https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.cpio.gz
-          wget https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.vmlinuz
+          curl -LO https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.cpio.gz
+          curl -LO https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.vmlinuz
 
       - name: Generate and sign OS Package
         run: |
@@ -97,7 +97,7 @@ jobs:
   run-disk-network:
     runs-on: ubuntu-20.04
     needs:
-      - build-ubuntu20
+      - build
     steps:
       - name: Install QEMU
         run: |
@@ -142,7 +142,7 @@ jobs:
   run-iso-network:
     runs-on: ubuntu-20.04
     needs:
-      - build-ubuntu20
+      - build
     steps:
       - name: Install QEMU
         run: |
@@ -187,7 +187,7 @@ jobs:
   run-disk-local:
     runs-on: ubuntu-20.04
     needs:
-      - build-ubuntu20
+      - build
     steps:
       - name: Install QEMU
         run: |
