@@ -27,7 +27,7 @@ tasks:
     method: timestamp
     cmds:
       - >
-        u-root -build=bb -uinitcmd=stboot -defaultsh="" -o {{.OUTPUT}}.tmp
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd=stboot -defaultsh="" -o {{.OUTPUT}}.tmp
         {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
     env:
