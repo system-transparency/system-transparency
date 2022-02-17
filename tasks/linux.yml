@@ -1,0 +1,158 @@
+version: '3'
+
+vars:
+  TARBALL_DIR: cache/tarball
+  KERNEL_DIR:
+    sh: echo cache/linux/{{.ST_LINUXBOOT_KERNEL_VERSION}} | tr . _
+  KERNEL_CONFIG: ./{{.KERNEL_DIR}}/.config
+  KERNEL_IMAGE: ./{{.KERNEL_DIR}}/arch/x86/boot/bzImage
+  KERNEL_MIRROR: https://cdn.kernel.org/pub/linux/kernel
+  KERNEL_TARBALL: linux-{{.ST_LINUXBOOT_KERNEL_VERSION}}.tar.xz
+  KERNEL_TARBALL_FILE: ./{{.TARBALL_DIR}}/{{.KERNEL_TARBALL}}
+  KERNEL_TARBALL_URL:
+    sh: |
+      major=$(echo {{.ST_LINUXBOOT_KERNEL_VERSION}} |  cut -d . -f 1)
+      echo {{.KERNEL_MIRROR}}/v${major}.x/{{.KERNEL_TARBALL}}
+
+tasks:
+
+  # TODO:
+  # * add hash validation
+  # * add signature validation
+  fetch:
+    generates:
+      - ./{{.KERNEL_TARBALL_FILE}}
+    cmds:
+      - mkdir -p {{.TARBALL_DIR}}
+      - cd {{.TARBALL_DIR}} && curl -LOs {{.KERNEL_TARBALL_URL}}
+    preconditions:
+      - sh: '[ -n "{{.KERNEL_TARBALL_URL}}" ]'
+        msg: 'task bug: KERNEL_TARBALL_URL not defined'
+    status:
+      - "[ -f {{.KERNEL_TARBALL_FILE}} ]"
+    run: once
+
+  unpack:
+    sources:
+      - ./{{.KERNEL_TARBALL_FILE}}
+    generates:
+      - ./{{.UNPACK_FLAG}}
+    method: timestamp
+    cmds:
+      - mkdir -p {{.KERNEL_DIR}}
+      - tar xJf {{.KERNEL_TARBALL_FILE}} --strip 1 -C {{.KERNEL_DIR}}
+      - cmd: touch {{.UNPACK_FLAG}}
+        silent: true
+    run: once
+    vars:
+      UNPACK_FLAG: ./{{.KERNEL_DIR}}/.unpack
+
+  config:
+    sources:
+      - ./{{.ST_LINUXBOOT_KERNEL_CONFIG}}
+      - ./{{.INITRAMFS}}
+    generates:
+      - ./{{.KERNEL_CONFIG}}
+    method: timestamp
+    cmds:
+      - cp {{.ST_LINUXBOOT_KERNEL_CONFIG}} {{.KERNEL_CONFIG}}
+      - cmd: >
+          if [ -n "{{.ST_LINUXBOOT_CMDLINE}}" ]; then
+          echo 'Overriding CONFIG_CMDLINE with
+          ST_LINUXBOOT_CMDLINE="{{.ST_LINUXBOOT_CMDLINE}}"';
+          sed -ie
+          's/CONFIG_CMDLINE=.*/CONFIG_CMDLINE="{{._ST_LINUXBOOT_CMDLINE}}"/g'
+          {{.KERNEL_CONFIG}};
+          fi
+        silent: true
+      - echo 'CONFIG_INITRAMFS_SOURCE="{{._INITRAMFS}}"' >> {{.KERNEL_CONFIG}};
+      - make -C {{.KERNEL_DIR}} -s olddefconfig
+    preconditions:
+      - sh: '[ -n "{{.INITRAMFS}}" ]'
+        msg: 'task bug: INITRAMFS not defined'
+    run: when_changed
+    status:
+      - "{{.CONFIG_HELPER}} linux:config {{.DEPS}}"
+      - "[ -f {{.KERNEL_CONFIG}} ]"
+    vars:
+      INITRAMFS: "{{.INITRAMFS}}"
+      _INITRAMFS:
+        sh: realpath {{.INITRAMFS}}
+      _ST_LINUXBOOT_CMDLINE:
+        sh: printf '%s\n' {{.ST_LINUXBOOT_CMDLINE}} | sed -e 's/[\/&]/\\&/g'
+      DEPS: >-
+        ST_LINUXBOOT_KERNEL_VERSION
+        ST_LINUXBOOT_KERNEL_CONFIG
+        ST_LINUXBOOT_CMDLINE
+
+  build:
+    sources:
+      - ./{{.KERNEL_CONFIG}}
+      - ./{{.INITRAMFS}}
+    generates:
+      - ./{{.KERNEL_IMAGE}}
+    method: timestamp
+    cmds:
+      - make -C {{.KERNEL_DIR}} -j16 bzImage
+    preconditions:
+      - sh: '[ -n "{{.INITRAMFS}}" ]'
+        msg: 'task bug: INITRAMFS not defined'
+    run: when_changed
+    vars:
+      INITRAMFS: "{{.INITRAMFS}}"
+
+  kernel:
+    deps:
+      - :check-config
+      - :stboot:initramfs
+    sources:
+      - ./{{.KERNEL_IMAGE}}
+      - ./{{.INITRAMFS_FILE}}
+    generates:
+      - ./{{.LINUXBOOT_IMAGE}}
+    method: timestamp
+    cmds:
+      - task: fetch
+      - task: unpack
+      - task: config
+        vars:
+          INITRAMFS: '{{.INITRAMFS}}'
+      - task: build
+        vars:
+          INITRAMFS: '{{.INITRAMFS}}'
+      - cp {{.KERNEL_IMAGE}} {{.LINUXBOOT_IMAGE}}
+    preconditions:
+      - sh: '[ -n "{{.INITRAMFS}}" ]'
+        msg: 'task bug: INITRAMFS not defined'
+      - sh: '[ -n "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
+        msg: |-
+          [ERROR] Configuration ST_LINUXBOOT_KERNEL_CONFIG not defined in {{.CONFIG}}.
+      - sh: '[ -f "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
+        msg: |-
+          [ERROR] linux configuration file {{.ST_LINUXBOOT_KERNEL_CONFIG}} missing.
+    status:
+      - "{{.CONFIG_HELPER}} linux:kernel {{.DEPS}}"
+      - "[ -f {{.LINUXBOOT_IMAGE}} ]"
+    run: once
+    vars:
+      INITRAMFS: '{{.INITRAMFS_FILE}}'
+      DEPS: >-
+        ST_LINUXBOOT_KERNEL_VERSION
+        ST_LINUXBOOT_KERNEL_CONFIG
+        ST_LINUXBOOT_CMDLINE
+
+  # TODO: add keyring integrity check
+  gpg-keyring:
+    generates:
+      - ./{{.GPG_KEYRING}}
+    cmds:
+      - mkdir -p -m 700 {{.GPG_DIR}}
+      - gpg -q --batch --homedir {{.GPG_DIR}} --auto-key-locate wkd --locate-keys >/dev/null
+      - gpg -q --batch --homedir {{.GPG_DIR}} --auto-key-locate wkd --locate-keys {{.DEV_1}} {{.DEV_2}} >/dev/null
+      - gpg -q --batch --homedir {{.GPG_DIR}} --no-default-keyring --export {{.DEV_1}} {{.DEV_2}}) > {{.GPG_KEYRING}}
+    vars:
+      DEV_1: torvalds@kernel.org
+      DEV_2: gregkh@kernel.org
+      GPG_DIR: cache/gnupg
+      GPG_KEYRING: ./{{.GPG_DIR}}/keyring.gpg
+    run: once
