@@ -94,16 +94,18 @@ tasks:
     desc: "Build compressed LinuxBoot initramfs"
     deps:
       - :check-config
+      - task: initramfs-{{.ST_LINUXBOOT_VARIANT}}
     sources:
-      - "{{.CONFIG}}"
       - "{{.INITRAMFS_VARIANT}}"
     generates:
       - "{{.INITRAMFS_FILE}}"
     method: timestamp
     cmds:
-      - task: initramfs-{{.ST_LINUXBOOT_VARIANT}}
       - gzip -kf {{.INITRAMFS_VARIANT}}
       - mv {{.INITRAMFS_VARIANT}}.gz {{.INITRAMFS_FILE}}
+    status:
+      - "{{.CONFIG_HELPER}} stboot:initramfs {{.DEPS}}"
+      - '[ -f "{{.INITRAMFS_FILE}}" ]'
     preconditions:
       - sh: "[ -n \"{{.ST_LINUXBOOT_VARIANT}}\" ]"
         msg: "[ERROR] Configuration ST_LINUXBOOT_VARIANT not defined in {{.CONFIG}}"
@@ -112,6 +114,8 @@ tasks:
     run: once
     vars:
       INITRAMFS_VARIANT: out/artifacts/initramfs-linuxboot-{{.ST_LINUXBOOT_VARIANT}}.cpio
+      DEPS: >-
+        ST_LINUXBOOT_VARIANT
 
   initramfs-minimal:
     cmds:
