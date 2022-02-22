@@ -6,11 +6,13 @@ vars:
   # Build Targets
   ISO: out/stboot.iso
   IMAGE: out/stboot.img
+  PROVISO: out/prov.iso
   # Build Artifacts
   DATA_PART: out/artifacts/data_partition.ext4
   BOOT_PART: out/artifacts/boot_partition.vfat
   LINUXBOOT_IMAGE: out/artifacts/linuxboot.vmlinuz
-  INITRAMFS_FILE: out/artifacts/initramfs-linuxboot.cpio.gz
+  STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
+  PROVISIONING_INITRAMFS: out/artifacts/proviso.cpio.gz
   SECURITY_CONFIG: out/artifacts/security_configuration.json
   # cpu ssh keys
   CPUKEYS_DIR: out/keys/cpu_keys
@@ -119,10 +121,41 @@ tasks:
     vars:
       IMAGE_SCRIPT: ./scripts/image.sh
 
+  proviso:
+    desc: Build provisioning iso image
+    deps:
+      - check-config
+      - task: linux:kernel
+        vars:
+          INITRAMFS: "{{.PROVISIONING_INITRAMFS}}"
+          INITRAMFS_TARGET: "stboot:provisioning-initramfs"
+
+    sources:
+      - ./{{.LINUXBOOT_IMAGE}}
+    generates:
+      - ./{{.PROVISO}}
+    cmds:
+      - rm -rf {{.PROVISO_FAT}}
+      - mkdir -p {{.ISO_DIR}}
+      - mkfs.vfat -C -n PROVISO {{.PROVISO_FAT}} {{.BLOCKS}}
+      - mmd -i {{.PROVISO_FAT}} ::/EFI
+      - mmd -i {{.PROVISO_FAT}} ::/EFI/BOOT
+      - mcopy -i {{.PROVISO_FAT}} {{.LINUXBOOT_IMAGE}} ::/EFI/BOOT/BOOTX64.EFI
+      - xorriso -as mkisofs -R -f -e provision.fat -no-emul-boot -o {{.PROVISO}} {{.ISO_DIR}}
+    vars:
+      ISO_DIR: cache/proviso
+      PROVISO_FAT: ./{{.ISO_DIR}}/provision.fat
+      # TODO: Calculate size
+      BLOCKS:
+        sh: echo $((1<<16))
+
   boot-part:
     deps:
       - check-config
-      - linux:kernel
+      - task: linux:kernel
+        vars:
+          INITRAMFS: "{{.STBOOT_INITRAMFS}}"
+          INITRAMFS_TARGET: "stboot:initramfs"
     sources:
       - "{{.LINUXBOOT_IMAGE}}"
       - "{{.ST_HOST_CONFIG_FILE}}"

@@ -6,37 +6,61 @@ vars:
     /usr/share/OVMF/OVMF_CODE.fd
     /usr/share/edk2/ovmf/OVMF_CODE.fd
     /usr/share/edk2-ovmf/x64/OVMF_CODE.fd
+  OVMF_CODE:
+    sh: |
+      for f in {{.OVMF_LOCATIONS}}; do
+      if [ -f "$f" ]; then
+      echo $f
+      break
+      fi
+      done
+  OVMF_VARS_DEFAULT:
+    sh: echo {{.OVMF_CODE}} | sed 's/CODE/VARS/g'
+  OVMF_VARS: out/artifacts/OVMF_VARS.fd
 
 tasks:
+
+  clean-efivars:
+    desc: "Clean EFI variables"
+    cmds:
+      - cmd: mkdir -p $(dirname {{.OVMF_VARS}})
+        silent: true
+      - cp {{.OVMF_VARS_DEFAULT}} {{.OVMF_VARS}}
+
+  efivars:
+    cmds:
+      - cmd: mkdir -p $(dirname {{.OVMF_VARS}})
+        silent: true
+      - cp {{.OVMF_VARS_DEFAULT}} {{.OVMF_VARS}}
+    status:
+      - '[ -f {{.OVMF_VARS}} ]'
+
   # internal use only
   qemu:
     deps:
       - task: :deps:check-cmd
         vars: {CMD: "qemu-system-x86_64"}
+      - efivars
     interactive: true
     cmds:
       - >-
         qemu-system-x86_64
         {{.QEMU_ARGS}}
     preconditions:
-      - sh: '[ -n "{{.OVMF}}" ]'
-        msg: "[ERROR] OVMF edk2 image not found"
+      - sh: '[ -n "{{.OVMF_CODE}}" ]'
+        msg: "[ERROR] OVMF_CODE edk2 image not found"
+      - sh: '[ -n "{{.OVMF_VARS}}" ]'
+        msg: "[ERROR] OVMF_VARS edk2 image not found"
     run: once
     vars:
-      OVMF:
-        sh: |
-          for f in {{.OVMF_LOCATIONS}}; do
-          if [ -f "$f" ]; then
-          echo $f
-          break
-          fi
-          done
-      EDK2_ARG: -bios {{.OVMF}}
+      OVMF_ARG: >-
+        -drive if=pflash,format=raw,readonly=on,file={{.OVMF_CODE}}
+        -drive if=pflash,format=raw,file={{.OVMF_VARS}}
       KVM_ARG:
         sh: '[ ! -w /dev/kvm ] || echo "-enable-kvm"'
       QEMU_ARGS: >-
+        {{.OVMF_ARG}}
         {{.KVM_ARG}}
-        {{.EDK2_ARG}}
         -M q35
         -net user,hostfwd=tcp::2222-:2222
         -net nic
@@ -73,4 +97,18 @@ tasks:
         msg: |-
              [ERROR] Image "{{.ISO}}" missing.
              Run "task iso" to build stboot iso image
+    run: once
+
+  proviso:
+    desc: Run provisioning iso image in QEMU
+    cmds:
+      - task: qemu
+        vars:
+          QEMU_ARGS: >-
+            -cdrom {{.PROVISO}}
+    preconditions:
+      - sh: '[ -f "{{.PROVISO}}" ]'
+        msg: |-
+             [ERROR] Image "{{.PROVISO}}" missing.
+             Run "task proviso" to build stboot provisioning iso image
     run: once
