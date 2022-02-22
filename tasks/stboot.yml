@@ -1,6 +1,7 @@
 version: '3'
 
 vars:
+  STBOOT_HOSTCONFIG_EFIVAR: STHostConfig-f401f2c1-b005-4be0-8cee-f2e5945bcbe7
   INITRAMFS_INCLUDE: contrib/initramfs-includes
   PROVISIONING_INITRC: out/artifacts/proviso.elv
   # WORKAROUND: remove kexec and sluinit from core pkgs to prevent build errors
@@ -69,8 +70,15 @@ tasks:
             cdrom)
               echo "-host-config cdrom:host_configuration.json"
               ;;
-            efivar*|legacy)
+            legacy)
               echo "-host-config $arg"
+              ;;
+            efivar)
+              echo "-host-config efivar:{{.STBOOT_HOSTCONFIG_EFIVAR}}"
+              ;;
+            *)
+              echo "unknown ST_HOST_CONFIG_LOCATION={{.ST_HOST_CONFIG_LOCATION}}"
+              exit 1
               ;;
           esac
       HTTPS_ROOT: contrib/initramfs-includes/https_roots.pem
