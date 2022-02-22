@@ -5,7 +5,7 @@ vars:
   CONFIG: st.config
   # Build Targets
   ISO: out/stboot.iso
-  IMAGE: out/stboot.img
+  DISK: out/stboot.img
   PROVISO: out/prov.iso
   # Build Artifacts
   DATA_PART: out/artifacts/data_partition.ext4
@@ -114,10 +114,10 @@ tasks:
       - "{{.BOOT_PART}}"
       - "{{.DATA_PART}}"
     generates:
-      - "{{.IMAGE}}"
+      - "{{.DISK}}"
     method: timestamp
     cmds:
-      - "{{.IMAGE_SCRIPT}} --boot {{.BOOT_PART}} --data {{.DATA_PART}} --output {{.IMAGE}}"
+      - "{{.IMAGE_SCRIPT}} --boot {{.BOOT_PART}} --data {{.DATA_PART}} --output {{.DISK}}"
     run: once
     vars:
       IMAGE_SCRIPT: ./scripts/image.sh
