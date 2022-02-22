@@ -77,11 +77,11 @@ tasks:
       - task: qemu
         vars:
           QEMU_ARGS: >-
-            -drive format=raw,file={{.IMAGE}}
+            -drive format=raw,file={{.DISK}}
     preconditions:
-      - sh: '[ -f "{{.IMAGE}}" ]'
+      - sh: '[ -f "{{.DISK}}" ]'
         msg: |-
-             [ERROR] Image "{{.IMAGE}}" missing.
+             [ERROR] Image "{{.DISK}}" missing.
              Run "task disk" to build stboot disk image
     run: once
 
