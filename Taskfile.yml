@@ -10,7 +10,8 @@ vars:
   # Build Artifacts
   DATA_PART: out/artifacts/data_partition.ext4
   BOOT_PART: out/artifacts/boot_partition.vfat
-  LINUXBOOT_IMAGE: out/artifacts/linuxboot.vmlinuz
+  STBOOT_LINUX_IMAGE: out/artifacts/stboot.vmlinuz
+  PROVISIONING_LINUX_IMAGE: out/artifacts/proviso.vmlinuz
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   PROVISIONING_INITRAMFS: out/artifacts/proviso.cpio.gz
   SECURITY_CONFIG: out/artifacts/security_configuration.json
@@ -127,11 +128,11 @@ tasks:
       - check-config
       - task: linux:kernel
         vars:
+          IMAGE: "{{.PROVISIONING_LINUX_IMAGE}}"
           INITRAMFS: "{{.PROVISIONING_INITRAMFS}}"
           INITRAMFS_TARGET: "stboot:provisioning-initramfs"
-
     sources:
-      - ./{{.LINUXBOOT_IMAGE}}
+      - ./{{.PROVISIONING_LINUX_IMAGE}}
     generates:
       - ./{{.PROVISO}}
     cmds:
@@ -140,7 +141,7 @@ tasks:
       - mkfs.vfat -C -n PROVISO {{.PROVISO_FAT}} {{.BLOCKS}}
       - mmd -i {{.PROVISO_FAT}} ::/EFI
       - mmd -i {{.PROVISO_FAT}} ::/EFI/BOOT
-      - mcopy -i {{.PROVISO_FAT}} {{.LINUXBOOT_IMAGE}} ::/EFI/BOOT/BOOTX64.EFI
+      - mcopy -i {{.PROVISO_FAT}} {{.PROVISIONING_LINUX_IMAGE}} ::/EFI/BOOT/BOOTX64.EFI
       - xorriso -as mkisofs -R -f -e provision.fat -no-emul-boot -o {{.PROVISO}} {{.ISO_DIR}}
     vars:
       ISO_DIR: cache/proviso
@@ -154,16 +155,17 @@ tasks:
       - check-config
       - task: linux:kernel
         vars:
+          IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
           INITRAMFS: "{{.STBOOT_INITRAMFS}}"
           INITRAMFS_TARGET: "stboot:initramfs"
     sources:
-      - "{{.LINUXBOOT_IMAGE}}"
+      - "{{.STBOOT_LINUX_IMAGE}}"
       - "{{.ST_HOST_CONFIG_FILE}}"
     generates:
       - "{{.BOOT_PART}}"
     method: timestamp
     cmds:
-      - "{{.BOOT_PART_SCRIPT}} {{.HOST_CONFIG_ARG}} --kernel {{.LINUXBOOT_IMAGE}} -o {{.BOOT_PART}}"
+      - "{{.BOOT_PART_SCRIPT}} {{.HOST_CONFIG_ARG}} --kernel {{.STBOOT_LINUX_IMAGE}} -o {{.BOOT_PART}}"
     status:
       - "{{.CONFIG_HELPER}} boot-part {{.DEPS}}"
       - "[ -f {{.BOOT_PART}} ]"
