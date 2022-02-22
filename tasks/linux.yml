@@ -5,7 +5,7 @@ vars:
   KERNEL_DIR:
     sh: echo cache/linux/{{.ST_LINUXBOOT_KERNEL_VERSION}} | tr . _
   KERNEL_CONFIG: ./{{.KERNEL_DIR}}/.config
-  KERNEL_IMAGE: ./{{.KERNEL_DIR}}/arch/x86/boot/bzImage
+  KERNEL_BZIMAGE: ./{{.KERNEL_DIR}}/arch/x86/boot/bzImage
   KERNEL_MIRROR: https://cdn.kernel.org/pub/linux/kernel
   KERNEL_TARBALL: linux-{{.ST_LINUXBOOT_KERNEL_VERSION}}.tar.xz
   KERNEL_TARBALL_FILE: ./{{.TARBALL_DIR}}/{{.KERNEL_TARBALL}}
@@ -53,7 +53,6 @@ tasks:
       - ./{{.INITRAMFS}}
     generates:
       - ./{{.KERNEL_CONFIG}}
-    method: timestamp
     cmds:
       - cp {{.ST_LINUXBOOT_KERNEL_CONFIG}} {{.KERNEL_CONFIG}}
       - cmd: >
@@ -90,10 +89,9 @@ tasks:
       - ./{{.KERNEL_CONFIG}}
       - ./{{.INITRAMFS}}
     generates:
-      - ./{{.KERNEL_IMAGE}}
-    method: timestamp
+      - ./{{.KERNEL_BZIMAGE}}
     cmds:
-      - make -C {{.KERNEL_DIR}} -j16 bzImage
+      - make -C {{.KERNEL_DIR}} -j$(nproc) bzImage
     preconditions:
       - sh: '[ -n "{{.INITRAMFS}}" ]'
         msg: 'task bug: INITRAMFS not defined'
@@ -106,10 +104,10 @@ tasks:
       - :check-config
       - :{{.INITRAMFS_TARGET}}
     sources:
-      - ./{{.KERNEL_IMAGE}}
+      - ./{{.KERNEL_BZIMAGE}}
       - ./{{.INITRAMFS}}
     generates:
-      - ./{{.LINUXBOOT_IMAGE}}
+      - ./{{.IMAGE}}
     method: timestamp
     cmds:
       - task: fetch
@@ -120,12 +118,14 @@ tasks:
       - task: build
         vars:
           INITRAMFS: '{{.INITRAMFS}}'
-      - cp {{.KERNEL_IMAGE}} {{.LINUXBOOT_IMAGE}}
+      - cp {{.KERNEL_BZIMAGE}} {{.IMAGE}}
     preconditions:
       - sh: '[ -n "{{.INITRAMFS}}" ]'
         msg: 'task bug: INITRAMFS not defined'
       - sh: '[ -n "{{.INITRAMFS_TARGET}}" ]'
         msg: 'task bug: INITRAMFS_TARGET not defined'
+      - sh: '[ -n "{{.IMAGE}}" ]'
+        msg: 'task bug: IMAGE not defined'
       - sh: '[ -n "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
           [ERROR] Configuration ST_LINUXBOOT_KERNEL_CONFIG not defined in {{.CONFIG}}.
@@ -139,6 +139,7 @@ tasks:
     vars:
       INITRAMFS: '{{.INITRAMFS}}'
       INITRAMFS_TARGET: '{{.INITRAMFS_TARGET}}'
+      IMAGE: '{{.IMAGE}}'
       DEPS: >-
         ST_LINUXBOOT_KERNEL_VERSION
         ST_LINUXBOOT_KERNEL_CONFIG
