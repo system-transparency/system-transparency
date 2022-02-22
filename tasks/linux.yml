@@ -104,10 +104,10 @@ tasks:
   kernel:
     deps:
       - :check-config
-      - :stboot:initramfs
+      - :{{.INITRAMFS_TARGET}}
     sources:
       - ./{{.KERNEL_IMAGE}}
-      - ./{{.INITRAMFS_FILE}}
+      - ./{{.INITRAMFS}}
     generates:
       - ./{{.LINUXBOOT_IMAGE}}
     method: timestamp
@@ -124,6 +124,8 @@ tasks:
     preconditions:
       - sh: '[ -n "{{.INITRAMFS}}" ]'
         msg: 'task bug: INITRAMFS not defined'
+      - sh: '[ -n "{{.INITRAMFS_TARGET}}" ]'
+        msg: 'task bug: INITRAMFS_TARGET not defined'
       - sh: '[ -n "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
           [ERROR] Configuration ST_LINUXBOOT_KERNEL_CONFIG not defined in {{.CONFIG}}.
@@ -133,9 +135,10 @@ tasks:
     status:
       - "{{.CONFIG_HELPER}} linux:kernel {{.DEPS}}"
       - "[ -f {{.LINUXBOOT_IMAGE}} ]"
-    run: once
+    run: when_changed
     vars:
-      INITRAMFS: '{{.INITRAMFS_FILE}}'
+      INITRAMFS: '{{.INITRAMFS}}'
+      INITRAMFS_TARGET: '{{.INITRAMFS_TARGET}}'
       DEPS: >-
         ST_LINUXBOOT_KERNEL_VERSION
         ST_LINUXBOOT_KERNEL_CONFIG

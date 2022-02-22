@@ -51,7 +51,7 @@ tasks:
           Please provide a certificate or run "task demo:keygen" to generate example keys.
     status:
       - "{{.CONFIG_HELPER}} initramfs {{.DEPS}}"
-      - "[ -f {{.INITRAMFS_FILE}} ]"
+      - "[ -f {{.STBOOT_INITRAMFS}} ]"
     run: when_changed
     vars:
       DEPS: >-
@@ -91,21 +91,21 @@ tasks:
       OUTPUT: "{{.OUTPUT}}"
 
   initramfs:
-    desc: "Build compressed LinuxBoot initramfs"
+    desc: "Build compressed stboot initramfs"
     deps:
       - :check-config
       - task: initramfs-{{.ST_LINUXBOOT_VARIANT}}
     sources:
       - "{{.INITRAMFS_VARIANT}}"
     generates:
-      - "{{.INITRAMFS_FILE}}"
+      - "{{.STBOOT_INITRAMFS}}"
     method: timestamp
     cmds:
       - gzip -kf {{.INITRAMFS_VARIANT}}
-      - mv {{.INITRAMFS_VARIANT}}.gz {{.INITRAMFS_FILE}}
+      - mv {{.INITRAMFS_VARIANT}}.gz {{.STBOOT_INITRAMFS}}
     status:
       - "{{.CONFIG_HELPER}} stboot:initramfs {{.DEPS}}"
-      - '[ -f "{{.INITRAMFS_FILE}}" ]'
+      - '[ -f "{{.STBOOT_INITRAMFS}}" ]'
     preconditions:
       - sh: "[ -n \"{{.ST_LINUXBOOT_VARIANT}}\" ]"
         msg: "[ERROR] Configuration ST_LINUXBOOT_VARIANT not defined in {{.CONFIG}}"
@@ -163,3 +163,37 @@ tasks:
             {{.CPUKEYS_DIR}}/cpu_rsa.pub:cpu_rsa.pub
           OUTPUT: out/artifacts/initramfs-linuxboot-debug.cpio
     run: once
+
+  provisioning-initramfs:
+    desc: "Build compressed stmgr provisioning initramfs"
+    deps:
+      - :check-config
+      - :go:u-root
+      - :go:stmgr
+      - :go:checkout-uroot
+    generates:
+      - "{{.PROVISIONING_INITRAMFS}}"
+    cmds:
+      - cmd: mkdir -p $(dirname {{.PROVISIONING_INITRAMFS}})
+        silent: true
+      - >
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb
+        -o {{.INITRAMFS}} {{.FILES_ARGS}} {{.PKGS_ARGS}}
+      - gzip -kf {{.INITRAMFS}}
+    env:
+      GO111MODULE: off
+    status:
+      - '[ -f "{{.PROVISIONING_INITRAMFS}}" ]'
+    preconditions:
+      - sh: '[ -n "{{.INITRAMFS}}" ]'
+        msg: "task bug: INITRAMFS not defined"
+    run: once
+    vars:
+      INITRAMFS:
+        sh: echo {{.PROVISIONING_INITRAMFS}} | sed -e 's/\.gz//'
+      PKGS_ARGS: >-
+        core
+      FILES: >-
+        cache/go/bin/stmgr:/bin/stmgr
+      FILES_ARGS:
+        sh: for f in {{.FILES}}; do echo -n "-files $f "; done
