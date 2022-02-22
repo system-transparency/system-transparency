@@ -183,6 +183,7 @@ tasks:
         cat > "{{.PROVISIONING_INITRC}}" <<EOL
         mount -t efivarfs none /sys/firmware/efi/efivars
         stmgr provision hostconfig {{.ST_PROVISO_STMGR_ARGS}}
+        shutdown
         EOL
     status:
       - "{{.CONFIG_HELPER}} stboot:proviso-initrc {{.DEPS}}"
