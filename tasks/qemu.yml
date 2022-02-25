@@ -77,7 +77,8 @@ tasks:
       - task: qemu
         vars:
           QEMU_ARGS: >-
-            -drive format=raw,file={{.DISK}}
+            -drive format=raw,file={{.DISK}},id=disk1,if=none
+            -device ide-hd,drive=disk1,bootindex=1
     preconditions:
       - sh: '[ -f "{{.DISK}}" ]'
         msg: |-
@@ -91,7 +92,9 @@ tasks:
       - task: qemu
         vars:
           QEMU_ARGS: >-
-            -cdrom {{.ISO}}
+            -drive file={{.ISO}},format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on
+            -device ahci,id=achi0
+            -device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=1
     preconditions:
       - sh: '[ -f "{{.ISO}}" ]'
         msg: |-
@@ -105,7 +108,9 @@ tasks:
       - task: qemu
         vars:
           QEMU_ARGS: >-
-            -cdrom {{.PROVISO}}
+            -drive file={{.PROVISO}},format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on
+            -device ahci,id=achi0
+            -device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=1
     preconditions:
       - sh: '[ -f "{{.PROVISO}}" ]'
         msg: |-
