@@ -2,13 +2,13 @@ version: '3'
 
 vars:
   UROOT_REPO: github.com/u-root/u-root
-  UROOT_VERSION: 78ac944
+  UROOT_DEFAULT_VERSION: 78ac944
   STBOOT_REPO: github.com/system-transparency/stboot
-  STBOOT_VERSION: 880b21f
+  STBOOT_DEFAULT_VERSION: 880b21f
   STMGR_REPO: github.com/system-transparency/stmgr
-  STMGR_VERSION: 1c1394b
+  STMGR_DEFAULT_VERSION: 1c1394b
   CPU_REPO: github.com/u-root/cpu
-  CPU_VERSION: a901912
+  CPU_DEFAULT_VERSION: a901912
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
@@ -107,6 +107,14 @@ tasks:
           PACKAGE: "{{.UROOT_REPO}}"
           VERSION: "{{.UROOT_VERSION}}"
     run: once
+    vars:
+      UROOT_VERSION:
+        sh: |
+          if [ -n "{{.ST_UROOT_VERSION}}" ]; then
+          echo {{.ST_UROOT_VERSION}}
+          else
+          echo {{.UROOT_DEFAULT_VERSION}}
+          fi
 
   stmgr:
     cmds:
@@ -116,6 +124,14 @@ tasks:
           PACKAGE: "{{.STMGR_REPO}}"
           VERSION: "{{.STMGR_VERSION}}"
     run: once
+    vars:
+      STMGR_VERSION:
+        sh: |
+          if [ -n "{{.ST_STMGR_VERSION}}" ]; then
+          echo {{.ST_STMGR_VERSION}}
+          else
+          echo {{.STMGR_DEFAULT_VERSION}}
+          fi
 
   cpu:
     cmds:
@@ -125,6 +141,14 @@ tasks:
           PACKAGE: "{{.CPU_REPO}}/cmds/cpu"
           VERSION: "{{.CPU_VERSION}}"
     run: once
+    vars:
+      CPU_VERSION:
+        sh: |
+          if [ -n "{{.ST_CPU_VERSION}}" ]; then
+          echo {{.ST_CPU_VERSION}}
+          else
+          echo {{.CPU_DEFAULT_VERSION}}
+          fi
 
   debos:
     cmds:
@@ -156,6 +180,14 @@ tasks:
           REPO: "{{.CPU_REPO}}"
           BRANCH: "{{.CPU_VERSION}}"
     run: once
+    vars:
+      CPU_VERSION:
+        sh: |
+          if [ -n "{{.ST_CPU_VERSION}}" ]; then
+          echo {{.ST_CPU_VERSION}}
+          else
+          echo {{.CPU_DEFAULT_VERSION}}
+          fi
 
   checkout-uroot:
     cmds:
@@ -164,6 +196,14 @@ tasks:
           REPO: "{{.UROOT_REPO}}"
           BRANCH: "{{.UROOT_VERSION}}"
     run: once
+    vars:
+      UROOT_VERSION:
+        sh: |
+          if [ -n "{{.ST_UROOT_VERSION}}" ]; then
+          echo {{.ST_UROOT_VERSION}}
+          else
+          echo {{.UROOT_DEFAULT_VERSION}}
+          fi
 
   checkout-stboot:
     cmds:
@@ -172,6 +212,14 @@ tasks:
           REPO: "{{.STBOOT_REPO}}"
           BRANCH: "{{.STBOOT_VERSION}}"
     run: once
+    vars:
+      STBOOT_VERSION:
+        sh: |
+          if [ -n "{{.ST_STBOOT_VERSION}}" ]; then
+          echo {{.ST_STBOOT_VERSION}}
+          else
+          echo {{.STBOOT_DEFAULT_VERSION}}
+          fi
 
   clean:
     cmds:
