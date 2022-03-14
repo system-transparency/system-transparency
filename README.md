@@ -136,9 +136,9 @@ task iso
 ``` bash
 
 # run stboot disk image
-task run-disk
+task qemu:disk
 # run stboot ISO image
-task run-iso
+task qemu:iso
 ```
 
 # OS-Package
@@ -166,32 +166,35 @@ A subset of the configuration options in `st.config` ends up in two JSON files w
 ## host_configuration.json
 This file is written to the root directory of the STBOOT partition. It contains host-specific data and resides on the STBOOT partition, so it can easily be modified during an orchestration process. It contains a single JSON object that stboot parses. The JSON object has the following fields:
 
-### `version ` - JSON number
+### `version` - JSON number
 The version number of the host configuration.
 
 ### `network_mode` - JSON string
 Valid values are `"static"` or `"dhcp"`. In network boot mode, it determines the setup of the network interface. Either the DHCP protocol is used or a static IP setup using the values of the fields `host_ip` and `gateway`.
 
-### `host_ip` - JSON string
+### `host_ip` - JSON string or null
 Only relevant in network boot mode and when `network_mode` is set to `"static"`. The machine's network IP address is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
 
-### `gateway` - JSON string
+### `gateway` - JSON string or null
 Only relevant in network boot mode and when `network_mode` is set to `"static"`. The machine's network default gateway is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
 
-### `dns` - JSON string
+### `dns` - JSON string or null
 Optional setting to pass a custom DNS server when using network boot mode. The value will be prefixed with `nameserver` and then written to `/etc/resolv.conf` inside the LinuxBoot initramfs. If no own setting is provided, `8.8.8.8` is used.
 
-### `network_interface` - JSON string
+### `network_interface` - JSON string or null
 Optional setting to choose a specific network interface via its MAC address when using network boot mode. The MAC is supposed to be passed in IEEE 802 MAC-48, EUI-48, or EUI-64 format, e.g `00:00:5e:00:53:01`.  If empty or if the desired network interface cannot be found, the first existing and successfully setup one will be used.
 
 ### `provisioning_urls` - JSON array of strings
 A list of provisioning server URLs. See also [Network Boot](#Network-Boot). The URLs must include the scheme (`http://` or `https://`).
 
-### `identity` - JSON string
+### `identity` - JSON string or null
 This string representation of random hex-encoded 256 bits is used for string replacement in the provisioning URLs. See [Network Boot](#Network-Boot).
 
-### `authentication` - JSON string
+### `authentication` - JSON string or null
 This string representation of random hex-encoded 256 bits is used for string replacement in the provisioning URLs. See [Network Boot](#Network-Boot).
+
+### `timestamp` - JSON number or null
+Optional Unix timestamp for system time validation.
 
 An example host_configuration.json file could look like this:
 ``` json
@@ -204,7 +207,8 @@ An example host_configuration.json file could look like this:
     "network_interface":"",
     "provisioning_urls":["http://a.server.com","https://b.server.com"],
     "identity":"8D4EA31D49AF0EB93FAB198D3FD874B0A2C7C4C4351F28A7967C8D674FE508DC",
-    "authentication":"C2F3F516A79F756E7D3128B77077B4A8AEF61E888499FD99AE92E6D4F2E7653C"
+    "authentication":"C2F3F516A79F756E7D3128B77077B4A8AEF61E888499FD99AE92E6D4F2E7653C",
+    "timestamp":1647263248
 }
 ```
 All values can be managed via `.config` so although you can easily modify this file on the image. Generally, it is recommended not to edit this file manually but control the values via the general configuration.
@@ -221,16 +225,12 @@ This value determines the minimum number of signatures that must be valid during
 ### `boot_mode ` - JSON string
 Valid values are `"local"` or `"network"`. See [Boot Modes](#Boot-Modes).
 
-### `use_ospkg_cache ` - JSON boolean
-Only relevant when using network boot mode. In case the provisioning server is down, this setting controls whether to fall back on the local cache or fail. This choice results in either risking a downgrading attack or a DoS attack.
-
 An example security_configuration.json file could look like this:
 ``` json
 {
   "version": 1,
   "min_valid_sigs_required": 2,
-  "boot_mode": "local",
-  "use_ospkg_cache": false
+  "boot_mode": "local"
 }
 ```
 
@@ -241,7 +241,7 @@ stboot extensively validates the state of the system and all data it will use in
 ## System Time Validation
 A proper system time is important for validating certificates. It is the responsibility of the operator to set the system time correctly. However, stboot performs the following check:
 
-* Look at the system time, look at the timestamp on `STDATA/stboot/etc/system_time_fix`
+* Look at the system time, look at the optional `timestamp` entry inside host configuration.
 * Set system time to the latest.
 
 The OS is allowed to update this file. Especially if it’s an embedded system without an RTC.
