@@ -19,6 +19,28 @@ vars:
   CPUKEYS_DIR: out/keys/cpu_keys
   # task helper script
   CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
+  # host configuration location
+  HOST_CONFIG_DEFAULT_PATH: /etc/host_configuration.json
+  HOST_CONFIG_DEFAULT_EFIVAR: STHostConfig-f401f2c1-b005-4be0-8cee-f2e5945bcbe7
+  HOST_CONFIG_LOCATION:
+    sh: |
+      arg="{{.ST_HOST_CONFIG_MODE}}"
+      case $arg in
+        initramfs|cdrom)
+          if [ -n "{{.ST_HOST_CONFIG_LOCATION}}" ]; then
+            echo "{{.ST_HOST_CONFIG_LOCATION}}"
+          else
+            echo "{{.HOST_CONFIG_DEFAULT_PATH}}"
+          fi
+          ;;
+        efivar)
+          if [ -n "{{.ST_HOST_CONFIG_LOCATION}}" ]; then
+            echo "{{.ST_HOST_CONFIG_LOCATION}}"
+          else
+            echo "{{.HOST_CONFIG_DEFAULT_EFIVAR}}"
+          fi
+          ;;
+      esac
 
 dotenv:
   - "{{.CONFIG}}"
@@ -86,21 +108,27 @@ tasks:
       - "xorriso -as mkisofs -R -f -e boot_partition.vfat -no-emul-boot -o {{.ISO}} cache/iso"
     preconditions:
       - sh: >-
-          [ "{{.ST_HOST_CONFIG_LOCATION}}" != "cdrom" ] ||
+          [ "{{.ST_HOST_CONFIG_MODE}}" != "cdrom" ] ||
           [ -n "{{.ST_HOST_CONFIG_FILE}}" ]
         msg: |-
           [ERROR] Configuration ST_HOST_CONFIG_FILE not defined in {{.CONFIG}}.
       - sh: >-
-          [ "{{.ST_HOST_CONFIG_LOCATION}}" != "cdrom" ] ||
+          [ "{{.ST_HOST_CONFIG_MODE}}" != "cdrom" ] ||
           [ -f "{{.ST_HOST_CONFIG_FILE}}" ]
         msg: |-
           [ERROR] Host configuration file {{.ST_HOST_CONFIG_FILE}} missing.
+      - sh: >-
+          [ "{{.ST_HOST_CONFIG_MODE}}" != "cdrom" ] ||
+          [ -n "{{.HOST_CONFIG_LOCATION}}" ]
+        msg: |-
+          [ERROR] task bug: Could not determine host configuration path.
     run: once
     vars:
       CMD_COPY_HOST_CONFIG:
-        sh: |
-          if [ "{{.ST_HOST_CONFIG_LOCATION}}" = "cdrom" ]; then
-          echo "cp {{.ST_HOST_CONFIG_FILE}} cache/iso/host_configuration.json"
+        sh: >-
+          if [ "{{.ST_HOST_CONFIG_MODE}}" = "cdrom" ]; then
+          echo "mkdir -p $(dirname cache/iso/{{.HOST_CONFIG_LOCATION}}) &&
+          cp {{.ST_HOST_CONFIG_FILE}} cache/iso/{{.HOST_CONFIG_LOCATION}}";
           fi
 
   disk:
@@ -174,10 +202,10 @@ tasks:
       BOOT_PART_SCRIPT: ./scripts/boot_partition.sh
       HOST_CONFIG_ARG:
         sh: >
-          [ "{{.ST_HOST_CONFIG_LOCATION}}" != "legacy" ] ||
+          [ "{{.ST_HOST_CONFIG_MODE}}" != "legacy" ] ||
           echo "--host-config {{.ST_HOST_CONFIG_FILE}}"
       DEPS: >-
-        ST_HOST_CONFIG_LOCATION
+        ST_HOST_CONFIG_MODE
 
   data-part:
     deps:
@@ -263,16 +291,16 @@ tasks:
 
   check-disk:
     preconditions:
-      - sh: '[ "{{.ST_HOST_CONFIG_LOCATION}}" != "cdrom" ]'
-        msg: '[ERROR] disk image does not support ST_HOST_CONFIG_LOCATION="cdrom".'
+      - sh: '[ "{{.ST_HOST_CONFIG_MODE}}" != "cdrom" ]'
+        msg: '[ERROR] disk image does not support ST_HOST_CONFIG_MODE="cdrom".'
     run: once
 
   check-iso:
     preconditions:
       - sh: '[ "{{.ST_BOOT_MODE}}" == "network" ]'
         msg: '[ERROR] ISO image does only support network boot mode'
-      - sh: '[ "{{.ST_HOST_CONFIG_LOCATION}}" != "legacy" ]'
-        msg: '[ERROR] ISO image does not support ST_HOST_CONFIG_LOCATION="legacy".'
+      - sh: '[ "{{.ST_HOST_CONFIG_MODE}}" != "legacy" ]'
+        msg: '[ERROR] ISO image does not support ST_HOST_CONFIG_MODE="legacy".'
     run: once
 
 ######## cleanup ########
