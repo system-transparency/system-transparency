@@ -132,6 +132,9 @@ tasks:
       - sh: '[ -f "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
           [ERROR] linux configuration file {{.ST_LINUXBOOT_KERNEL_CONFIG}} missing.
+      - sh: '! (echo "{{.ST_LINUXBOOT_CMDLINE}}" | grep -q uroot.uinitargs) || [ -z "{{.ST_STBOOT_ARGS}}" ]'
+        msg: |-
+          [ERROR] kernel parameter "uroot.uinitargs" not supported if ST_STBOOT_ARGS is set
     status:
       - "{{.CONFIG_HELPER}} linux:kernel {{.DEPS}}"
       - "[ -f {{.LINUXBOOT_IMAGE}} ]"
