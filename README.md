@@ -313,18 +313,18 @@ The verification process in stboot:
 # Debugging
 
 ## Console Output
-The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in `.config`. Besides the usual kernel parameters, you can pass flags to stboot via the special parameter `uroot.uinitargs`.
+The output of stboot can be controlled via the LinuxBoot kernel command line. You can edit the command line in `st.config`. Besides the usual kernel parameters, you can pass flags to stboot via the special parameter `uroot.uinitargs` or via `ST_STBOOT_ARGS` config.
 * To enable debug output in stboot pass `-debug`
 * To see not only the LinuxBoot kernel's but also stboot's output on all defined consoles (not on the last one defined only) pass `-klog`
 
 Examples:
 
-* Print output to multiple consoles: `console=tty0 console=ttyS0,115200 printk.devkmsg=on uroot.uinitargs="-debug -klog"` (input is still taken from the last console defined. Furthermore, it can happen that certain messages are only displayed on the last console)
+* Print output to multiple consoles: `console=tty0 console=ttyS0,115200 printk.devkmsg=on uroot.uinitargs=\"-debug -klog\"` (input is still taken from the last console defined. Furthermore, it can happen that certain messages are only displayed on the last console)
 
 * Print minimal output: `console=ttyS0,115200`
 
 ## u-root Shell
-By setting `ST_LINUXBOOT_VARIANT=full` in `.config` the LinuxBoot initramfs will contain a shell and u-root's core commands (https://github.com/u-root/u-root/tree/stboot/cmds/core) in addition to stboot itself. So while stboot is running, you can press `ctrl+c` to exit. You are then dropped into a shell and can inspect the system and use the core commands of u-root.
+By setting `ST_LINUXBOOT_VARIANT=full` in `st.config` the LinuxBoot initramfs will contain a shell and u-root's core commands (https://github.com/u-root/u-root/tree/stboot/cmds/core) in addition to stboot itself. So while stboot is running, you can press `ctrl+c` to exit. You are then dropped into a shell and can inspect the system and use the core commands of u-root.
 
 ## Remote Debugging Using the CPU Command
 To do extensive remote debugging of the host, you can use u-root's cpu command. Since the stboot image running on the host has much fewer tools and services than usual Linux operating systems, the `cpu` command is a well-suited option for debugging the host remotely.
