@@ -56,12 +56,11 @@ tasks:
     cmds:
       - cp {{.ST_LINUXBOOT_KERNEL_CONFIG}} {{.KERNEL_CONFIG}}
       - cmd: >
-          if [ -n "{{.ST_LINUXBOOT_CMDLINE}}" ]; then
+          if [ -n '{{.ST_LINUXBOOT_CMDLINE}}' ]; then
           echo 'Overriding CONFIG_CMDLINE with
-          ST_LINUXBOOT_CMDLINE="{{.ST_LINUXBOOT_CMDLINE}}"';
-          sed -ie
-          's/CONFIG_CMDLINE=.*/CONFIG_CMDLINE="{{._ST_LINUXBOOT_CMDLINE}}"/g'
-          {{.KERNEL_CONFIG}};
+          ST_LINUXBOOT_CMDLINE="{{._ST_LINUXBOOT_CMDLINE}}"';
+          sed -ie '/CONFIG_CMDLINE=.*/d' {{.KERNEL_CONFIG}};
+          echo 'CONFIG_CMDLINE="{{._ST_LINUXBOOT_CMDLINE}}"' >> {{.KERNEL_CONFIG}};
           fi
         silent: true
       - echo 'CONFIG_INITRAMFS_SOURCE="{{._INITRAMFS}}"' >> {{.KERNEL_CONFIG}};
@@ -75,10 +74,12 @@ tasks:
       - "[ -f {{.KERNEL_CONFIG}} ]"
     vars:
       INITRAMFS: "{{.INITRAMFS}}"
+      # use absolute path
       _INITRAMFS:
         sh: realpath {{.INITRAMFS}}
+      # escape double quotes
       _ST_LINUXBOOT_CMDLINE:
-        sh: printf '%s\n' {{.ST_LINUXBOOT_CMDLINE}} | sed -e 's/[\/&]/\\&/g'
+        sh: printf '%s' '{{.ST_LINUXBOOT_CMDLINE}}' | sed 's/"/\\"/g'
       DEPS: >-
         ST_LINUXBOOT_KERNEL_VERSION
         ST_LINUXBOOT_KERNEL_CONFIG
@@ -132,6 +133,9 @@ tasks:
       - sh: '[ -f "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
           [ERROR] linux configuration file {{.ST_LINUXBOOT_KERNEL_CONFIG}} missing.
+      - sh: '! (echo "{{.ST_LINUXBOOT_CMDLINE}}" | grep -q uroot.uinitargs) || [ -z "{{.ST_STBOOT_ARGS}}" ]'
+        msg: |-
+          [ERROR] kernel parameter "uroot.uinitargs" not supported if ST_STBOOT_ARGS is set
     status:
       - "{{.CONFIG_HELPER}} linux:kernel {{.DEPS}}"
       - "[ -f {{.LINUXBOOT_IMAGE}} ]"
