@@ -83,6 +83,9 @@ tasks:
       - task
       - u-root
       - stmgr
+      - checkout-cpu
+      - checkout-uroot
+      - checkout-stboot
 
   update:
     cmds:

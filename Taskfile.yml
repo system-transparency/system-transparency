@@ -62,6 +62,13 @@ tasks:
       - task -l
     interactive: true
 
+  fetch:
+    desc: Fetch dependencies which require network access
+    deps:
+      - check-config
+      - go:all
+      - linux:fetch
+
   images:
     desc: Build stboot images
     deps:
