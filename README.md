@@ -176,7 +176,7 @@ Valid values are `"static"` or `"dhcp"`. In network boot mode, it determines the
 Only relevant in network boot mode and when `network_mode` is set to `"static"`. The machine's network IP address is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
 
 ### `gateway` - JSON string or null
-Only relevant in network boot mode and when `network_mode` is set to `"static"`. The machine's network default gateway is supposed to be passed in CIDR notation like "192.0.2.0/24" or "2001:db8::/32".
+Only relevant in network boot mode and when `network_mode` is set to `"static"`. The machine's network default gateway is supposed to be passed as an IP address like "192.0.2.0" or "2001:db8::".
 
 ### `dns` - JSON string or null
 Optional setting to pass a custom DNS server when using network boot mode. The value will be prefixed with `nameserver` and then written to `/etc/resolv.conf` inside the LinuxBoot initramfs. If no own setting is provided, `8.8.8.8` is used.
