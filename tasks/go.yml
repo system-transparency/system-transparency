@@ -101,7 +101,6 @@ tasks:
         vars:
           NAME: task
           PACKAGE: github.com/go-task/task/v3/cmd/task
-          VERSION: v3.10.0
     run: once
 
   u-root:
