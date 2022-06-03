@@ -250,7 +250,7 @@ The OS is allowed to update this file. Especially if it’s an embedded system w
 stboot supports two boot methods - Network and Local. In _Network_ mode, stboot loads an OS package from a provisioning server. In _Local_ mode, stboot loads an OS package from the STDATA partition on a local disk. Only one boot method at a time may be configured.
 
 ### Network Boot
-Network boot can be configured using either DHCP or a static network configuration. In the case of a static network, stboot uses IP address, netmask, default gateway, and DNS server from `host_configuration.json`. The latest downloaded and verified OS package can be cached depending on settings in `security_configuration.json`. Older ones are removed. The cache directory is separate from the directory used by the Local boot method.
+Network boot can be configured using either DHCP or a static network configuration. In the case of a static network, stboot uses IP address, netmask, default gateway, and DNS server from `host_configuration.json`.
 
 Provisioning Server Communication:
 * The HTTPS root certificates are stored in the LinuxBoot initramfs
@@ -270,14 +270,7 @@ For each provisioning server URL in `host_configuration.json`:
 * Try downloading the OS package descriptor (JSON file).
 * Extract the OS package URL.
 * Check the filename in the OS package URL. (must be `.zip`)
-    * Compare the provisioning server OS package filename with the one in the cache. Download if they don’t match.
 * Try downloading the OS package
-
-In case the provisioning server is down, the operator has to choose whether to fall back on the local cache or fail. This choice results in either risking a downgrading attack or a DoS attack.
-
-* Save the path name to the OS package which is about to be booted in `STDATA/stboot/etc/current_ospkg_pathname`
-     * (all caps note in case of uncached network loaded OS package)
-* Cache path: `STDATA/stboot/os_pkgs/cache/`
 
 ### Local Boot
 * Local storage: `STDATA/stboot/os_pkgs/local/`

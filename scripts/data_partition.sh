@@ -59,7 +59,6 @@ e2mkdir "${output}.tmp":/stboot
 e2mkdir "${output}.tmp":/stboot/etc
 e2mkdir "${output}.tmp":/stboot/os_pkgs
 e2mkdir "${output}.tmp":/stboot/os_pkgs/local
-e2mkdir "${output}.tmp":/stboot/os_pkgs/cache
 
 timestamp_dir=$(mktemp -d)
 trap "rm -r ${timestamp_dir}" EXIT
