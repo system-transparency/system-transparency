@@ -221,7 +221,7 @@ tasks:
       INITRAMFS:
         sh: echo {{.PROVISIONING_INITRAMFS}} | sed -e 's/\.gz//'
       PKGS_ARGS: >-
-        core
+        {{.UROOT_CORE_PKGS}}
       FILES: >-
         cache/go/bin/stmgr:/bin/stmgr
         {{.PROVISIONING_INITRC}}:.elvish/rc.elv
