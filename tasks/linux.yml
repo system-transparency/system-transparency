@@ -79,29 +79,32 @@ tasks:
     sources:
       - ./{{.KERNEL_BZIMAGE}}
     generates:
-      - ./{{.LINUX_KERNEL}}
+      - ./{{.KERNEL_IMAGE}}
     method: timestamp
     cmds:
       - task: fetch
       - task: unpack
       - task: config
       - task: build
-      - mkdir -p {{.LINUX_KERNEL_DIR}}
-      - cp {{.KERNEL_BZIMAGE}} {{.LINUX_KERNEL}}
+      - mkdir -p $(dirname {{.KERNEL_DIR}})
+      - cp {{.KERNEL_BZIMAGE}} {{.KERNEL_IMAGE}}
     preconditions:
+      - sh: '[ -n "{{.ST_LINUXBOOT_KERNEL_IMAGE}}" ] || [ -f {{.ST_LINUXBOOT_KERNEL_IMAGE}} ]'
+        msg: |-
+          [ERROR] linux kernel image {{.ST_LINUXBOOT_KERNEL_IMAGE}} not found.
       - sh: '[ -n "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
-          [ERROR] Configuration ST_LINUXBOOT_KERNEL_CONFIG not defined in {{.CONFIG}}.
+          [ERROR] configuration ST_LINUXBOOT_KERNEL_CONFIG not defined in {{.CONFIG}}.
       - sh: '[ -f "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
           [ERROR] linux configuration file {{.ST_LINUXBOOT_KERNEL_CONFIG}} missing.
     status:
-      - "{{.CONFIG_HELPER}} linux:kernel {{.DEPS}}"
-      - "[ -f {{.LINUXBOOT_LINUX_KERNEL}} ]"
+      # do not build if ST_LINUXBOOT_KERNEL_IMAGE is set
+      - >
+        [ -n "{{.ST_LINUXBOOT_KERNEL_IMAGE}}" ] ||
+        ({{.CONFIG_HELPER}} linux:kernel {{.DEPS}} && [ -f "{{.KERNEL_IMAGE}}" ])
     run: when_changed
     vars:
-      LINUX_KERNEL_DIR:
-        sh: dirname {{.LINUX_KERNEL}}
       DEPS: >-
         ST_LINUXBOOT_KERNEL_VERSION
         ST_LINUXBOOT_KERNEL_CONFIG
@@ -111,7 +114,7 @@ tasks:
       - kernel
       - :{{.INITRAMFS_TARGET}}
     sources:
-      - ./{{.LINUX_KERNEL}}
+      - ./{{.KERNEL_IMAGE}}
       - ./{{.INITRAMFS}}
     generates:
       - ./{{.IMAGE}}
@@ -121,7 +124,7 @@ tasks:
       - >
         objcopy
         {{.CMDLINE_ARG}}
-        --add-section .linux="{{.LINUX_KERNEL}}" --change-section-vma .linux=0x2000000
+        --add-section .linux="{{.KERNEL_IMAGE}}" --change-section-vma .linux=0x2000000
         --add-section .initrd="{{.INITRAMFS}}" --change-section-vma .initrd=0x3000000
         {{.EFI_STUB}} {{.IMAGE}}
     preconditions:

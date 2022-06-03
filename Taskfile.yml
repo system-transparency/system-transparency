@@ -10,7 +10,13 @@ vars:
   # Build Artifacts
   DATA_PART: out/artifacts/data_partition.ext4
   BOOT_PART: out/artifacts/boot_partition.vfat
-  LINUX_KERNEL: out/artifacts/vmlinux
+  KERNEL_IMAGE:
+    sh: |
+      if [ -n "{{.ST_LINUXBOOT_KERNEL_IMAGE}}" ]; then
+        echo {{.ST_LINUXBOOT_KERNEL_IMAGE}}
+      else
+        echo out/artifacts/vmlinux
+      fi
   STBOOT_LINUX_IMAGE: out/artifacts/stboot.efi
   PROVISIONING_LINUX_IMAGE: out/artifacts/proviso.efi
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
