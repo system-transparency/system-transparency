@@ -10,8 +10,9 @@ vars:
   # Build Artifacts
   DATA_PART: out/artifacts/data_partition.ext4
   BOOT_PART: out/artifacts/boot_partition.vfat
-  STBOOT_LINUX_IMAGE: out/artifacts/stboot.vmlinuz
-  PROVISIONING_LINUX_IMAGE: out/artifacts/proviso.vmlinuz
+  LINUX_KERNEL: out/artifacts/vmlinux
+  STBOOT_LINUX_IMAGE: out/artifacts/stboot.efi
+  PROVISIONING_LINUX_IMAGE: out/artifacts/proviso.efi
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   PROVISIONING_INITRAMFS: out/artifacts/proviso.cpio.gz
   SECURITY_CONFIG: out/artifacts/security_configuration.json
@@ -161,7 +162,7 @@ tasks:
     desc: Build provisioning iso image
     deps:
       - check-config
-      - task: linux:kernel
+      - task: linux:efi
         vars:
           IMAGE: "{{.PROVISIONING_LINUX_IMAGE}}"
           INITRAMFS: "{{.PROVISIONING_INITRAMFS}}"
@@ -188,7 +189,7 @@ tasks:
   boot-part:
     deps:
       - check-config
-      - task: linux:kernel
+      - task: linux:efi
         vars:
           IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
           INITRAMFS: "{{.STBOOT_INITRAMFS}}"

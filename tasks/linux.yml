@@ -50,103 +50,101 @@ tasks:
   config:
     sources:
       - ./{{.ST_LINUXBOOT_KERNEL_CONFIG}}
-      - ./{{.INITRAMFS}}
     generates:
       - ./{{.KERNEL_CONFIG}}
     cmds:
       - cp {{.ST_LINUXBOOT_KERNEL_CONFIG}} {{.KERNEL_CONFIG}}
-      - cmd: >
-          if [ -n '{{.ST_LINUXBOOT_CMDLINE}}' ]; then
-          echo 'Overriding CONFIG_CMDLINE with
-          ST_LINUXBOOT_CMDLINE="{{._ST_LINUXBOOT_CMDLINE}}"';
-          sed -ie '/CONFIG_CMDLINE=.*/d' {{.KERNEL_CONFIG}};
-          echo 'CONFIG_CMDLINE="{{._ST_LINUXBOOT_CMDLINE}}"' >> {{.KERNEL_CONFIG}};
-          fi
-        silent: true
-      - echo 'CONFIG_INITRAMFS_SOURCE="{{._INITRAMFS}}"' >> {{.KERNEL_CONFIG}};
       - make -C {{.KERNEL_DIR}} -s olddefconfig
-    preconditions:
-      - sh: '[ -n "{{.INITRAMFS}}" ]'
-        msg: 'task bug: INITRAMFS not defined'
     run: when_changed
     status:
       - "{{.CONFIG_HELPER}} linux:config {{.DEPS}}"
       - "[ -f {{.KERNEL_CONFIG}} ]"
     vars:
-      INITRAMFS: "{{.INITRAMFS}}"
-      # use absolute path
-      _INITRAMFS:
-        sh: realpath {{.INITRAMFS}}
-      # escape double quotes
-      _ST_LINUXBOOT_CMDLINE:
-        sh: printf '%s' '{{.ST_LINUXBOOT_CMDLINE}}' | sed 's/"/\\"/g'
       DEPS: >-
         ST_LINUXBOOT_KERNEL_VERSION
         ST_LINUXBOOT_KERNEL_CONFIG
-        ST_LINUXBOOT_CMDLINE
 
   build:
     sources:
       - ./{{.KERNEL_CONFIG}}
-      - ./{{.INITRAMFS}}
     generates:
       - ./{{.KERNEL_BZIMAGE}}
     cmds:
       - make -C {{.KERNEL_DIR}} -j$(nproc) bzImage
-    preconditions:
-      - sh: '[ -n "{{.INITRAMFS}}" ]'
-        msg: 'task bug: INITRAMFS not defined'
     run: when_changed
-    vars:
-      INITRAMFS: "{{.INITRAMFS}}"
 
   kernel:
     deps:
       - :check-config
-      - :{{.INITRAMFS_TARGET}}
     sources:
       - ./{{.KERNEL_BZIMAGE}}
-      - ./{{.INITRAMFS}}
     generates:
-      - ./{{.IMAGE}}
+      - ./{{.LINUX_KERNEL}}
     method: timestamp
     cmds:
       - task: fetch
       - task: unpack
       - task: config
-        vars:
-          INITRAMFS: '{{.INITRAMFS}}'
       - task: build
-        vars:
-          INITRAMFS: '{{.INITRAMFS}}'
-      - cp {{.KERNEL_BZIMAGE}} {{.IMAGE}}
+      - mkdir -p {{.LINUX_KERNEL_DIR}}
+      - cp {{.KERNEL_BZIMAGE}} {{.LINUX_KERNEL}}
     preconditions:
-      - sh: '[ -n "{{.INITRAMFS}}" ]'
-        msg: 'task bug: INITRAMFS not defined'
-      - sh: '[ -n "{{.INITRAMFS_TARGET}}" ]'
-        msg: 'task bug: INITRAMFS_TARGET not defined'
-      - sh: '[ -n "{{.IMAGE}}" ]'
-        msg: 'task bug: IMAGE not defined'
       - sh: '[ -n "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
           [ERROR] Configuration ST_LINUXBOOT_KERNEL_CONFIG not defined in {{.CONFIG}}.
       - sh: '[ -f "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
           [ERROR] linux configuration file {{.ST_LINUXBOOT_KERNEL_CONFIG}} missing.
-      - sh: '! (echo "{{.ST_LINUXBOOT_CMDLINE}}" | grep -q uroot.uinitargs) || [ -z "{{.ST_STBOOT_ARGS}}" ]'
-        msg: |-
-          [ERROR] kernel parameter "uroot.uinitargs" not supported if ST_STBOOT_ARGS is set
     status:
       - "{{.CONFIG_HELPER}} linux:kernel {{.DEPS}}"
-      - "[ -f {{.LINUXBOOT_IMAGE}} ]"
+      - "[ -f {{.LINUXBOOT_LINUX_KERNEL}} ]"
     run: when_changed
     vars:
-      INITRAMFS: '{{.INITRAMFS}}'
-      INITRAMFS_TARGET: '{{.INITRAMFS_TARGET}}'
-      IMAGE: '{{.IMAGE}}'
+      LINUX_KERNEL_DIR:
+        sh: dirname {{.LINUX_KERNEL}}
       DEPS: >-
         ST_LINUXBOOT_KERNEL_VERSION
         ST_LINUXBOOT_KERNEL_CONFIG
+
+  efi:
+    deps:
+      - kernel
+      - :{{.INITRAMFS_TARGET}}
+    sources:
+      - ./{{.LINUX_KERNEL}}
+      - ./{{.INITRAMFS}}
+    generates:
+      - ./{{.IMAGE}}
+    method: timestamp
+    # TODO: Add system-transparency os-release entry
+    cmds:
+      - >
+        objcopy
+        {{.CMDLINE_ARG}}
+        --add-section .linux="{{.LINUX_KERNEL}}" --change-section-vma .linux=0x2000000
+        --add-section .initrd="{{.INITRAMFS}}" --change-section-vma .initrd=0x3000000
+        {{.EFI_STUB}} {{.IMAGE}}
+    preconditions:
+      - sh: '[ -n "{{.IMAGE}}" ]'
+        msg: 'task bug: IMAGE not defined'
+      - sh: '[ -n "{{.INITRAMFS}}" ]'
+        msg: 'task bug: INITRAMFS not defined'
+      - sh: '[ -n "{{.INITRAMFS_TARGET}}" ]'
+        msg: 'task bug: INITRAMFS_TARGET not defined'
+    status:
+      - "{{.CONFIG_HELPER}} linux:efi {{.DEPS}}"
+    vars:
+      # TODO: remove systemd dependency
+      EFI_STUB:
+        "/usr/lib/systemd/boot/efi/linuxx64.efi.stub"
+      CMDLINE_TXT: out/artifacts/cmdline.txt
+      CMDLINE_ARG:
+        sh: |
+          if [ -n "{{.ST_LINUXBOOT_CMDLINE}}" ]; then
+            echo "{{.ST_LINUXBOOT_CMDLINE}}" > {{.CMDLINE_TXT}}
+            echo '--add-section .cmdline="{{.CMDLINE_TXT}}" --c-section-vma .cmdline=0x30000'
+          fi
+      DEPS: >-
         ST_LINUXBOOT_CMDLINE
 
   # TODO: add keyring integrity check
