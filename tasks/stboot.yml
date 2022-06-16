@@ -28,11 +28,11 @@ tasks:
     method: timestamp
     cmds:
       - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.HOST_CONFIG_ARG}} {{.ST_STBOOT_ARGS}}" -defaultsh=""
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=gbb
+        -uroot-source {{.GOPATH}}/src/{{.UROOT_REPO}}
+        -uinitcmd="stboot {{.HOST_CONFIG_ARG}} {{.ST_STBOOT_ARGS}}" -defaultsh=""
         -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
-    env:
-      GO111MODULE: off
     preconditions:
       - sh: "[ -n \"{{.OUTPUT}}\" ]"
         msg: "task bug: OUTPUT not defined"
@@ -94,7 +94,7 @@ tasks:
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f "; done
       PKGS_ARGS: >-
-        {{.STBOOT_REPO}}
+        {{.GOPATH}}/src/{{.STBOOT_REPO}}
         {{.PKGS}}
       OUTPUT: "{{.OUTPUT}}"
 
@@ -130,26 +130,16 @@ tasks:
       - task: u-root
         vars:
           PKGS: >-
-            {{.UROOT_REPO}}/cmds/core/init
+            cmds/core/init
           OUTPUT: out/artifacts/initramfs-linuxboot-minimal.cpio
     run: once
 
   initramfs-full:
-    deps:
-      - :go:cpu
-      - :go:checkout-cpu
-      - :cpu-sshkeys
     cmds:
       - task: u-root
         vars:
-          FILES: >-
-            {{.INITRAMFS_INCLUDE}}/netsetup.elv:netsetup.elv
-            {{.INITRAMFS_INCLUDE}}/start_cpu.elv:start_cpu.elv
-            {{.CPUKEYS_DIR}}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key
-            {{.CPUKEYS_DIR}}/cpu_rsa.pub:cpu_rsa.pub
           PKGS: >-
             {{.UROOT_CORE_PKGS}}
-            github.com/u-root/cpu/cmds/cpud
           OUTPUT: out/artifacts/initramfs-linuxboot-full.cpio
     run: once
 
@@ -208,11 +198,10 @@ tasks:
       - cmd: mkdir -p $(dirname {{.PROVISIONING_INITRAMFS}})
         silent: true
       - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb
+        {{.GOPREFIX}} {{.GOBIN}}/u-root
+        -build=gbb -uroot-source {{.GOPATH}}/src/{{.UROOT_REPO}}
         -o {{.INITRAMFS}} {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - gzip -kf {{.INITRAMFS}}
-    env:
-      GO111MODULE: off
     preconditions:
       - sh: '[ -n "{{.INITRAMFS}}" ]'
         msg: "task bug: INITRAMFS not defined"

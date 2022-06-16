@@ -2,9 +2,9 @@ version: '3'
 
 vars:
   UROOT_REPO: github.com/u-root/u-root
-  UROOT_DEFAULT_VERSION: 78ac944
+  UROOT_DEFAULT_VERSION: 896bb9a
   STBOOT_REPO: github.com/system-transparency/stboot
-  STBOOT_DEFAULT_VERSION: 4b208b7
+  STBOOT_DEFAULT_VERSION: e922f66
   STMGR_REPO: github.com/system-transparency/stmgr
   STMGR_DEFAULT_VERSION: 1c1394b
   CPU_REPO: github.com/u-root/cpu
@@ -38,8 +38,6 @@ tasks:
     cmds:
       - "git -C cache/go/src/{{.REPO}} fetch --quiet"
       - "git -C cache/go/src/{{.REPO}} checkout --quiet {{.BRANCH}}"
-    env:
-      GO111MODULE: off
     deps:
       - task: get
         vars:
