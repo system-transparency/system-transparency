@@ -146,7 +146,7 @@ tasks:
           if [ -n "{{.ST_LINUXBOOT_CMDLINE}}" ]; then
             mkdir -p $(dirname {{.CMDLINE_TXT}})
             echo "{{.ST_LINUXBOOT_CMDLINE}}" > {{.CMDLINE_TXT}}
-            echo '--add-section .cmdline="{{.CMDLINE_TXT}}" --c-section-vma .cmdline=0x30000'
+            echo '--add-section .cmdline="{{.CMDLINE_TXT}}" --change-section-vma .cmdline=0x30000'
           fi
       DEPS: >-
         ST_LINUXBOOT_CMDLINE
