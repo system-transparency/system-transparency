@@ -11,7 +11,7 @@ vars:
   DPKGS: >-
     curl xz-utils git gcc make bc golang dosfstools udev
     flex bison pkg-config libelf-dev gpg jq e2tools mtools
-    parted xorriso
+    parted xorriso systemd
 
 tasks:
 

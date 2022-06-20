@@ -137,7 +137,6 @@ tasks:
     status:
       - "{{.CONFIG_HELPER}} linux:efi {{.DEPS}}"
     vars:
-      # TODO: remove systemd dependency
       EFI_STUB:
         "/usr/lib/systemd/boot/efi/linuxx64.efi.stub"
       CMDLINE_TXT: out/artifacts/cmdline.txt
