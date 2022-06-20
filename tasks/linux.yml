@@ -86,7 +86,7 @@ tasks:
       - task: unpack
       - task: config
       - task: build
-      - mkdir -p $(dirname {{.KERNEL_DIR}})
+      - mkdir -p $(dirname {{.KERNEL_IMAGE}})
       - cp {{.KERNEL_BZIMAGE}} {{.KERNEL_IMAGE}}
     preconditions:
       - sh: '[ -n "{{.ST_LINUXBOOT_KERNEL_IMAGE}}" ] || [ -f {{.ST_LINUXBOOT_KERNEL_IMAGE}} ]'

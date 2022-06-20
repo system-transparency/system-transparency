@@ -249,6 +249,11 @@ tasks:
       DEPS: >-
         ST_DATA_PARTITION_EXTRA_SPACE
 
+  kernel:
+    desc: Build linux kernel
+    cmds:
+      - task: linux:kernel
+
   security-config:
     deps:
       - check-config
