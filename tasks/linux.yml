@@ -119,11 +119,13 @@ tasks:
     generates:
       - ./{{.IMAGE}}
     method: timestamp
-    # TODO: Add system-transparency os-release entry
     cmds:
+      - mkdir -p $(dirname {{.CMDLINE_TXT}})
+      - echo "{{.ST_LINUXBOOT_CMDLINE}}" > {{.CMDLINE_TXT}}
       - >
         objcopy
-        {{.CMDLINE_ARG}}
+        --add-section .osrel="{{.OS_RELEASE}}" --change-section-vma .osrel=0x20000
+        --add-section .cmdline="{{.CMDLINE_TXT}}" --change-section-vma .cmdline=0x30000
         --add-section .linux="{{.KERNEL_IMAGE}}" --change-section-vma .linux=0x2000000
         --add-section .initrd="{{.INITRAMFS}}" --change-section-vma .initrd=0x3000000
         {{.EFI_STUB}} {{.IMAGE}}
@@ -137,16 +139,9 @@ tasks:
     status:
       - "{{.CONFIG_HELPER}} linux:efi {{.DEPS}}"
     vars:
-      EFI_STUB:
-        "/usr/lib/systemd/boot/efi/linuxx64.efi.stub"
+      EFI_STUB: /usr/lib/systemd/boot/efi/linuxx64.efi.stub
       CMDLINE_TXT: out/artifacts/cmdline.txt
-      CMDLINE_ARG:
-        sh: |
-          if [ -n "{{.ST_LINUXBOOT_CMDLINE}}" ]; then
-            mkdir -p $(dirname {{.CMDLINE_TXT}})
-            echo "{{.ST_LINUXBOOT_CMDLINE}}" > {{.CMDLINE_TXT}}
-            echo '--add-section .cmdline="{{.CMDLINE_TXT}}" --change-section-vma .cmdline=0x30000'
-          fi
+      OS_RELEASE: contrib/os-release
       DEPS: >-
         ST_LINUXBOOT_CMDLINE
 

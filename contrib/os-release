@@ -1,0 +1,6 @@
+NAME="System Transparency"
+PRETTY_NAME="System Transparency"
+ID=stboot
+BUILD_ID=rolling
+HOME_URL="https://www.system-transparency.org/"
+BUG_REPORT_URL="https://github.com/system-transparency/system-transparency/issues"
