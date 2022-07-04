@@ -76,11 +76,8 @@ tasks:
   kernel:
     deps:
       - :check-config
-    sources:
-      - ./{{.KERNEL_BZIMAGE}}
     generates:
       - ./{{.KERNEL_IMAGE}}
-    method: timestamp
     cmds:
       - task: fetch
       - task: unpack
@@ -89,6 +86,9 @@ tasks:
       - mkdir -p $(dirname {{.KERNEL_IMAGE}})
       - cp {{.KERNEL_BZIMAGE}} {{.KERNEL_IMAGE}}
     preconditions:
+      - sh: '[ -z "{{.ST_LINUXBOOT_KERNEL_IMAGE}}" ] || [ -f "{{.ST_LINUXBOOT_KERNEL_IMAGE}}" ]'
+        msg: |-
+          [ERROR] kernel image "{{.ST_LINUXBOOT_KERNEL_IMAGE}}" not found
       - sh: '[ -n "{{.ST_LINUXBOOT_KERNEL_IMAGE}}" ] || [ -f {{.ST_LINUXBOOT_KERNEL_IMAGE}} ]'
         msg: |-
           [ERROR] linux kernel image {{.ST_LINUXBOOT_KERNEL_IMAGE}} not found.
