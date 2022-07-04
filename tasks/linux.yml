@@ -29,7 +29,7 @@ tasks:
       - sh: '[ -n "{{.KERNEL_TARBALL_URL}}" ]'
         msg: 'task bug: KERNEL_TARBALL_URL not defined'
     status:
-      - "[ -f {{.KERNEL_TARBALL_FILE}} ]"
+      - '[ -n "{{.ST_LINUXBOOT_KERNEL_IMAGE}}" ] || [ -f "{{.KERNEL_TARBALL_FILE}}" ]'
     run: once
 
   unpack:
