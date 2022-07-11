@@ -95,14 +95,6 @@ tasks:
       - task: all
     run: once
 
-  task:
-    cmds:
-      - task: install
-        vars:
-          NAME: task
-          PACKAGE: github.com/go-task/task/v3/cmd/task
-    run: once
-
   u-root:
     cmds:
       - task: install
