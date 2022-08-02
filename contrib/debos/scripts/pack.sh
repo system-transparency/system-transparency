@@ -2,6 +2,7 @@
 
 set -o errexit
 set -o nounset
+set -o pipefail
 # set -o xtrace
 
 kernel_out="$ARTIFACTDIR/$1.vmlinuz"
