@@ -109,6 +109,11 @@ task demo:ospkg
 
 It builds an example Debian OS image with [debos](https://github.com/go-debos/debos) and uses stmgr to convert it to an OS package.
 
+```bash
+task demo:server
+```
+
+Will start the HTTP server stboot will read the package from. Remember to run it before booting the stboot machine.
 
 # Installation
 To bring System Transparency to your systems, you need to deploy an installation image. Run the following to create an image.
