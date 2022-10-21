@@ -8,5 +8,8 @@
    "provisioning_urls": ["http://10.0.2.2:8080/os-pkg-example-ubuntu20.json"],
    "identity":null,
    "authentication":null,
-   "timestamp":null
+   "timestamp":null,
+   "network_interfaces": [],
+   "bonding_mode": "",
+   "bond_name": ""
 }
