@@ -60,7 +60,7 @@ tasks:
 
   install:
     cmds:
-      - '{{.GOPREFIX}} go install {{.PACKAGE}}@{{.VERSION}}'
+      - '{{.GOPREFIX}} go install -ldflags "{{.GO_LDFLAGS}}" {{.PACKAGE}}@{{.VERSION}}'
       # create version file
       - cmd: 'echo "{{.VERSION}}" > {{.GOBIN}}/.{{.NAME}}'
         silent: true
@@ -77,6 +77,7 @@ tasks:
       - 'grep -q {{.VERSION}} {{.GOBIN}}/.{{.NAME}}'
     vars:
       VERSION: '{{default "latest" .VERSION}}'
+      GO_LDFLAGS: '{{default "" .GO_LDFLAGS}}'
 
   all:
     deps:
