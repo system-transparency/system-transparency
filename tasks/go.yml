@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   UROOT_REPO: github.com/u-root/u-root
-  UROOT_DEFAULT_VERSION: 78ac944
+  UROOT_DEFAULT_VERSION: v0.10.0
   STBOOT_REPO: github.com/system-transparency/stboot
   STBOOT_DEFAULT_VERSION: 4b208b7
   STMGR_REPO: github.com/system-transparency/stmgr

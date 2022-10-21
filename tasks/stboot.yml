@@ -29,6 +29,7 @@ tasks:
     cmds:
       - >
         {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.HOST_CONFIG_ARG}} {{.ST_STBOOT_ARGS}}" -defaultsh=""
+        -uroot-source ./cache/go/src/{{.UROOT_REPO}}
         -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
     env:
@@ -209,6 +210,7 @@ tasks:
         silent: true
       - >
         {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb
+        -uroot-source ./cache/go/src/{{.UROOT_REPO}}
         -o {{.INITRAMFS}} {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - gzip -kf {{.INITRAMFS}}
     env:
