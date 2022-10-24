@@ -181,7 +181,11 @@ tasks:
         silent: true
       - |-
         cat > "{{.PROVISIONING_INITRC}}" <<EOL
-        mount -t efivarfs none /sys/firmware/efi/efivars || true
+        try {
+          mount -t efivarfs none /sys/firmware/efi/efivars
+        } except e {
+          echo "failed to mount efivarfs, probably already mounted"
+        }
         stmgr provision hostconfig {{.ST_PROVISO_STMGR_ARGS}}
         shutdown
         EOL
