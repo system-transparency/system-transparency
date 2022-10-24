@@ -4,7 +4,7 @@ vars:
   UROOT_REPO: github.com/u-root/u-root
   UROOT_DEFAULT_VERSION: v0.10.0
   STBOOT_REPO: github.com/system-transparency/stboot
-  STBOOT_DEFAULT_VERSION: 4b208b7
+  STBOOT_DEFAULT_VERSION: 96c2c50
   STMGR_REPO: github.com/system-transparency/stmgr
   STMGR_DEFAULT_VERSION: 1c1394b
   CPU_REPO: github.com/u-root/cpu
