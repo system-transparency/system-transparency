@@ -1,0 +1,69 @@
+stages:
+    - environment
+    - test
+default:
+    image: ubuntu:20.04
+    before_script:
+        - export DEBIAN_FRONTEND=noninteractive 
+        # Install utils
+        - apt-get update > /dev/null
+        - apt-get install -qqy curl wget tree > /dev/null
+        # Install go
+        - wget -q https://go.dev/dl/go1.19.1.linux-amd64.tar.gz
+        - rm -rf /usr/local/go && tar -C /usr/local -xzf go1.19.1.linux-amd64.tar.gz
+        - export PATH=$PATH:/usr/local/go/bin
+        # Install task
+        - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+        # Install QEMU
+        - apt-get -qqy install qemu-system-x86 > /dev/null
+        # Install Toolchain dependencies
+        - task deps:install > /dev/null
+
+        - task --version
+        - go version
+
+Example keys & OS package:
+    stage: environment
+    script:
+        # ST config file
+        - task config
+        # Key generation
+        - task demo:keygen
+        # Download example OS
+        - mkdir -p cache/debos
+        - cd cache/debos
+        - curl -LO https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.cpio.gz
+        - curl -LO https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.vmlinuz
+        - cd ../../
+        # Generate and sign OS Package
+        - task demo:ospkg
+
+        - tree --du -h cache/go/bin/
+        - tree --du -h out/
+    artifacts:
+        paths: 
+            - st.config
+            - cache/go/bin/
+            - out/
+
+
+ISO image - network mode - hostcfg from efivar:
+    stage: test
+    script:
+        - tree  -L 2 cache
+        - tree -L 2 out
+        # Set host config file location to efivar
+        - sed -i '/^ST_HOST_CONFIG_LOCATION=.*/d' st.config
+        - sed -i '/^ST_PROVISO_STMGR_ARGS=.*/d' st.config
+        - echo 'ST_HOST_CONFIG_LOCATION="efivar"' >> st.config
+        - echo 'ST_PROVISO_STMGR_ARGS="-efi -version 1 -addrMode dhcp -urls http://10.0.2.2:8080/os-pkg-example-ubuntu20.json"' >> st.config
+        # Build provisioning iso and network efivar images
+        - task proviso
+        - task images
+        # Start http server to serve OS Package
+        - task demo:server &
+        # Boot stboot iso in network efivar mode using QEMU
+        - task qemu:proviso
+        - ci-scripts/test-qemu.sh iso
+        
+
