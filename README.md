@@ -2,7 +2,7 @@
 
 This repository contains tooling, configuration files and, demos to form a build-, test- and development environment for _System Transparency_.
 
-_stboot_ is System Transparency Project’s official bootloader. It is a [LinuxBoot](https://www.linuxboot.org/) distribution based on [u-root](https://github.com/u-root/u-root). The source code of stboot can be found at https://github.com/system-transparency/stboot.
+_stboot_ is System Transparency Project’s official bootloader. It is a [LinuxBoot](https://www.linuxboot.org/) distribution based on [u-root](https://github.com/u-root/u-root). The source code of stboot can be found at https://git.glasklar.is/system-transparency/core/stboot.
 
 With System Transparency, all OS-related artifacts including the userspace are bundled together in a signed [OS Package](#OS-Package). The core idea is that stboot verifies this OS package before booting. For more details on signature verification, further security mechanisms and features of stboot see [Features](#Features)
 
@@ -147,7 +147,7 @@ task qemu:iso
 # OS-Package
 An OS package consists of an archive file (ZIP) and descriptor file (JSON). The archive contains the boot files (kernel, initramfs, etc.) and the descriptor file contains the signatures and other metadata.
 
-OS packages can be created and managed with the _stmgr_ tool. Source code of stmgr: https://github.com/system-transparency/stmgr/tree/main/tools/stmgr
+OS packages can be created and managed with the _stmgr_ tool. Source code of stmgr: https://git.glasklar.is/system-transparency/core/stmgr
 
 Once you have an OS kernel & initramfs containing the userspace, create an OS package out of it:
 ``` bash
