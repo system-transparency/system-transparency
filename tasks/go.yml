@@ -3,10 +3,10 @@ version: '3'
 vars:
   UROOT_REPO: github.com/u-root/u-root
   UROOT_DEFAULT_VERSION: v0.10.0
-  STBOOT_REPO: github.com/system-transparency/stboot
-  STBOOT_DEFAULT_VERSION: 96c2c50
-  STMGR_REPO: github.com/system-transparency/stmgr
-  STMGR_DEFAULT_VERSION: f1631dd
+  STBOOT_REPO: git.glasklar.is/system-transparency/core/stboot
+  STBOOT_DEFAULT_VERSION: a36964d2
+  STMGR_REPO: git.glasklar.is/system-transparency/core/stmgr
+  STMGR_DEFAULT_VERSION: d588e591
   CPU_REPO: github.com/u-root/cpu
   CPU_DEFAULT_VERSION: a901912
   GOBIN: cache/go/bin
