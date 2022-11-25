@@ -28,7 +28,7 @@ tasks:
     method: timestamp
     cmds:
       - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.HOST_CONFIG_ARG}} {{.ST_STBOOT_ARGS}}" -defaultsh=""
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.ST_STBOOT_ARGS}}" -defaultsh=""
         -uroot-source ./cache/go/src/{{.UROOT_REPO}}
         -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
@@ -38,12 +38,10 @@ tasks:
       - sh: "[ -n \"{{.OUTPUT}}\" ]"
         msg: "task bug: OUTPUT not defined"
       - sh: >-
-          [ "{{.ST_HOST_CONFIG_MODE}}" != "initramfs" ] ||
           [ -n "{{.ST_HOST_CONFIG_FILE}}" ]
         msg: |-
           [ERROR] Configuration ST_HOST_CONFIG_FILE not defined in {{.CONFIG}}.
       - sh: >-
-          [ "{{.ST_HOST_CONFIG_MODE}}" != "initramfs" ] ||
           [ -f "{{.ST_HOST_CONFIG_FILE}}" ]
         msg: |-
           [ERROR] Host configuration file {{.ST_HOST_CONFIG_FILE}} missing.
@@ -59,35 +57,9 @@ tasks:
       DEPS: >-
         ST_STBOOT_ARGS
         ST_HOST_CONFIG_FILE
-        ST_HOST_CONFIG_MODE
-        ST_HOST_CONFIG_LOCATION
-      HOST_CONFIG_ARG:
-        sh: |
-          arg="{{.ST_HOST_CONFIG_MODE}}"
-          case $arg in
-            initramfs)
-              echo "-host-config {{.HOST_CONFIG_LOCATION}}"
-              ;;
-            cdrom)
-              echo "-host-config cdrom:{{.HOST_CONFIG_LOCATION}}"
-              ;;
-            efivar)
-              echo "-host-config efivar:{{.HOST_CONFIG_LOCATION}}"
-              ;;
-            legacy)
-              echo "-host-config legacy"
-              ;;
-            *)
-              exit 1
-              ;;
-          esac
       HTTPS_ROOT: contrib/initramfs-includes/https_roots.pem
-      FILE_HOST_CONFIG:
-        sh: >-
-          [ "{{.ST_HOST_CONFIG_MODE}}" != "initramfs" ] ||
-          echo "{{.ST_HOST_CONFIG_FILE}}:{{.HOST_CONFIG_LOCATION}}"
       FILES: >-
-        {{.FILE_HOST_CONFIG}}
+        {{.ST_HOST_CONFIG_FILE}}:etc/host_configuration.json
         {{.SECURITY_CONFIG}}:etc/security_configuration.json
         {{.ST_SIGNING_ROOT}}:etc/ospkg_signing_root.pem
         {{.HTTPS_ROOT}}:etc/https_roots.pem
