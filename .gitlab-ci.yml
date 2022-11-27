@@ -59,7 +59,7 @@ ISO image - network mode - hostcfg from efivar:
         - echo 'ST_PROVISO_STMGR_ARGS="-efi -version 1 -addrMode dhcp -urls http://10.0.2.2:8080/os-pkg-example-ubuntu20.json"' >> st.config
         # Build provisioning iso and network efivar images
         - task proviso
-        - task images
+        - task iso
         # Start http server to serve OS Package
         - task demo:server &
         # Boot stboot iso in network efivar mode using QEMU

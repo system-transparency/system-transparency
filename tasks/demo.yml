@@ -1,5 +1,8 @@
 version: '3'
 
+vars:
+  OSPKG_DIR: "out/ospkgs"
+
 tasks:
   keygen:
     desc: Generate example signing keys
@@ -49,20 +52,18 @@ tasks:
     sources:
       - "{{.SIGNKEYS_DIR}}/signing-key-*}}"
     generates:
-      - "{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
+      - "{{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
     cmds:
-      - "mkdir -p {{.ST_LOCAL_OSPKG_DIR}}"
-      - "{{.GOBIN}}/stmgr ospkg create -out '{{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' -label='{{.LABEL}}' -kernel={{.KERNEL}} -initramfs={{.INITRD}} -cmdline='{{.CMDLINE}}' -url=http://10.0.2.2:8080/os-pkg-example-ubuntu20.zip"
-      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do {{.GOBIN}}/stmgr ospkg sign -key={{.SIGNKEYS_DIR}}/signing-key-$i.key -cert={{.SIGNKEYS_DIR}}/signing-key-$i.cert -ospkg {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
-      - "echo {{.EXAMPLE_OSPKG}} > {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
+      - "mkdir -p {{.OSPKG_DIR}}"
+      - "{{.GOBIN}}/stmgr ospkg create -out '{{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' -label='{{.LABEL}}' -kernel={{.KERNEL}} -initramfs={{.INITRD}} -cmdline='{{.CMDLINE}}' -url=http://10.0.2.2:8080/os-pkg-example-ubuntu20.zip"
+      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do {{.GOBIN}}/stmgr ospkg sign -key={{.SIGNKEYS_DIR}}/signing-key-$i.key -cert={{.SIGNKEYS_DIR}}/signing-key-$i.cert -ospkg {{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
     status:
-      - "test -f {{.ST_LOCAL_OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
-      - "test -f {{.ST_LOCAL_OSPKG_DIR}}/boot_order"
+      - "test -f {{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
     preconditions:
       - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
         msg: "[ERROR] OS is not debian based"
-      - sh: '[ ! -z "{{.ST_LOCAL_OSPKG_DIR}}" ] && ! (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
-        msg: "[ERROR] Path \"{{.ST_LOCAL_OSPKG_DIR}}\" already contain OS packages. Remove them to create an example OS Package"
+      - sh: '[ ! -z "{{.OSPKG_DIR}}" ] && ! (find {{.OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
+        msg: "[ERROR] Path \"{{.OSPKG_DIR}}\" already contain OS packages. Remove them to create an example OS Package"
       - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.key ]]; done"
         msg: "[ERROR] Missing sign key. Run \"task demo:keygen\" to generate examples keys and certificates"
       - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.cert ]]; done"
@@ -82,11 +83,11 @@ tasks:
     - task: :deps:check-cmd
       vars: {CMD: "python3"}
     cmds:
-      - cd {{.ST_LOCAL_OSPKG_DIR}}; python3 -m http.server {{.PORT}}
+      - cd {{.OSPKG_DIR}}; python3 -m http.server {{.PORT}}
     preconditions:
-      - sh: find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | read
+      - sh: find {{.OSPKG_DIR}} -name \*.zip | read
         msg: |-
-          [ERROR] Path "{{.ST_LOCAL_OSPKG_DIR}}" does not contain any OS packages
+          [ERROR] Path "{{.OSPKG_DIR}}" does not contain any OS packages
           Run "task demo:ospkg" to generate an example OS Package
     vars:
       PORT: 8080

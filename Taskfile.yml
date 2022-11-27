@@ -5,10 +5,8 @@ vars:
   CONFIG: st.config
   # Build Targets
   ISO: out/stboot.iso
-  DISK: out/stboot.img
   PROVISO: out/prov.iso
   # Build Artifacts
-  DATA_PART: out/artifacts/data_partition.ext4
   BOOT_PART: out/artifacts/boot_partition.vfat
   STBOOT_LINUX_IMAGE: out/artifacts/stboot.vmlinuz
   PROVISIONING_LINUX_IMAGE: out/artifacts/proviso.vmlinuz
@@ -48,13 +46,6 @@ tasks:
       - go:all
       - linux:fetch
 
-  images:
-    desc: Build stboot images
-    deps:
-      - disk
-      - iso
-    run: once
-
   config:
     desc: Generate default configuration
     sources:
@@ -93,25 +84,6 @@ tasks:
       - "cp {{.BOOT_PART}} cache/iso/boot_partition.vfat"
       - "xorriso -as mkisofs -R -f -e boot_partition.vfat -no-emul-boot -o {{.ISO}} cache/iso"
     run: once
-
-  disk:
-    desc: Build stboot disk image
-    deps:
-      - check-config
-      - check-disk
-      - boot-part
-      - data-part
-    sources:
-      - "{{.BOOT_PART}}"
-      - "{{.DATA_PART}}"
-    generates:
-      - "{{.DISK}}"
-    method: timestamp
-    cmds:
-      - "{{.IMAGE_SCRIPT}} --boot {{.BOOT_PART}} --data {{.DATA_PART}} --output {{.DISK}}"
-    run: once
-    vars:
-      IMAGE_SCRIPT: ./scripts/image.sh
 
   proviso:
     desc: Build provisioning iso image
@@ -170,33 +142,6 @@ tasks:
       DEPS: >-
         ST_HOST_CONFIG_MODE
 
-  data-part:
-    deps:
-      - check-config
-    sources:
-      - "{{.CONFIG}}"
-      - "{{.ST_LOCAL_OSPKG_DIR}}/**"
-    generates:
-      - "{{.DATA_PART}}"
-    method: timestamp
-    cmds:
-      - "{{.DATA_PART_SCRIPT}} -o {{.DATA_PART}}"
-    status:
-      - "{{.CONFIG_HELPER}} data-part {{.DEPS}}"
-      - "[ -f {{.DATA_PART}} ] && [ -z \"$(ls -A {{.ST_LOCAL_OSPKG_DIR}})\" ]"
-    preconditions:
-      - sh: '[ -z "$ST_BOOT_MODE" ] || [ "$ST_BOOT_MODE" != "local" ] || (find {{.ST_LOCAL_OSPKG_DIR}} -name \*.zip | read)'
-        msg: |
-          [ERROR] Path "{{.ST_LOCAL_OSPKG_DIR}}" does not contain any OS package, which is required in Local Boot Mode.
-          Please provide an OS Package or run "task demo:ospkg" to generate an example OS Package
-      - sh: '[ -z "$ST_BOOT_MODE" ] || [ "$ST_BOOT_MODE" != "local" ] || [ -f "{{.ST_LOCAL_OSPKG_DIR}}/boot_order" ]'
-        msg: |
-          [ERROR] Local Boot requires {{.ST_LOCAL_OSPKG_DIR}}/boot_order file
-    run: once
-    vars:
-      DATA_PART_SCRIPT: ./scripts/data_partition.sh
-      DEPS: >-
-        ST_DATA_PARTITION_EXTRA_SPACE
 
   security-config:
     deps:
@@ -252,18 +197,10 @@ tasks:
           Please provide a configuration file or run "task config"
     run: once
 
-  check-disk:
-    preconditions:
-      - sh: '[ "{{.ST_HOST_CONFIG_MODE}}" != "cdrom" ]'
-        msg: '[ERROR] disk image does not support ST_HOST_CONFIG_MODE="cdrom".'
-    run: once
-
   check-iso:
     preconditions:
       - sh: '[ "{{.ST_BOOT_MODE}}" == "network" ]'
         msg: '[ERROR] ISO image does only support network boot mode'
-      - sh: '[ "{{.ST_HOST_CONFIG_MODE}}" != "legacy" ]'
-        msg: '[ERROR] ISO image does not support ST_HOST_CONFIG_MODE="legacy".'
     run: once
 
 ######## cleanup ########
