@@ -75,45 +75,35 @@ tasks:
     desc: "Build compressed stboot initramfs"
     deps:
       - :check-config
-      - task: initramfs-{{.ST_LINUXBOOT_VARIANT}}
+      - task: initramfs-{{.VARIANT}}
     sources:
-      - "{{.INITRAMFS_VARIANT}}"
+      - "{{.VARIANT_SRC}}"
     generates:
       - "{{.STBOOT_INITRAMFS}}"
     method: timestamp
     cmds:
-      - gzip -kf {{.INITRAMFS_VARIANT}}
-      - mv {{.INITRAMFS_VARIANT}}.gz {{.STBOOT_INITRAMFS}}
+      - gzip -kf {{.VARIANT_SRC}}
+      - mv {{.VARIANT_SRC}}.gz {{.STBOOT_INITRAMFS}}
     status:
-      - "{{.CONFIG_HELPER}} stboot:initramfs {{.DEPS}}"
+      #- "{{.CONFIG_HELPER}} stboot:initramfs {{.DEPS}}"
       - '[ -f "{{.STBOOT_INITRAMFS}}" ]'
     preconditions:
-      - sh: "[ -n \"{{.ST_LINUXBOOT_VARIANT}}\" ]"
-        msg: "[ERROR] Configuration ST_LINUXBOOT_VARIANT not defined in {{.CONFIG}}"
-      - sh: "[ -n \"{{.ST_LINUXBOOT_VARIANT}}\" ] && [ \"minimal\" = \"minimal\" ]"
-        msg: "[ERROR] Unknown linuxboot variant: \"{{.ST_LINUXBOOT_VARIANT}}\""
+      #- sh: "[ -n \"{{.ST_SOME_OPTION_IN_ST_CONFIG}}\" ]"
+      #  msg: "[ERROR] Configuration ST_SOME_OPTION_IN_ST_CONFIG not defined in {{.CONFIG}}"
     run: once
     vars:
-      INITRAMFS_VARIANT: out/artifacts/initramfs-linuxboot-{{.ST_LINUXBOOT_VARIANT}}.cpio
-      DEPS: >-
-        ST_LINUXBOOT_VARIANT
+      VARIANT: standard
+      VARIANT_SRC: out/artifacts/initramfs-linuxboot-{{.VARIANT}}.cpio
+      #DEPS: >-
+      # ST_SOME_OPTION_IN_ST_CONFIG
 
-  initramfs-minimal:
+  initramfs-standard:
     cmds:
       - task: u-root
         vars:
           PKGS: >-
             {{.UROOT_REPO}}/cmds/core/init
-          OUTPUT: out/artifacts/initramfs-linuxboot-minimal.cpio
-    run: once
-
-  initramfs-full:
-    cmds:
-      - task: u-root
-        vars:
-          PKGS: >-
-            {{.UROOT_CORE_PKGS}}
-          OUTPUT: out/artifacts/initramfs-linuxboot-full.cpio
+          OUTPUT: out/artifacts/initramfs-linuxboot-standard.cpio
     run: once
 
   proviso-initrc:
