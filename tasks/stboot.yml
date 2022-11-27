@@ -108,41 +108,12 @@ tasks:
     run: once
 
   initramfs-full:
-    deps:
-      - :go:cpu
-      - :go:checkout-cpu
-      - :cpu-sshkeys
     cmds:
       - task: u-root
         vars:
-          FILES: >-
-            {{.INITRAMFS_INCLUDE}}/netsetup.elv:netsetup.elv
-            {{.INITRAMFS_INCLUDE}}/start_cpu.elv:start_cpu.elv
-            {{.CPUKEYS_DIR}}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key
-            {{.CPUKEYS_DIR}}/cpu_rsa.pub:cpu_rsa.pub
           PKGS: >-
             {{.UROOT_CORE_PKGS}}
-            github.com/u-root/cpu/cmds/cpud
           OUTPUT: out/artifacts/initramfs-linuxboot-full.cpio
-    run: once
-
-  initramfs-debug:
-    deps:
-      - :go:cpu
-      - :go:checkout-cpu
-      - :cpu-sshkeys
-    cmds:
-      - task: u-root
-        vars:
-          PKGS: >-
-            {{.UROOT_CORE_PKGS}}
-            github.com/u-root/cpu/cmds/cpud
-          FILES: >-
-            {{.INITRAMFS_INCLUDE}}/netsetup.elv:netsetup.elv
-            {{.INITRAMFS_INCLUDE}}/start_cpu.elv:start_cpu.elv
-            {{.CPUKEYS_DIR}}/ssh_host_rsa_key:etc/ssh/ssh_host_rsa_key
-            {{.CPUKEYS_DIR}}/cpu_rsa.pub:cpu_rsa.pub
-          OUTPUT: out/artifacts/initramfs-linuxboot-debug.cpio
     run: once
 
   proviso-initrc:

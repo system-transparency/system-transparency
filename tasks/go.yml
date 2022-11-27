@@ -7,8 +7,6 @@ vars:
   STBOOT_DEFAULT_VERSION: a36964d2
   STMGR_REPO: git.glasklar.is/system-transparency/core/stmgr
   STMGR_DEFAULT_VERSION: d588e591
-  CPU_REPO: github.com/u-root/cpu
-  CPU_DEFAULT_VERSION: a901912
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
@@ -86,7 +84,6 @@ tasks:
       - stmgr
     # checkout sequentially
     cmds:
-      - task: checkout-cpu
       - task: checkout-uroot
       - task: checkout-stboot
 
@@ -138,23 +135,6 @@ tasks:
           echo {{.STMGR_DEFAULT_VERSION}}
           fi
 
-  cpu:
-    cmds:
-      - task: install
-        vars:
-          NAME: cpu
-          PACKAGE: "{{.CPU_REPO}}/cmds/cpu"
-          VERSION: "{{.CPU_VERSION}}"
-    run: once
-    vars:
-      CPU_VERSION:
-        sh: |
-          if [ -n "{{.ST_CPU_VERSION}}" ]; then
-          echo {{.ST_CPU_VERSION}}
-          else
-          echo {{.CPU_DEFAULT_VERSION}}
-          fi
-
   debos:
     cmds:
       - '{{.GOPREFIX}} go get github.com/go-debos/debos/cmd/debos'
@@ -177,22 +157,6 @@ tasks:
       - "test -x cache/go/bin/debos"
 
   # Fetch/checkout Repos into GOPATH for u-root build runtime
-
-  checkout-cpu:
-    cmds:
-      - task: :go:checkout
-        vars:
-          REPO: "{{.CPU_REPO}}"
-          BRANCH: "{{.CPU_VERSION}}"
-    run: once
-    vars:
-      CPU_VERSION:
-        sh: |
-          if [ -n "{{.ST_CPU_VERSION}}" ]; then
-          echo {{.ST_CPU_VERSION}}
-          else
-          echo {{.CPU_DEFAULT_VERSION}}
-          fi
 
   checkout-uroot:
     cmds:

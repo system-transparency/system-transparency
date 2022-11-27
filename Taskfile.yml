@@ -13,8 +13,6 @@ vars:
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   PROVISIONING_INITRAMFS: out/artifacts/proviso.cpio.gz
   SECURITY_CONFIG: out/artifacts/security_configuration.json
-  # cpu ssh keys
-  CPUKEYS_DIR: out/keys/cpu_keys
   # task helper script
   CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
 
@@ -168,23 +166,6 @@ tasks:
         ST_NUM_SIGNATURES
         ST_BOOT_MODE
 
-  cpu-sshkeys:
-    generates:
-      - "{{.CPUKEYS_DIR}}/*"
-    cmds:
-      - cmd: mkdir -p {{.CPUKEYS_DIR}}
-        silent: true
-      - ssh-keygen -b 2048 -t rsa -f {{.CPU_HOST_KEY}} -q -N "" <<< y >/dev/null
-      - ssh-keygen -b 2048 -t rsa -f {{.CPU_CLIENT_KEY}} -q -N "" <<< y >/dev/null
-    status:
-      - "[ -f {{.CPU_HOST_KEY}} ]"
-      - "[ -f {{.CPU_HOST_KEY}}.pub ]"
-      - "[ -f {{.CPU_CLIENT_KEY}} ]"
-      - "[ -f {{.CPU_CLIENT_KEY}}.pub ]"
-    run: once
-    vars:
-      CPU_HOST_KEY: "{{.CPUKEYS_DIR}}/ssh_host_rsa_key"
-      CPU_CLIENT_KEY: "{{.CPUKEYS_DIR}}/cpu_rsa"
 
 ######## checks ########
 
