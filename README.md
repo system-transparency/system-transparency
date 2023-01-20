@@ -119,10 +119,8 @@ stmgr ospkg create -kernel=<your_OS_kernel> -initramfs=<your_OS_initramfs>
 stmgr ospkg sign -key=<your.key> -cert=<your.cert> -ospkg=<OS package>
 
 # See help for all options
-stman -help
+stmgr -help
 
-```
-According to the configured boot mode, place the OS package(s) at the STDATA partition of the stboot image or upload it to a provisioning server. See [Boot Modes](#Boot-Modes)
 
 # System Configuration
 
