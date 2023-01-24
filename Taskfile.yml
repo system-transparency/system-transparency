@@ -8,9 +8,7 @@ vars:
   PROVISO: out/prov.iso
   # Build Artifacts
   STBOOT_LINUX_IMAGE: out/artifacts/stboot.vmlinuz
-  PROVISIONING_LINUX_IMAGE: out/artifacts/proviso.vmlinuz
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
-  PROVISIONING_INITRAMFS: out/artifacts/proviso.cpio.gz
   SECURITY_CONFIG: out/artifacts/security_configuration.json
   # task helper script
   CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
@@ -26,6 +24,7 @@ includes:
   linux: ./tasks/linux.yml
   stboot: ./tasks/stboot.yml
   qemu: ./tasks/qemu.yml
+  proviso: ./tasks/provision.yml
 
 output: 'prefixed'
 
@@ -96,35 +95,6 @@ tasks:
     vars:
       ISO_DIR: cache/iso
       ISO_FAT: ./{{.ISO_DIR}}/stboot.fat
-    
-
-  proviso:
-    desc: Build provisioning iso image
-    deps:
-      - check-config
-      - task: linux:kernel
-        vars:
-          IMAGE: "{{.PROVISIONING_LINUX_IMAGE}}"
-          INITRAMFS: "{{.PROVISIONING_INITRAMFS}}"
-          INITRAMFS_TARGET: "stboot:provisioning-initramfs"
-    sources:
-      - ./{{.PROVISIONING_LINUX_IMAGE}}
-    generates:
-      - ./{{.PROVISO}}
-    cmds:
-      - rm -rf {{.PROVISO_FAT}}
-      - mkdir -p {{.ISO_DIR}}
-      - mkfs.vfat -C -n PROVISO {{.PROVISO_FAT}} {{.BLOCKS}}
-      - mmd -i {{.PROVISO_FAT}} ::/EFI
-      - mmd -i {{.PROVISO_FAT}} ::/EFI/BOOT
-      - mcopy -i {{.PROVISO_FAT}} {{.PROVISIONING_LINUX_IMAGE}} ::/EFI/BOOT/BOOTX64.EFI
-      - xorriso -as mkisofs -R -f -e provision.fat -no-emul-boot -o {{.PROVISO}} {{.ISO_DIR}}
-    vars:
-      ISO_DIR: cache/proviso
-      PROVISO_FAT: ./{{.ISO_DIR}}/provision.fat
-      # TODO: Calculate size
-      BLOCKS:
-        sh: echo $((1<<16))
 
 
   security-config:
@@ -185,3 +155,37 @@ tasks:
       - "rm -rf cache"
       - "rm -rf .task"
       - "rm -f {{.CONFIG}}"
+
+
+######## somehow outdated, maybe remove it ########
+# it builds the stmgr provision hostconfig tool into
+# an own iso/initramfs. This GUI tool was never actually used.
+# It prompts for hostconfig input and writes it to qemu efivar.
+
+  proviso:
+    desc: Build provisioning iso image
+    deps:
+      - check-config
+      - task: linux:kernel
+        vars:
+          IMAGE: "{{.PROVISIONING_LINUX_IMAGE}}"
+          INITRAMFS: "{{.PROVISIONING_INITRAMFS}}"
+          INITRAMFS_TARGET: "proviso:provisioning-initramfs"
+    sources:
+      - ./{{.PROVISIONING_LINUX_IMAGE}}
+    generates:
+      - ./{{.PROVISO}}
+    cmds:
+      - rm -rf {{.PROVISO_FAT}}
+      - mkdir -p {{.ISO_DIR}}
+      - mkfs.vfat -C -n PROVISO {{.PROVISO_FAT}} {{.BLOCKS}}
+      - mmd -i {{.PROVISO_FAT}} ::/EFI
+      - mmd -i {{.PROVISO_FAT}} ::/EFI/BOOT
+      - mcopy -i {{.PROVISO_FAT}} {{.PROVISIONING_LINUX_IMAGE}} ::/EFI/BOOT/BOOTX64.EFI
+      - xorriso -as mkisofs -R -f -e provision.fat -no-emul-boot -o {{.PROVISO}} {{.ISO_DIR}}
+    vars:
+      ISO_DIR: cache/proviso
+      PROVISO_FAT: ./{{.ISO_DIR}}/provision.fat
+      # TODO: Calculate size
+      BLOCKS:
+        sh: echo $((1<<16))

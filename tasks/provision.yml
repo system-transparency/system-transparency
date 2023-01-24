@@ -1,0 +1,73 @@
+version: '3'
+
+vars:
+  # Build Targets
+  PROVISO: out/prov.iso
+  # Build Artifacts
+  PROVISIONING_LINUX_IMAGE: out/artifacts/proviso.vmlinuz
+  PROVISIONING_INITRAMFS: out/artifacts/proviso.cpio.gz
+  # WORKAROUND: remove kexec and sluinit from core pkgs to prevent build errors
+  UROOT_CORE_PKGS: "{{.UROOT_REPO}}/cmds/core/{basename,bind,blkid,cat,chmod,chroot,cmp,comm,cp,cpio,date,dd,df,dhclient,dirname,dmesg,echo,elvish,false,find,free,fusermount,gpgv,gpt,grep,gzip,hexdump,hostname,hwclock,id,init,insmod,io,ip,kill,lddfiles,ln,lockmsrs,losetup,ls,lsdrivers,lsmod,man,md5sum,mkdir,mkfifo,mknod,mktemp,more,mount,msr,mv,netcat,ntpdate,pci,ping,printenv,ps,pwd,readlink,rm,rmmod,rsdp,scp,seq,shasum,shutdown,sleep,sort,sshd,strace,strings,stty,switch_root,sync,tail,tar,tee,tr,true,truncate,ts,umount,uname,uniq,unmount,unshare,uptime,watchdog,watchdogd,wc,wget,which,yes}"
+
+tasks:
+
+  proviso-initrc:
+    generates:
+      - "{{.PROVISIONING_INITRC}}"
+    cmds:
+      - cmd: mkdir -p out/artifacts
+        silent: true
+      - |-
+        cat > "{{.PROVISIONING_INITRC}}" <<EOL
+        try {
+          mount -t efivarfs none /sys/firmware/efi/efivars
+        } except e {
+          echo "failed to mount efivarfs, probably already mounted"
+        }
+        stmgr provision hostconfig {{.ST_PROVISO_STMGR_ARGS}}
+        shutdown
+        EOL
+    status:
+      - "{{.CONFIG_HELPER}} stboot:proviso-initrc {{.DEPS}}"
+      - "[ -f {{.PROVISIONING_INITRC}} ]"
+    vars:
+      DEPS: >-
+        ST_PROVISO_STMGR_ARGS
+
+  provisioning-initramfs:
+    desc: "Build compressed stmgr provisioning initramfs"
+    deps:
+      - :check-config
+      - :go:u-root
+      - :go:stmgr
+      - :go:checkout-uroot
+      - proviso-initrc
+    sources:
+      - ./cache/go/bin/stmgr
+      - ./{{.PROVISIONING_INITRC}}
+    generates:
+      - "{{.PROVISIONING_INITRAMFS}}"
+    cmds:
+      - cmd: mkdir -p $(dirname {{.PROVISIONING_INITRAMFS}})
+        silent: true
+      - >
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb
+        -uroot-source ./cache/go/src/{{.UROOT_REPO}}
+        -o {{.INITRAMFS}} {{.FILES_ARGS}} {{.PKGS_ARGS}}
+      - gzip -kf {{.INITRAMFS}}
+    env:
+      GO111MODULE: off
+    preconditions:
+      - sh: '[ -n "{{.INITRAMFS}}" ]'
+        msg: "task bug: INITRAMFS not defined"
+    run: once
+    vars:
+      INITRAMFS:
+        sh: echo {{.PROVISIONING_INITRAMFS}} | sed -e 's/\.gz//'
+      PKGS_ARGS: >-
+        {{.UROOT_CORE_PKGS}}
+      FILES: >-
+        cache/go/bin/stmgr:/bin/stmgr
+        {{.PROVISIONING_INITRC}}:.elvish/rc.elv
+      FILES_ARGS:
+        sh: for f in {{.FILES}}; do echo -n "-files $f "; done
