@@ -61,12 +61,12 @@ tasks:
       DEPS: >-
         ST_STBOOT_ARGS
         ST_HOST_CONFIG_FILE
-      HTTPS_ROOT: contrib/initramfs-includes/https_roots.pem
+      HTTPS_ROOT: contrib/initramfs-includes/isrgrootx1.pem
       FILES: >-
         {{.ST_HOST_CONFIG_FILE}}:etc/host_configuration.json
         {{.SECURITY_CONFIG}}:etc/security_configuration.json
         {{.ST_SIGNING_ROOT}}:etc/ospkg_signing_root.pem
-        {{.HTTPS_ROOT}}:etc/https_roots.pem
+        {{.HTTPS_ROOT}}:/etc/ssl/certs/isrgrootx1.pem
         {{.FILES}}
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f "; done
