@@ -5,9 +5,9 @@ vars:
   PROVISIONING_INITRC: out/artifacts/proviso.elv
 
 tasks:
-  # internal use only
+  
   u-root:
-    label: initramfs
+    internal: yes
     deps:
       - :check-config
       - :go:u-root
@@ -25,6 +25,12 @@ tasks:
       - "{{.OUTPUT}}"
     method: timestamp
     cmds:
+      - cmd: echo "Building initramfs via u-root with stboot as init process"
+        silent: yes
+      - cmd: echo "Including files:"
+        silent: yes
+      - cmd: for f in {{.FILES}}; do echo "- $f" ; done
+        silent: yes
       - >
         {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.ST_STBOOT_ARGS}}" -defaultsh=""
         -uroot-source ./cache/go/src/{{.UROOT_REPO}}
@@ -65,15 +71,18 @@ tasks:
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f "; done
       PKGS_ARGS: >-
+        {{.UROOT_REPO}}/cmds/core/init
         {{.STBOOT_REPO}}
-        {{.PKGS}}
+        {{.UROOT_PKGS}}
       OUTPUT: "{{.OUTPUT}}"
 
   initramfs:
-    desc: "Build compressed stboot initramfs"
+    internal: yes
     deps:
       - :check-config
-      - task: initramfs-{{.VARIANT}}
+      - task: u-root
+        vars:
+          OUTPUT: "{{.VARIANT_SRC}}"
     sources:
       - "{{.VARIANT_SRC}}"
     generates:
@@ -83,23 +92,24 @@ tasks:
       - gzip -kf {{.VARIANT_SRC}}
       - mv {{.VARIANT_SRC}}.gz {{.STBOOT_INITRAMFS}}
     status:
-      #- "{{.CONFIG_HELPER}} stboot:initramfs {{.DEPS}}"
       - '[ -f "{{.STBOOT_INITRAMFS}}" ]'
-    preconditions:
-      #- sh: "[ -n \"{{.ST_SOME_OPTION_IN_ST_CONFIG}}\" ]"
-      #  msg: "[ERROR] Configuration ST_SOME_OPTION_IN_ST_CONFIG not defined in {{.CONFIG}}"
     run: once
     vars:
-      VARIANT: standard
-      VARIANT_SRC: out/artifacts/initramfs-linuxboot-{{.VARIANT}}.cpio
-      #DEPS: >-
-      # ST_SOME_OPTION_IN_ST_CONFIG
+      VARIANT: "{{.VARIANT}}"
+      VARIANT_SRC: out/artifacts/{{.VARIANT}}.cpio
 
   initramfs-standard:
+    de: "Build an initramfs with stboot as init process"
     cmds:
-      - task: u-root
+      - task: initramfs
         vars:
-          PKGS: >-
-            {{.UROOT_REPO}}/cmds/core/init
-          OUTPUT: out/artifacts/initramfs-linuxboot-standard.cpio
+          VARIANT: initramfs-standard
     run: once
+
+# TODO:
+# To cover both paths of hostconfig autodetect:
+#
+# - make a `initramfs-incl-host-config` including
+#   {{.ST_HOST_CONFIG_FILE}}:etc/host_configuration.json
+#
+# - write something in qemu: to preset the OVMF_VARS.fd with host config

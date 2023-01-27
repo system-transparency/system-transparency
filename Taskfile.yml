@@ -72,7 +72,7 @@ tasks:
         vars:
           IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
           INITRAMFS: "{{.STBOOT_INITRAMFS}}"
-          INITRAMFS_TARGET: "stboot:initramfs"
+          INITRAMFS_TARGET: "stboot:initramfs-standard"
     sources:
       - "{{.STBOOT_LINUX_IMAGE}}"
     generates:
