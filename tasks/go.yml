@@ -3,10 +3,10 @@ version: '3'
 vars:
   UROOT_REPO: github.com/u-root/u-root
   UROOT_DEFAULT_VERSION: v0.10.0
-  STBOOT_REPO: git.glasklar.is/system-transparency/core/stboot
-  STBOOT_DEFAULT_VERSION: 0a6a48d0
-  STMGR_REPO: git.glasklar.is/system-transparency/core/stmgr
-  STMGR_DEFAULT_VERSION: d588e591
+  STBOOT_REPO: system-transparency.org/stboot
+  STBOOT_DEFAULT_VERSION: 033e4de
+  STMGR_REPO: system-transparency.org/stmgr
+  STMGR_DEFAULT_VERSION: bf48ee8
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
