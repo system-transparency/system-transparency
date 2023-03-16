@@ -120,7 +120,7 @@ stmgr ospkg sign -key=<your.key> -cert=<your.cert> -ospkg=<OS package>
 
 # See help for all options
 stmgr -help
-
+```
 
 # System Configuration
 
