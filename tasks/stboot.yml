@@ -11,11 +11,11 @@ tasks:
     deps:
       - :check-config
       - :go:u-root
-      - :security-config
+      - :trust-policy
       - :go:checkout-uroot
       - :go:checkout-stboot
     sources:
-      - "{{.SECURITY_CONFIG}}"
+      - "{{.TRUST_POLICY}}"
       - "{{.ST_HOST_CONFIG_FILE}}"
       - "{{.ST_SIGNING_ROOT}}"
       - "{{.HTTPS_ROOT}}"
@@ -64,9 +64,9 @@ tasks:
       HTTPS_ROOT: contrib/initramfs-includes/isrgrootx1.pem
       FILES: >-
         {{.ST_HOST_CONFIG_FILE}}:etc/host_configuration.json
-        {{.SECURITY_CONFIG}}:etc/security_configuration.json
-        {{.ST_SIGNING_ROOT}}:etc/ospkg_signing_root.pem
-        {{.HTTPS_ROOT}}:/etc/ssl/certs/isrgrootx1.pem
+        {{.TRUST_POLICY}}:etc/trust_policy/trust_policy.json
+        {{.ST_SIGNING_ROOT}}:etc/trust_policy/ospkg_signing_root.pem
+        {{.HTTPS_ROOT}}:etc/ssl/certs/isrgrootx1.pem
         {{.FILES}}
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f "; done

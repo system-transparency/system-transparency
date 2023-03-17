@@ -9,7 +9,7 @@ vars:
   # Build Artifacts
   STBOOT_LINUX_IMAGE: out/artifacts/stboot.vmlinuz
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
-  SECURITY_CONFIG: out/artifacts/security_configuration.json
+  TRUST_POLICY: out/artifacts/trust_policy.json
   # task helper script
   CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
 
@@ -97,30 +97,29 @@ tasks:
       ISO_FAT: ./{{.ISO_DIR}}/stboot.fat
 
 
-  security-config:
+  trust-policy:
     deps:
       - check-config
     generates:
-      - "{{.SECURITY_CONFIG}}"
+      - "{{.TRUST_POLICY}}"
     cmds:
-      - cmd: mkdir -p $(dirname {{.SECURITY_CONFIG}})
+      - cmd: mkdir -p $(dirname {{.TRUST_POLICY}})
         silent: true
       - |-
-        cat > "{{.SECURITY_CONFIG}}" <<EOL
+        cat > "{{.TRUST_POLICY}}" <<EOL
         {
-          "version":1,
-          "min_valid_sigs_required": {{.ST_NUM_SIGNATURES}},
-          "boot_mode": "{{.ST_BOOT_MODE}}"
+          "ospkg_signature_threshold": {{.ST_NUM_SIGNATURES}},
+          "ospkg_fetch_method": "{{.ST_FETCH_METHOD}}"
         }
         EOL
     status:
-      - "{{.CONFIG_HELPER}} security-config {{.DEPS}}"
-      - "[ -f {{.SECURITY_CONFIG}} ]"
+      - "{{.CONFIG_HELPER}} trust-policy {{.DEPS}}"
+      - "[ -f {{.TRUST_POLICY}} ]"
     run: once
     vars:
       DEPS: >-
         ST_NUM_SIGNATURES
-        ST_BOOT_MODE
+        ST_FETCH_METHOD
 
 
 ######## checks ########
