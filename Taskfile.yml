@@ -96,6 +96,38 @@ tasks:
       ISO_DIR: cache/iso
       ISO_FAT: ./{{.ISO_DIR}}/stboot.fat
 
+  iso-ospkg:
+    desc: Build stboot iso image including an OS package inside the initramfs
+    deps:
+      - check-config
+      - task: linux:kernel
+        vars:
+          IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
+          INITRAMFS: "{{.STBOOT_INITRAMFS}}"
+          INITRAMFS_TARGET: "stboot:initramfs-incl-ospkg"
+    sources:
+      - "{{.STBOOT_LINUX_IMAGE}}"
+    generates:
+      - "{{.ISO}}"
+    cmds:
+      - rm -rf {{.ISO_FAT}}
+      - mkdir -p {{.ISO_DIR}}
+      # ugly size calculation before call to mkfs.vfat needed
+      - >- 
+            tot_size=$(du -cb {{.STBOOT_LINUX_IMAGE}} | tail -1 | awk '{print $1}');
+            size_vfat=$((tot_size + (1<<20)));
+            vfat_blocks=$((size_vfat >> 10));
+            vfat_blocks=$(((($vfat_blocks+32)&~31)));
+            mkfs.vfat -C -n STBOOTISO {{.ISO_FAT}} $vfat_blocks
+      - mmd -i {{.ISO_FAT}} ::/EFI
+      - mmd -i {{.ISO_FAT}} ::/EFI/BOOT
+      - mcopy -i {{.ISO_FAT}} {{.STBOOT_LINUX_IMAGE}} ::/EFI/BOOT/BOOTX64.EFI
+      - xorriso -as mkisofs -R -f -e stboot.fat -no-emul-boot -o {{.ISO}} {{.ISO_DIR}}
+    run: once
+    vars:
+      ISO_DIR: cache/iso
+      ISO_FAT: ./{{.ISO_DIR}}/stboot.fat
+
 
   trust-policy:
     deps:
@@ -110,6 +142,30 @@ tasks:
         {
           "ospkg_signature_threshold": {{.ST_NUM_SIGNATURES}},
           "ospkg_fetch_method": "{{.ST_FETCH_METHOD}}"
+        }
+        EOL
+    status:
+      - "{{.CONFIG_HELPER}} trust-policy {{.DEPS}}"
+      - "[ -f {{.TRUST_POLICY}} ]"
+    run: once
+    vars:
+      DEPS: >-
+        ST_NUM_SIGNATURES
+        ST_FETCH_METHOD
+
+  trust-policy-fetch-method-initramfs:
+    deps:
+      - check-config
+    generates:
+      - "{{.TRUST_POLICY}}"
+    cmds:
+      - cmd: mkdir -p $(dirname {{.TRUST_POLICY}})
+        silent: true
+      - |-
+        cat > "{{.TRUST_POLICY}}" <<EOL
+        {
+          "ospkg_signature_threshold": {{.ST_NUM_SIGNATURES}},
+          "ospkg_fetch_method": "initramfs"
         }
         EOL
     status:

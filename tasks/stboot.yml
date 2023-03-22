@@ -83,6 +83,7 @@ tasks:
       - task: u-root
         vars:
           OUTPUT: "{{.VARIANT_SRC}}"
+          FILES: "{{.FILES}}"
     sources:
       - "{{.VARIANT_SRC}}"
     generates:
@@ -97,14 +98,36 @@ tasks:
     vars:
       VARIANT: "{{.VARIANT}}"
       VARIANT_SRC: out/artifacts/{{.VARIANT}}.cpio
+      FILES: "{{.FILES}}"
 
   initramfs-standard:
-    de: "Build an initramfs with stboot as init process"
+    desc: "Build an initramfs with stboot as init process"
     cmds:
       - task: initramfs
         vars:
           VARIANT: initramfs-standard
     run: once
+
+  initramfs-incl-ospkg:
+    desc: "Build an initramfs with stboot as init process including an OS package"
+    deps:
+      - :trust-policy-fetch-method-initramfs
+    cmds:
+      - task: initramfs
+        vars:
+          VARIANT: initramfs-incl-ospkg
+          FILES: >-
+            "{{.OSPKGARCHIVE}}":ospkg/ospkg.json
+            "{{.OSPKGDESCRIPTOR}}":ospkg/ospkg.zip
+    preconditions:
+      - sh: >-
+          [ -f "{{.OSPKGARCHIVE}}" ] && [ -f "{{.OSPKGDESCRIPTOR}}" ]
+        msg: |-
+          [ERROR] Missing OS package artifacts ({{.OSPKGARCHIVE}} and {{.OSPKGDESCRIPTOR}}). Either provide them manually or try running 'task demo:ospkg'
+    run: once
+    vars:
+      OSPKGARCHIVE: "{{.OSPKG_DIR}}/os-pkg-example-ubuntu20.json"
+      OSPKGDESCRIPTOR: "{{.OSPKG_DIR}}/os-pkg-example-ubuntu20.zip"
 
 # TODO:
 # To cover both paths of hostconfig autodetect:
