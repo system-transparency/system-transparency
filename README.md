@@ -105,6 +105,37 @@ task iso
 # run stboot ISO image
 task qemu:iso
 ```
+# Installation with built-in provison OS package (experimental)
+
+```bash
+task config
+```
+
+```bash
+# required for a valid OS package
+task demo:keygen
+```
+
+```bash
+# HACK: override example data for OS package with provisioning OS package
+mkdir cache/debos
+cp <your provisioning kernel> cache/debos/ubuntu-focal-amd64.vmlinuz
+cp <your provisioning kernel> cache/debos/ubuntu-focal-amd64.cpio.gz
+```
+
+```bash
+# build OS package
+task demo:ospkg
+```
+```bash
+# build stboot ISO image
+task iso-ospkg
+```
+
+``` bash
+# optional test your installation
+task qemu:iso
+```
 
 # OS-Package
 An OS package consists of an archive file (ZIP) and descriptor file (JSON). The archive contains the boot files (kernel, initramfs, etc.) and the descriptor file contains the signatures and other metadata.
@@ -128,7 +159,11 @@ See package `opts` at [stboot code](https://git.glasklar.is/system-transparency/
 
 # Features
 
-## Network Boot
+## Boot Modes
+
+stboot can fetch OS packages from different sources. The fetching mechanism is determined by the trust policy.
+
+### Network Boot
 Network boot can be configured using either DHCP or a static network configuration. In the case of a static network, stboot uses IP address, netmask, default gateway, and DNS server from `host_configuration.json`.
 
 Provisioning Server Communication:
@@ -150,6 +185,11 @@ For each provisioning server URL in `host_configuration.json`:
 * Extract the OS package URL.
 * Check the filename in the OS package URL. (must be `.zip`)
 * Try downloading the OS package
+
+### Initramfs Boot
+Initramfs boot expects the OS package artifacts to be included inside the initramfs at the following paths:
+* Descriptor: /ospkg/ospkg.json
+* Archive: /ospkg/ospkg.zip
 
 ## Signature Verification
 
