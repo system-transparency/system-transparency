@@ -4,7 +4,7 @@ vars:
   UROOT_REPO: github.com/u-root/u-root
   UROOT_DEFAULT_VERSION: v0.10.0
   STBOOT_REPO: system-transparency.org/stboot
-  STBOOT_DEFAULT_VERSION: cc6aea4
+  STBOOT_DEFAULT_VERSION: d1e6263
   STMGR_REPO: system-transparency.org/stmgr
   STMGR_DEFAULT_VERSION: bf48ee8
   GOBIN: cache/go/bin
