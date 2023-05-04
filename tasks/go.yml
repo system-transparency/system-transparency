@@ -6,7 +6,7 @@ vars:
   STBOOT_REPO: system-transparency.org/stboot
   STBOOT_DEFAULT_VERSION: d1e6263
   STMGR_REPO: system-transparency.org/stmgr
-  STMGR_DEFAULT_VERSION: bf48ee8
+  STMGR_DEFAULT_VERSION: 52bc0ea4
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
