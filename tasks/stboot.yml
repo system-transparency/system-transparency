@@ -16,7 +16,7 @@ tasks:
     sources:
       - "{{.TRUST_POLICY}}"
       - "{{.HOST_CONFIG}}"
-      - "{{.ST_SIGNING_ROOT}}"
+      - "{{.SIGNING_ROOT}}"
       - "{{.HTTPS_ROOT}}"
       - "cache/go/src/{{.UROOT_REPO}}/**"
       - "cache/go/src/{{.STBOOT_REPO}}/**"
@@ -44,9 +44,9 @@ tasks:
           [ -f "{{.HOST_CONFIG}}" ]
         msg: |-
           [ERROR] Host configuration file {{.HOST_CONFIG}} missing.
-      - sh: "[ -e \"{{.ST_SIGNING_ROOT}}\" ]"
+      - sh: "[ -e \"{{.SIGNING_ROOT}}\" ]"
         msg: |-
-          [ERROR] root certificate ({{.ST_SIGNING_ROOT}}) missing.
+          [ERROR] root certificate ({{.SIGNING_ROOT}}) missing.
           Please provide a certificate or run "task demo:keygen" to generate example keys.
     status:
       - "{{.CONFIG_HELPER}} initramfs {{.DEPS}}"
@@ -56,10 +56,11 @@ tasks:
       DEPS: >-
         ST_STBOOT_ARGS
       HTTPS_ROOT: contrib/initramfs-includes/isrgrootx1.pem
+      SIGNING_ROOT: out/keys/example_keys/root.cert
       FILES: >-
         {{.HOST_CONFIG}}:etc/host_configuration.json
         {{.TRUST_POLICY}}:etc/trust_policy/trust_policy.json
-        {{.ST_SIGNING_ROOT}}:etc/trust_policy/ospkg_signing_root.pem
+        {{.SIGNING_ROOT}}:etc/trust_policy/ospkg_signing_root.pem
         {{.HTTPS_ROOT}}:etc/ssl/certs/isrgrootx1.pem
         {{.FILES}}
       FILES_ARGS:

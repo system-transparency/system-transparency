@@ -2,12 +2,13 @@ version: '3'
 
 vars:
   OSPKG_DIR: "out/ospkgs"
+  NUM_SIGNATURES: 2
+  DEMO_KEY_DIR: out/keys/example_keys
 
 tasks:
   keygen:
     desc: Generate example signing keys
     deps:
-      - :check-config
       - :go:stmgr
     generates:
       - "{{.DEMO_KEY_DIR}}/root.*"
@@ -23,7 +24,7 @@ tasks:
              $CMD;
         silent: true
       - cmd: >
-             for I in {1..{{.ST_NUM_SIGNATURES}}}; do
+             for I in {1..{{.NUM_SIGNATURES}}}; do
              CMD="{{.GOBIN}}/stmgr keygen certificate -rootCert={{.DEMO_KEY_DIR}}/root.cert
              -rootKey={{.DEMO_KEY_DIR}}/root.key
              -certOut={{.DEMO_KEY_DIR}}/signing-key-${I}.cert
@@ -35,28 +36,24 @@ tasks:
     status:
       - "[ -f {{.DEMO_KEY_DIR}}/root.key ]"
       - "[ -f {{.DEMO_KEY_DIR}}/root.cert ]"
-      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.key ]]; done"
-      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.cert ]]; done"
-    preconditions:
-      - sh: '[ "{{.ST_SIGNING_ROOT}}" = "{{.DEMO_KEY_DIR}}/root.cert" ]'
-        msg: '[ERROR] Set ST_SIGNING_ROOT="{{.DEMO_KEY_DIR}}/root.cert" to generate example signing keys'
-    vars:
-      DEMO_KEY_DIR: out/keys/example_keys
+      - "for i in {1..{{.NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.key ]]; done"
+      - "for i in {1..{{.NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.cert ]]; done"
+
 
   ospkg:
     desc: "Build demo OS Package"
     deps:
-      - :check-config
       - :go:stmgr
+      - keygen
       - ubuntu
     sources:
-      - "{{.SIGNKEYS_DIR}}/signing-key-*}}"
+      - "{{.DEMO_KEY_DIR}}/signing-key-*}}"
     generates:
       - "{{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
     cmds:
       - "mkdir -p {{.OSPKG_DIR}}"
       - "{{.GOBIN}}/stmgr ospkg create -out '{{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' -label='{{.LABEL}}' -kernel={{.KERNEL}} -initramfs={{.INITRD}} -cmdline='{{.CMDLINE}}' -url=http://10.0.2.2:8080/os-pkg-example-ubuntu20.zip"
-      - "for i in {1..{{.ST_NUM_SIGNATURES}}}; do {{.GOBIN}}/stmgr ospkg sign -key={{.SIGNKEYS_DIR}}/signing-key-$i.key -cert={{.SIGNKEYS_DIR}}/signing-key-$i.cert -ospkg {{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
+      - "for i in {1..{{.NUM_SIGNATURES}}}; do {{.GOBIN}}/stmgr ospkg sign -key={{.DEMO_KEY_DIR}}/signing-key-$i.key -cert={{.DEMO_KEY_DIR}}/signing-key-$i.cert -ospkg {{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
     status:
       - "test -f {{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
     preconditions:
@@ -64,18 +61,12 @@ tasks:
         msg: "[ERROR] OS is not debian based"
       - sh: '[ ! -z "{{.OSPKG_DIR}}" ] && ! (find {{.OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
         msg: "[ERROR] Path \"{{.OSPKG_DIR}}\" already contain OS packages. Remove them to create an example OS Package"
-      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.key ]]; done"
-        msg: "[ERROR] Missing sign key. Run \"task demo:keygen\" to generate examples keys and certificates"
-      - sh: "for i in {1..{{.ST_NUM_SIGNATURES}}}; do [[ -f {{.SIGNKEYS_DIR}}/signing-key-$i.cert ]]; done"
-        msg: "[ERROR] Missing sign certificate. Run \"task demo:keygen\" to generate examples keys and certificates"
     vars:
       EXAMPLE_OSPKG: "os-pkg-example-ubuntu20.zip"
       LABEL: System Transparency Test OS
       KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz
       INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
       CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
-      SIGNKEYS_DIR:
-        sh: "dirname {{.ST_SIGNING_ROOT}} 2>/dev/null || true"
 
   server:
     desc: Run http server to serve ospkgs on port {{.PORT}}
