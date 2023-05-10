@@ -45,7 +45,6 @@ tasks:
     deps:
       - :go:stmgr
       - keygen
-      - ubuntu
     sources:
       - "{{.DEMO_KEY_DIR}}/signing-key-*}}"
     generates:
@@ -57,10 +56,10 @@ tasks:
     status:
       - "test -f {{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
     preconditions:
-      - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
-        msg: "[ERROR] OS is not debian based"
       - sh: '[ ! -z "{{.OSPKG_DIR}}" ] && ! (find {{.OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
         msg: "[ERROR] Path \"{{.OSPKG_DIR}}\" already contain OS packages. Remove them to create an example OS Package"
+      - sh: '[[ -f {{.KERNEL}} ]] && [[ -f {{.INITRD}} ]]'
+        msg: "[ERROR] Provide {{.KERNEL}} and {{.INITRD}} or run 'task ubuntu' (experimental)"
     vars:
       EXAMPLE_OSPKG: "os-pkg-example-ubuntu20.zip"
       LABEL: System Transparency Test OS
@@ -97,6 +96,8 @@ tasks:
       - "test -f {{.KERNEL}}"
       - "test -f {{.INITRD}}"
     preconditions:
+      - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
+        msg: "[ERROR] OS is not debian based"
       - sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || command -v sudo 2>/dev/null"
         msg: "[ERROR] root privileges required when kvm virtualization is not available"
     vars:
