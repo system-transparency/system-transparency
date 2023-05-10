@@ -10,6 +10,7 @@ vars:
   STBOOT_LINUX_IMAGE: out/artifacts/stboot.vmlinuz
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   TRUST_POLICY: out/artifacts/trust_policy.json
+  HOST_CONFIG: contrib/example_host_configuration.json
   # task helper script
   CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
 
@@ -78,7 +79,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_IMAGE}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.ST_HOST_CONFIG_FILE}}'"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_IMAGE}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
     run: once
 
   iso-ospkg:
@@ -95,7 +96,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_IMAGE}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.ST_HOST_CONFIG_FILE}}'"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_IMAGE}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
     run: once
 
 
