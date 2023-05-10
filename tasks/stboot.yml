@@ -11,7 +11,6 @@ tasks:
     deps:
       - :check-config
       - :go:u-root
-      - :trust-policy
       - :go:checkout-uroot
       - :go:checkout-stboot
     sources:
@@ -97,6 +96,8 @@ tasks:
 
   initramfs-standard:
     desc: "Build an initramfs with stboot as init process"
+    deps:
+      - :trustpolicy-network
     cmds:
       - task: initramfs
         vars:
@@ -106,7 +107,7 @@ tasks:
   initramfs-incl-ospkg:
     desc: "Build an initramfs with stboot as init process including an OS package"
     deps:
-      - :trust-policy-fetch-method-initramfs
+      - :trustpolicy-initramfs
     cmds:
       - task: initramfs
         vars:

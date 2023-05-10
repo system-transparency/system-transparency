@@ -100,53 +100,41 @@ tasks:
     run: once
 
 
-  trust-policy:
+  trustpolicy:
+    internal: yes
     deps:
-      - check-config
+      - task: go:stmgr
     generates:
       - "{{.TRUST_POLICY}}"
     cmds:
       - cmd: mkdir -p $(dirname {{.TRUST_POLICY}})
         silent: true
-      - |-
-        cat > "{{.TRUST_POLICY}}" <<EOL
-        {
-          "ospkg_signature_threshold": {{.ST_NUM_SIGNATURES}},
-          "ospkg_fetch_method": "{{.ST_FETCH_METHOD}}"
-        }
-        EOL
-    status:
-      - "{{.CONFIG_HELPER}} trust-policy {{.DEPS}}"
-      - "[ -f {{.TRUST_POLICY}} ]"
-    run: once
+      - cmd: |-
+          {{.GOBIN}}/stmgr trustpolicy check '{{.JSON}}' > {{.TRUST_POLICY}}
     vars:
-      DEPS: >-
-        ST_NUM_SIGNATURES
-        ST_FETCH_METHOD
+      JSON: "{{.JSON}}"
 
-  trust-policy-fetch-method-initramfs:
-    deps:
-      - check-config
-    generates:
-      - "{{.TRUST_POLICY}}"
+  trustpolicy-network:
+    desc: Generate trust_policy.json with arbitray data but ospkg_fetch_method set to "network"
     cmds:
-      - cmd: mkdir -p $(dirname {{.TRUST_POLICY}})
-        silent: true
-      - |-
-        cat > "{{.TRUST_POLICY}}" <<EOL
-        {
-          "ospkg_signature_threshold": {{.ST_NUM_SIGNATURES}},
-          "ospkg_fetch_method": "initramfs"
-        }
-        EOL
-    status:
-      - "{{.CONFIG_HELPER}} trust-policy {{.DEPS}}"
-      - "[ -f {{.TRUST_POLICY}} ]"
-    run: once
-    vars:
-      DEPS: >-
-        ST_NUM_SIGNATURES
-        ST_FETCH_METHOD
+      - task: trustpolicy
+        vars:
+          JSON: |-
+            { 
+              "ospkg_signature_threshold": 2,
+              "ospkg_fetch_method": "network"
+            }
+
+  trustpolicy-initramfs:
+    desc: Generate trust_policy.json with arbitray data but ospkg_fetch_method set to "initramfs"
+    cmds:
+      - task: trustpolicy
+        vars:
+          JSON: |-
+            { 
+              "ospkg_signature_threshold": 2,
+              "ospkg_fetch_method": "initramfs"
+            }
 
 
 ######## checks ########
