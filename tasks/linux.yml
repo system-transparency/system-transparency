@@ -72,7 +72,7 @@ tasks:
     sources:
       - ./{{.KERNEL_BZIMAGE}}
     generates:
-      - ./{{.IMAGE}}
+      - ./{{.STBOOT_LINUX_KERNEL}}
     method: timestamp
     cmds:
       - task: fetch
@@ -80,18 +80,25 @@ tasks:
       - task: config
       - mkdir -p out/artifacts
       - task: build
-      - cp {{.KERNEL_BZIMAGE}} {{.IMAGE}}
+      - cp {{.KERNEL_BZIMAGE}} {{.STBOOT_LINUX_KERNEL}}
     preconditions:
-      - sh: '[ -n "{{.IMAGE}}" ]'
-        msg: 'task bug: IMAGE not defined'
       - sh: '[ -f "{{.LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
           [ERROR] linux configuration file {{.LINUXBOOT_KERNEL_CONFIG}} missing.
     status:
-      - "[ -f {{.LINUXBOOT_IMAGE}} ]"
+      - "[ -f {{.STBOOT_LINUX_KERNEL}} ]"
     run: when_changed
+
+  kernel-prebuilt:
+    cmds:
+      - mkdir -p out/artifacts
+      - cp {{.PREBUILT_KERNEL}} {{.STBOOT_LINUX_KERNEL}}
+    preconditions:
+      - sh: '[ -f "{{.PREBUILT_KERNEL}}" ]'
+        msg: |-
+          [ERROR] linux configuration file {{.LINUXBOOT_KERNEL_CONFIG}} missing.
     vars:
-      IMAGE: '{{.IMAGE}}'
+      PREBUILT_KERNEL: contrib/linuxboot.vmlinuz
 
   # TODO: add keyring integrity check
   gpg-keyring:

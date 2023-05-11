@@ -5,7 +5,7 @@ vars:
   ISO: out/stboot.iso
   PROVISO: out/prov.iso
   # Build Artifacts
-  STBOOT_LINUX_IMAGE: out/artifacts/stboot.vmlinuz
+  STBOOT_LINUX_KERNEL: out/artifacts/stboot.vmlinuz
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   TRUST_POLICY: out/artifacts/trust_policy.json
   HOST_CONFIG: out/artifacts/host_config.json
@@ -44,34 +44,30 @@ tasks:
     desc: Build stboot iso image
     deps:
       - task: hostconfig
-      - task: linux:kernel
-        vars:
-          IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
+      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
       - task: stboot:initramfs-standard
     sources:
-      - "{{.STBOOT_LINUX_IMAGE}}"
+      - "{{.STBOOT_LINUX_KERNEL}}"
       - "{{.STBOOT_INITRAMFS}}"
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_IMAGE}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
     run: once
 
   iso-ospkg:
     desc: Build stboot iso image including an OS package inside the initramfs
     deps:
       - task: hostconfig
-      - task: linux:kernel
-        vars:
-          IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
+      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
       - task: stboot:initramfs-incl-ospkg
     sources:
-      - "{{.STBOOT_LINUX_IMAGE}}"
+      - "{{.STBOOT_LINUX_KERNEL}}"
       - "{{.STBOOT_INITRAMFS}}"
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_IMAGE}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
     run: once
 
 
@@ -170,9 +166,7 @@ tasks:
   proviso:
     desc: Build provisioning iso image
     deps:
-      - task: linux:kernel
-        vars:
-          IMAGE: "{{.PROVISIONING_LINUX_IMAGE}}"
+      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
       - task: proviso:provisioning-initramfs
     sources:
       - ./{{.PROVISIONING_LINUX_IMAGE}}
@@ -180,7 +174,7 @@ tasks:
     generates:
       - ./{{.PROVISO}}
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.PROVISIONING_LINUX_IMAGE}} -initramfs={{.PROVISIONING_INITRAMFS}}"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.PROVISIONING_INITRAMFS}}"
     vars:
       ISO_DIR: cache/proviso
       PROVISO_FAT: ./{{.ISO_DIR}}/provision.fat
