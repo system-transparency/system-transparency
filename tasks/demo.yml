@@ -59,7 +59,17 @@ tasks:
       - sh: '[ ! -z "{{.OSPKG_DIR}}" ] && ! (find {{.OSPKG_DIR}} -name \*.zip | grep -v {{.EXAMPLE_OSPKG}} | read)'
         msg: "[ERROR] Path \"{{.OSPKG_DIR}}\" already contain OS packages. Remove them to create an example OS Package"
       - sh: '[[ -f {{.KERNEL}} ]] && [[ -f {{.INITRD}} ]]'
-        msg: "[ERROR] Provide {{.KERNEL}} and {{.INITRD}} or run 'task ubuntu' (experimental)"
+        msg: |-
+          [MISSING FILES] To create an OS package, you need an OS-kernel and packed OS-userland at this location:
+          - {{.KERNEL}} 
+          - {{.INITRD}} 
+          
+          Choose!
+          1) Provide this files on your own
+          2) run "task demo:ubuntu" to build them from scratch via debos (experimental)
+          3) run "task demo:ubuntu-prebuilt" to download pre-built files
+
+          Afterwards, run this task again.
     vars:
       EXAMPLE_OSPKG: "os-pkg-example-ubuntu20.zip"
       LABEL: System Transparency Test OS
@@ -103,5 +113,17 @@ tasks:
     vars:
       SUDO:
         sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || echo sudo"
+      KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz
+      INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
+
+  ubuntu-prebuilt:
+    cmds:
+      - "mkdir -p cache/debos"
+      - "curl -L -o {{.INITRD}} https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.cpio.gz"
+      - "curl -L -o {{.KERNEL}} https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.vmlinuz"
+    status:
+      - "test -f {{.KERNEL}}"
+      - "test -f {{.INITRD}}"
+    vars:
       KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz
       INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
