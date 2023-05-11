@@ -3,13 +3,13 @@ version: '3'
 vars:
   INITRAMFS_INCLUDE: contrib/initramfs-includes
   PROVISIONING_INITRC: out/artifacts/proviso.elv
+  STBOOT_ARGS: -loglevel=d
 
 tasks:
   
   u-root:
     internal: yes
     deps:
-      - :check-config
       - :go:u-root
       - :go:checkout-uroot
       - :go:checkout-stboot
@@ -31,7 +31,7 @@ tasks:
       - cmd: for f in {{.FILES}}; do echo "- $f" ; done
         silent: yes
       - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.ST_STBOOT_ARGS}}" -defaultsh=""
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot {{.STBOOT_ARGS}}" -defaultsh=""
         -uroot-source ./cache/go/src/{{.UROOT_REPO}}
         -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} {{.PKGS_ARGS}}
       - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
@@ -49,12 +49,9 @@ tasks:
           [ERROR] root certificate ({{.SIGNING_ROOT}}) missing.
           Please provide a certificate or run "task demo:keygen" to generate example keys.
     status:
-      - "{{.CONFIG_HELPER}} initramfs {{.DEPS}}"
       - "[ -f {{.STBOOT_INITRAMFS}} ]"
     run: when_changed
     vars:
-      DEPS: >-
-        ST_STBOOT_ARGS
       HTTPS_ROOT: contrib/initramfs-includes/isrgrootx1.pem
       SIGNING_ROOT: out/keys/example_keys/root.cert
       FILES: >-
@@ -74,7 +71,6 @@ tasks:
   initramfs:
     internal: yes
     deps:
-      - :check-config
       - task: u-root
         vars:
           OUTPUT: "{{.VARIANT_SRC}}"

@@ -24,20 +24,15 @@ tasks:
         } except e {
           echo "failed to mount efivarfs, probably already mounted"
         }
-        stmgr provision hostconfig {{.ST_PROVISO_STMGR_ARGS}}
+        stmgr provision hostconfig -efi
         shutdown
         EOL
     status:
-      - "{{.CONFIG_HELPER}} stboot:proviso-initrc {{.DEPS}}"
       - "[ -f {{.PROVISIONING_INITRC}} ]"
-    vars:
-      DEPS: >-
-        ST_PROVISO_STMGR_ARGS
 
   provisioning-initramfs:
     desc: "Build compressed stmgr provisioning initramfs"
     deps:
-      - :check-config
       - :go:u-root
       - :go:stmgr
       - :go:checkout-uroot

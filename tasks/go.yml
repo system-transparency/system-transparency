@@ -2,11 +2,11 @@ version: '3'
 
 vars:
   UROOT_REPO: github.com/u-root/u-root
-  UROOT_DEFAULT_VERSION: v0.10.0
+  UROOT_VERSION: v0.10.0
   STBOOT_REPO: system-transparency.org/stboot
-  STBOOT_DEFAULT_VERSION: d1e6263
+  STBOOT_VERSION: d1e6263
   STMGR_REPO: system-transparency.org/stmgr
-  STMGR_DEFAULT_VERSION: 25829a0e
+  STMGR_VERSION: 25829a0e
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
@@ -109,14 +109,6 @@ tasks:
           PACKAGE: "{{.UROOT_REPO}}"
           VERSION: "{{.UROOT_VERSION}}"
     run: once
-    vars:
-      UROOT_VERSION:
-        sh: |
-          if [ -n "{{.ST_UROOT_VERSION}}" ]; then
-          echo {{.ST_UROOT_VERSION}}
-          else
-          echo {{.UROOT_DEFAULT_VERSION}}
-          fi
 
   stmgr:
     cmds:
@@ -126,14 +118,6 @@ tasks:
           PACKAGE: "{{.STMGR_REPO}}"
           VERSION: "{{.STMGR_VERSION}}"
     run: once
-    vars:
-      STMGR_VERSION:
-        sh: |
-          if [ -n "{{.ST_STMGR_VERSION}}" ]; then
-          echo {{.ST_STMGR_VERSION}}
-          else
-          echo {{.STMGR_DEFAULT_VERSION}}
-          fi
 
   debos:
     cmds:
@@ -165,14 +149,6 @@ tasks:
           REPO: "{{.UROOT_REPO}}"
           BRANCH: "{{.UROOT_VERSION}}"
     run: once
-    vars:
-      UROOT_VERSION:
-        sh: |
-          if [ -n "{{.ST_UROOT_VERSION}}" ]; then
-          echo {{.ST_UROOT_VERSION}}
-          else
-          echo {{.UROOT_DEFAULT_VERSION}}
-          fi
 
   checkout-stboot:
     cmds:
@@ -181,15 +157,7 @@ tasks:
           REPO: "{{.STBOOT_REPO}}"
           BRANCH: "{{.STBOOT_VERSION}}"
     run: once
-    vars:
-      STBOOT_VERSION:
-        sh: |
-          if [ -n "{{.ST_STBOOT_VERSION}}" ]; then
-          echo {{.ST_STBOOT_VERSION}}
-          else
-          echo {{.STBOOT_DEFAULT_VERSION}}
-          fi
-
+  
   clean:
     cmds:
       - "[ ! -d cache/go ] || chmod +w -R cache/go"

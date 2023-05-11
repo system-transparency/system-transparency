@@ -46,8 +46,8 @@ Example keys & OS package:
             - cache/go/bin/
             - out/
 
-# Fix stmgr provision sub-command or even better, develop an nicer way to preset
-# QEMU with efivars.
+# Will not work anymore (ST_PROVISO_STMGR_ARGS is gone). Also provision sub-command is deprecated.
+# Develop an nicer way to preset QEMU with efivars.
 #ISO image - network mode - hostcfg from efivar:
 #    stage: test
 #    script:

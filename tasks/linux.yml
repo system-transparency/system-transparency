@@ -1,17 +1,19 @@
 version: '3'
 
 vars:
+  LINUXBOOT_KERNEL_CONFIG: contrib/linuxboot.defconfig
   TARBALL_DIR: cache/tarball
+  KERNEL_VERSION: 5.15.21
   KERNEL_DIR:
-    sh: echo cache/linux/{{.ST_LINUXBOOT_KERNEL_VERSION}} | tr . _
+    sh: echo cache/linux/{{.KERNEL_VERSION}} | tr . _
   KERNEL_CONFIG: ./{{.KERNEL_DIR}}/.config
   KERNEL_BZIMAGE: ./{{.KERNEL_DIR}}/arch/x86/boot/bzImage
   KERNEL_MIRROR: https://cdn.kernel.org/pub/linux/kernel
-  KERNEL_TARBALL: linux-{{.ST_LINUXBOOT_KERNEL_VERSION}}.tar.xz
+  KERNEL_TARBALL: linux-{{.KERNEL_VERSION}}.tar.xz
   KERNEL_TARBALL_FILE: ./{{.TARBALL_DIR}}/{{.KERNEL_TARBALL}}
   KERNEL_TARBALL_URL:
     sh: |
-      major=$(echo {{.ST_LINUXBOOT_KERNEL_VERSION}} |  cut -d . -f 1)
+      major=$(echo {{.KERNEL_VERSION}} |  cut -d . -f 1)
       echo {{.KERNEL_MIRROR}}/v${major}.x/{{.KERNEL_TARBALL}}
 
 tasks:
@@ -49,20 +51,14 @@ tasks:
 
   config:
     sources:
-      - ./{{.ST_LINUXBOOT_KERNEL_CONFIG}}
+      - ./{{.LINUXBOOT_KERNEL_CONFIG}}
     generates:
       - ./{{.KERNEL_CONFIG}}
     cmds:
-      - cp {{.ST_LINUXBOOT_KERNEL_CONFIG}} {{.KERNEL_CONFIG}}
+      - cp {{.LINUXBOOT_KERNEL_CONFIG}} {{.KERNEL_CONFIG}}
       - make -C {{.KERNEL_DIR}} -s olddefconfig
     status:
-      - "{{.CONFIG_HELPER}} linux:config {{.DEPS}}"
       - "[ -f {{.KERNEL_CONFIG}} ]"
-    vars:
-      DEPS: >-
-        ST_LINUXBOOT_KERNEL_VERSION
-        ST_LINUXBOOT_KERNEL_CONFIG
-        ST_LINUXBOOT_CMDLINE
 
   build:
     sources:
@@ -73,8 +69,6 @@ tasks:
       - make -C {{.KERNEL_DIR}} -j$(nproc) bzImage
 
   kernel:
-    deps:
-      - :check-config
     sources:
       - ./{{.KERNEL_BZIMAGE}}
     generates:
@@ -90,25 +84,14 @@ tasks:
     preconditions:
       - sh: '[ -n "{{.IMAGE}}" ]'
         msg: 'task bug: IMAGE not defined'
-      - sh: '[ -n "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
+      - sh: '[ -f "{{.LINUXBOOT_KERNEL_CONFIG}}" ]'
         msg: |-
-          [ERROR] Configuration ST_LINUXBOOT_KERNEL_CONFIG not defined in {{.CONFIG}}.
-      - sh: '[ -f "{{.ST_LINUXBOOT_KERNEL_CONFIG}}" ]'
-        msg: |-
-          [ERROR] linux configuration file {{.ST_LINUXBOOT_KERNEL_CONFIG}} missing.
-      - sh: '! (echo "{{.ST_LINUXBOOT_CMDLINE}}" | grep -q uroot.uinitargs) || [ -z "{{.ST_STBOOT_ARGS}}" ]'
-        msg: |-
-          [ERROR] kernel parameter "uroot.uinitargs" not supported if ST_STBOOT_ARGS is set
+          [ERROR] linux configuration file {{.LINUXBOOT_KERNEL_CONFIG}} missing.
     status:
-      - "{{.CONFIG_HELPER}} linux:kernel {{.DEPS}}"
       - "[ -f {{.LINUXBOOT_IMAGE}} ]"
     run: when_changed
     vars:
       IMAGE: '{{.IMAGE}}'
-      DEPS: >-
-        ST_LINUXBOOT_KERNEL_VERSION
-        ST_LINUXBOOT_KERNEL_CONFIG
-        ST_LINUXBOOT_CMDLINE
 
   # TODO: add keyring integrity check
   gpg-keyring:

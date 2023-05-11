@@ -1,8 +1,6 @@
 version: '3'
 
 vars:
-  # Config file
-  CONFIG: st.config
   # Build Targets
   ISO: out/stboot.iso
   PROVISO: out/prov.iso
@@ -11,12 +9,7 @@ vars:
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   TRUST_POLICY: out/artifacts/trust_policy.json
   HOST_CONFIG: contrib/example_host_configuration.json
-  # task helper script
-  CONFIG_HELPER: "CONFIG={{.CONFIG}} ./.task_config.sh"
 
-
-dotenv:
-  - "{{.CONFIG}}"
 
 includes:
   demo: ./tasks/demo.yml
@@ -39,26 +32,8 @@ tasks:
   fetch:
     desc: Fetch dependencies which require network access
     deps:
-      - check-config
       - go:all
       - linux:fetch
-
-  config:
-    desc: Generate default configuration
-    sources:
-      - "{{.DEFAULT_CONFIG}}"
-    generates:
-      - "{{.CONFIG}}"
-    cmds:
-      - cmd: >-
-             if [ -f {{.CONFIG}} ]; then
-             echo Moving old config to {{.CONFIG}}.old;
-             mv {{.CONFIG}} {{.CONFIG}}.old;
-             fi
-        silent: true
-      - cp {{.DEFAULT_CONFIG}} {{.CONFIG}}
-    vars:
-      DEFAULT_CONFIG: contrib/default.config
 
   toolchain:
     desc: Build toolchain
@@ -68,7 +43,6 @@ tasks:
   iso:
     desc: Build stboot iso image
     deps:
-      - check-config
       - task: linux:kernel
         vars:
           IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
@@ -85,7 +59,6 @@ tasks:
   iso-ospkg:
     desc: Build stboot iso image including an OS package inside the initramfs
     deps:
-      - check-config
       - task: linux:kernel
         vars:
           IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
@@ -137,17 +110,6 @@ tasks:
             }
 
 
-######## checks ########
-
-  # TODO: add config file validation
-  check-config:
-    preconditions:
-      - sh: '[ -f "{{.CONFIG}}" ]'
-        msg: |-
-          [ERROR] File "{{.CONFIG}}" missing
-          Please provide a configuration file or run "task config"
-    run: once
-
 ######## cleanup ########
 
   clean:
@@ -168,7 +130,6 @@ tasks:
     cmds:
       - "rm -rf cache"
       - "rm -rf .task"
-      - "rm -f {{.CONFIG}}"
 
 
 ######## somehow outdated, maybe remove it ########
@@ -179,7 +140,6 @@ tasks:
   proviso:
     desc: Build provisioning iso image
     deps:
-      - check-config
       - task: linux:kernel
         vars:
           IMAGE: "{{.PROVISIONING_LINUX_IMAGE}}"
