@@ -8,7 +8,7 @@ vars:
   STBOOT_LINUX_IMAGE: out/artifacts/stboot.vmlinuz
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   TRUST_POLICY: out/artifacts/trust_policy.json
-  HOST_CONFIG: contrib/example_host_configuration.json
+  HOST_CONFIG: out/artifacts/host_config.json
 
 
 includes:
@@ -43,6 +43,7 @@ tasks:
   iso:
     desc: Build stboot iso image
     deps:
+      - task: hostconfig
       - task: linux:kernel
         vars:
           IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
@@ -59,6 +60,7 @@ tasks:
   iso-ospkg:
     desc: Build stboot iso image including an OS package inside the initramfs
     deps:
+      - task: hostconfig
       - task: linux:kernel
         vars:
           IMAGE: "{{.STBOOT_LINUX_IMAGE}}"
@@ -108,6 +110,34 @@ tasks:
               "ospkg_signature_threshold": 2,
               "ospkg_fetch_method": "initramfs"
             }
+
+  hostconfig:
+    internal: yes
+    deps:
+      - task: go:stmgr
+    generates:
+      - "{{.HOST_CONFIG}}"
+    cmds:
+      - cmd: mkdir -p $(dirname {{.HOST_CONFIG}})
+        silent: true
+      - cmd: |-
+          {{.GOBIN}}/stmgr hostconfig check '{{.JSON}}' > {{.HOST_CONFIG}}
+    vars:
+      JSON: |-
+          { 
+            "network_mode":"dhcp",
+            "host_ip":null,
+            "gateway":null,
+            "dns":null,
+            "network_interface":null,
+            "provisioning_urls": ["http://10.0.2.2:8080/os-pkg-example-ubuntu20.json"],
+            "identity":null,
+            "authentication":null,
+            "timestamp":null,
+            "network_interfaces": [],
+            "bonding_mode": "",
+            "bond_name": ""
+          }
 
 
 ######## cleanup ########

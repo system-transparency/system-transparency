@@ -10,6 +10,7 @@ tasks:
   u-root:
     internal: yes
     deps:
+      - :hostconfig
       - :go:u-root
       - :go:checkout-uroot
       - :go:checkout-stboot
@@ -40,10 +41,6 @@ tasks:
     preconditions:
       - sh: "[ -n \"{{.OUTPUT}}\" ]"
         msg: "task bug: OUTPUT not defined"
-      - sh: >-
-          [ -f "{{.HOST_CONFIG}}" ]
-        msg: |-
-          [ERROR] Host configuration file {{.HOST_CONFIG}} missing.
       - sh: "[ -e \"{{.SIGNING_ROOT}}\" ]"
         msg: |-
           [ERROR] root certificate ({{.SIGNING_ROOT}}) missing.
