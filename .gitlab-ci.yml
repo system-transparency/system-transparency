@@ -25,11 +25,7 @@ default:
 Example keys & OS package:
     stage: environment
     script:
-        # ST config file
-        - task config
-        # Key generation
-        - task demo:keygen
-        # Download example OS
+        # Download example OS artifacts
         - mkdir -p cache/debos
         - cd cache/debos
         - curl -LO https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.cpio.gz
@@ -42,7 +38,6 @@ Example keys & OS package:
         - tree --du -h out/
     artifacts:
         paths: 
-            - st.config
             - cache/go/bin/
             - out/
 
