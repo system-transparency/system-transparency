@@ -1,6 +1,6 @@
 # System Transparency Tooling
 
-This repository contains tooling, configuration files and, demos to form a build-, test- and development environment for _System Transparency_.
+This repository contains tooling, configuration files and demos to form a build-, test- and development environment for _System Transparency_.
 
 _stboot_ is System Transparency Project’s official bootloader. It is a [LinuxBoot](https://www.linuxboot.org/) distribution based on [u-root](https://github.com/u-root/u-root). The source code of stboot can be found at https://git.glasklar.is/system-transparency/core/stboot.
 
@@ -10,9 +10,13 @@ With System Transparency, all OS-related artifacts including the userspace are b
 # Prerequisites
 Your machine should run a Linux system (tested with Ubuntu and 20.04.2 LTS).
 
+## Golang
+
+Make sure you have at least go1.17 running on your system. See [here](https://go.dev/doc/install) for installation.
+
 ## Task
 
-[Task](https://taskfile.dev) is a task runner/build tool that aims to be simpler and easier to use than, for example, [GNU Make](https://www.gnu.org/software/make/). It provides remarkable documentation and uses a simple YAML schema to define tasks. For more information, go to https://taskfile.dev or run `task --help`.
+[Task](https://taskfile.dev) is a task runner or build tool, respectively. It aims to be simpler and easier to use than, for example, [GNU Make](https://www.gnu.org/software/make/). It provides remarkable documentation and uses a simple YAML schema to define tasks. For more information, go to https://taskfile.dev or run `task --help`.
 
 To see all available tasks:
 
@@ -38,104 +42,35 @@ source setup.env
 
 However, this is only recommended on CI workflows since it makes the environment changes persistent in your current shell session.
 
-## Build Dependencies
 
-This is work in progress.
+## Demo
 
-System Transparency requires some dependencies to build the complete installation image. You can check for missing dependencies:
-
-```bash
-task deps:check
-```
-
-In addition, it is possible to install all dependencies on Debian based environments (tested with Ubuntu 18.04.2 LTS and 20.04.2 LTS):
-
-```bash
-task deps:install
-```
-`Note: user requires privileges via sudo`
-
-
-## Demo Files
-
-To see System Transparency in action you need a signed OS package to be loaded by stboot, it is possible to create an Image for demo purposes.
-
-First, generate all required keys and certificates for the signature verification:
-
-```bash
-task demo:keygen
-```
-
-Afterward, an example OS package can be built with:
+To see System Transparency in action you need a signed OS package to be loaded by stboot.
 
 ```bash
 task demo:ospkg
 ```
 
-It builds an example Debian OS image with [debos](https://github.com/go-debos/debos) and uses stmgr to convert it to an OS package.
+Next, you need a HTTP server in the background where stboot can read the OS package from:
 
 ```bash
 task demo:server &
 ```
 
-Will start a HTTP server in the background where stboot can read the OS package from.
-
-# Installation
-To bring System Transparency to your systems, you need to deploy an installation image. Run the following to create an image.
-See [Deployment](#Deployment) for the supported scenarios.
-
-## Configure
-
-To generate a default configuration:
+Now let task build an complete stboot image for you:
 
 ```bash
-task config
-```
-
-The config file `st.config` contains all available configuration variables. Take a look at the descriptions provided in this file for details.
-
-## Build
-```bash
-# build stboot ISO image
 task iso
 ```
 
-## Test
+Finally, enjoy stboot in action:
 ``` bash
-# run stboot ISO image
 task qemu:iso
 ```
-# Installation with built-in provison OS package (experimental)
 
-```bash
-task config
-```
+# Installation
 
-```bash
-# required for a valid OS package
-task demo:keygen
-```
-
-```bash
-# HACK: override example data for OS package with provisioning OS package
-mkdir cache/debos
-cp <your provisioning kernel> cache/debos/ubuntu-focal-amd64.vmlinuz
-cp <your provisioning kernel> cache/debos/ubuntu-focal-amd64.cpio.gz
-```
-
-```bash
-# build OS package
-task demo:ospkg
-```
-```bash
-# build stboot ISO image
-task iso-ospkg
-```
-
-``` bash
-# optional test your installation
-task qemu:iso
-```
+TBD
 
 # OS-Package
 An OS package consists of an archive file (ZIP) and descriptor file (JSON). The archive contains the boot files (kernel, initramfs, etc.) and the descriptor file contains the signatures and other metadata.
