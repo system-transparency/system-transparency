@@ -77,6 +77,19 @@ tasks:
     desc: "Build an initramfs with stboot as init process"
     deps:
       - task: :trustpolicy-network
+    cmds:
+      - task: generic
+        vars:
+          VARIANT: "{{.TASK}}"
+          FILES: "{{.FILES}}"
+    vars: 
+      FILES: >-
+        {{.TRUST_POLICY}}:etc/trust_policy/trust_policy.json
+
+  incl-hostconfig:
+    desc: "Build an initramfs with stboot as init process"
+    deps:
+      - task: :trustpolicy-network
       - task: :hostconfig
     cmds:
       - task: generic
@@ -115,6 +128,7 @@ tasks:
         {{.TRUST_POLICY}}:etc/trust_policy/trust_policy.json
         {{.OSPKG_DESCRIPTOR}}:ospkg/ospkg.json
         {{.OSPKG_ARCHIVE}}:ospkg/ospkg.zip
+
 
 
 # TODO:

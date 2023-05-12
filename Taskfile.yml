@@ -45,7 +45,7 @@ tasks:
     deps:
       - task: hostconfig
       - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
-      - task: initramfs:standard
+      - task: initramfs:incl-hostconfig
     sources:
       - "{{.STBOOT_LINUX_KERNEL}}"
       - "{{.STBOOT_INITRAMFS}}"
