@@ -16,7 +16,7 @@ includes:
   deps: ./tasks/deps.yml
   go: ./tasks/go.yml
   linux: ./tasks/linux.yml
-  stboot: ./tasks/stboot.yml
+  initramfs: ./tasks/initramfs.yml
   qemu: ./tasks/qemu.yml
   proviso: ./tasks/provision.yml
 
@@ -45,7 +45,7 @@ tasks:
     deps:
       - task: hostconfig
       - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
-      - task: stboot:initramfs-standard
+      - task: initramfs:standard
     sources:
       - "{{.STBOOT_LINUX_KERNEL}}"
       - "{{.STBOOT_INITRAMFS}}"
@@ -60,7 +60,7 @@ tasks:
     deps:
       - task: hostconfig
       - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
-      - task: stboot:initramfs-incl-ospkg
+      - task: initramfs:incl-ospkg
     sources:
       - "{{.STBOOT_LINUX_KERNEL}}"
       - "{{.STBOOT_INITRAMFS}}"
