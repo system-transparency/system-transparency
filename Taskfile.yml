@@ -40,11 +40,18 @@ tasks:
     deps:
       - go:update
 
+  fullrun:
+    cmds:
+      - task: demo:ubuntu-prebuilt
+      - task: demo:ospkg
+      - task: iso
+      - task: qemu:iso
+
   iso:
     desc: Build stboot iso image
     deps:
-      - task: hostconfig
-      - task: linux:kernel-prebuilt # Use pre compiled kernel. Change to linux:kernel for compiling your own.
+      - task: hostconfig-network
+      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
       - task: initramfs:incl-hostconfig
     sources:
       - "{{.STBOOT_LINUX_KERNEL}}"
@@ -58,8 +65,8 @@ tasks:
   iso-ospkg:
     desc: Build stboot iso image including an OS package inside the initramfs
     deps:
-      - task: hostconfig
-      - task: linux:kernel-prebuilt # Use pre compiled kernel. Change to linux:kernel for compiling your own.
+      - task: hostconfig-initramfs
+      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
       - task: initramfs:incl-ospkg
     sources:
       - "{{.STBOOT_LINUX_KERNEL}}"
@@ -98,6 +105,22 @@ tasks:
     cmds:
       - "{{.GOBIN}}/mgmt --auth-key-label='Glasklar Admin Key' --password='keins' sign efi --in='{{.UKI}}' --id='0xe37b' --out='{{.UKI_SIGNED}}'"
     run: once
+    
+  iso-provision:
+    desc: Build stboot iso image including NO hostconfig but an provision OS package inside the initramfs
+    deps:
+      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
+      - task: initramfs:provision
+      - task: hostconfig-initramfs # why does stmgr uki need hostconfig.json ??
+    sources:
+      - "{{.STBOOT_LINUX_KERNEL}}"
+      - "{{.STBOOT_INITRAMFS}}"
+    generates:
+      - "{{.ISO}}"
+    cmds:
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+    run: once
+
 
   trustpolicy:
     internal: yes
@@ -135,7 +158,7 @@ tasks:
               "ospkg_fetch_method": "initramfs"
             }
 
-  hostconfig:
+  hostconfig-network:
     internal: yes
     deps:
       - task: go:stmgr
@@ -154,7 +177,34 @@ tasks:
             "gateway":null,
             "dns":null,
             "network_interfaces":null,
-            "provisioning_urls": ["http://10.0.2.2:8080/os-pkg-example-ubuntu20.json"],
+            "ospkg_pointer": "http://10.0.2.2:8080/os-pkg-example-ubuntu20.json",
+            "identity":null,
+            "authentication":null,
+            "timestamp":null,
+            "bonding_mode": "",
+            "bond_name": ""
+          }
+    
+  hostconfig-initramfs:
+    internal: yes
+    deps:
+      - task: go:stmgr
+    generates:
+      - "{{.HOST_CONFIG}}"
+    cmds:
+      - cmd: mkdir -p $(dirname {{.HOST_CONFIG}})
+        silent: true
+      - cmd: |-
+          {{.GOBIN}}/stmgr hostconfig check '{{.JSON}}' > {{.HOST_CONFIG}}
+    vars:
+      JSON: |-
+          { 
+            "network_mode":"dhcp",
+            "host_ip":null,
+            "gateway":null,
+            "dns":null,
+            "network_interfaces":null,
+            "ospkg_pointer": "ospkg.json",
             "identity":null,
             "authentication":null,
             "timestamp":null,

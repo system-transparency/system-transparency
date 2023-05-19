@@ -63,6 +63,42 @@ tasks:
       INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
       CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
 
+
+  ospkg-stprov:
+    desc: "Build stprov OS Package"
+    deps:
+      - :go:stmgr
+      - keygen
+    sources:
+      - "{{.DEMO_KEY_DIR}}/signing-key-*}}"
+    generates:
+      - "{{.OSPKG_DIR}}/{{.STPROV_OSPKG}}"
+    cmds:
+      - "mkdir -p {{.OSPKG_DIR}}"
+      - "{{.GOBIN}}/stmgr ospkg create -out '{{.OSPKG_DIR}}/{{.STPROV_OSPKG}}' -label='{{.LABEL}}' -kernel={{.KERNEL}} -initramfs={{.INITRD}} -cmdline='{{.CMDLINE}}' -url=http://10.0.2.2:8080/os-pkg-example-ubuntu20.zip"
+      - "for i in {1..{{.NUM_SIGNATURES}}}; do {{.GOBIN}}/stmgr ospkg sign -key={{.DEMO_KEY_DIR}}/signing-key-$i.key -cert={{.DEMO_KEY_DIR}}/signing-key-$i.cert -ospkg {{.OSPKG_DIR}}/{{.STPROV_OSPKG}}; done"
+    status:
+      - "test -f {{.OSPKG_DIR}}/{{.STPROV_OSPKG}}"
+    preconditions:
+      - sh: '[[ -f {{.KERNEL}} ]] && [[ -f {{.INITRD}} ]]'
+        msg: |-
+          [MISSING FILES] To create an OS package, you need an OS-kernel and packed OS-userland at this location:
+          - {{.KERNEL}} 
+          - {{.INITRD}} 
+          
+          Choose!
+          1) Provide this files on your own
+          2) run "task demo:ubuntu" to build them from scratch via debos (experimental)
+          3) run "task demo:ubuntu-prebuilt" to download pre-built files
+
+          Afterwards, run this task again.
+    vars:
+      STPROV_OSPKG: "stprov.zip"
+      LABEL: Provisioning Tool
+      KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz #CHANGEME to contrib/linuxboot.vmlinuz or other kernel for stprov
+      INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz #CHANGME to whereever stpro initramfs is laying aroud
+      CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd  
+
   server:
     desc: Run http server to serve ospkgs on port {{.PORT}}
     deps:

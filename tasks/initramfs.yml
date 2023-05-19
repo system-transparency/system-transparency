@@ -90,7 +90,7 @@ tasks:
     desc: "Build an initramfs with stboot as init process"
     deps:
       - task: :trustpolicy-network
-      - task: :hostconfig
+      - task: :hostconfig-network
     cmds:
       - task: generic
         vars:
@@ -106,7 +106,7 @@ tasks:
     desc: "Build an initramfs with stboot as init process including an OS package"
     deps:
       - task: :trustpolicy-initramfs
-      - task: :hostconfig
+      - task: :hostconfig-initramfs
     cmds:
       - task: generic
         vars:
@@ -128,6 +128,31 @@ tasks:
         {{.TRUST_POLICY}}:etc/trust_policy/trust_policy.json
         {{.OSPKG_DESCRIPTOR}}:ospkg/ospkg.json
         {{.OSPKG_ARCHIVE}}:ospkg/ospkg.zip
+
+  provision:
+    desc: "Build an initramfs with stboot as init process including stprov as OS package"
+    deps:
+      - task: :trustpolicy-initramfs
+    cmds:
+      - task: generic
+        vars:
+          VARIANT: "{{.TASK}}"
+          FILES: "{{.FILES}}"
+    preconditions:
+      - sh: >-
+          [ -f "{{.STPROV_OSPKG_DESCRIPTOR}}" ] && [ -f "{{.STPROV_OSPKG_ARCHIVE}}" ]
+        msg: |-
+          [ERROR] Missing OS package artifacts:
+          - {{.STPROV_OSPKG_ARCHIVE}}  
+          - {{.STPROV_OSPKG_DESCRIPTOR}}
+          Either provide them manually or run before 'task demo:ospkg-stprov'
+    vars:
+      STPROV_OSPKG_DESCRIPTOR: "{{.OSPKG_DIR}}/stprov.json"
+      STPROV_OSPKG_ARCHIVE: "{{.OSPKG_DIR}}/stprov.zip"
+      FILES: >-
+        {{.TRUST_POLICY}}:etc/trust_policy/trust_policy.json
+        {{.STPROV_OSPKG_DESCRIPTOR}}:ospkg/provision.json
+        {{.STPROV_OSPKG_ARCHIVE}}:ospkg/provision.zip
 
 
 
