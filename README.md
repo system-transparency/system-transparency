@@ -65,6 +65,19 @@ task qemu:iso
 (Login to the booted Ubuntu: user: stboot, pw: stboot)
 
 
+## Demo 2, including stprov in an os-pkg, in the initramfs
+``` bash
+task demo:initramfs-stprov linux:kernel-prebuilt demo:ospkg-stprov iso-provision qemu:iso
+```
+
+Once stboot has entered provision mode, because it cannot find enough
+host config and trust policy, try provision the machine by running stprov:
+
+``` bash
+stprov remote static -h x -i 10.0.2.15/27 -g 10.0.2.2 -A
+```
+
+
 # Installation
 
 TBD
