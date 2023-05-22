@@ -67,6 +67,7 @@ tasks:
     desc: "Build stprov initramfs"
     deps:
       - :go:stprov
+      - :go:u-root
       - :go:checkout-uroot
     sources:
       - ./cache/go/bin/stmgr
