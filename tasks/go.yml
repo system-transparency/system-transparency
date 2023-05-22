@@ -7,6 +7,8 @@ vars:
   STBOOT_VERSION: stprov
   STMGR_REPO: system-transparency.org/stmgr
   STMGR_VERSION: 02c69e86
+  STPROV_REPO: system-transparency.org/stprov/cmd/stprov
+  STPROV_VERSION: 2cfc81c
   STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt
   STHSM_VERSION: e428dbc
   GOBIN: cache/go/bin
@@ -84,7 +86,11 @@ tasks:
       - task
       - u-root
       - stmgr
+<<<<<<< HEAD
       - sthsm
+=======
+      - stprov
+>>>>>>> c272b8d (Add support for stprov ospkg in intitramfs)
     # checkout sequentially
     cmds:
       - task: checkout-uroot
@@ -122,6 +128,7 @@ tasks:
           VERSION: "{{.STMGR_VERSION}}"
     run: once
 
+<<<<<<< HEAD
   sthsm:
     cmds:
       - task: install
@@ -129,6 +136,15 @@ tasks:
           NAME: sthsm
           PACKAGE: "{{.STHSM_REPO}}"
           VERSION: "{{.STHSM_VERSION}}"
+=======
+  stprov:
+    cmds:
+      - task: install
+        vars:
+          NAME: stprov
+          PACKAGE: "{{.STPROV_REPO}}"
+          VERSION: "{{.STPROV_VERSION}}"
+>>>>>>> c272b8d (Add support for stprov ospkg in intitramfs)
     run: once
 
   debos:

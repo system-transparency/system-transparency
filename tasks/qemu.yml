@@ -101,19 +101,3 @@ tasks:
              [ERROR] Image "{{.ISO}}" missing.
              Run "task iso" to build stboot iso image
     run: once
-
-  proviso:
-    desc: Run provisioning iso image in QEMU
-    cmds:
-      - task: qemu
-        vars:
-          QEMU_ARGS: >-
-            -drive file={{.PROVISO}},format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on
-            -device ahci,id=achi0
-            -device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=1
-    preconditions:
-      - sh: '[ -f "{{.PROVISO}}" ]'
-        msg: |-
-             [ERROR] Image "{{.PROVISO}}" missing.
-             Run "task proviso" to build stboot provisioning iso image
-    run: once

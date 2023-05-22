@@ -4,6 +4,7 @@ vars:
   OSPKG_DIR: "out/ospkgs"
   NUM_SIGNATURES: 2
   DEMO_KEY_DIR: out/keys/example_keys
+  STPROV_INITRAMFS: out/artifacts/stprov.cpio.gz
 
 tasks:
   keygen:
@@ -39,7 +40,6 @@ tasks:
       - "for i in {1..{{.NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.key ]]; done"
       - "for i in {1..{{.NUM_SIGNATURES}}}; do [[ -f {{.DEMO_KEY_DIR}}/signing-key-$i.cert ]]; done"
 
-
   ospkg:
     desc: "Build demo OS Package"
     deps:
@@ -63,6 +63,36 @@ tasks:
       INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
       CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
 
+  initramfs-stprov:
+    desc: "Build stprov initramfs"
+    deps:
+      - :go:stprov
+      - :go:checkout-uroot
+    sources:
+      - ./cache/go/bin/stmgr
+    generates:
+      - "{{.STPROV_INITRAMFS}}"
+    cmds:
+      - cmd: mkdir -p $(dirname {{.STPROV_INITRAMFS}})
+        silent: true
+      - >
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb
+        -uroot-source ./cache/go/src/{{.UROOT_REPO}}
+        -o {{.INITRAMFS}} {{.FILES_ARGS}} core
+      - gzip -kf {{.INITRAMFS}}
+    env:
+      GO111MODULE: off
+    preconditions:
+      - sh: '[ -n "{{.INITRAMFS}}" ]'
+        msg: "task bug: INITRAMFS not defined"
+    run: once
+    vars:
+      INITRAMFS:
+        sh: echo {{.STPROV_INITRAMFS}} | sed -e 's/\.gz//'
+      FILES: >-
+        cache/go/bin/stprov:/bin/stprov
+      FILES_ARGS:
+        sh: for f in {{.FILES}}; do echo -n "-files $f"; done
 
   ospkg-stprov:
     desc: "Build stprov OS Package"
@@ -95,9 +125,9 @@ tasks:
     vars:
       STPROV_OSPKG: "stprov.zip"
       LABEL: Provisioning Tool
-      KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz #CHANGEME to contrib/linuxboot.vmlinuz or other kernel for stprov
-      INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz #CHANGME to whereever stpro initramfs is laying aroud
-      CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd  
+      KERNEL: "{{.STBOOT_LINUX_KERNEL}}"
+      INITRD: "{{.STPROV_INITRAMFS}}"
+      CMDLINE: console=ttyS0,115200n8
 
   server:
     desc: Run http server to serve ospkgs on port {{.PORT}}
