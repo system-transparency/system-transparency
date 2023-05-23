@@ -4,6 +4,8 @@ vars:
   # Build Targets
   ISO: out/stboot.iso
   PROVISO: out/prov.iso
+  EFI: out/stboot.uki
+  EFI_SIGNED: out/stboot.signed
   # Build Artifacts
   STBOOT_LINUX_KERNEL: out/artifacts/stboot.vmlinuz
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
@@ -135,6 +137,22 @@ tasks:
             "bond_name": ""
           }
 
+  netboot:
+      desc: Build stboot netboot image
+      deps:
+        - task: go:stmgr
+        - task: go:sthsm
+        - task: linux:kernel
+        - task: initramfs:standard
+      sources:
+        - "{{.STBOOT_LINUX_KERNEL}}"
+        - "{{.STBOOT_INITRAMFS}}"
+      generates:
+        - "{{.EFI}}"
+      cmds:
+        - "{{.GOBIN}}/stmgr uki create -format uki -out '{{.EFI}}' -sbat ./contrib/sbat.csv -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+        - "{{.GOBIN}}/mgmt --auth-key-label='Glasklar Admin Key' --password='keins' sign efi --in='{{.EFI}}' --id='0xe37b' --out='{{.EFI_SIGNED}}'"
+      run: once
 
 ######## cleanup ########
 

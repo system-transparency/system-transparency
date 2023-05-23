@@ -7,6 +7,8 @@ vars:
   STBOOT_VERSION: d1e6263
   STMGR_REPO: system-transparency.org/stmgr
   STMGR_VERSION: 25829a0e
+  STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt
+  STHSM_VERSION: 3cd8e3b1
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
@@ -82,6 +84,7 @@ tasks:
       - task
       - u-root
       - stmgr
+      - sthsm
     # checkout sequentially
     cmds:
       - task: checkout-uroot
@@ -117,6 +120,15 @@ tasks:
           NAME: stmgr
           PACKAGE: "{{.STMGR_REPO}}"
           VERSION: "{{.STMGR_VERSION}}"
+    run: once
+
+  sthsm:
+    cmds:
+      - task: install
+        vars:
+          NAME: sthsm
+          PACKAGE: "{{.STHSM_REPO}}"
+          VERSION: "{{.STHSM_VERSION}}"
     run: once
 
   debos:
