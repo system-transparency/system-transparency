@@ -133,12 +133,13 @@ tasks:
     desc: "Build an initramfs with stboot as init process including stprov as OS package"
     deps:
       - task: :trustpolicy-initramfs
+      - task: :demo:ospkg-stprov
     cmds:
       - task: generic
         vars:
           VARIANT: "{{.TASK}}"
           FILES: "{{.FILES}}"
-    preconditions:
+    preconditions: # may be removed
       - sh: >-
           [ -f "{{.STPROV_OSPKG_DESCRIPTOR}}" ] && [ -f "{{.STPROV_OSPKG_ARCHIVE}}" ]
         msg: |-

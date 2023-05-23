@@ -100,6 +100,7 @@ tasks:
     deps:
       - :go:stmgr
       - keygen
+      - initramfs-stprov
     sources:
       - "{{.DEMO_KEY_DIR}}/signing-key-*}}"
     generates:
@@ -110,7 +111,7 @@ tasks:
       - "for i in {1..{{.NUM_SIGNATURES}}}; do {{.GOBIN}}/stmgr ospkg sign -key={{.DEMO_KEY_DIR}}/signing-key-$i.key -cert={{.DEMO_KEY_DIR}}/signing-key-$i.cert -ospkg {{.OSPKG_DIR}}/{{.STPROV_OSPKG}}; done"
     status:
       - "test -f {{.OSPKG_DIR}}/{{.STPROV_OSPKG}}"
-    preconditions:
+    preconditions: # may be removed
       - sh: '[[ -f {{.KERNEL}} ]] && [[ -f {{.INITRD}} ]]'
         msg: |-
           [MISSING FILES] To create an OS package, you need an OS-kernel and packed OS-userland at this location:
@@ -119,8 +120,8 @@ tasks:
           
           Choose!
           1) Provide this files on your own
-          2) run "task demo:ubuntu" to build them from scratch via debos (experimental)
-          3) run "task demo:ubuntu-prebuilt" to download pre-built files
+          2) run "task initramfs-stprov" to build them from scratch via debos (experimental)
+          3) run "task initramfs-stprov" to download pre-built files
 
           Afterwards, run this task again.
     vars:
