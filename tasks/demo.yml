@@ -77,7 +77,7 @@ tasks:
       - cmd: mkdir -p $(dirname {{.STPROV_INITRAMFS}})
         silent: true
       - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="/bin/stprov help"
         -uroot-source ./cache/go/src/{{.UROOT_REPO}}
         -o {{.INITRAMFS}} {{.FILES_ARGS}} core
       - gzip -kf {{.INITRAMFS}}
