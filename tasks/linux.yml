@@ -3,7 +3,7 @@ version: '3'
 vars:
   LINUXBOOT_KERNEL_CONFIG: contrib/linuxboot.defconfig
   TARBALL_DIR: cache/tarball
-  KERNEL_VERSION: 5.15.21
+  KERNEL_VERSION: 5.15.112
   KERNEL_DIR:
     sh: echo cache/linux/{{.KERNEL_VERSION}} | tr . _
   KERNEL_CONFIG: ./{{.KERNEL_DIR}}/.config
