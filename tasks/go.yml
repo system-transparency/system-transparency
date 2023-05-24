@@ -4,9 +4,9 @@ vars:
   UROOT_REPO: github.com/u-root/u-root
   UROOT_VERSION: v0.10.0
   STBOOT_REPO: system-transparency.org/stboot
-  STBOOT_VERSION: d1e6263
+  STBOOT_VERSION: v0.1.2
   STMGR_REPO: system-transparency.org/stmgr
-  STMGR_VERSION: 25829a0e
+  STMGR_VERSION: v0.1.1
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
