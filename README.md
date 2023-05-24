@@ -51,22 +51,19 @@ To see System Transparency in action you need a signed OS package to be loaded b
 task demo:ospkg
 ```
 
-Next, you need a HTTP server in the background where stboot can read the OS package from:
-
-```bash
-task demo:server &
-```
-
 Now let task build an complete stboot image for you:
 
 ```bash
 task iso
 ```
 
-Finally, enjoy stboot in action:
+Finally, start a webserver in the background providing the OS package and enjoy stboot in action:
 ``` bash
+task demo:server &
 task qemu:iso
 ```
+(Login to the booted Ubuntu: user: stboot, pw: stboot)
+
 
 # Installation
 
