@@ -3,7 +3,6 @@ version: '3'
 vars:
   # Build Targets
   ISO: out/stboot.iso
-  PROVISO: out/prov.iso
   # Build Artifacts
   STBOOT_LINUX_KERNEL: out/artifacts/stboot.vmlinuz
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
@@ -18,8 +17,7 @@ includes:
   linux: ./tasks/linux.yml
   initramfs: ./tasks/initramfs.yml
   qemu: ./tasks/qemu.yml
-  proviso: ./tasks/provision.yml
-
+  
 output: 'prefixed'
 
 tasks:
@@ -155,28 +153,3 @@ tasks:
     cmds:
       - "rm -rf cache"
       - "rm -rf .task"
-
-
-######## somehow outdated, maybe remove it ########
-# it builds the stmgr provision hostconfig tool into
-# an own iso/initramfs. This GUI tool was never actually used.
-# It prompts for hostconfig input and writes it to qemu efivar.
-
-  proviso:
-    desc: Build provisioning iso image
-    deps:
-      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
-      - task: proviso:provisioning-initramfs
-    sources:
-      - ./{{.PROVISIONING_LINUX_IMAGE}}
-      - ./{{.PROVISIONING_INITRAMFS}}
-    generates:
-      - ./{{.PROVISO}}
-    cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.PROVISIONING_INITRAMFS}}"
-    vars:
-      ISO_DIR: cache/proviso
-      PROVISO_FAT: ./{{.ISO_DIR}}/provision.fat
-      # TODO: Calculate size
-      BLOCKS:
-        sh: echo $((1<<16))
