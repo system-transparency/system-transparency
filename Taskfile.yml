@@ -79,20 +79,20 @@ tasks:
     run: once
 
   uki:
-      desc: Build stboot UKI
-      deps:
-        - task: go:stmgr
-        - task: go:sthsm
-        - task: linux:kernel-prebuilt # Use pre compiled kernel. Change to linux:kernel for compiling your own.
-        - task: initramfs:standard
-      sources:
-        - "{{.STBOOT_LINUX_KERNEL}}"
-        - "{{.STBOOT_INITRAMFS}}"
-      generates:
-        - "{{.UKI}}"
-      cmds:
-        - "{{.GOBIN}}/stmgr uki create -format uki -out '{{.UKI}}' -sbat ./contrib/sbat.csv -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
-      run: once
+    desc: Build stboot UKI
+    deps:
+      - task: go:stmgr
+      - task: go:sthsm
+      - task: linux:kernel-prebuilt # Use pre compiled kernel. Change to linux:kernel for compiling your own.
+      - task: initramfs:standard
+    sources:
+      - "{{.STBOOT_LINUX_KERNEL}}"
+      - "{{.STBOOT_INITRAMFS}}"
+    generates:
+      - "{{.UKI}}"
+    cmds:
+      - "{{.GOBIN}}/stmgr uki create -format uki -out '{{.UKI}}' -sbat ./contrib/sbat.csv -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+    run: once
 
 
   netboot-img:       # FIXME: Signing the UKI probably belongs in demo

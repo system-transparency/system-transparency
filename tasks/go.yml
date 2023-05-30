@@ -86,11 +86,8 @@ tasks:
       - task
       - u-root
       - stmgr
-<<<<<<< HEAD
-      - sthsm
-=======
       - stprov
->>>>>>> c272b8d (Add support for stprov ospkg in intitramfs)
+      - sthsm
     # checkout sequentially
     cmds:
       - task: checkout-uroot
@@ -128,15 +125,6 @@ tasks:
           VERSION: "{{.STMGR_VERSION}}"
     run: once
 
-<<<<<<< HEAD
-  sthsm:
-    cmds:
-      - task: install
-        vars:
-          NAME: sthsm
-          PACKAGE: "{{.STHSM_REPO}}"
-          VERSION: "{{.STHSM_VERSION}}"
-=======
   stprov:
     cmds:
       - task: install
@@ -144,7 +132,15 @@ tasks:
           NAME: stprov
           PACKAGE: "{{.STPROV_REPO}}"
           VERSION: "{{.STPROV_VERSION}}"
->>>>>>> c272b8d (Add support for stprov ospkg in intitramfs)
+    run: once
+
+  sthsm:
+    cmds:
+      - task: install
+        vars:
+          NAME: sthsm
+          PACKAGE: "{{.STHSM_REPO}}"
+          VERSION: "{{.STHSM_VERSION}}"
     run: once
 
   debos:
