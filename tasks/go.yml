@@ -4,9 +4,9 @@ vars:
   UROOT_REPO: github.com/u-root/u-root
   UROOT_VERSION: v0.10.0
   STBOOT_REPO: system-transparency.org/stboot
-  STBOOT_VERSION: stprov
+  STBOOT_VERSION: v0.2.0
   STMGR_REPO: system-transparency.org/stmgr
-  STMGR_VERSION: 02c69e86
+  STMGR_VERSION: v0.2.0
   STPROV_REPO: system-transparency.org/stprov/cmd/stprov
   STPROV_VERSION: 2cfc81c
   STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt

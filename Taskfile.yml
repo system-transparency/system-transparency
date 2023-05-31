@@ -60,7 +60,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}"
     run: once
 
   iso-ospkg:
@@ -75,7 +75,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}"
     run: once
 
   iso-provision:
@@ -83,14 +83,13 @@ tasks:
     deps:
       - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
       - task: initramfs:provision
-      - task: hostconfig-initramfs # why does stmgr uki need hostconfig.json ??
     sources:
       - "{{.STBOOT_LINUX_KERNEL}}"
       - "{{.STBOOT_INITRAMFS}}"
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}"
     run: once
 
   uki:
@@ -106,7 +105,7 @@ tasks:
     generates:
       - "{{.UKI}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format uki -out '{{.UKI}}' -sbat ./contrib/sbat.csv -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+      - "{{.GOBIN}}/stmgr uki create -format uki -out '{{.UKI}}' -sbat ./contrib/sbat.csv -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}"
     run: once
 
 
