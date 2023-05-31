@@ -78,6 +78,21 @@ tasks:
       - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
     run: once
 
+  iso-provision:
+    desc: Build stboot iso image including NO hostconfig but an provision OS package inside the initramfs
+    deps:
+      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
+      - task: initramfs:provision
+      - task: hostconfig-initramfs # why does stmgr uki need hostconfig.json ??
+    sources:
+      - "{{.STBOOT_LINUX_KERNEL}}"
+      - "{{.STBOOT_INITRAMFS}}"
+    generates:
+      - "{{.ISO}}"
+    cmds:
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
+    run: once
+
   uki:
     desc: Build stboot UKI
     deps:
@@ -105,21 +120,6 @@ tasks:
       - "{{.UKI_SIGNED}}"
     cmds:
       - "{{.GOBIN}}/mgmt --auth-key-label='Glasklar Admin Key' --password='keins' sign efi --in='{{.UKI}}' --id='0xe37b' --out='{{.UKI_SIGNED}}'"
-    run: once
-    
-  iso-provision:
-    desc: Build stboot iso image including NO hostconfig but an provision OS package inside the initramfs
-    deps:
-      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
-      - task: initramfs:provision
-      - task: hostconfig-initramfs # why does stmgr uki need hostconfig.json ??
-    sources:
-      - "{{.STBOOT_LINUX_KERNEL}}"
-      - "{{.STBOOT_INITRAMFS}}"
-    generates:
-      - "{{.ISO}}"
-    cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -config='{{.HOST_CONFIG}}'"
     run: once
 
 
