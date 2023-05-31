@@ -67,7 +67,7 @@ task qemu:iso
 
 ## Demo 2, including stprov in an os-pkg, in the initramfs
 ``` bash
-task demo:initramfs-stprov linux:kernel-prebuilt demo:ospkg-stprov iso-provision qemu:iso
+task iso-provision qemu:iso
 ```
 
 Once stboot has entered provision mode, because it cannot find enough
