@@ -80,7 +80,10 @@ stprov remote static -h x -i 10.0.2.15/27 -g 10.0.2.2 -A
 
 # Installation
 
-TBD
+TBD. 
+
+However, the log of task in the demos delivers detailed information on the executed commands. You can adapt these to your need.
+
 
 # OS-Package
 An OS package consists of an archive file (ZIP) and descriptor file (JSON). The archive contains the boot files (kernel, initramfs, etc.) and the descriptor file contains the signatures and other metadata.
@@ -100,13 +103,17 @@ stmgr -help
 
 # System Configuration
 
-See package `opts` at [stboot code](https://git.glasklar.is/system-transparency/core/stboot).
+See package `opts` at [stboot code](https://pkg.go.dev/system-transparency.org/stboot@v0.2.0/host#Config).
+Information on host config autodetection can be found [here](https://pkg.go.dev/system-transparency.org/stboot@v0.2.0/host#ConfigAutodetect)
 
 # Features
 
 ## Boot Modes
 
 stboot can fetch OS packages from different sources. The fetching mechanism is determined by the trust policy.
+The location of the OS package is defined by the OS package pointer in the host config. The format of the OS package pointer needs to setisfy the requirements of the choosen fetching mechanism.
+
+stboot will do string replacement on $ID and $AUTH in the OS package pointer using the values _identity_ and _authentication_ from the host configuration.
 
 ### Network Boot
 Network boot can be configured using either DHCP or a static network configuration. In the case of a static network, stboot uses IP address, netmask, default gateway, and DNS server from `host_configuration.json`.
@@ -116,12 +123,10 @@ Provisioning Server Communication:
     * File name: `/etc/https_roots.pem`
     * Use https://letsencrypt.org/certificates/ roots as default.
 
-Provisioning URLs:
-* If multiple provisioning URLs are present in host_configuration, try all, in order.
+OS package pointer:
+* Expect a comma separated list of URLs
+* If multiple URLs are present, try all, in order.
 * The user must specify HTTP or HTTPS in the URL.
-* stboot will do string replacement on $ID and $AUTH using the values from `host_configuration.json`:
-    * e.g. https://provisioning.foo.net/api/v1/?id=$ID&auth=$AUTH 
-    * e.g. https://provisioning.bar.net/api/v1/$ID
 
 These URLs are supposed to serve the OS package descriptor.
 
@@ -132,9 +137,14 @@ For each provisioning server URL in `host_configuration.json`:
 * Try downloading the OS package
 
 ### Initramfs Boot
-Initramfs boot expects the OS package artifacts to be included inside the initramfs at the following paths:
-* Descriptor: /ospkg/ospkg.json
-* Archive: /ospkg/ospkg.zip
+Initramfs boot expects the OS package artifacts to be included inside the initramfs.
+
+OS package pointer:
+* Expect a filename like _my-ospkg.json_
+
+The OS package will then be loaded from:
+* Descriptor: `/ospkg/my-ospkg.json`
+* Archive: `/ospkg/my-ospkg.zip`
 
 ## Signature Verification
 
