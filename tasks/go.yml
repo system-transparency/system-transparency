@@ -8,7 +8,7 @@ vars:
   STMGR_REPO: system-transparency.org/stmgr
   STMGR_VERSION: v0.2.0
   STPROV_REPO: system-transparency.org/stprov/cmd/stprov
-  STPROV_VERSION: 2cfc81c
+  STPROV_VERSION: v0.1.1
   STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt
   STHSM_VERSION: e428dbc
   GOBIN: cache/go/bin

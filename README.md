@@ -71,11 +71,15 @@ task iso-provision qemu:iso
 ```
 
 Once stboot has entered provision mode, because it cannot find enough
-host config and trust policy, try provision the machine by running stprov:
+host config and trust policy, try provisioning the machine by running
+stprov:
 
 ``` bash
-stprov remote static -h x -i 10.0.2.15/27 -g 10.0.2.2 -A
+stprov remote static -h x -i 10.0.2.10/27 -g 10.0.2.2 -A
 ```
+
+This should result in out/artifacts/OVMF_VARS.fd being set up so that
+the next boot do not enter provision mode.
 
 
 # Installation
