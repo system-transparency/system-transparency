@@ -91,7 +91,7 @@ tasks:
       INITRAMFS:
         sh: echo {{.STPROV_INITRAMFS}} | sed -e 's/\.gz//'
       FILES: >-
-        cache/go/bin/stprov:/bin/stprov
+        cache/go/bin/stprov:bin/stprov
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f"; done
 
