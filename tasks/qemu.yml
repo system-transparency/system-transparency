@@ -93,8 +93,8 @@ tasks:
         vars:
           QEMU_ARGS: >-
             -drive file={{.ISO}},format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on
-            -device ahci,id=achi0
-            -device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=1
+            -device ahci,id=ahci0
+            -device ide-cd,bus=ahci0.0,drive=drive-cd1,id=cd1,bootindex=1
     preconditions:
       - sh: '[ -f "{{.ISO}}" ]'
         msg: |-
