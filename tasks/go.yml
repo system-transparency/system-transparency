@@ -6,7 +6,7 @@ vars:
   STBOOT_REPO: system-transparency.org/stboot
   STBOOT_VERSION: v0.2.0
   STMGR_REPO: system-transparency.org/stmgr
-  STMGR_VERSION: v0.2.0
+  STMGR_VERSION: ln5/cmdline
   STPROV_REPO: system-transparency.org/stprov/cmd/stprov
   STPROV_VERSION: v0.1.1
   STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt

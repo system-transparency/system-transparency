@@ -61,7 +61,7 @@ tasks:
       LABEL: System Transparency Test OS
       KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz
       INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
-      CMDLINE: console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd
+      CMDLINE: rw rdinit=/lib/systemd/systemd
 
   initramfs-stprov:
     desc: "Build stprov initramfs"
@@ -129,7 +129,7 @@ tasks:
       LABEL: Provisioning Tool
       KERNEL: "{{.STBOOT_LINUX_KERNEL}}"
       INITRD: "{{.STPROV_INITRAMFS}}"
-      CMDLINE: console=ttyS0,115200n8
+      CMDLINE:
 
   server:
     desc: Run http server to serve ospkgs on port {{.PORT}}
