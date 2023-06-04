@@ -68,7 +68,6 @@ tasks:
         -device virtio-rng-pci,rng=rng0
         -rtc base=localtime
         -m {{.QEMU_MEM}}
-        -nographic
         {{.QEMU_ARGS}}
 
   disk:
@@ -95,9 +94,19 @@ tasks:
             -drive file={{.ISO}},format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on
             -device ahci,id=achi0
             -device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=1
+            {{.QEMU_ARGS}}
     preconditions:
       - sh: '[ -f "{{.ISO}}" ]'
         msg: |-
              [ERROR] Image "{{.ISO}}" missing.
              Run "task iso" to build stboot iso image
+    run: once
+
+  iso-serial:
+    desc: Run stboot iso image in QEMU without a graphic console
+    cmds:
+      - task: iso
+        vars:
+          QEMU_ARGS: >-
+            -nographic
     run: once
