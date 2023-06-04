@@ -4,7 +4,7 @@ vars:
   UROOT_REPO: github.com/u-root/u-root
   UROOT_VERSION: v0.10.0
   STBOOT_REPO: system-transparency.org/stboot
-  STBOOT_VERSION: v0.2.0
+  STBOOT_VERSION: ln5/hostconfig-autodetect
   STMGR_REPO: system-transparency.org/stmgr
   STMGR_VERSION: ln5/cmdline
   STPROV_REPO: system-transparency.org/stprov/cmd/stprov
