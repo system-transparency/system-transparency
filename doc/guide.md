@@ -10,7 +10,7 @@ At the heart of a bootable image is an initramfs containing [stboot][], the boot
 
 The initramfs will have to contain numerous configuration bits and pieces, influencing different aspects of the boot process. We will be using two programs to put it all together, [stmgr][] and [u-root][].
 
-![bootable img components][]
+![components][]
 
 [stboot]: https://git.glasklar.is/system-transparency/core/stboot
 [stmgr]: https://git.glasklar.is/system-transparency/core/stmgr
