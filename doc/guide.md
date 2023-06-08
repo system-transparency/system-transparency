@@ -6,7 +6,7 @@ Please note that the task runners provided are meant for a) simple demos and b) 
 
 ## Overview
 
-At the heart of a bootable image is an initramfs containing [stboot][], the boot loader, and its configuration. You will also need a Linux kernel to include in the boot image.
+At the heart of a bootable image is an initramfs containing [stboot][] and its configuration. You will also need a Linux kernel to include in the boot image.
 
 The initramfs will have to contain numerous configuration bits and pieces, influencing different aspects of the boot process. We will be using two programs to put it all together, [stmgr][] and [u-root][].
 
