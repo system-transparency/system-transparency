@@ -11,6 +11,8 @@ vars:
   STPROV_VERSION: v0.1.1
   STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt
   STHSM_VERSION: e428dbc
+  STAUTH_REPO: git.glasklar.is/system-transparency/core/stauth
+  STAUTH_VERSION: 6e1b46d9f57bfb6a6bf770e2fdd591b1294c3d56
   GOBIN: cache/go/bin
   GOPATH:
     sh: echo "$PWD/cache/go"
@@ -77,9 +79,12 @@ tasks:
       - "test -x {{.GOBIN}}/{{.NAME}}"
       # check version file
       - 'grep -q {{.VERSION}} {{.GOBIN}}/.{{.NAME}}'
+    env:
+      CGO_ENABLED: '{{.CGO_ENABLED}}'
     vars:
       VERSION: '{{default "latest" .VERSION}}'
       GO_LDFLAGS: '{{default "" .GO_LDFLAGS}}'
+      CGO_ENABLED: '{{default "" .CGO_ENABLED}}'
 
   all:
     deps:
@@ -133,6 +138,16 @@ tasks:
           NAME: sthsm
           PACKAGE: "{{.STHSM_REPO}}"
           VERSION: "{{.STHSM_VERSION}}"
+    run: once
+
+  stauth:
+    cmds:
+      - task: install
+        vars:
+          NAME: stauth
+          PACKAGE: "{{.STAUTH_REPO}}"
+          VERSION: "{{.STAUTH_VERSION}}"
+          CGO_ENABLED: "0"
     run: once
 
   debos:

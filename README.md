@@ -57,8 +57,30 @@ task iso
 ```
 
 Finally, enjoy stboot in action:
+
 ``` bash
 task qemu:iso
+```
+
+To attest the demo VM, first build stauth and copy it to the VM and start it on a second terminal.
+```bash
+. setup.env
+task go:stauth
+sshpass -p stboot scp -P 2222 out/stauth stboot@localhost:/tmp
+sshpass -p stboot ssh -p 2222 stboot@localhost "chmod +x /tmp/stauth && echo stboot | sudo -S /tmp/stauth enroll host -l :3000"
+```
+
+On another terminal use stauth to enroll the VM.
+```bash
+. setup.env
+./out/stauth enroll operator http://localhost:3000
+# Plaform data written to ubuntu.platform.pb
+./out/stauth print ubuntu.platform.pb
+# File: ubuntu.platform.pb
+# Platform:
+#   AIK Qualified Name: 7c70ce39698ebdd425e0b1dbf6bbf4f9e3d319f2eeae4a3dc2abe61f70a7bae2
+#   AIK Type: ECDSA over P-256
+#   Log Template: 63 entries
 ```
 
 ### Notes

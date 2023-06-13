@@ -45,6 +45,7 @@ tasks:
     desc: "Build demo OS Package"
     deps:
       - :go:stmgr
+      - ospkg-stauth
       - keygen
     sources:
       - "{{.DEMO_KEY_DIR}}/signing-key-*}}"
@@ -131,6 +132,16 @@ tasks:
       KERNEL: "{{.STBOOT_LINUX_KERNEL}}"
       INITRD: "{{.STPROV_INITRAMFS}}"
       CMDLINE: console=ttyS0,115200n8
+
+  ospkg-stauth:
+    deps:
+      - :go:stauth
+    cmds:
+      - |
+        mkdir -p  "{{.OSPKG_DIR}}/stauth"
+        cp "{{.GOBIN}}/stauth" "{{.OSPKG_DIR}}/stauth"
+    generates:
+      - "{{.OSKG_DIR}}/stauth"
 
   start-services:
     desc: Start http server to serve ospkgs and the TPM simulator

@@ -62,7 +62,7 @@ tasks:
         {{.OVMF_ARG}}
         {{.KVM_ARG}}
         -M q35
-        -net user,hostfwd=tcp::2222-:2222
+        -net user,hostfwd=tcp::2222-:22,hostfwd=tcp::3000-:3000
         -net nic
         -object rng-random,filename=/dev/urandom,id=rng0
         -device virtio-rng-pci,rng=rng0
