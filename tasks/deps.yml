@@ -5,7 +5,7 @@ vars:
   GO_VER_MINOR_MIN: 17
   CMDS: >-
     curl xz git gcc make bc go mkfs.vfat udevadm pkg-config
-    flex bison gpg jq e2mkdir mmd mcopy parted xorriso
+    flex bison gpg jq e2mkdir mmd mcopy parted xorriso swtpm
   PKGS: >-
     libelf
   DPKGS: >-
