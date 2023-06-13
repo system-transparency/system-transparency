@@ -70,7 +70,5 @@ ISO image - network mode - hostcfg from initramfs:
         - tree -L 2 out
         # Build iso
         - task iso
-        # Start http server to serve OS Package
-        - task demo:server &
         # Run ST in QEMU
         - ci-scripts/test-qemu.sh iso

@@ -89,15 +89,17 @@ tasks:
   iso:
     desc: Run stboot iso image in QEMU
     cmds:
+      - task: :demo:start-services
       - task: qemu
         vars:
           QEMU_ARGS: >-
             -drive file={{.ISO}},format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on
             -device ahci,id=ahci0
             -device ide-cd,bus=ahci0.0,drive=drive-cd1,id=cd1,bootindex=1
-            -chardev socket,id=chrtpm,path=/tmp/mytpm1/swtpm-sock
+            -chardev socket,id=chrtpm,path=/tmp/stauth-demo-swtpm.sock
             -tpmdev emulator,id=tpm0,chardev=chrtpm
             -device tpm-tis,tpmdev=tpm0
+      - task: :demo:stop-services
     preconditions:
       - sh: '[ -f "{{.ISO}}" ]'
         msg: |-

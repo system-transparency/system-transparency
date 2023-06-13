@@ -5,6 +5,7 @@ vars:
   NUM_SIGNATURES: 2
   DEMO_KEY_DIR: out/keys/example_keys
   STPROV_INITRAMFS: out/artifacts/stprov.cpio.gz
+  SVHOME: "cache/supervisor"
 
 tasks:
   keygen:
@@ -131,20 +132,47 @@ tasks:
       INITRD: "{{.STPROV_INITRAMFS}}"
       CMDLINE: console=ttyS0,115200n8
 
-  server:
-    desc: Run http server to serve ospkgs on port {{.PORT}}
+  start-services:
+    desc: Start http server to serve ospkgs and the TPM simulator
     deps:
-    - task: :deps:check-cmd
-      vars: {CMD: "python3"}
+      - task: :deps:supervisor
+      - task: :deps:check-cmd
+        vars: {CMD: "swtpm"}
+    status:
+      - |
+        "{{.SVHOME}}/bin/supervisorctl" -s unix:///tmp/stauth-demo-supervisor.sock status
     cmds:
-      - cd {{.OSPKG_DIR}}; python3 -m http.server {{.PORT}}
+      - |
+        "{{.SVHOME}}/bin/supervisord" -c "contrib/services/supervisord.conf"
+        while [ ! -e /tmp/stauth-demo-swtpm.sock ]
+        do
+          "{{.SVHOME}}/bin/supervisorctl" -s unix:///tmp/stauth-demo-supervisor.sock status
+        done
+    env:
+      SVHOME: "{{.SVHOME}}"
+      PYTHONUSERBASE: "{{.SVHOME}}"
+      PORT: 8080
+      OSPKG_DIR: "{{.OSPKG_DIR}}"
     preconditions:
       - sh: find {{.OSPKG_DIR}} -name \*.zip | read
         msg: |-
           [ERROR] Path "{{.OSPKG_DIR}}" does not contain any OS packages
           Run "task demo:ospkg" to generate an example OS Package
-    vars:
-      PORT: 8080
+
+  stop-services:
+    desc: Stop http server and the TPM simulator
+    deps:
+    - task: :deps:check-cmd
+      vars: {CMD: "python3"}
+    status:
+      - |
+        ! "{{.SVHOME}}/bin/supervisorctl" -s unix:///tmp/stauth-demo-supervisor.sock status
+    env:
+      SVHOME: "{{.SVHOME}}"
+      PYTHONUSERBASE: "{{.SVHOME}}"
+    cmds:
+      - |
+        "{{.SVHOME}}/bin/supervisorctl" -s unix:///tmp/stauth-demo-supervisor.sock shutdown
 
   ubuntu:
     cmds:

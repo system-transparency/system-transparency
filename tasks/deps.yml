@@ -9,9 +9,10 @@ vars:
   PKGS: >-
     libelf
   DPKGS: >-
-    curl xz-utils git gcc make bc dosfstools udev
+    curl xz-utils git gcc make bc dosfstools udev swtpm
     flex bison pkg-config libelf-dev gpg jq e2tools mtools
-    parted xorriso
+    parted xorriso python3-pip
+  SVHOME: "cache/supervisor"
 
 tasks:
 
@@ -55,6 +56,19 @@ tasks:
     vars:
       SUDO:
         sh: '[ "$UID" -eq "0" ] || echo "sudo"'
+
+  supervisor:
+    desc: Install supervisord
+    deps:
+    - task: :deps:check-cmd
+      vars: {CMD: "python3"}
+    status:
+      - "[ -e \"{{.SVHOME}}/bin/supervisord\" ]"
+    env:
+      SVHOME: "{{.SVHOME}}"
+      PYTHONUSERBASE: "{{.SVHOME}}"
+    cmds:
+      - "python3 -m pip install --user supervisor"
 
   check-cmd:
     run: when_changed

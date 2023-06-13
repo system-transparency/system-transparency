@@ -56,10 +56,8 @@ Then let task build a complete stboot ISO image:
 task iso
 ```
 
-Finally, start a webserver in the background serving up the OS package and enjoy stboot in action:
-
+Finally, enjoy stboot in action:
 ``` bash
-task demo:server &
 task qemu:iso
 ```
 
