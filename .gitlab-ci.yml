@@ -2,7 +2,7 @@ stages:
     - environment
     - test
 default:
-    image: ubuntu:20.04
+    image: ubuntu:22.10
     before_script:
         - export DEBIAN_FRONTEND=noninteractive 
         # Install utils
