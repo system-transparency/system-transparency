@@ -62,25 +62,43 @@ Finally, enjoy stboot in action:
 task qemu:iso
 ```
 
-To attest the demo VM, first build stauth and copy it to the VM and start it on a second terminal.
+To attest the demo VM, first build stauth and copy it to the VM and start it on
+a second terminal.
 ```bash
 . setup.env
 task go:stauth
 sshpass -p stboot scp -P 2222 out/stauth stboot@localhost:/tmp
-sshpass -p stboot ssh -p 2222 stboot@localhost "chmod +x /tmp/stauth && echo stboot | sudo -S /tmp/stauth enroll host -l :3000"
+sshpass -p stboot ssh -p 2222 stboot@localhost \
+    "chmod +x /tmp/stauth && echo stboot | sudo -S /tmp/stauth endorse --platform-server 0.0.0.0:3000"
 ```
 
-On another terminal use stauth to enroll the VM.
+On another terminal use stauth to enroll the VM and endorse the stboot ISO and
+OS package.
 ```bash
 . setup.env
-./out/stauth enroll operator http://localhost:3000
+./out/stauth endorse --platform localhost:3000
 # Plaform data written to ubuntu.platform.pb
-./out/stauth print ubuntu.platform.pb
-# File: ubuntu.platform.pb
-# Platform:
-#   AIK Qualified Name: 7c70ce39698ebdd425e0b1dbf6bbf4f9e3d319f2eeae4a3dc2abe61f70a7bae2
-#   AIK Type: ECDSA over P-256
-#   Log Template: 63 entries
+./out/stauth endorse --stboot out/stboot.iso
+# Stboot endorsement written to stboot.stboot.pb
+./out/stauth endorse --ospkg-json out/ospkgs/os-pkg-example-ubuntu20.json \
+    --ospkg-zip out/ospkgs/os-pkg-example-ubuntu20.zip
+# OS package endorsement written to os-pkg-example-ubuntu20.ospkg.pb
+```
+
+Now we're ready to generate a quote and validate it. On the first terminal,
+kill the `stauth endorse` process and start the quote service.
+```bash
+# Ctrl-C
+sshpass -p stboot ssh -p 2222 stboot@localhost \
+    "echo stboot | sudo -S /tmp/stauth quote host -l 0.0.0.0:3000"
+```
+
+On the second terminal request the quote and supply the set of endorsements
+generated above.
+```bash
+./out/stauth quote operator localhost:3000 ubuntu.platform.pb stboot.stboot.pb \
+    os-pkg-example-ubuntu20.ospkg.pb
+# Quote verified successfully
 ```
 
 ### Notes
