@@ -16,7 +16,7 @@ MATCH+=("Ubuntu 18.04 LTS ubuntu ttyS0")
 MATCH+=("Debian GNU/Linux 10 debian ttyS0")
 
 # run qemu
-task qemu:$TARGET </dev/null | tee /dev/stderr > "$LOG" &
+task qemu:"$TARGET" </dev/null | tee /dev/stderr > "$LOG" &
 
 i=0
 while [ "$i" -lt "$TIMEOUT" ]
