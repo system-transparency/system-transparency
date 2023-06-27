@@ -137,3 +137,46 @@ task: [demo:ubuntu-prebuilt] curl -L -o cache/debos/ubuntu-focal-amd64.vmlinuz h
 task: [demo:ospkg] cache/go/bin/stmgr ospkg create -out 'out/ospkgs/os-pkg-example-ubuntu20.zip' -label='System Transparency Test OS' -kernel=cache/debos/ubuntu-focal-amd64.vmlinuz -initramfs=cache/debos/ubuntu-focal-amd64.cpio.gz -cmdline='console=tty0 console=ttyS0,115200n8 rw rdinit=/lib/systemd/systemd' -url=http://10.0.2.2:8080/os-pkg-example-ubuntu20.zip
 task: [demo:ospkg] for i in {1..2}; do cache/go/bin/stmgr ospkg sign -key=out/keys/example_keys/signing-key-$i.key -cert=out/keys/example_keys/signing-key-$i.cert -ospkg out/ospkgs/os-pkg-example-ubuntu20.zip; done
 ```
+
+# Remote Attestation
+
+To attest the demo VM, first build stauth and copy it to the VM and start it on
+a second terminal.
+```bash
+. setup.env
+task go:stauth
+sshpass -p stboot scp -P 2222 out/stauth stboot@localhost:/tmp
+sshpass -p stboot ssh -p 2222 stboot@localhost \
+    "chmod +x /tmp/stauth && echo stboot | sudo -S /tmp/stauth endorse --platform-server 0.0.0.0:3000"
+```
+
+On another terminal use stauth to enroll the VM and endorse the stboot ISO and
+OS package.
+```bash
+. setup.env
+./out/stauth endorse --platform localhost:3000
+# Plaform data written to ubuntu.platform.pb
+./out/stauth endorse --stboot out/stboot.iso
+# Stboot endorsement written to stboot.stboot.pb
+./out/stauth endorse --ospkg-json out/ospkgs/os-pkg-example-ubuntu20.json \
+    --ospkg-zip out/ospkgs/os-pkg-example-ubuntu20.zip
+# OS package endorsement written to os-pkg-example-ubuntu20.ospkg.pb
+```
+
+Now we're ready to generate a quote and validate it. On the first terminal,
+kill the `stauth endorse` process and start the quote service.
+```bash
+# Ctrl-C
+sshpass -p stboot ssh -p 2222 stboot@localhost \
+    "echo stboot | sudo -S /tmp/stauth quote host -l 0.0.0.0:3000"
+```
+
+On the second terminal request the quote and supply the set of endorsements
+generated above.
+```bash
+./out/stauth quote operator localhost:3000 ubuntu.platform.pb stboot.stboot.pb \
+    os-pkg-example-ubuntu20.ospkg.pb
+# Quote verified successfully
+```
+
+For a detailed explanation of stauth see [the stauth documentation](https://git.glasklar.is/system-transparency/core/stauth).
