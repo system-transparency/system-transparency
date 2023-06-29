@@ -7,7 +7,7 @@ default:
         - export DEBIAN_FRONTEND=noninteractive 
         # Install utils
         - apt-get update > /dev/null
-        - apt-get install -qqy curl wget tree > /dev/null
+        - apt-get install -qqy curl wget tree xxd gettext-base > /dev/null
         # Install go
         - wget -q https://go.dev/dl/go1.19.8.linux-amd64.tar.gz
         - rm -rf /usr/local/go && tar -C /usr/local -xzf go1.19.8.linux-amd64.tar.gz
@@ -18,6 +18,8 @@ default:
         - apt-get -qqy install qemu-system-x86 > /dev/null
         # Install Toolchain dependencies
         - task deps:install > /dev/null
+        # Install test-only tools
+        - pip install --user virt-firmware
 
         - task --version
         - go version
@@ -61,14 +63,55 @@ Example keys & OS package:
 #        # Boot stboot iso in network efivar mode using QEMU
 #        - task qemu:proviso
 #        - ci-scripts/test-qemu.sh iso
-        
+
+variables:
+  # keep in sync with tasks/qemu.yml
+  OVMF_VARS_SOURCE_PATH: /usr/share/OVMF/OVMF_VARS.fd
+  OVMF_VARS_PATH: out/artifacts/OVMF_VARS.fd
+  HOSTCFG_PATH: out/artifacts/host_config.json
+
+  # keep in sync with stboot source (host/configautodetect.go)
+  HOSTCFG_VAR_NAME: STHostConfig
+  HOSTCFG_VAR_GUID: f401f2c1-b005-4be0-8cee-f2e5945bcbe7
+
+ISO image - network mode - hostcfg from efivars:
+  stage: test
+  environment:
+  script:
+    # prepare the efi var file
+    - task iso-no-hostcfg
+    - |
+      HOSTCFG_TEMP_PATH=$(mktemp st.test.XXXXXXXXXX.json)
+      HOSTCFG_VAR_DATA=$(xxd -g 0 "$HOSTCFG_PATH" | cut -d ' ' -f 2 | tr -d '\n')
+
+      envsubst <<EOF > "$HOSTCFG_TEMP_PATH"
+      {
+        "version": 2,
+        "variables": [{
+          "name": "$HOSTCFG_VAR_NAME",
+          "guid": "$HOSTCFG_VAR_GUID",
+          "attr": 39,
+          "data": "$HOSTCFG_VAR_DATA"
+        }]
+      }
+      EOF
+
+      $HOME/.local/bin/virt-fw-vars \
+        --set-json "$HOSTCFG_TEMP_PATH" \
+        -i "$OVMF_VARS_SOURCE_PATH" \
+        -o "$OVMF_VARS_PATH"
+
+      rm "$HOSTCFG_TEMP_PATH"
+
+    # Run ST in QEMU
+    - ci-scripts/test-qemu.sh iso
 
 ISO image - network mode - hostcfg from initramfs:
     stage: test
     script:
-        - tree  -L 2 cache
-        - tree -L 2 out
-        # Build iso
-        - task iso
-        # Run ST in QEMU
-        - ci-scripts/test-qemu.sh iso
+      # Build iso
+      - task iso
+      - cp "$OVMF_VARS_SOURCE_PATH" "$OVMF_VARS_PATH"
+
+      # Run ST in QEMU
+      - ci-scripts/test-qemu.sh iso

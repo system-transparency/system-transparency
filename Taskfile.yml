@@ -63,6 +63,21 @@ tasks:
       - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}"
     run: once
 
+  iso-no-hostcfg:
+    desc: Build stboot iso image
+    deps:
+      - task: hostconfig-network
+      - task: linux:kernel-prebuilt # Use pre compiled kernel. Take linux:kernel for compiling.
+      - task: initramfs:standard
+    sources:
+      - "{{.STBOOT_LINUX_KERNEL}}"
+      - "{{.STBOOT_INITRAMFS}}"
+    generates:
+      - "{{.ISO}}"
+    cmds:
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}"
+    run: once
+
   iso-ospkg:
     desc: Build stboot iso image including an OS package inside the initramfs
     deps:
