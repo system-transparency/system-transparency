@@ -131,7 +131,7 @@ tasks:
       LABEL: Provisioning Tool
       KERNEL: "{{.STBOOT_LINUX_KERNEL}}"
       INITRD: "{{.STPROV_INITRAMFS}}"
-      CMDLINE: console=ttyS0,115200n8
+      CMDLINE: console=ttyS0,115200
 
   ospkg-stauth:
     deps:
