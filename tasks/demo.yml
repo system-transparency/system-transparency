@@ -6,6 +6,7 @@ vars:
   DEMO_KEY_DIR: out/keys/example_keys
   STPROV_INITRAMFS: out/artifacts/stprov.cpio.gz
   SVHOME: "cache/supervisor"
+  STAUTH: "out/stauth"
 
 tasks:
   keygen:
@@ -45,7 +46,7 @@ tasks:
     desc: "Build demo OS Package"
     deps:
       - :go:stmgr
-      - ospkg-stauth
+      - stauth
       - keygen
     sources:
       - "{{.DEMO_KEY_DIR}}/signing-key-*}}"
@@ -133,15 +134,14 @@ tasks:
       INITRD: "{{.STPROV_INITRAMFS}}"
       CMDLINE: console=ttyS0,115200n8
 
-  ospkg-stauth:
+  stauth:
     deps:
       - :go:stauth
     cmds:
       - |
-        mkdir -p  "{{.OSPKG_DIR}}/stauth"
-        cp "{{.GOBIN}}/stauth" "{{.OSPKG_DIR}}/stauth"
+        cp "{{.GOBIN}}/stauth" "{{.STAUTH}}"
     generates:
-      - "{{.OSKG_DIR}}/stauth"
+      - "{{.STAUTH}}"
 
   start-services:
     desc: Start http server to serve ospkgs and the TPM simulator

@@ -144,7 +144,7 @@ To attest the demo VM, first build stauth and copy it to the VM and start it on
 a second terminal.
 ```bash
 . setup.env
-task go:stauth
+task demo:stauth
 sshpass -p stboot scp -P 2222 out/stauth stboot@localhost:/tmp
 sshpass -p stboot ssh -p 2222 stboot@localhost \
     "chmod +x /tmp/stauth && echo stboot | sudo -S /tmp/stauth endorse --platform-server 0.0.0.0:3000"
