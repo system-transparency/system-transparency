@@ -142,12 +142,16 @@ task: [demo:ospkg] for i in {1..2}; do cache/go/bin/stmgr ospkg sign -key=out/ke
 
 To attest the demo VM, first build stauth and copy it to the VM and start it on
 a second terminal.
+
+The password for the default `stboot` user is `stboot`.
+
 ```bash
 . setup.env
 task demo:stauth
-sshpass -p stboot scp -P 2222 out/stauth stboot@localhost:/tmp
-sshpass -p stboot ssh -p 2222 stboot@localhost \
-    "chmod +x /tmp/stauth && echo stboot | sudo -S /tmp/stauth endorse --platform-server 0.0.0.0:3000"
+$ scp -P 2222 out/stauth stboot@localhost:/tmp
+$ ssh -p 2222 stboot@localhost
+stboot@ubuntu:~$ chmod +x /tmp/stauth
+stboot@ubuntu:~$ echo stboot | sudo -S /tmp/stauth endorse --platform-server 0.0.0.0:3000
 ```
 
 On another terminal use stauth to enroll the VM and endorse the stboot ISO and
@@ -167,8 +171,8 @@ Now we're ready to generate a quote and validate it. On the first terminal,
 kill the `stauth endorse` process and start the quote service.
 ```bash
 # Ctrl-C
-sshpass -p stboot ssh -p 2222 stboot@localhost \
-    "echo stboot | sudo -S /tmp/stauth quote host -l 0.0.0.0:3000"
+
+stboot@ubuntu:~$ echo stboot | sudo -S /tmp/stauth quote host -l 0.0.0.0:3000
 ```
 
 On the second terminal request the quote and supply the set of endorsements

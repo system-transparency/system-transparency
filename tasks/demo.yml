@@ -139,6 +139,7 @@ tasks:
       - :go:stauth
     cmds:
       - |
+        mkdir -p "$(dirname {{.STAUTH}})"
         cp "{{.GOBIN}}/stauth" "{{.STAUTH}}"
     generates:
       - "{{.STAUTH}}"
