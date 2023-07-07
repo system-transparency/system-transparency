@@ -6,7 +6,8 @@ vars:
   DEMO_KEY_DIR: out/keys/example_keys
   STPROV_INITRAMFS: out/artifacts/stprov.cpio.gz
   SVHOME: "cache/supervisor"
-  STAUTH: "out/stauth"
+  EXAMPLE_OS_INITRD: "https://git.glasklar.is/system-transparency/core/example-os/-/package_files/5/download"
+  EXAMPLE_OS_KERNEL: "https://git.glasklar.is/system-transparency/core/example-os/-/package_files/6/download"
 
 tasks:
   keygen:
@@ -213,8 +214,8 @@ tasks:
   ubuntu-prebuilt:
     cmds:
       - "mkdir -p cache/debos"
-      - "curl -L -o {{.INITRD}} https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.cpio.gz"
-      - "curl -L -o {{.KERNEL}} https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.vmlinuz"
+      - "curl -L -o {{.INITRD}} {{.EXAMPLE_OS_INITRD}}"
+      - "curl -L -o {{.KERNEL}} {{.EXAMPLE_OS_KERNEL}}"
     status:
       - "test -f {{.KERNEL}}"
       - "test -f {{.INITRD}}"
