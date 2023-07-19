@@ -1,0 +1,6 @@
+config FAKE_PMEM
+tristate "Fake persistent memory support"
+depends on X86_64
+default y if X86_64
+help
+  allocates and leaks 2M for use of emulated persistent memory in a kexec kernel.
