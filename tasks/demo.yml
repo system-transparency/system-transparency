@@ -6,6 +6,7 @@ vars:
   DEMO_KEY_DIR: out/keys/example_keys
   STPROV_INITRAMFS: out/artifacts/stprov.cpio.gz
   SVHOME: "cache/supervisor"
+  STAUTH: "out/stauth"
   EXAMPLE_OS_INITRD: "https://git.glasklar.is/system-transparency/core/example-os/-/package_files/5/download"
   EXAMPLE_OS_KERNEL: "https://git.glasklar.is/system-transparency/core/example-os/-/package_files/6/download"
 
