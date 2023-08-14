@@ -48,6 +48,21 @@ tasks:
       - task: iso
       - task: qemu:iso
 
+  iso-fresh:
+    desc: Build stboot iso image
+    deps:
+      - task: hostconfig-network
+      - task: linux:kernel
+      - task: initramfs:incl-hostconfig
+    sources:
+      - "{{.STBOOT_LINUX_KERNEL}}"
+      - "{{.STBOOT_INITRAMFS}}"
+    generates:
+      - "{{.ISO}}"
+    cmds:
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}"
+    run: once
+
   iso:
     desc: Build stboot iso image
     deps:

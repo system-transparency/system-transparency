@@ -68,7 +68,7 @@ tasks:
       SVHOME: "{{.SVHOME}}"
       PYTHONUSERBASE: "{{.SVHOME}}"
     cmds:
-      - "python3 -m pip install --user supervisor"
+      - "python3 -m pip install --user --break-system-packages supervisor"
 
   check-cmd:
     run: when_changed

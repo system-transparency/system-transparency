@@ -60,6 +60,19 @@ tasks:
     status:
       - "[ -f {{.KERNEL_CONFIG}} ]"
 
+  add-fake-pmem:
+    sources:
+      - ./{{.LINUXBOOT_KERNEL_CONFIG}}
+    generates:
+      - ./{{.KERNEL_CONFIG}}
+    cmds:
+      - cp -R contrib/fake-pmem {{.KERNEL_DIR}}/drivers/fake-pmem
+      - |
+        echo 'source "drivers/fake-pmem/Kconfig"' >> "{{.KERNEL_DIR}}/drivers/Kconfig"
+        echo 'obj-y += fake-pmem/' >> "{{.KERNEL_DIR}}/drivers/Makefile"
+    status:
+      - "[ -f {{.KERNEL_DIR}}/drivers/fake-pmem/Makefile ]"
+
   build:
     sources:
       - ./{{.KERNEL_CONFIG}}
@@ -77,6 +90,7 @@ tasks:
     cmds:
       - task: fetch
       - task: unpack
+      - task: add-fake-pmem
       - task: config
       - mkdir -p out/artifacts
       - task: build
