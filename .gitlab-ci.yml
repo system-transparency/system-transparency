@@ -9,11 +9,11 @@ default:
         - apt-get update > /dev/null
         - apt-get install -qqy curl wget tree xxd gettext-base > /dev/null
         # Install go
-        - wget -q https://go.dev/dl/go1.19.8.linux-amd64.tar.gz
-        - rm -rf /usr/local/go && tar -C /usr/local -xzf go1.19.8.linux-amd64.tar.gz
-        - export PATH=$PATH:/usr/local/go/bin
+        - apt-get install -qqy golang-1.19
+        - export PATH=/usr/lib/go-1.19/bin:$PATH
         # Install task
-        - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+        - GOBIN=/usr/local/bin go install github.com/go-task/task/v3/cmd/task@v3.29.1
+        - export PATH=$PATH:/usr/local/bin
         # Install QEMU
         - apt-get -qqy install qemu-system-x86 > /dev/null
         # Install Toolchain dependencies
