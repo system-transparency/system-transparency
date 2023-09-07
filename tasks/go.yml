@@ -88,7 +88,6 @@ tasks:
 
   all:
     deps:
-      - task
       - u-root
       - stmgr
       - stprov
