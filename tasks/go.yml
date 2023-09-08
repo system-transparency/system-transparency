@@ -1,6 +1,8 @@
 version: '3'
 
 vars:
+  # All bins we install in GOBIN, for purge by update target
+  BINS: "u-root stboot stmgr stprov mgmt stauth"
   UROOT_REPO: github.com/u-root/u-root
   UROOT_VERSION: v0.10.0
   STBOOT_REPO: system-transparency.org/stboot
@@ -99,7 +101,7 @@ tasks:
 
   update:
     cmds:
-      - "rm -rf {{.GOBIN}}"
+      - "cd {{.GOBIN}} && rm -f {{.BINS}}"
       - task: all
     run: once
 
