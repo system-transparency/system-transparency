@@ -19,6 +19,7 @@ default:
         # Install Toolchain dependencies
         - task deps:install > /dev/null
         # Install test-only tools
+        - apt-get install -qqy --no-install-recommends python3-pip
         - pip install --user virt-firmware
 
         - task --version
