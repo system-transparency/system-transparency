@@ -10,6 +10,7 @@ vars:
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   TRUST_POLICY: out/artifacts/trust_policy.json
   HOST_CONFIG: out/artifacts/host_config.json
+  CMDLINE: console=tty0 console=ttyS0,115200n8
 
 
 includes:
@@ -60,7 +61,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='{{.CMDLINE}}"
     run: once
 
   iso-no-hostcfg:
