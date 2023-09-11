@@ -61,7 +61,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='{{.CMDLINE}}"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='{{.CMDLINE}}'"
     run: once
 
   iso-no-hostcfg:
@@ -76,7 +76,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='{{.CMDLINE}}"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='{{.CMDLINE}}'"
     run: once
 
   iso-ospkg:
@@ -105,7 +105,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='{{.CMDLINE}}"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='{{.CMDLINE}}'"
     run: once
 
   uki:
@@ -121,7 +121,7 @@ tasks:
     generates:
       - "{{.UKI}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format uki -out '{{.UKI}}' -sbat ./contrib/sbat.csv -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}  -cmdline='{{.CMDLINE}}"
+      - "{{.GOBIN}}/stmgr uki create -format uki -out '{{.UKI}}' -sbat ./contrib/sbat.csv -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}}  -cmdline='{{.CMDLINE}}'"
     run: once
 
 
