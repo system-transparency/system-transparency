@@ -6,7 +6,7 @@ vars:
   UROOT_REPO: github.com/u-root/u-root
   UROOT_VERSION: v0.10.0
   STBOOT_REPO: system-transparency.org/stboot
-  STBOOT_VERSION: 2eb8ac648c2c206df2c03557c5397d4accf9a174
+  STBOOT_VERSION: 4a217262fed276d266e9de059b110c1abaa9fed2
   STMGR_REPO: system-transparency.org/stmgr
   STMGR_VERSION: v0.2.1
   STPROV_REPO: system-transparency.org/stprov/cmd/stprov
