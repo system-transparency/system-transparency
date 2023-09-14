@@ -5,7 +5,6 @@ vars:
   NUM_SIGNATURES: 2
   DEMO_KEY_DIR: out/keys/example_keys
   STPROV_INITRAMFS: out/artifacts/stprov.cpio.gz
-  SVHOME: "cache/supervisor"
   STAUTH: "out/stauth"
   EXAMPLE_OS_INITRD: "https://git.glasklar.is/system-transparency/core/example-os/-/package_files/5/download"
   EXAMPLE_OS_KERNEL: "https://git.glasklar.is/system-transparency/core/example-os/-/package_files/6/download"
@@ -149,22 +148,25 @@ tasks:
   start-services:
     desc: Start http server to serve ospkgs and the TPM simulator
     deps:
-      - task: :deps:supervisor
+      - task: :deps:check-cmd
+        vars: {CMD: "supervisord"}
+      - task: :deps:check-cmd
+        vars: {CMD: "supervisorctl"}
+      - task: :deps:check-cmd
+        vars: {CMD: "python3"}
       - task: :deps:check-cmd
         vars: {CMD: "swtpm"}
     status:
       - |
-        "{{.SVHOME}}/bin/supervisorctl" -s unix:///tmp/stauth-demo-supervisor.sock status
+        supervisorctl -c contrib/services/supervisord.conf -s unix:///tmp/stauth-demo-supervisor.sock status
     cmds:
       - |
-        "{{.SVHOME}}/bin/supervisord" -c "contrib/services/supervisord.conf"
+        supervisord -c contrib/services/supervisord.conf
         while [ ! -e /tmp/stauth-demo-swtpm.sock ]
         do
-          "{{.SVHOME}}/bin/supervisorctl" -s unix:///tmp/stauth-demo-supervisor.sock status
+          supervisorctl -c contrib/services/supervisord.conf -s unix:///tmp/stauth-demo-supervisor.sock status
         done
     env:
-      SVHOME: "{{.SVHOME}}"
-      PYTHONUSERBASE: "{{.SVHOME}}"
       PORT: 8080
       OSPKG_DIR: "{{.OSPKG_DIR}}"
     preconditions:
@@ -176,17 +178,14 @@ tasks:
   stop-services:
     desc: Stop http server and the TPM simulator
     deps:
-    - task: :deps:check-cmd
-      vars: {CMD: "python3"}
+      - task: :deps:check-cmd
+        vars: {CMD: "supervisorctl"}
     status:
       - |
-        ! "{{.SVHOME}}/bin/supervisorctl" -s unix:///tmp/stauth-demo-supervisor.sock status
-    env:
-      SVHOME: "{{.SVHOME}}"
-      PYTHONUSERBASE: "{{.SVHOME}}"
+        ! supervisorctl -c contrib/services/supervisord.conf -s unix:///tmp/stauth-demo-supervisor.sock status
     cmds:
       - |
-        "{{.SVHOME}}/bin/supervisorctl" -s unix:///tmp/stauth-demo-supervisor.sock shutdown
+        supervisorctl -c contrib/services/supervisord.conf -s unix:///tmp/stauth-demo-supervisor.sock shutdown
 
   ubuntu:
     cmds:

@@ -18,8 +18,9 @@ default:
         - apt-get -qqy install qemu-system-x86 > /dev/null
         # Install Toolchain dependencies
         - task deps:install > /dev/null
-        # Install test-only tools, override
-        # externally-managed-environment check.
+        # Install test-only tools
+        - apt-get install -qqy --no-install-recommends python3-pip
+        # Override externally-managed-environment check.
         - pip install --break-system-packages --user virt-firmware
 
         - task --version
