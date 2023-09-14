@@ -153,8 +153,6 @@ tasks:
       - task: :deps:check-cmd
         vars: {CMD: "supervisorctl"}
       - task: :deps:check-cmd
-        vars: {CMD: "python3"}
-      - task: :deps:check-cmd
         vars: {CMD: "swtpm"}
     status:
       - |
