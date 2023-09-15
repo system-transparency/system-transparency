@@ -8,7 +8,6 @@ vars:
   STBOOT_REPO: system-transparency.org/stboot
   STBOOT_VERSION: v0.2.0
   STMGR_REPO: system-transparency.org/stmgr
-  STMGR_VERSION: v0.2.1
   STPROV_REPO: system-transparency.org/stprov/cmd/stprov
   STPROV_VERSION: v0.1.1
   STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt
@@ -66,10 +65,7 @@ tasks:
 
   install:
     cmds:
-      - '{{.GOPREFIX}} go install -ldflags "{{.GO_LDFLAGS}}" {{.PACKAGE}}@{{.VERSION}}'
-      # create version file
-      - cmd: 'echo "{{.VERSION}}" > {{.GOBIN}}/.{{.NAME}}'
-        silent: true
+      - '{{.GOPREFIX}} go install -ldflags "{{.GO_LDFLAGS}}" {{.PACKAGE}}'
     label: "go:install {{.NAME}}"
     preconditions:
       - sh: '[ -n "{{.NAME}}" ]'
@@ -79,14 +75,27 @@ tasks:
     run: when_changed
     status:
       - "test -x {{.GOBIN}}/{{.NAME}}"
-      # check version file
-      - 'grep -q {{.VERSION}} {{.GOBIN}}/.{{.NAME}}'
     env:
       CGO_ENABLED: '{{.CGO_ENABLED}}'
     vars:
-      VERSION: '{{default "latest" .VERSION}}'
       GO_LDFLAGS: '{{default "" .GO_LDFLAGS}}'
       CGO_ENABLED: '{{default "" .CGO_ENABLED}}'
+
+  install-with-version:
+    cmds:
+      - task: install
+        vars:
+          PACKAGE: "{{.PACKAGE}}@{{.VERSION}}"
+          NAME: '{{.NAME}}'
+      # create version file
+      - cmd: 'echo "{{.VERSION}}" > {{.GOBIN}}/.{{.NAME}}'
+        silent: true
+    run: when_changed
+    status:
+      # check version file
+      - 'grep -q {{.VERSION}} {{.GOBIN}}/.{{.NAME}}'
+    vars:
+      VERSION: '{{default "latest" .VERSION}}'
 
   all:
     deps:
@@ -107,7 +116,7 @@ tasks:
 
   u-root:
     cmds:
-      - task: install
+      - task: install-with-version
         vars:
           NAME: u-root
           PACKAGE: "{{.UROOT_REPO}}"
@@ -120,12 +129,11 @@ tasks:
         vars:
           NAME: stmgr
           PACKAGE: "{{.STMGR_REPO}}"
-          VERSION: "{{.STMGR_VERSION}}"
     run: once
 
   stprov:
     cmds:
-      - task: install
+      - task: install-with-version
         vars:
           NAME: stprov
           PACKAGE: "{{.STPROV_REPO}}"
@@ -134,7 +142,7 @@ tasks:
 
   sthsm:
     cmds:
-      - task: install
+      - task: install-with-version
         vars:
           NAME: sthsm
           PACKAGE: "{{.STHSM_REPO}}"
@@ -143,7 +151,7 @@ tasks:
 
   stauth:
     cmds:
-      - task: install
+      - task: install-with-version
         vars:
           NAME: stauth
           PACKAGE: "{{.STAUTH_REPO}}"
