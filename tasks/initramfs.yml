@@ -8,7 +8,6 @@ tasks:
     deps:
       - :go:u-root
       - :go:checkout-uroot
-      - :go:checkout-stboot
     cmds:
       - cmd: echo "Building initramfs via u-root with stboot as init process"
         silent: yes

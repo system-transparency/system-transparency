@@ -97,7 +97,6 @@ tasks:
     # checkout sequentially
     cmds:
       - task: checkout-uroot
-      - task: checkout-stboot
 
   update:
     cmds:
@@ -182,14 +181,6 @@ tasks:
           BRANCH: "{{.UROOT_VERSION}}"
     run: once
 
-  checkout-stboot:
-    cmds:
-      - task: :go:checkout
-        vars:
-          REPO: "{{.STBOOT_REPO}}"
-          BRANCH: "{{.STBOOT_VERSION}}"
-    run: once
-  
   clean:
     cmds:
       - "[ ! -d cache/go ] || chmod +w -R cache/go"
