@@ -1,6 +1,6 @@
 # System Transparency Tooling
 
-This repository contains tooling, configuration files and demos to form a build-, test- and development environment for [System Transparency](https://www.system-transparency.org/).
+[This repository](https://git.glasklar.is/system-transparency/core/system-transparency) contains tooling, configuration files and demos to form a build-, test- and development environment for [System Transparency](https://www.system-transparency.org/).
 
 _stboot_ is System Transparency Project’s official bootloader. It is a [LinuxBoot](https://www.linuxboot.org/) distribution based on [u-root](https://github.com/u-root/u-root). The source code for stboot can be found at https://git.glasklar.is/system-transparency/core/stboot.
 
