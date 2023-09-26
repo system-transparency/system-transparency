@@ -5,6 +5,8 @@ package tools
 import (
 	_ "git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt"
 	_ "git.glasklar.is/system-transparency/core/stauth"
+	_ "github.com/u-root/u-root"
 	_ "system-transparency.org/stmgr"
 	_ "system-transparency.org/stprov/cmd/stprov"
+	_ "system-transparency.org/stboot"
 )

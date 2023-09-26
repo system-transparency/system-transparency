@@ -4,9 +4,7 @@ vars:
   # All bins we install in GOBIN, for purge by update target
   BINS: "u-root stboot stmgr stprov mgmt stauth"
   UROOT_REPO: github.com/u-root/u-root
-  UROOT_VERSION: v0.10.0
   STBOOT_REPO: system-transparency.org/stboot
-  STBOOT_VERSION: v0.2.1
   STMGR_REPO: system-transparency.org/stmgr
   STPROV_REPO: system-transparency.org/stprov/cmd/stprov
   STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt
@@ -18,9 +16,6 @@ vars:
 
 tasks:
 
-  # XXX: It is not safe to run "get" and "checkout" task concurrently.
-  #      If a repository gets updated during a checkout, an error due to
-  #      conflicting git commands may be caused.
   get:
     cmds:
       - "{{.GOPREFIX}} go get -d {{.REPO}}/..."
@@ -35,30 +30,6 @@ tasks:
       - "test -f cache/go/src/{{.REPO}}/.git/config"
     vars:
         REPO: "{{.REPO}}"
-
-  checkout:
-    cmds:
-      - "git -C cache/go/src/{{.REPO}} fetch --quiet"
-      - "git -C cache/go/src/{{.REPO}} checkout --quiet {{.BRANCH}}"
-    env:
-      GO111MODULE: off
-    deps:
-      - task: get
-        vars:
-          REPO: "{{.REPO}}"
-    label: "go:checkout {{.REPO}}@{{.BRANCH}}"
-    preconditions:
-      - sh: '[ -n "{{.REPO}}" ]'
-        msg: "task bug: REPO not defined"
-      - sh: '[ -n "{{.BRANCH}}" ]'
-        msg: "task bug: BRANCH not defined"
-    run: when_changed
-    status:
-      - "test -f cache/go/src/{{.REPO}}/.git/HEAD"
-      - "git -C cache/go/src/{{.REPO}} diff --no-patch --exit-code {{.BRANCH}} >/dev/null 2>&1"
-    vars:
-        REPO: "{{.REPO}}"
-        BRANCH: "{{.BRANCH}}"
 
   install:
     cmds:
@@ -78,25 +49,10 @@ tasks:
       GO_LDFLAGS: '{{default "" .GO_LDFLAGS}}'
       CGO_ENABLED: '{{default "" .CGO_ENABLED}}'
 
-  install-with-version:
-    cmds:
-      - task: install
-        vars:
-          PACKAGE: "{{.PACKAGE}}@{{.VERSION}}"
-          NAME: '{{.NAME}}'
-      # create version file
-      - cmd: 'echo "{{.VERSION}}" > {{.GOBIN}}/.{{.NAME}}'
-        silent: true
-    run: when_changed
-    status:
-      # check version file
-      - 'grep -q {{.VERSION}} {{.GOBIN}}/.{{.NAME}}'
-    vars:
-      VERSION: '{{default "latest" .VERSION}}'
-
   all:
     deps:
       - u-root
+      - stboot
       - stmgr
       - stprov
       - sthsm
@@ -113,11 +69,18 @@ tasks:
 
   u-root:
     cmds:
-      - task: install-with-version
+      - task: install
         vars:
           NAME: u-root
           PACKAGE: "{{.UROOT_REPO}}"
-          VERSION: "{{.UROOT_VERSION}}"
+    run: once
+
+  stboot:
+    cmds:
+      - task: install
+        vars:
+          NAME: stboot
+          PACKAGE: "{{.STBOOT_REPO}}"
     run: once
 
   stmgr:
@@ -174,24 +137,6 @@ tasks:
     status:
       - "test -x cache/go/bin/debos"
 
-  # Fetch/checkout Repos into GOPATH for u-root build runtime
-
-  checkout-uroot:
-    cmds:
-      - task: :go:checkout
-        vars:
-          REPO: "{{.UROOT_REPO}}"
-          BRANCH: "{{.UROOT_VERSION}}"
-    run: once
-
-  checkout-stboot:
-    cmds:
-      - task: :go:checkout
-        vars:
-          REPO: "{{.STBOOT_REPO}}"
-          BRANCH: "{{.STBOOT_VERSION}}"
-    run: once
-  
   clean:
     cmds:
       - "[ ! -d cache/go ] || chmod +w -R cache/go"

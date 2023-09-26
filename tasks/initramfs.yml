@@ -7,8 +7,7 @@ tasks:
     internal: yes
     deps:
       - :go:u-root
-      - :go:checkout-uroot
-      - :go:checkout-stboot
+      - :go:stboot
     cmds:
       - cmd: echo "Building initramfs via u-root with stboot as init process"
         silent: yes
@@ -17,9 +16,8 @@ tasks:
       - cmd: for f in {{.FILES}}; do echo "- $f" ; done
         silent: yes
       - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="stboot -loglevel=d" -defaultsh=""
-        -uroot-source ./cache/go/src/{{.UROOT_REPO}}
-        -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} {{.PKGS_ARGS}}
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -initcmd=stboot" -defaultsh=""
+        -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} -files cache/go/bin/stboot:stboot
       - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
     env:
       GO111MODULE: off
@@ -28,12 +26,9 @@ tasks:
         msg: "task bug: OUTPUT not defined"
       - sh: "[ -n \"{{.FILES}}\" ]"
         msg: "task bug: FILES not defined"
-      - sh: "[ -n \"{{.PKGS_ARGS}}\" ]"
-        msg: "task bug: PKGS_ARGS not defined"
     vars:
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f "; done
-      PKGS_ARGS: "{{.GOPKGS}}"
       FILES: "{{.FILES}}"
       OUTPUT: "{{.OUTPUT}}"
 
@@ -44,7 +39,6 @@ tasks:
       - task: build
         vars:
           OUTPUT: "{{.VARIANT_OUT}}"
-          GOPKGS: "{{.GOPKGS}}"
           FILES: "{{.FILES}}"
       - gzip -kf {{.VARIANT_OUT}}
       - mv {{.VARIANT_OUT}}.gz {{.STBOOT_INITRAMFS}}
@@ -63,10 +57,6 @@ tasks:
       SIGNING_ROOT: out/keys/example_keys/root.cert
       VARIANT_OUT: out/artifacts/{{.VARIANT}}.cpio
       VARIANT: "{{.VARIANT}}"
-      GOPKGS: >-
-        {{.UROOT_REPO}}/cmds/core/init
-        {{.STBOOT_REPO}}
-        {{.GOPKGS}}
       FILES: >-
         {{.SIGNING_ROOT}}:etc/trust_policy/ospkg_signing_root.pem
         {{.HTTPS_ROOT}}:etc/ssl/certs/isrgrootx1.pem
