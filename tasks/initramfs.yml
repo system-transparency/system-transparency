@@ -16,8 +16,9 @@ tasks:
       - cmd: for f in {{.FILES}}; do echo "- $f" ; done
         silent: yes
       - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -initcmd=stboot" -defaultsh=""
+        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -initcmd='/stboot' -defaultsh=""
         -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} -files cache/go/bin/stboot:stboot
+        dummy/
       - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
     env:
       GO111MODULE: off
