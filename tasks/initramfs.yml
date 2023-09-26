@@ -23,12 +23,9 @@ tasks:
         msg: "task bug: OUTPUT not defined"
       - sh: "[ -n \"{{.FILES}}\" ]"
         msg: "task bug: FILES not defined"
-      - sh: "[ -n \"{{.PKGS_ARGS}}\" ]"
-        msg: "task bug: PKGS_ARGS not defined"
     vars:
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f "; done
-      PKGS_ARGS: "{{.GOPKGS}}"
       FILES: "{{.FILES}}"
       OUTPUT: "{{.OUTPUT}}"
 
@@ -39,7 +36,6 @@ tasks:
       - task: build
         vars:
           OUTPUT: "{{.VARIANT_OUT}}"
-          GOPKGS: "{{.GOPKGS}}"
           FILES: "{{.FILES}}"
       - gzip -kf {{.VARIANT_OUT}}
       - mv {{.VARIANT_OUT}}.gz {{.STBOOT_INITRAMFS}}
@@ -58,10 +54,6 @@ tasks:
       SIGNING_ROOT: out/keys/example_keys/root.cert
       VARIANT_OUT: out/artifacts/{{.VARIANT}}.cpio
       VARIANT: "{{.VARIANT}}"
-      GOPKGS: >-
-        {{.UROOT_REPO}}/cmds/core/init
-        {{.STBOOT_REPO}}
-        {{.GOPKGS}}
       FILES: >-
         {{.SIGNING_ROOT}}:etc/trust_policy/ospkg_signing_root.pem
         {{.HTTPS_ROOT}}:etc/ssl/certs/isrgrootx1.pem
