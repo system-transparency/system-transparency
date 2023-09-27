@@ -32,8 +32,8 @@ Example keys & OS package:
         # Download example OS artifacts
         - mkdir -p cache/debos
         - cd cache/debos
-        - curl -LO https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.cpio.gz
-        - curl -LO https://github.com/system-transparency/example-os/releases/download/v0.1/ubuntu-focal-amd64.vmlinuz
+        - curl -L https://git.glasklar.is/system-transparency/core/example-os/-/package_files/5/download -o ubuntu-focal-amd64.cpio.gz
+        - curl -L https://git.glasklar.is/system-transparency/core/example-os/-/package_files/6/download -o ubuntu-focal-amd64.vmlinuz
         - cd ../../
         # Generate and sign OS Package
         - task demo:ospkg
