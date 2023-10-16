@@ -784,8 +784,8 @@ pack.ag/tftp v1.0.1-0.20181129014014-07909dfbde3c h1:4DHuGX0VtxRIyjXlVpcjSGEmZ7O
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
 rsc.io/quote/v3 v3.1.0/go.mod h1:yEA65RcK8LyAZtP9Kv3t0HmxON59tX3rD+tICJqUlj0=
 rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=
-system-transparency.org/stboot v0.2.1-0.20230926114338-dbfac0b11d1e h1:4dbYZQu68XvevfDlK6rgcxweE2jGaksNSfuxq5yw6EA=
-system-transparency.org/stboot v0.2.1-0.20230926114338-dbfac0b11d1e/go.mod h1:D3RqmqRC+KMpoyDPoeBEOpfgFYvv2aNChgtsmL8XWOI=
+system-transparency.org/stboot v0.2.1-0.20231016084113-a7d661baa011 h1:2zP/3I9i5sFBbtVh54YXOEzmvcyKZnsIs/vnA0Iu9To=
+system-transparency.org/stboot v0.2.1-0.20231016084113-a7d661baa011/go.mod h1:D3RqmqRC+KMpoyDPoeBEOpfgFYvv2aNChgtsmL8XWOI=
 system-transparency.org/stmgr v0.2.1 h1:taw6cKk5SbS6lHsq2qDOWg/hs8g45/b430T4R3bAIpw=
 system-transparency.org/stmgr v0.2.1/go.mod h1:pD5AXn5sg0ZnIblFmu0jt1SCw9X4bpMv9h5m/jghHtw=
 system-transparency.org/stprov v0.1.1 h1:yu44zlNP7sQlpfOE+jDV49j316lNq6v5DuXTYenptMM=

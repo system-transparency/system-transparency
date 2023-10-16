@@ -9,7 +9,7 @@ require (
 	git.glasklar.is/system-transparency/project/sthsm v0.0.0-20230523092857-e428dbca65b7
 	github.com/u-root/u-root v0.11.0
 	// system-transparency.org/stboot v0.2.0
-	system-transparency.org/stboot v0.2.1-0.20230926114338-dbfac0b11d1e // branch nisse/stboot-as-init
+	system-transparency.org/stboot v0.2.1-0.20231016084113-a7d661baa011 // branch nisse/stboot-as-init
 	system-transparency.org/stmgr v0.2.1
 	system-transparency.org/stprov v0.1.1
 )
