@@ -74,39 +74,41 @@ task qemu:iso
 
 ## Demo 2: including stprov in stboot's initramfs
 
-``` bash
-task iso-provision qemu:iso
-```
-
-stboot will enter provision mode since it cannot find enough host configuration and trust policy. You can now provision the system by running stprov.
+In this demo stboot enters a _provisioning mode_.  Provisioning mode is entered
+when there's no host configuration available in EFI-NVRAM or initramfs, _and_
+when stboot's initramfs was built to include an [stprov][] OS package.
 
 ``` bash
-stprov remote static -h myhost -i 10.0.2.10/27 -g 10.0.2.2 -A
+rm -f out/stboot.iso
+task iso-provision demo:ospkg qemu:iso
 ```
 
-This should result in EFI NVRAM variables (backed by the file `out/artifacts/OVMF_VARS.fd`) being set up so that the next boot do **not** enter provision mode but instead uses the provisioned host configuration.
-
-Shut down the provisioned system.
+Use the `stprov remote` command to write a host configuration:
 
 ``` bash
-shutdown
+stprov remote static -h myhost -i 10.0.2.10/27 -g 10.0.2.2 -r http://10.0.2.2:8080/os-pkg-example-ubuntu20.json
 ```
 
-The next time stboot starts with this EFI NVRAM it will find proper host configuration and use that information to configure the network and find an OS package to fetch, verify and boot.
+A host configuration should now be present in EFI-NVRAM, see
+`/sys/firmware/efi/efivars/STHostConfig-f401f2c1-b005-4be0-8cee-f2e5945bcbe7`.
 
-(In the current version of stboot (v0.2.0) the boot mode must be [initramfs](#initramfs-boot) for doing provisioning the way we're doing here. This means that an stprov ISO/UKI image will not be useful for fetching OS packages over the network. This lmitation will be removed in a future stboot release.)
+(Note that there are no actual writes to the local system's EFI-NVRAM.  QEMU is
+configured to store EFI-variables in a file: `out/artifacts/OVMF_VARS.fd`.)
 
-To get back to provisioning, simply remove the file backing the EFI NVRAM and boot the ISO again.
+The next boot will find this configuration and load the OS package from demo 1:
+
+``` bash
+shutdown -r
+```
+
+Remove the EFI-NVRAM file if you want to run the provisioning demo again:
 
 ```
 rm out/artifacts/OVMF_VARS.fd
 task qemu:iso
 ```
 
-### Tips and tricks
-
-- To quit QEMU: `C-a x`.
-
+[stprov]: https://git.glasklar.is/system-transparency/core/stprov
 
 # OS Package
 An OS package consists of an archive file (ZIP) and a [descriptor file][] (JSON). The archive contains the boot files (kernel, initramfs, etc.) and the descriptor file contains the signatures for the archive and other metadata.
