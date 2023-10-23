@@ -132,7 +132,7 @@ tasks:
   provision:
     desc: "Build an initramfs with stboot as init process including stprov as OS package"
     deps:
-      - task: :trustpolicy-initramfs
+      - task: :trustpolicy-network
       - task: :demo:ospkg-stprov
     cmds:
       - task: generic
