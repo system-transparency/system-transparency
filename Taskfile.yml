@@ -60,7 +60,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='console=tty0 console=ttyS0,115200n8'"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='console=tty0 console=ttyS0,115200n8 -- --loglevel=debug'"
     run: once
 
   iso-no-hostcfg:
@@ -75,7 +75,7 @@ tasks:
     generates:
       - "{{.ISO}}"
     cmds:
-      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='console=tty0 console=ttyS0,115200n8'"
+      - "{{.GOBIN}}/stmgr uki create -format iso -out '{{.ISO}}' -kernel={{.STBOOT_LINUX_KERNEL}} -initramfs={{.STBOOT_INITRAMFS}} -cmdline='console=tty0 console=ttyS0,115200n8 -- --loglevel=debug'"
     run: once
 
   iso-ospkg:
