@@ -4,9 +4,9 @@ vars:
   # All bins we install in GOBIN, for purge by update target
   BINS: "u-root stboot stmgr stprov mgmt stauth"
   UROOT_REPO: github.com/u-root/u-root
-  UROOT_VERSION: v0.10.0
+  UROOT_VERSION: v0.11.0 # Obsolete variable, superseded by go.mod
   STBOOT_REPO: system-transparency.org/stboot
-  STBOOT_VERSION: v0.3.1
+  STBOOT_VERSION: v0.3.1 # Obsolete variable, superseded by go.mod
   STMGR_REPO: system-transparency.org/stmgr
   STPROV_REPO: system-transparency.org/stprov/cmd/stprov
   STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt
@@ -113,11 +113,10 @@ tasks:
 
   u-root:
     cmds:
-      - task: install-with-version
+      - task: install
         vars:
           NAME: u-root
           PACKAGE: "{{.UROOT_REPO}}"
-          VERSION: "{{.UROOT_VERSION}}"
     run: once
 
   stmgr:
