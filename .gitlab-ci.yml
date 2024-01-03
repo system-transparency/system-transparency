@@ -7,7 +7,7 @@ default:
         - export DEBIAN_FRONTEND=noninteractive 
         # Install utils
         - apt-get update > /dev/null
-        - apt-get install -qqy curl wget tree xxd gettext-base > /dev/null
+        - apt-get install -qqy curl wget tree xxd gettext-base cpio > /dev/null
         # Install go
         - apt-get install -qqy golang-1.19
         - export PATH=/usr/lib/go-1.19/bin:$PATH
