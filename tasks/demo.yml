@@ -54,7 +54,7 @@ tasks:
     generates:
       - "{{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}"
     cmds:
-      - task: ubuntu-prebuilt #use ubuntu for compiling ubuntu artifacts
+      - task: ubuntu-prebuilt
       - "mkdir -p {{.OSPKG_DIR}}"
       - "{{.GOBIN}}/stmgr ospkg create -out '{{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}' -label='{{.LABEL}}' -kernel={{.KERNEL}} -initramfs={{.INITRD}} -cmdline='{{.CMDLINE}}' -url=http://10.0.2.2:8080/os-pkg-example-ubuntu20.zip"
       - "for i in {1..{{.NUM_SIGNATURES}}}; do {{.GOBIN}}/stmgr ospkg sign -key={{.DEMO_KEY_DIR}}/signing-key-$i.key -cert={{.DEMO_KEY_DIR}}/signing-key-$i.cert -ospkg {{.OSPKG_DIR}}/{{.EXAMPLE_OSPKG}}; done"
