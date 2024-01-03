@@ -107,6 +107,11 @@ ISO image - network mode - hostcfg from efivars:
 
     # Run ST in QEMU
     - ci-scripts/test-qemu.sh iso
+  artifacts:
+    when: always
+    expire_in: 2 days # Rather large files
+    paths:
+    - out/artifacts
 
 ISO image - network mode - hostcfg from initramfs:
     stage: test
@@ -117,3 +122,8 @@ ISO image - network mode - hostcfg from initramfs:
 
       # Run ST in QEMU
       - ci-scripts/test-qemu.sh iso
+    artifacts:
+        when: always
+        expire_in: 2 days # Rather large files
+        paths:
+        - out/artifacts
