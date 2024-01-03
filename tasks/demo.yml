@@ -185,30 +185,6 @@ tasks:
       - |
         supervisorctl -c contrib/services/supervisord.conf -s unix:///tmp/stauth-demo-supervisor.sock shutdown
 
-  ubuntu:
-    cmds:
-      - task: :go:debos
-      - task: :deps:check-cmd
-        vars: {CMD: "debootstrap"}
-      - task: :deps:check-cmd
-        vars: {CMD: "systemd-nspawn"}
-      - "mkdir -p cache/debos"
-      - "{{.SUDO}} cache/go/bin/debos --artifactdir=cache/debos --template-var=suite:focal contrib/debos/ubuntu.yaml"
-      - 'if [ ! -z "{{.SUDO}}" ];then {{.SUDO}} chown $(id -u):$(id -g) {{.KERNEL}} {{.INITRD}};fi'
-    status:
-      - "test -f {{.KERNEL}}"
-      - "test -f {{.INITRD}}"
-    preconditions:
-      - sh: '[[ -f /etc/os-release ]] && sed -n "s/^ID.*=\(.*\)$/\1/p" /etc/os-release|grep -q debian'
-        msg: "[ERROR] OS is not debian based"
-      - sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || command -v sudo 2>/dev/null"
-        msg: "[ERROR] root privileges required when kvm virtualization is not available"
-    vars:
-      SUDO:
-        sh: "[ $(id -u) -eq 0 ] || [ -w /dev/kvm ] || echo sudo"
-      KERNEL: cache/debos/ubuntu-focal-amd64.vmlinuz
-      INITRD: cache/debos/ubuntu-focal-amd64.cpio.gz
-
   ubuntu-prebuilt:
     cmds:
       - "mkdir -p cache/debos"

@@ -160,27 +160,6 @@ tasks:
           CGO_ENABLED: "0"
     run: once
 
-  debos:
-    cmds:
-      - '{{.GOPREFIX}} go get github.com/go-debos/debos/cmd/debos'
-    deps:
-      # libglib2.0-dev
-      - task: :deps:check-pkg
-        vars: {PKG: "glib-2.0"}
-      - task: :deps:check-pkg
-        vars: {PKG: "gobject-2.0"}
-      # libostree-dev
-      - task: :deps:check-pkg
-        vars: {PKG: "ostree-1"}
-      - task: get
-        vars:
-          REPO: github.com/go-debos/debos
-    env:
-      GO111MODULE: off
-    run: once
-    status:
-      - "test -x cache/go/bin/debos"
-
   # Fetch/checkout Repos into GOPATH for u-root build runtime
 
   checkout-uroot:
