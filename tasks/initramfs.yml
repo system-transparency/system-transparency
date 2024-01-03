@@ -25,7 +25,7 @@ tasks:
           ln -sr "$from" "out/tmp-initramfs/$to"
           done
           ln -sr "cache/go/bin/stboot" "out/tmp-initramfs/init"
-          (cd out/tmp-initramfs && find -L . -type f | cpio -o -H newc -R 0:0 --dereference) > {{.OUTPUT}}.tmp
+          (cd out/tmp-initramfs && find . | cpio -o -H newc -R 0:0 --dereference) > {{.OUTPUT}}.tmp
           mv {{.OUTPUT}}.tmp {{.OUTPUT}}
     preconditions:
       - sh: "[ -n \"{{.OUTPUT}}\" ]"
