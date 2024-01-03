@@ -152,6 +152,15 @@ tasks:
           CGO_ENABLED: "0"
     run: once
 
+  stboot:
+    cmds:
+      - task: install
+        vars:
+          NAME: stboot
+          PACKAGE: "{{.STBOOT_REPO}}"
+          CGO_ENABLED: "0"
+    run: once
+
   debos:
     cmds:
       - '{{.GOPREFIX}} go get github.com/go-debos/debos/cmd/debos'

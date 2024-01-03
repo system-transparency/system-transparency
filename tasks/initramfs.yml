@@ -6,18 +6,27 @@ tasks:
   build:
     internal: yes
     deps:
-      - :go:u-root
+      - :go:stboot
     cmds:
-      - cmd: echo "Building initramfs via u-root with stboot as init process"
+      - cmd: echo "Building uncompressed initramfs via cpio with stboot as init process"
         silent: yes
       - cmd: echo "Including files:"
         silent: yes
       - cmd: for f in {{.FILES}}; do echo "- $f" ; done
         silent: yes
-      - >
-        {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -initcmd='stboot' -defaultsh=""
-        -o {{.OUTPUT}}.tmp {{.FILES_ARGS}} {{.STBOOT_REPO}}
-      - mv {{.OUTPUT}}.tmp {{.OUTPUT}}
+      - cmd: |
+          set -e
+          rm -rf out/tmp-initramfs
+          mkdir -p out/tmp-initramfs
+          for f in {{.FILES}} ; do
+          from=$(echo "$f" |sed s/:.*//)
+          to=$(echo "$f" |sed s/.*://)
+          mkdir -p out/tmp-initramfs/$(dirname "$to")
+          ln -sr "$from" "out/tmp-initramfs/$to"
+          done
+          ln -sr "cache/go/bin/stboot" "out/tmp-initramfs/init"
+          (cd out/tmp-initramfs && find -L . -type f | cpio -o -H newc -R 0:0 --dereference) > {{.OUTPUT}}.tmp
+          mv {{.OUTPUT}}.tmp {{.OUTPUT}}
     preconditions:
       - sh: "[ -n \"{{.OUTPUT}}\" ]"
         msg: "task bug: OUTPUT not defined"
