@@ -127,3 +127,12 @@ ISO image - network mode - hostcfg from initramfs:
         expire_in: 2 days # Rather large files
         paths:
         - out/artifacts
+
+# Doesn't run actual tests, but tests for obvious failures in the
+# scripts used for running tests on real hardware.
+Test tools:
+    stage: test
+    script:
+      - ./contrib/testing/build-ospkg.sh
+      - ./contrib/testing/build-stprov.sh
+      - ./contrib/testing/build-stboot.sh
