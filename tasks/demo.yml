@@ -72,7 +72,6 @@ tasks:
     deps:
       - :go:stprov
       - :go:u-root
-      - :go:checkout-uroot
     sources:
       - ./cache/go/bin/stmgr
     generates:
@@ -81,12 +80,15 @@ tasks:
       - cmd: mkdir -p $(dirname {{.STPROV_INITRAMFS}})
         silent: true
       - >
+        if [ -d ./cache/u-root ] ;
+        then (cd ./cache/u-root && git checkout {{.UROOT_VERSION}}) ;
+        else (cd ./cache && git clone https://github.com/u-root/u-root -b {{.UROOT_VERSION}}) ;
+        fi
+      - >
         {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="/bin/stprov help"
-        -uroot-source ./cache/go/src/{{.UROOT_REPO}}
+        -uroot-source ./cache/u-root
         -o {{.INITRAMFS}} {{.FILES_ARGS}} core
       - gzip -kf {{.INITRAMFS}}
-    env:
-      GO111MODULE: off
     preconditions:
       - sh: '[ -n "{{.INITRAMFS}}" ]'
         msg: "task bug: INITRAMFS not defined"
@@ -94,6 +96,8 @@ tasks:
     vars:
       INITRAMFS:
         sh: echo {{.STPROV_INITRAMFS}} | sed -e 's/\.gz//'
+      UROOT_VERSION:
+        sh: go list -m -f '{''{.Version}}' github.com/u-root/u-root
       FILES: >-
         cache/go/bin/stprov:bin/stprov
       FILES_ARGS:
