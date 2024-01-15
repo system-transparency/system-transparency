@@ -1,47 +1,12 @@
 version: '3'
 
 vars:
-  GO_VER_MAJOR_MIN: 1
-  GO_VER_MINOR_MIN: 17
-  CMDS: >-
-    curl xz git gcc make bc go mkfs.vfat udevadm pkg-config
-    flex bison gpg jq e2mkdir mmd mcopy parted xorriso swtpm
-    python3 supervisord supervisorctl
-  PKGS: >-
-    libelf
   DPKGS: >-
     curl xz-utils git gcc make bc dosfstools udev swtpm
     flex bison pkg-config libelf-dev gpg jq e2tools mtools
     parted xorriso python3 supervisor
 
 tasks:
-
-  check:
-    desc: Check dependencies
-    cmds:
-      - cmd: |
-          missing=""
-          for cmd in {{.CMDS}}; do
-          if ! command -v $cmd >/dev/null 2>/dev/null; then
-          missing="$missing $cmd"
-          fi
-          done
-          if [ -n "$missing" ]; then
-          echo "command(s) not found:$missing"
-          exit 1
-          fi
-        silent: true
-      - cmd: |
-          for pkg in {{.PKGS}}; do
-          if ! pkg-config $pkg ; then
-          echo "pkg-config not found: $pkg"
-          exit 1
-          fi
-          done
-        silent: true
-      - task: check-go
-      - cmd: echo "Check complete"
-        silent: true
 
   install:
     desc: Install Debian/Ubuntu dependencies
@@ -64,36 +29,3 @@ tasks:
         msg: "task bug: CMD not defined"
       - sh: "command -v {{.CMD}} >/dev/null 2>&1"
         msg: "command not found: \"{{.CMD}}\""
-
-  check-pkg:
-    run: when_changed
-    deps:
-      - task: check-cmd
-        vars: {CMD: "pkg-config"}
-    preconditions:
-      - sh: '[ -n "{{.PKG}}" ]'
-        msg: "task bug: PKG not defined"
-      - sh: "[[ -z {{.PKG}} ]] || pkg-config {{.PKG}} >/dev/null 2>&1"
-        msg: "package not found: \"{{.PKG}}\""
-
-  check-go:
-    run: once
-    deps:
-      - task: check-cmd
-        vars: {CMD: "go"}
-    preconditions:
-      - sh: >
-          [ "{{.GO_VER_MAJOR}}" -ge "{{.GO_VER_MAJOR_MIN}}" ] &&
-          ([ "{.GO_VER_MAJOR}}" -gt "{{.GO_VER_MAJOR_MIN}}" ] ||
-          [ "{{.GO_VER_MINOR}}" -ge "{{.GO_VER_MINOR_MIN}}" ])
-        msg: |
-          GO version {{.GO_VER_MAJOR}}.{{.GO_VER_MINOR}} is not supported.
-          Needs version {{.GO_VER_MAJOR_MIN}}.{{.GO_VER_MINOR_MIN}} or higher.
-    vars:
-      GO_VER:
-        sh: go version | cut -d ' ' -f 3 | sed 's/go//'
-      GO_VER_MAJOR:
-        sh: echo {{.GO_VER}} | cut -d . -f 1
-      GO_VER_MINOR:
-        sh: echo {{.GO_VER}} | cut -d . -f 2
-

@@ -30,17 +30,6 @@ tasks:
       - task -l
     interactive: true
 
-  fetch:
-    desc: Fetch dependencies which require network access
-    deps:
-      - go:all
-      - linux:fetch
-
-  toolchain:
-    desc: Build toolchain
-    deps:
-      - go:update
-
   fullrun:
     cmds:
       - task: demo:ubuntu-prebuilt
@@ -233,11 +222,6 @@ tasks:
     desc: Remove all build artifacts
     cmds:
       - "rm -rf out"
-
-  clean-toolchain:
-    desc: Remove all go tools
-    deps:
-      - go:clean
 
   clean-all:
     desc: Remove all build artifacts, cache and config file

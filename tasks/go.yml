@@ -34,34 +34,12 @@ tasks:
       GO_LDFLAGS: '{{default "" .GO_LDFLAGS}}'
       CGO_ENABLED: '{{default "" .CGO_ENABLED}}'
 
-  install-with-version:
-    cmds:
-      - task: install
-        vars:
-          PACKAGE: "{{.PACKAGE}}@{{.VERSION}}"
-          NAME: '{{.NAME}}'
-      # create version file
-      - cmd: 'echo "{{.VERSION}}" > {{.GOBIN}}/.{{.NAME}}'
-        silent: true
-    run: when_changed
-    status:
-      # check version file
-      - 'grep -q {{.VERSION}} {{.GOBIN}}/.{{.NAME}}'
-    vars:
-      VERSION: '{{default "latest" .VERSION}}'
-
   all:
     deps:
       - u-root
       - stmgr
       - stprov
       - sthsm
-
-  update:
-    cmds:
-      - "cd {{.GOBIN}} && rm -f {{.BINS}}"
-      - task: all
-    run: once
 
   u-root:
     cmds:
