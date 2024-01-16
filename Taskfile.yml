@@ -30,6 +30,12 @@ tasks:
       - task -l
     interactive: true
 
+  fetch:
+    desc: Fetch dependencies which require network access
+    deps:
+      - go:all
+      - linux:fetch
+
   fullrun:
     cmds:
       - task: demo:ubuntu-prebuilt
