@@ -4,14 +4,12 @@ vars:
   GO_VER_MAJOR_MIN: 1
   GO_VER_MINOR_MIN: 17
   CMDS: >-
-    curl xz git gcc make bc go mkfs.vfat udevadm pkg-config
+    curl xz git gcc make bc go mkfs.vfat udevadm
     flex bison gpg jq e2mkdir mmd mcopy parted xorriso swtpm
     python3 supervisord supervisorctl
-  PKGS: >-
-    libelf
   DPKGS: >-
     curl xz-utils git gcc make bc dosfstools udev swtpm
-    flex bison pkg-config libelf-dev gpg jq e2tools mtools
+    flex bison gpg jq e2tools mtools
     parted xorriso python3 supervisor
 
 tasks:
@@ -30,14 +28,6 @@ tasks:
           echo "command(s) not found:$missing"
           exit 1
           fi
-        silent: true
-      - cmd: |
-          for pkg in {{.PKGS}}; do
-          if ! pkg-config $pkg ; then
-          echo "pkg-config not found: $pkg"
-          exit 1
-          fi
-          done
         silent: true
       - task: check-go
       - cmd: echo "Check complete"
@@ -64,17 +54,6 @@ tasks:
         msg: "task bug: CMD not defined"
       - sh: "command -v {{.CMD}} >/dev/null 2>&1"
         msg: "command not found: \"{{.CMD}}\""
-
-  check-pkg:
-    run: when_changed
-    deps:
-      - task: check-cmd
-        vars: {CMD: "pkg-config"}
-    preconditions:
-      - sh: '[ -n "{{.PKG}}" ]'
-        msg: "task bug: PKG not defined"
-      - sh: "[[ -z {{.PKG}} ]] || pkg-config {{.PKG}} >/dev/null 2>&1"
-        msg: "package not found: \"{{.PKG}}\""
 
   check-go:
     run: once
