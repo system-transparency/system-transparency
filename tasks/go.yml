@@ -9,10 +9,9 @@ vars:
   STPROV_REPO: system-transparency.org/stprov/cmd/stprov
   STHSM_REPO: git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt
   STAUTH_REPO: git.glasklar.is/system-transparency/core/stauth
-  GOBIN: cache/go/bin
-  GOPATH:
-    sh: echo "$PWD/cache/go"
-  GOPREFIX: GOPATH={{.GOPATH}}
+  GOBIN:
+    sh: echo "$PWD/bin"
+  GOPREFIX: GOBIN={{.GOBIN}}
 
 tasks:
 
@@ -43,7 +42,7 @@ tasks:
 
   update:
     cmds:
-      - "cd {{.GOBIN}} && rm -f {{.BINS}}"
+      - task: clean
       - task: all
     run: once
 
@@ -99,6 +98,5 @@ tasks:
 
   clean:
     cmds:
-      - "[ ! -d cache/go ] || chmod +w -R cache/go"
-      - rm -rf cache/go
+      - "cd {{.GOBIN}} && rm -f {{.BINS}}"
     run: once

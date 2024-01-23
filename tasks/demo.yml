@@ -73,7 +73,7 @@ tasks:
       - :go:stprov
       - :go:u-root
     sources:
-      - ./cache/go/bin/stmgr
+      - ./bin/stmgr
     generates:
       - "{{.STPROV_INITRAMFS}}"
     cmds:
@@ -99,7 +99,7 @@ tasks:
       UROOT_VERSION:
         sh: go list -m -f '{''{.Version}}' github.com/u-root/u-root
       FILES: >-
-        cache/go/bin/stprov:bin/stprov
+        bin/stprov
       FILES_ARGS:
         sh: for f in {{.FILES}}; do echo -n "-files $f"; done
 

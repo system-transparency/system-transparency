@@ -24,7 +24,7 @@ tasks:
           mkdir -p out/tmp-initramfs/$(dirname "$to")
           ln -sr "$from" "out/tmp-initramfs/$to"
           done
-          ln -sr "cache/go/bin/stboot" "out/tmp-initramfs/init"
+          ln -sr "bin/stboot" "out/tmp-initramfs/init"
           (cd out/tmp-initramfs && find . | cpio -o -H newc -R 0:0 --dereference) > {{.OUTPUT}}.tmp
           mv {{.OUTPUT}}.tmp {{.OUTPUT}}
     preconditions:

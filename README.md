@@ -22,7 +22,7 @@ Make sure you have at least go1.17 running on your system. See [here](https://go
 
 ## Environment
 
-The System Transparency Repository provides a `setup.env` file meant to be sourced in a shell to load the build environment. It installs the [Task](https://taskfile.dev/) tool, if not already installed, and configures a separate GOPATH to prevent conflicts. To load and unload the environment depending on the current directory, it is recommended to use [direnv](https://direnv.net/). See [direnv Basic Installation](https://direnv.net/#basic-installation) to see how to properly setup direnv for your shell.
+The System Transparency Repository provides a `setup.env` file meant to be sourced in a shell to load the build environment. It installs the [Task](https://taskfile.dev/) tool, if not already installed, and configures a separate GOBIN to prevent conflicts. To load and unload the environment depending on the current directory, it is recommended to use [direnv](https://direnv.net/). See [direnv Basic Installation](https://direnv.net/#basic-installation) to see how to properly setup direnv for your shell.
 
 After restarting your shell, you can enable direnv for this repository:
 

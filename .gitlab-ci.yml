@@ -38,11 +38,11 @@ Example keys & OS package:
         # Generate and sign OS Package
         - task demo:ospkg
 
-        - tree --du -h cache/go/bin/
+        - tree --du -h bin/
         - tree --du -h out/
     artifacts:
         paths: 
-            - cache/go/bin/
+            - bin/
             - out/
 
 # Will not work anymore (ST_PROVISO_STMGR_ARGS is gone). Also provision sub-command is deprecated.
