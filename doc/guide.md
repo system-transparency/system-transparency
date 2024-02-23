@@ -37,7 +37,8 @@ task: [go:clean] cd /path/to/system-transparency/bin && rm -f u-root stboot stmg
 task: [go:install stmgr] GOBIN=/path/to/system-transparency/bin go install -ldflags "" system-transparency.org/stmgr
 task: [go:install u-root] GOBIN=/path/to/system-transparency/bin go install -ldflags "" github.com/u-root/u-root
 task: [go:install sthsm] GOBIN=/path/to/system-transparency/bin go install -ldflags "" git.glasklar.is/system-transparency/project/sthsm/cmd/mgmt
-task: [go:install stprov] GOBIN=/path/to/system-transparency/bin go install -ldflags "" system-transparency.org/stprov/cmd/stprov```
+task: [go:install stprov] GOBIN=/path/to/system-transparency/bin go install -ldflags "" system-transparency.org/stprov/cmd/stprov
+```
 
 Some of the installed packages are optional for this guide but you will need the following ones for sure:
 - stmgr
