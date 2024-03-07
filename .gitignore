@@ -5,5 +5,5 @@
 /out/
 **/*.old
 .task
-bin/task
+/bin/
 host_configuration.json
