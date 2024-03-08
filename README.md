@@ -151,8 +151,6 @@ stboot can fetch OS packages from different sources. The fetching mechanism is d
 
 The location of the OS package is defined by the OS package pointer in the host config. The format of the OS package pointer needs to satisfy the requirements of the choosen fetching mechanism.
 
-stboot will do string replacement on `$ID` and `$AUTH` in the OS package pointer using the values `identity` and `authentication` from the host configuration.
-
 ### Network Boot
 Network boot can be configured using either DHCP or a static network configuration. In the case of a static network, stboot uses IP address, netmask, default gateway, and DNS server from the host configuration.
 
