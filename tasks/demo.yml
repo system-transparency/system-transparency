@@ -87,7 +87,10 @@ tasks:
       - >
         {{.GOPREFIX}} {{.GOBIN}}/u-root -build=bb -uinitcmd="/bin/stprov help"
         -uroot-source ./cache/u-root
-        -o {{.INITRAMFS}} {{.FILES_ARGS}} core
+        -files bin/stprov:bin/stprov
+        -files {{.HTTPS_ROOT}}:etc/trust_policy/tls_roots.pem
+        -o {{.INITRAMFS}}
+        core
       - gzip -kf {{.INITRAMFS}}
     preconditions:
       - sh: '[ -n "{{.INITRAMFS}}" ]'
@@ -98,10 +101,6 @@ tasks:
         sh: echo {{.STPROV_INITRAMFS}} | sed -e 's/\.gz//'
       UROOT_VERSION:
         sh: go list -m -f '{''{.Version}}' github.com/u-root/u-root
-      FILES: >-
-        bin/stprov
-      FILES_ARGS:
-        sh: for f in {{.FILES}}; do echo -n "-files $f"; done
 
   ospkg-stprov:
     desc: "Build stprov OS Package"

@@ -10,6 +10,8 @@ vars:
   STBOOT_INITRAMFS: out/artifacts/stboot.cpio.gz
   TRUST_POLICY: out/artifacts/trust_policy.json
   HOST_CONFIG: out/artifacts/host_config.json
+  # Common
+  HTTPS_ROOT: contrib/initramfs-includes/isrgrootx1.pem
 
 
 includes:

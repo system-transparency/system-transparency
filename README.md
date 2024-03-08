@@ -53,6 +53,9 @@ However, this is only recommended in CI workflows since it makes the environment
 
 # Demonstrating the whole thing
 
+It is assumed that the demos are run in order to function properly (because the
+defined task dependencies are a bit buggy).
+
 ## Demo 1: ST-booting an OS package downloaded over HTTPS
 
 To see System Transparency in action you first need a signed OS package to be loaded by stboot:

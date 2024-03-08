@@ -57,7 +57,6 @@ tasks:
         msg: |-
           [ERROR] HTTPS certificate ({{.HTTPS_ROOT}}) missing.
     vars:
-      HTTPS_ROOT: contrib/initramfs-includes/isrgrootx1.pem
       SIGNING_ROOT: out/keys/example_keys/root.cert
       VARIANT_OUT: out/artifacts/{{.VARIANT}}.cpio
       VARIANT: "{{.VARIANT}}"
