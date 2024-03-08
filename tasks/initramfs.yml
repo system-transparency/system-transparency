@@ -63,7 +63,7 @@ tasks:
       VARIANT: "{{.VARIANT}}"
       FILES: >-
         {{.SIGNING_ROOT}}:etc/trust_policy/ospkg_signing_root.pem
-        {{.HTTPS_ROOT}}:etc/ssl/certs/isrgrootx1.pem
+        {{.HTTPS_ROOT}}:etc/trust_policy/tls_roots.pem
         {{.FILES}}
 
 

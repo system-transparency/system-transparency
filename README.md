@@ -158,8 +158,8 @@ Network boot can be configured using either DHCP or a static network configurati
 
 OS package server communication:
 * The HTTPS root certificates are stored in the LinuxBoot initramfs
-    * File name: `/etc/https_roots.pem`
-    * Uses the roots in https://letsencrypt.org/certificates/ per default
+    * File name: `/etc/trust_policy/tls_roots.pem`
+    * Can, e.g., be populated with the roots at https://letsencrypt.org/certificates/
 
 The OS package pointer:
 * Is a URL with method HTTP or HTTPS

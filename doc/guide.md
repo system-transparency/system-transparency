@@ -97,10 +97,10 @@ task: [trustpolicy] bin/stmgr trustpolicy check '{
 [initramfs:build] Building initramfs via u-root with stboot as init process
 [initramfs:build] Including files:
 [initramfs:build] - out/keys/example_keys/root.cert:etc/trust_policy/ospkg_signing_root.pem
-[initramfs:build] - contrib/initramfs-includes/isrgrootx1.pem:etc/ssl/certs/isrgrootx1.pem
+[initramfs:build] - contrib/initramfs-includes/isrgrootx1.pem:etc/trust_policy/tls_roots.pem
 [initramfs:build] - out/artifacts/host_config.json:etc/host_configuration.json
 [initramfs:build] - out/artifacts/trust_policy.json:etc/trust_policy/trust_policy.json
-task: [initramfs:build] GOBIN=/path/to/system-transparency/bin bin/u-root -build=bb -uinitcmd="stboot -loglevel=d" -defaultsh="" -uroot-source ./cache/u-root -o out/artifacts/initramfs:incl-hostconfig.cpio.tmp -files out/keys/example_keys/root.cert:etc/trust_policy/ospkg_signing_root.pem -files contrib/initramfs-includes/isrgrootx1.pem:etc/ssl/certs/isrgrootx1.pem -files out/artifacts/host_config.json:etc/host_configuration.json -files out/artifacts/trust_policy.json:etc/trust_policy/trust_policy.json  github.com/u-root/u-root/cmds/core/init system-transparency.org/stboot
+task: [initramfs:build] GOBIN=/path/to/system-transparency/bin bin/u-root -build=bb -uinitcmd="stboot -loglevel=d" -defaultsh="" -uroot-source ./cache/u-root -o out/artifacts/initramfs:incl-hostconfig.cpio.tmp -files out/keys/example_keys/root.cert:etc/trust_policy/ospkg_signing_root.pem -files contrib/initramfs-includes/isrgrootx1.pem:etc/trust_policy/tls_roots.pem -files out/artifacts/host_config.json:etc/host_configuration.json -files out/artifacts/trust_policy.json:etc/trust_policy/trust_policy.json  github.com/u-root/u-root/cmds/core/init system-transparency.org/stboot
 
 [initramfs:build] 23:33:27 Disabling CGO for u-root...
 [initramfs:build] 23:33:27 Build environment: GOARCH=amd64 GOOS=linux GOROOT=/usr/lib/golang GOBIN=/path/to/system-transparency/bin CGO_ENABLED=0

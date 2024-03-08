@@ -8,7 +8,7 @@ require (
 	git.glasklar.is/system-transparency/core/stauth v0.0.0-20230621112137-6e1b46d9f57b
 	git.glasklar.is/system-transparency/project/sthsm v0.0.0-20230523092857-e428dbca65b7
 	github.com/u-root/u-root v0.11.0
-	system-transparency.org/stboot v0.3.1
+	system-transparency.org/stboot v0.3.2
 	system-transparency.org/stmgr v0.2.1
 	system-transparency.org/stprov v0.3.0
 )
