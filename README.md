@@ -1,3 +1,14 @@
+**Warning:** this repository will eventually be archived in favor of the demos
+and documentation located at https://docs.system-transparency.org/.  Similarly,
+the CI that is running here is gradually obsoleted by CI in the respective
+repositories that contain code (stprov, stmgr, stboot, etc).
+
+Our current level of commitment to supporting this repository is:
+
+  - The existing CI passes
+  - The README demo instructions can be copy-pasted without errors
+  - The README is not obviously wrong and unhelpful
+
 # System Transparency Tooling
 
 [This repository](https://git.glasklar.is/system-transparency/core/system-transparency) contains tooling, configuration files and demos to form a build-, test- and development environment for [System Transparency](https://www.system-transparency.org/).
@@ -111,22 +122,11 @@ task qemu:iso
 [stprov]: https://git.glasklar.is/system-transparency/core/stprov
 
 # OS Package
-An OS package consists of an archive file (ZIP) and a [descriptor file][] (JSON). The archive contains the boot files (kernel, initramfs, etc.) and the descriptor file contains the signatures for the archive and other metadata.
+An [OS package][] consists of an archive file (ZIP) and a descriptor file (JSON). The archive contains the boot files (kernel, initramfs, etc.) and the descriptor file contains the signatures for the archive and other metadata.
 
-OS packages can be created and managed with the `stmgr` tool. Source code for stmgr can be found at https://git.glasklar.is/system-transparency/core/stmgr/.
+OS packages can be created and managed with the `stmgr` tool. Source code for stmgr can be found at https://git.glasklar.is/system-transparency/core/stmgr/.  See `stmgr ospkg -help`. 
 
-Once you have an OS kernel and an initramfs file containing the userspace, create an OS package out of it:
-``` bash
-# Create a new OS package
-stmgr ospkg create -kernel=<your_OS_kernel> -initramfs=<your_OS_initramfs>
-# Sign the OS package (multiple times)
-stmgr ospkg sign -key=<your.key> -cert=<your.cert> -ospkg=<OS package>
-
-# See help for all options
-stmgr ospkg -help
-```
-
-[descriptor file]: https://pkg.go.dev/system-transparency.org/stboot@v0.2.0/ospkg#Descriptor
+[OS package]: https://docs.system-transparency.org/docs/reference/data-structures/os_package/
 
 # System Configuration
 
@@ -141,10 +141,10 @@ The host configuration contains
 * an OS package pointer, and
 * identity data unique to each provisioned system.
 
-Information on host configuration autodetection can be found [here](https://pkg.go.dev/system-transparency.org/stboot@v0.2.0/host#ConfigAutodetect)
+Information on host configuration autodetection can be found [here](https://git.glasklar.is/system-transparency/core/stboot/-/blob/main/docs/stboot.md?ref_type=heads#loading-stboot-configuration)
 
-[trust policy]: https://pkg.go.dev/system-transparency.org/stboot@v0.2.0/trust#Policy
-[host configuration]: https://pkg.go.dev/system-transparency.org/stboot@v0.2.0/host#Config
+[trust policy]: https://docs.system-transparency.org/docs/reference/data-structures/trust_policy/ 
+[host configuration]: https://docs.system-transparency.org/docs/reference/data-structures/host_configuration/ 
 
 ## Boot Modes
 stboot can fetch OS packages from different sources. The fetching mechanism is determined by the trust policy.
@@ -187,7 +187,7 @@ SHA256 must be used to hash the OS package ZIP archive file. The signature must 
 
 An OS package is signed using one or more X.509 signing certificates.
 
-The root certificate for the signing certificates is packed into the LinuxBoot initramfs at `/etc/trust_policy/ospkg_signing_root.pem`. Also, the minimum number of signatures required resides in the initramfs in `etc/trust_policy/trust_policy.json`. Ed25519 is recommended for the root certificate as well as the signing certificates.
+The root certificate for the signing certificates is packed into the LinuxBoot initramfs at `/etc/trust_policy/ospkg_signing_root.pem`. Also, the minimum number of signatures required resides in the initramfs in `etc/trust_policy/trust_policy.json`. Ed25519 is recommended for the root certificate and required for the signing certificates.
 
 Two files are involved, the OS package itself and a corresponding descriptor file:
 * `SOMENAME.zip` (archive file)
@@ -198,7 +198,7 @@ The verification process in stboot:
 * For each signature certificate tuple:
     * Validate the certificate against the root certificate.
         * Only check validity bounds and if the certificate is chained to the trusted root certificate.
-    * Check for duplicate X.509 certificates.
+    * Check for duplicate leaf certificates.  The duplication check is based on each certificate's public key.
     * Verify signature.
     * Increase count of valid signatures.
 * Check if the number of successful signatures is enough.
