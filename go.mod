@@ -8,8 +8,8 @@ require (
 	git.glasklar.is/system-transparency/core/stauth v0.0.0-20230621112137-6e1b46d9f57b
 	git.glasklar.is/system-transparency/project/sthsm v0.0.0-20230523092857-e428dbca65b7
 	github.com/u-root/u-root v0.11.0
-	system-transparency.org/stboot v0.3.2
-	system-transparency.org/stmgr v0.2.1
+	system-transparency.org/stboot v0.3.4
+	system-transparency.org/stmgr v0.3.1
 	system-transparency.org/stprov v0.3.1
 )
 
@@ -22,8 +22,6 @@ require (
 	github.com/edsrzf/mmap-go v1.1.0 // indirect
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815 // indirect
 	github.com/foxboron/go-uefi v0.0.0-20230218004016-d1bb9a12f92c // indirect
-	github.com/gdamore/encoding v1.0.0 // indirect
-	github.com/gdamore/tcell/v2 v2.5.4 // indirect
 	github.com/go-chi/chi/v5 v5.0.8 // indirect
 	github.com/go-ping/ping v1.1.0 // indirect
 	github.com/golang/protobuf v1.5.0 // indirect
@@ -37,18 +35,14 @@ require (
 	github.com/josharian/native v1.1.0 // indirect
 	github.com/klauspost/compress v1.10.6 // indirect
 	github.com/klauspost/pgzip v1.2.4 // indirect
-	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
-	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mdlayher/packet v1.1.2 // indirect
 	github.com/mdlayher/socket v0.4.1 // indirect
 	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/xattr v0.4.1 // indirect
-	github.com/rivo/tview v0.0.0-20230130130022-4a1b7a76c01c // indirect
-	github.com/rivo/uniseg v0.4.2 // indirect
 	github.com/rs/zerolog v1.29.1 // indirect
 	github.com/saferwall/pe v1.4.2 // indirect
 	github.com/sirupsen/logrus v1.7.0 // indirect
@@ -72,4 +66,5 @@ require (
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/djherbis/times.v1 v1.2.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	sigsum.org/sigsum-go v0.7.2 // indirect
 )
