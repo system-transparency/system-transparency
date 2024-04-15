@@ -47,7 +47,6 @@ tasks:
     desc: "Build demo OS Package"
     deps:
       - :go:stmgr
-      - stauth
       - keygen
     sources:
       - "{{.DEMO_KEY_DIR}}/signing-key-*}}"

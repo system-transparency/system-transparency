@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   # All bins we install in GOBIN, for purge by update target
-  BINS: "u-root stboot stmgr stprov mgmt stauth"
+  BINS: "u-root stboot stmgr stprov"
   UROOT_REPO: github.com/u-root/u-root
   STBOOT_REPO: system-transparency.org/stboot
   STMGR_REPO: system-transparency.org/stmgr
@@ -78,6 +78,7 @@ tasks:
           PACKAGE: "{{.STHSM_REPO}}"
     run: once
 
+  # Note that stauth depends on go-1.20, which we're not yet using.
   stauth:
     cmds:
       - task: install
