@@ -1,0 +1,5 @@
+st-version: R.2
+component: https://git.glasklar.is/system-transparency/core/system-transparency.git v0.2.0 1fd39f384b6abe23f3d926251f8430db5a1c712f
+component: https://git.glasklar.is/system-transparency/core/stboot.git v0.2.0 7da225d44419ec4af114e6c0d35bded43cc3a69d
+component: https://git.glasklar.is/system-transparency/core/stmgr.git v0.2.1 d5b51f2d1b42c8e16f99296982dbfd5a814fa4be
+component: https://git.glasklar.is/system-transparency/core/stprov.git v0.1.1 018ca80a3b5e378dc3c1c4503d91d061d9d1dd9a

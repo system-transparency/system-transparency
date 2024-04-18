@@ -1,0 +1,8 @@
+# TODO: There should be some correspondency between st-version below
+# and git tag, and possibly with file name (if we have one manifest
+# file per release).
+st-version: v1.0.0-wip
+component: https://git.glasklar.is/system-transparency/core/stboot.git v0.3.5 9400d07bd9fb66482187d6cd4c09dc866e7808ab
+component: https://git.glasklar.is/system-transparency/core/stmgr.git v0.3.2 1a23f12318f643bbb7acebbc7a36ba942a1215ca
+component: https://git.glasklar.is/system-transparency/core/stprov.git v0.3.3 15d3021c39ee91aa067c23aac5ff1fc715dbbc01
+component: https://git.glasklar.is/system-transparency/project/docs.git v0.1.3 97dca8e74ff787e5b55174e20cb49067220834c6
