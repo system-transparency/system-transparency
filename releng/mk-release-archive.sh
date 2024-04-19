@@ -56,6 +56,7 @@ commit_seconds() {
     --date=unix \
     "$@"
 }
+
 download_component () {
     local repo="$1"
     local tag="$2"
@@ -68,15 +69,14 @@ download_component () {
     msg "Checking out ${name}"
 
     # TODO: Unnecessarily verbose, even with -q.
-    git clone -q --depth 1 -b "${tag}" -- "${repo}" "${dir}"
+    git -c advice.detachedHead=false clone -q --depth 1 -b "${tag}" -- "${repo}" "${dir}"
 
     (
 	cd "${dir}"
 
-	# TODO: Should require valid signatures by default, with
-	# option to allow unsigned tags.
-	git tag --verify "${tag}" \
-	    || msg "Component ${name} tag ${tag} not properly signed"
+	# Require valid signature, unless -f is in effect
+	git -c "gpg.ssh.allowedSignersFile=${ALLOWED_SIGNERS}" tag --verify "${tag}" \
+	    || [[ ${FORCE} = "yes" ]] || die "Component ${name} tag ${tag} is not properly signed"
 
 	[[ "${hash}" = "$(commit_hash HEAD)" ]] \
 	    || die "Unexpected hash for component ${name} tag ${tag}"
@@ -95,12 +95,59 @@ download_component () {
 	  touch -mr "$1/$(ls --zero -At "$1" | grep -z -v "^.git\$" | head -z -n1 | tr -d "\0")" "$1"' bash '{}' ';' ')'
     )
 }
-[[ $# = 1 ]] || die "Wants exactly one argument, the manifest file."
+
+usage () {
+    echo "mk-release-archive.sh [OPTIONS] MANIFEST-FILE"
+    echo "Create a .tar.gz archive based on the components listed in the manifest file."
+    echo
+    echo "Options:"
+    echo "  -o DIR  Use directory DIR and create archive 'DIR.tar.gz'"
+    echo "            (default: 'st-<version>', with version from the manifest."
+    echo "  -a FILE OpenSSH allowed signers file (default: 'allowed_signers')."
+    echo "  -f      Force-create archive even if tags are not properly signed."
+    echo "  -h      Display this help."
+}
+
+FORCE=no
+
+while getopts "hfa:o:" option ; do
+    case "${option}" in
+	h)
+	    usage
+	    exit 0
+	    ;;
+	o)
+	    DIST_DIR="${OPTARG}"
+	    ;;
+	a)
+	    ALLOWED_SIGNERS="${OPTARG}"
+	    ;;
+	f)
+	    FORCE=yes
+	    ;;
+	*)
+	    usage >&2
+	    exit 1
+    esac
+done
+
+shift $(( OPTIND - 1 ))
+
+[[ $# = 1 ]] || die "Missing argument, see mk-release-archive.sh -h for help"
 
 MANIFEST="$1"
 
 VERSION="$(get_version "${MANIFEST}")"
-DIST_DIR="st-${VERSION}"
+: ${DIST_DIR:="st-${VERSION}"}
+
+if [[ ${FORCE} = "yes" ]] ; then
+    : ${ALLOWED_SIGNERS:=/dev/null}
+else
+    : ${ALLOWED_SIGNERS:=allowed_signers}
+fi
+
+# Needs an absolute filename
+ALLOWED_SIGNERS="$(realpath "${ALLOWED_SIGNERS}")"
 
 # Consider just rm -rf ${DIST_DIR}.
 [[ ! -a ${DIST_DIR} ]] || die "Directory ${DIST_DIR} already exists."

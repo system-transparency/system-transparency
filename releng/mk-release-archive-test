@@ -1,0 +1,47 @@
+#! /bin/bash
+
+# Script to populate a git repo with a signed release tag, and test
+# packaging using mk-release-archive.
+
+set -eu
+
+# Change directory to where script is located.
+cd "$(dirname "$0")"
+
+die() {
+    echo "$@"
+    exit 1
+}
+
+rm -rf test-tmp
+mkdir test-tmp
+cd test-tmp
+
+ssh-keygen -q -N '' -t ed25519 -f testkey
+echo 'rjh@example.org namespaces="git,file" '"$(< testkey.pub)" > allowed_signers
+
+# Populate a repo
+git init foo-project
+(
+    cd foo-project
+    git config --local gpg.format ssh
+    git config --local user.signingkey "$(realpath ../testkey)"
+    echo "Test component" > README
+    git add README
+    git commit -S -m "First revision"
+    git tag -s -m "Release v0.1" v0.1
+)
+
+{
+    echo st-version: test-v0.1
+    echo component: file://$(realpath foo-project) v0.1 $(cd foo-project && git show -s --format='tformat:%H' HEAD)
+} > foo-manifest
+
+../mk-release-archive.sh foo-manifest
+
+tar -tzf st-test-v0.1.tar.gz | grep -q foo-project/README || die "FAIL: README file missing in archive"
+
+! ../mk-release-archive.sh -o st-expect-fail -a /dev/null foo-manifest || die "FAIL: Signatures not enforced"
+../mk-release-archive.sh -f -o st-unsigned -a /dev/null foo-manifest || die "FAIL: -f (force) not working"
+
+tar -tzf st-unsigned.tar.gz | grep -q foo-project/README || die "FAIL: README file missing in (forced) archive"
