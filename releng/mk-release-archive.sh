@@ -161,7 +161,7 @@ done
 
 LATEST_COMPONENT="$(ls --zero -At "${DIST_DIR}" | head -z -n1 | tr -d "\0")"
 
-cp "${MANIFEST}" "${DIST_DIR}/"
+cp "${MANIFEST}" "${DIST_DIR}/manifest"
 
 (
     echo tar: "$(tar --version | head -1)"
