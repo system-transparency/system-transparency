@@ -8,7 +8,7 @@ require (
 	github.com/u-root/u-root v0.12.0
 	system-transparency.org/stboot v0.3.6
 	system-transparency.org/stmgr v0.3.2
-	system-transparency.org/stprov v0.3.3
+	system-transparency.org/stprov v0.3.4
 )
 
 require (
@@ -40,11 +40,11 @@ require (
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/vishvananda/netlink v1.2.1-beta.2 // indirect
 	github.com/vishvananda/netns v0.0.4 // indirect
-	golang.org/x/crypto v0.19.0 // indirect
+	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.18.0 // indirect
 	gopkg.in/djherbis/times.v1 v1.2.0 // indirect
