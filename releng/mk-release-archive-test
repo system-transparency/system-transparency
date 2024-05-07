@@ -39,9 +39,11 @@ git init foo-project
 
 ../mk-release-archive.sh foo-manifest
 
-tar -tzf st-test-v0.1.tar.gz | grep -q foo-project/README || die "FAIL: README file missing in archive"
+tar -tzf st-test-v0.1.tar.gz | grep -q '^st-test-v0.1/foo-project/README' || die "FAIL: README file missing in archive"
 
 ! ../mk-release-archive.sh -o st-expect-fail -a /dev/null foo-manifest || die "FAIL: Signatures not enforced"
-../mk-release-archive.sh -f -o st-unsigned -a /dev/null foo-manifest || die "FAIL: -f (force) not working"
 
-tar -tzf st-unsigned.tar.gz | grep -q foo-project/README || die "FAIL: README file missing in (forced) archive"
+# Test with -f, and also test passing an absolute filename with -o.
+../mk-release-archive.sh -f -o "$(pwd)/st-unsigned" -a /dev/null foo-manifest || die "FAIL: -f (force) not working"
+
+tar -tzf st-unsigned.tar.gz | grep -q '^st-unsigned/foo-project/README' || die "FAIL: README file missing in (forced) archive"

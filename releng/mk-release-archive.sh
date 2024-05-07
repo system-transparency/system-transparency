@@ -102,7 +102,8 @@ usage () {
     echo
     echo "Options:"
     echo "  -o DIR  Use directory DIR and create archive 'DIR.tar.gz'"
-    echo "            (default: 'st-<version>', with version from the manifest."
+    echo "            Only the last directory component is included in the archive."
+    echo "            (default: 'st-<version>', with version from the manifest)."
     echo "  -a FILE OpenSSH allowed signers file (default: 'allowed_signers')."
     echo "  -f      Force-create archive even if tags are not properly signed."
     echo "  -h      Display this help."
@@ -168,11 +169,11 @@ cp "${MANIFEST}" "${DIST_DIR}/manifest"
     echo gzip: "$(gzip --version | head -1)"
 ) > "${DIST_DIR}/archiving-tools.txt"
 
-
-tar --exclude .git --sort=name --format=posix \
+( cd "$(dirname "${DIST_DIR}")" &&
+  tar --exclude .git --sort=name --format=posix \
   --pax-option=exthdr.name=%d/PaxHeaders/%f \
   --pax-option=delete=atime,delete=ctime \
-  --clamp-mtime --mtime="./${DIST_DIR}/${LATEST_COMPONENT}" \
+  --clamp-mtime --mtime="./$(basename "${DIST_DIR}")/${LATEST_COMPONENT}" \
   --numeric-owner --owner=0 --group=0 \
   --mode=go+u,go-w \
-  -cf - "${DIST_DIR}" | gzip --no-name --best > "${DIST_DIR}.tar.gz"
+  -cf - "$(basename "${DIST_DIR}")" ) | gzip --no-name --best > "${DIST_DIR}.tar.gz"
