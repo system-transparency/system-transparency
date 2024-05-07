@@ -1,21 +1,21 @@
 NEWS for st-v1.0.0
 
-    This collection release is a first stable release of System
-    Transparency. By "stable", we mean that later releases will either
-    be fully compatible, or include a documented procedure for
-    upgrading. For information on how System Transparency releases are
-    made, see
-    https://git.glasklar.is/system-transparency/project/docs/-/tree/main/content/docs/releases
-    and RELEASES.md files for each component.
+    This is the first stable collection release of System Transparency.
+    By "stable", we mean that subsequent releases within the same major
+    version will be backwards compatible.  The ST version 1 collection
+    is supported for at least one year, until 2025-06-01.
+
+    For information on how releases are made in System Transparency, see
+    https://git.glasklar.is/system-transparency/project/docs/-/tree/main/content/docs/releases.
 
     The included components and their versions are specified in the
-    manifest file. Documentation for this version of the collection is
-    included in the distribution, and also published on
-    https://www.system-transparency.org/st-v1.0.0.
+    collection's manifest file. Documentation for the collection can be
+    generated from the included components, see docs.  Documentation is
+    also published at https://www.system-transparency.org/st-v1.0.0/.
 
-    Compared to previous, more experimental, releases, this collection
-    release includes a few new features, improved backwards
-    compatibility with systems provisioned using older tools tools and
-    conventions, and much improved documentation. Some obsolete
-    features with no known usage have been deleted. See NEWS files for
-    respective component for details.
+    Compared to previous System Transparency releases that were more
+    experimental, this collection release includes components with a few
+    new features, improved backwards compatibility with systems
+    provisioned using older tools tools and conventions, and much
+    improved documentation.  Some obsolete features with no known usage
+    have been deleted. See the NEWS files of each component for details.
