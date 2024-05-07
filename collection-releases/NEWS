@@ -1,13 +1,21 @@
 NEWS for st-v1.0.0
 
-    This collection release is intended as a stable release of all
-    System Transparency components. There are a few new features,
-    improved backwards compatibility with systems provisioned using
-    older tools tools and conventions, and much improved
-    documentation. Some obsolete features with no known usage have
-    been deleted.
+    This collection release is a first stable release of System
+    Transparency. By "stable", we mean that later releases will either
+    be fully compatible, or include a documented procedure for
+    upgrading. For information on how System Transparency releases are
+    made, see
+    https://git.glasklar.is/system-transparency/project/docs/-/tree/main/content/docs/releases
+    and RELEASES.md files for each component.
 
-    TODO: Highlights/examples of component changes?
-    TODO: Specifically, list incompatible changes in each component?
-    TODO: List included components, and/or versions? (Duplicating manifest file)
-    TODO: Some statement committing to stability and support?
+    The included components and their versions are specified in the
+    manifest file. Documentation for this version of the collection is
+    included in the distribution, and also published on
+    https://www.system-transparency.org/st-v1.0.0.
+
+    Compared to previous, more experimental, releases, this collection
+    release includes a few new features, improved backwards
+    compatibility with systems provisioned using older tools tools and
+    conventions, and much improved documentation. Some obsolete
+    features with no known usage have been deleted. See NEWS files for
+    respective component for details.
