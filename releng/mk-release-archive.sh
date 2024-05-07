@@ -26,17 +26,17 @@ trim_space () {
 s,[ \t]*$,,'
 }
 
-get_version () {
-    local version
-    version="$(sed -n '/^st-version:/{
+get_collection () {
+    local name
+    name="$(sed -n '/^collection:/{
 s,^[^:]*:[ \t]*,,
 p
 q
 }' < "$1" | trim_space)"
     # Check that we get a single value (no spaces, no control characters, no slashes).
-    [[ "${version}" ]] || die "st-version missing in manifest"
-    echo "${version}" | grep -vq '[/[:space:][:cntrl:]]' || die "Multiple or invalid st-version"
-    echo "${version}"
+    [[ "${name}" ]] || die "collection missing in manifest"
+    echo "${name}" | grep -vq '[/[:space:][:cntrl:]]' || die "Multiple or invalid st-version"
+    echo "${name}"
 }
 
 get_component_list () {
@@ -97,13 +97,14 @@ download_component () {
 }
 
 usage () {
-    echo "mk-release-archive.sh [OPTIONS] MANIFEST-FILE"
+    echo "mk-release-archive.sh [OPTIONS] MANIFEST-FILE [FILE ... ]"
     echo "Create a .tar.gz archive based on the components listed in the manifest file."
+    echo "Any additional files are into the top-level of the archived directory."
     echo
     echo "Options:"
     echo "  -o DIR  Use directory DIR and create archive 'DIR.tar.gz'"
     echo "            Only the last directory component is included in the archive."
-    echo "            (default: 'st-<version>', with version from the manifest)."
+    echo "            (default: name from collection-line in the manifest)."
     echo "  -a FILE OpenSSH allowed signers file (default: 'allowed_signers')."
     echo "  -f      Force-create archive even if tags are not properly signed."
     echo "  -h      Display this help."
@@ -134,17 +135,18 @@ done
 
 shift $(( OPTIND - 1 ))
 
-[[ $# = 1 ]] || die "Missing argument, see mk-release-archive.sh -h for help"
+[[ $# -ge 1 ]] || die "Missing argument, see mk-release-archive.sh -h for help"
 
 MANIFEST="$1"
+shift
 
-VERSION="$(get_version "${MANIFEST}")"
-: ${DIST_DIR:="st-${VERSION}"}
+COLLECTION="$(get_collection "${MANIFEST}")"
+: "${DIST_DIR:="${COLLECTION}"}"
 
 if [[ ${FORCE} = "yes" ]] ; then
-    : ${ALLOWED_SIGNERS:=/dev/null}
+    : "${ALLOWED_SIGNERS:=/dev/null}"
 else
-    : ${ALLOWED_SIGNERS:=allowed_signers}
+    : "${ALLOWED_SIGNERS:=allowed_signers}"
 fi
 
 # Needs an absolute filename
@@ -162,7 +164,13 @@ done
 
 LATEST_COMPONENT="$(ls --zero -At "${DIST_DIR}" | head -z -n1 | tr -d "\0")"
 
+[[ ! -e  "${DIST_DIR}/manifest" ]] || die "'manifest' file already exists in target dir!"
 cp "${MANIFEST}" "${DIST_DIR}/manifest"
+
+for f in "$@" ; do
+    [[ ! -e "${DIST_DIR}/$(basename "$f")" ]] || die "file '$(basename "$f")' already exists in target dir!"
+    cp "$f" "${DIST_DIR}"
+done
 
 (
     echo tar: "$(tar --version | head -1)"
