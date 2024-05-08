@@ -11,7 +11,7 @@ die() {
     exit 1
 }
 
-[[ $# -ge 1 ]] || die "Missing argument, wants tar file to test"
+[[ $# -eq 1 ]] || die "Requires a single argument, the .tar.gz file to test"
 
 # Need absolute file name, to make it work after changing directory.
 TARFILE="$(realpath "$1")"
@@ -27,7 +27,7 @@ tar xzf "${TARFILE}"
 
 DIR="$(basename "${TARFILE}" .tar.gz)"
 
-[[ -d "${DIR}" ]] || die "unexpected unpacked directory name"
+[[ -d "${DIR}" ]] || die "Unexpected unpacked directory name"
 
 echo RUNNING stboot tests
 
@@ -35,13 +35,14 @@ echo RUNNING stboot tests
 # collection.
 (cd "${DIR}"/stboot/integration && go work init && go work use . ../../stmgr)
 
+(cd "${DIR}"/stboot && go test ./...)
 ./"${DIR}"/stboot/integration/qemu-boot-from-net.sh
 ./"${DIR}"/stboot/integration/supermicro-x11scl-bond-iso.sh
-cp "${DIR}"/stboot/integration/out/stboot.iso stboot-bond-x11scl.iso
+cp "${DIR}"/stboot/integration/out/stboot.iso stboot.iso
 
 echo RUNNING stmgr tests
 
-(cd "${DIR}"/stmgr && go work init && go work use . ../stboot && make check)
+(cd "${DIR}"/stmgr && go work init && go work use . ../stboot && go test ./... && make check)
 
 # To get stprov integration to use stmgr from the collection, install it in PATH.
 GOBIN="$(pwd)/bin"
@@ -52,6 +53,10 @@ PATH="${GOBIN}:${PATH}"
 
 echo RUNNING stprov tests
 
-PATH="${GOBIN}:${PATH}" ./"${DIR}"/stprov/integration/qemu.sh
+(cd "${DIR}"/stprov && go test ./...)
 
-echo "All tests pass. To test on hardware, boot test-tmp/stboot-bond-x11scl.iso."
+PATH="${GOBIN}:${PATH}" ./"${DIR}"/stprov/integration/qemu.sh
+PATH="${GOBIN}:${PATH}" ./"${DIR}"/stprov/integration/supermicro-x11scl.sh
+cp "${DIR}"/stprov/integration/build/stprov.iso stprov.iso
+
+echo "All tests pass. To test on hardware, boot test-tmp/{stboot,stprov}.iso."
