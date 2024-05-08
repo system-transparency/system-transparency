@@ -99,7 +99,7 @@ download_component () {
 usage () {
     echo "mk-release-archive.sh [OPTIONS] MANIFEST-FILE [FILE ... ]"
     echo "Create a .tar.gz archive based on the components listed in the manifest file."
-    echo "Any additional files are into the top-level of the archived directory."
+    echo "Any additional files are copied into the top-level of the archived directory."
     echo
     echo "Options:"
     echo "  -o DIR  Use directory DIR and create archive 'DIR.tar.gz'"

@@ -33,7 +33,7 @@ git init foo-project
 )
 
 {
-    echo collection: test-v0.1
+    echo collection: test-0.1
     echo component: file://$(realpath foo-project) v0.1 $(cd foo-project && git show -s --format='tformat:%H' HEAD)
 } > foo-manifest
 
@@ -41,9 +41,9 @@ echo "New stuff" > NEWS
 
 ../mk-release-archive.sh foo-manifest NEWS
 
-tar -tzf test-v0.1.tar.gz | grep -q '^test-v0.1/foo-project/README' || die "FAIL: README file missing in archive"
-tar -tzf test-v0.1.tar.gz | grep -q '^test-v0.1/manifest' || die "FAIL: manifest file missing in archive"
-tar -tzf test-v0.1.tar.gz | grep -q '^test-v0.1/NEWS' || die "FAIL: NEWS file missing in archive"
+tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/foo-project/README' || die "FAIL: README file missing in archive"
+tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/manifest' || die "FAIL: manifest file missing in archive"
+tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/NEWS' || die "FAIL: NEWS file missing in archive"
 
 ! ../mk-release-archive.sh -o test-expect-fail -a /dev/null foo-manifest || die "FAIL: Signatures not enforced"
 
