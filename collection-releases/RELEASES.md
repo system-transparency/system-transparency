@@ -45,6 +45,13 @@ component release testing of docs is based on the collection archive,
 which means that component testing provides reasonable test coverage
 for assembling the complete docs site from a release archive.
 
+## Publishing the release
+
+Make a signed tag in this repo, and sign the release archive.
+
+Upload archive and signature to <https://dist.system-transparency.org>,
+and send release email to <st-announce@lists.system-transparency.org>.
+
 ## Future extensions
 
 For later releases, we're considering the need to have collection
