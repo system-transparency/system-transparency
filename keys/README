@@ -1,0 +1,6 @@
+Release signing keys
+
+This directory records the keys used for signing releases for the
+System Transparency project. See
+https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/releases/signatures.md
+for information on how these keys are used and managed.
