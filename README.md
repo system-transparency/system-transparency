@@ -1,13 +1,6 @@
-**Warning:** this repository will eventually be archived in favor of the demos
-and documentation located at https://docs.system-transparency.org/.  Similarly,
-the CI that is running here is gradually obsoleted by CI in the respective
-repositories that contain code (stprov, stmgr, stboot, etc).
-
-Our current level of commitment to supporting this repository is:
-
-  - The existing CI passes
-  - The README demo instructions can be copy-pasted without errors
-  - The README is not obviously wrong and unhelpful
+**Warning:** this repository is gradually being repurposed for managing
+collection releases in ST.  For up-to-date documentation and demos, see
+https://docs.system-transparency.org/.
 
 # System Transparency Tooling
 
