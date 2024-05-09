@@ -57,6 +57,21 @@ commit_seconds() {
     "$@"
 }
 
+fix_timestamps() {
+	# Set modification time according to commit time, similar to
+	# example in tar manual.
+	git ls-files -z | while read -r -d '' file; do
+	    touch -md @"$(commit_seconds "${file}")" "${file}"
+	done
+	# All checked out directories are non-empty. Set mtime of each
+	# directory to that of its newest entry, depth first.
+	# Unfortunately, -prune is not effective in combination with
+	# -depth, so we need to match and exclude all subdirectories
+	# under .git/.
+	find . -depth -type d '(' -name .git -o -path '*/.git/*' -o -exec bash -c '
+	  touch -mr "$1/$(ls --zero -At "$1" | grep -z -v "^.git\$" | head -z -n1 | tr -d "\0")" "$1"' bash '{}' ';' ')'
+}
+
 download_component () {
     local repo="$1"
     local tag="$2"
@@ -81,18 +96,11 @@ download_component () {
 	[[ "${hash}" = "$(commit_hash HEAD)" ]] \
 	    || die "Unexpected hash for component ${name} tag ${tag}"
 
-	# Set modification time according to commit time, similar to
-	# example in tar manual.
-	git ls-files -z | while read -r -d '' file; do
-	    touch -md @"$(commit_seconds "${file}")" "${file}"
-	done
-	# All checked out directories are non-empty. Set mtime of each
-	# directory to that of its newest entry, depth first.
-	# Unfortunately, -prune is not effective in combination with
-	# -depth, so we need to match and exclude all subdirectories
-	# under .git/.
-	find . -depth -type d '(' -name .git -o -path '*/.git/*' -o -exec bash -c '
-	  touch -mr "$1/$(ls --zero -At "$1" | grep -z -v "^.git\$" | head -z -n1 | tr -d "\0")" "$1"' bash '{}' ';' ')'
+	# Documentation depends on a theme submodule at a particular
+	# version.  Include it here rather than forcing users to clone.
+	[[ $name != docs ]] || (git submodule update --init --recursive --depth 1 && cd themes/book && fix_timestamps)
+
+	fix_timestamps
     )
 }
 
