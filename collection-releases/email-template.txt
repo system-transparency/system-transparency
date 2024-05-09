@@ -1,0 +1,32 @@
+The ST team is happy to announce a new collection release: st-X.Y.Z.
+The tar archive and a corresponding signature can be downloaded at
+
+  https://dist.system-transparency.org/
+
+Authoritative ST release signing keys are published at
+
+  https://www.system-transparency.org/keys/
+
+The signature can be verified using the command
+
+  ssh-keygen -Y verify -n file \
+    -f allowed-ST-release-signers \
+    -I releases@system-transparency.org \
+    -s st-X.Y.Z.tar.gz.sig < st-X.Y.Z.tar.gz
+
+The NEWS file in the tar archive summarizes what changed.  An excerpt
+from the latest NEWS-file entry is included below for convenience.
+
+The tar archive also includes documentation that gets rendered at
+
+  https://docs.system-transparency.org/st-X.Y.Z/
+
+If you find any bugs, please file issues in the affected component
+repositories or report them on the System Transparency discuss list.
+
+  https://lists.system-transparency.org/mailman3/postorius/lists/st-discuss.lists.system-transparency.org/
+
+Cheers,
+The ST team
+
+<COPY-PASTE EXCERPT OF LATEST NEWS FILE ENTRY HERE>
