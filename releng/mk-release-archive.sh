@@ -186,7 +186,7 @@ done
 ) > "${DIST_DIR}/archiving-tools.txt"
 
 ( cd "$(dirname "${DIST_DIR}")" &&
-  tar --exclude .git --sort=name --format=posix \
+  tar --exclude .git --exclude .gitmodules --sort=name --format=posix \
   --pax-option=exthdr.name=%d/PaxHeaders/%f \
   --pax-option=delete=atime,delete=ctime \
   --clamp-mtime --mtime="./$(basename "${DIST_DIR}")/${LATEST_COMPONENT}" \
