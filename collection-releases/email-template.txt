@@ -14,8 +14,9 @@ The signature can be verified using the command
     -I releases@system-transparency.org \
     -s st-X.Y.Z.tar.gz.sig < st-X.Y.Z.tar.gz
 
-The NEWS file in the tar archive summarizes what changed.  An excerpt
-from the latest NEWS-file entry is included below for convenience.
+The NEWS file in the tar archive summarizes changes since the previous
+release.  An excerpt from the latest NEWS-file entry is included below
+for convenience.
 
 The tar archive also includes documentation that gets rendered at
 
