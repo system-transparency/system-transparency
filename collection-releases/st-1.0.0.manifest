@@ -2,4 +2,4 @@ collection: st-1.0.0
 component: https://git.glasklar.is/system-transparency/core/stboot.git v0.3.6 d4cdd82453ee7a64fcf0b38f04a9b0f548efb4c1
 component: https://git.glasklar.is/system-transparency/core/stmgr.git v0.3.3 a94b54b9fa5abd3152581d21b61f132f4289a8c7
 component: https://git.glasklar.is/system-transparency/core/stprov.git v0.3.5 e2f027be1cad778589e579738db09c37f620e43c
-component: https://git.glasklar.is/system-transparency/project/docs.git v0.2.4 5e93e4c47656b80d7cee90beeeeec8aff49f9a1a
+component: https://git.glasklar.is/system-transparency/project/docs.git v0.2.5 00bdb60f8c372bf0bab5b60f2ff7279212bf91d2
