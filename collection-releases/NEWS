@@ -11,11 +11,11 @@ NEWS for st-1.0.0
     The included components and their versions are specified in the
     collection's manifest file. Documentation for the collection can be
     generated from the included components, see docs.  Documentation is
-    also published at https://www.system-transparency.org/st-v1.0.0/.
+    also published at https://docs.system-transparency.org/st-1.0.0/.
 
     Compared to previous System Transparency releases that were more
     experimental, this collection release includes components with a few
     new features, improved backwards compatibility with systems
-    provisioned using older tools tools and conventions, and much
-    improved documentation.  Some obsolete features with no known usage
-    have been deleted. See the NEWS files of each component for details.
+    provisioned using older tools and conventions, and much improved
+    documentation.  Some obsolete features with no known usage have been
+    deleted. See the NEWS files of each component for details.
