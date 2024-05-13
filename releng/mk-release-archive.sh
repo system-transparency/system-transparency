@@ -13,7 +13,7 @@ export TZ=UTC0
 export LC_ALL=C
 
 die() {
-    echo "$@"
+    echo "$@" >&2
     exit 1
 }
 
@@ -52,9 +52,7 @@ commit_hash() {
 
 # Commit time in seconds since unix epoch.
 commit_seconds() {
-    git show -s --format=tformat:%cd \
-    --date=unix \
-    "$@"
+    git show -s --format=tformat:%cd --date=unix "$@"
 }
 
 fix_timestamps() {
@@ -96,9 +94,16 @@ download_component () {
 	[[ "${hash}" = "$(commit_hash HEAD)" ]] \
 	    || die "Unexpected hash for component ${name} tag ${tag}"
 
-	# Documentation depends on a theme submodule at a particular
-	# version.  Include it here rather than forcing users to clone.
-	[[ $name != docs ]] || (git submodule update --init --recursive --depth 1 && cd themes/book && fix_timestamps)
+	# We currently don't support nested submodules. Just adding --recursive
+	# to the below git module commands might work, but we'd then need
+	# foreach to process submodules in depth-first order, and git
+	# documentation doesn't promise anything about order.
+	git submodule update --init --depth 1
+	# Use a shell loop over list of modules, to avoid need to export the
+	# fix_timestamps function.
+	git submodule --quiet foreach "printf '%s\\0' \$displaypath" | while read -r -d '' mod; do
+	    (cd "${mod}" && fix_timestamps)
+	done
 
 	fix_timestamps
     )
