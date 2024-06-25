@@ -6,9 +6,9 @@ go 1.19
 
 require (
 	github.com/u-root/u-root v0.12.0
-	system-transparency.org/stboot v0.3.6
-	system-transparency.org/stmgr v0.3.2
-	system-transparency.org/stprov v0.3.4
+	system-transparency.org/stboot v0.4.0
+	system-transparency.org/stmgr v0.4.0
+	system-transparency.org/stprov v0.3.5
 )
 
 require (
