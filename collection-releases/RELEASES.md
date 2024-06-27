@@ -27,16 +27,20 @@ the `-f` (force) flag, mainly useful during test and development).
 
 ## Release testing
 
-We currently rely heavily on the release testing of the components
-included in the collection. Testing of the release archive is intended
-to be a low-effort "smoke test" to verify that nothing has gone wrong
-in the collection packaging.
+To gain confidence in a collection at large, we rely heavily on the
+release testing of the individual components that are included.  To also
+gain confidence in the claimed compatibility between different
+collection releases (such as an older stboot and a newer stmgr), we
+assess what's changed manually and make a testing plan based on that.
 
 The script `collection-build-test.sh` can be used to test a release
 archive. It takes a single argument, the .tar.gz archive file to test.
 It unpacks the archive, runs the tests of the included components, and
 produces two ISO files (`stboot.iso` and `stprov.iso`) that are
 expected to boot successfully on our lab machine.
+
+Testing of the release archive is intended to be a low-effort "smoke
+test" to verify that nothing has gone wrong in the collection packaging.
 
 ## Documentation
 
