@@ -1,3 +1,24 @@
+NEWS for st-1.1.0-wip
+
+    Intro sentence(s) goes here.
+
+    Bug fixes:
+
+    * stboot: EFI variables are mounted by stboot's init after loading
+      kernel modules.  This bug is not fixed in u-root's init yet, and
+      does not affect users that compile the EFI driver into the kernel.
+      XXX: link docs.sto/where-this-is-described?
+
+    Features:
+
+    * stboot: forceful entering of provision mode has been added, e.g.,
+      to fallback to provisioning on errors or to interrupt with Ctrl-C.
+      XXX: link docs.sto/where-this-is-described?
+    * stboot, stmgr: the OS package archive URL (os_pkg_url) can now be
+      relative to the OS package pointer.  Avoid use of this extension
+      if backwards compatibility with older stboot versions is needed.
+      XXX: link docs.sto/where-this-is-described?
+
 NEWS for st-1.0.0
 
     This is the first stable collection release of System Transparency.
