@@ -1,23 +1,43 @@
 NEWS for st-1.1.0-wip
 
-    Intro sentence(s) goes here.
+    This is an update to the st-1.0.0 collection release, with
+    one bug fix and a few new features requested by users. It is
+    intended to be backwards compatible with the st-1.0.0 collection.
+    Introducing use of a relative os_pkg_url for OS packages served to
+    deployed systems (one of the new features) requires an stboot
+    upgrade on affected systems, or booting will fail.
 
     Bug fixes:
 
-    * stboot: EFI variables are mounted by stboot's init after loading
-      kernel modules.  This bug is not fixed in u-root's init yet, and
-      does not affect users that compile the EFI driver into the kernel.
-      XXX: link docs.sto/where-this-is-described?
+    * stboot: When stboot is started as the init process (pid 1), it
+      now loads kernel modules *before* mounting the efivarfs.
+      Previously, accessing EFI variables required that the efivarfs
+      driver was compiled statically into the kernel, rather than as a
+      module. See https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.4.3/docs/stboot-system.md#init-process
+      for init process alternatives and how to configure module loading
+      when stboot is started as the init process.
 
     Features:
 
-    * stboot: forceful entering of provision mode has been added, e.g.,
-      to fallback to provisioning on errors or to interrupt with Ctrl-C.
-      XXX: link docs.sto/where-this-is-described?
+    * stboot: If a provisioning OS package is included in the stboot
+      image, the operator can force stboot into provisioning mode by
+      pressing Ctrl-C to interrupt normal boot, and stboot can
+      similarly enter provisioning mode if normal boot fails for any
+      other reason. See https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.4.3/docs/stboot-system.md#error-handling
+
     * stboot, stmgr: the OS package archive URL (os_pkg_url) can now be
       relative to the OS package pointer.  Avoid use of this extension
       if backwards compatibility with older stboot versions is needed.
-      XXX: link docs.sto/where-this-is-described?
+      See https://docs.system-transparency.org/st-1.1.0/docs/reference/os_package/#descriptor
+
+    For information on how releases are made in System Transparency, see
+    https://git.glasklar.is/system-transparency/project/docs/-/tree/main/content/docs/releases.
+
+    The included components and their versions are specified in the
+    collection's manifest file. Documentation for the collection can be
+    generated from the included components, see docs.  Documentation is
+    also published at https://docs.system-transparency.org/st-1.1.0/.
+
 
 NEWS for st-1.0.0
 
