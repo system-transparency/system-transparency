@@ -3,9 +3,9 @@ NEWS for st-1.1.0-wip
     This is an update to the st-1.0.0 collection release, with
     one bug fix and a few new features requested by users. It is
     intended to be backwards compatible with the st-1.0.0 collection.
-    Introducing use of a relative os_pkg_url for OS packages served to
-    deployed systems (one of the new features) requires an stboot
-    upgrade on affected systems, or booting will fail.
+
+    Using a relative os_pkg_url for OS packages served (one of the new 
+    features) requires an stboot upgrade, or else the boot will fail.
 
     Bug fixes:
 
