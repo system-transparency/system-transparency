@@ -1,4 +1,4 @@
-NEWS for st-1.1.0-wip
+NEWS for st-1.1.0
 
     This is an update to the st-1.0.0 collection release, with
     one bug fix and a few new features requested by users. It is
@@ -13,7 +13,7 @@ NEWS for st-1.1.0-wip
       now loads kernel modules *before* mounting the efivarfs.
       Previously, accessing EFI variables required that the efivarfs
       driver was compiled statically into the kernel, rather than as a
-      module. See https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.4.3/docs/stboot-system.md#init-process
+      module. See https://docs.system-transparency.org/st-1.1.0/docs/reference/stboot-system/#init-process
       for init process alternatives and how to configure module loading
       when stboot is started as the init process.
 
@@ -23,7 +23,7 @@ NEWS for st-1.1.0-wip
       image, the operator can force stboot into provisioning mode by
       pressing Ctrl-C to interrupt normal boot, and stboot can
       similarly enter provisioning mode if normal boot fails for any
-      other reason. See https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.4.3/docs/stboot-system.md#error-handling
+      other reason. See https://docs.system-transparency.org/st-1.1.0/docs/reference/stboot-system/#error-handling
 
     * stboot, stmgr: the OS package archive URL (os_pkg_url) can now be
       relative to the OS package pointer.  Avoid use of this extension
@@ -31,7 +31,7 @@ NEWS for st-1.1.0-wip
       See https://docs.system-transparency.org/st-1.1.0/docs/reference/os_package/#descriptor
 
     For information on how releases are made in System Transparency, see
-    https://git.glasklar.is/system-transparency/project/docs/-/tree/main/content/docs/releases.
+    https://docs.system-transparency.org/st-1.1.0/docs/releases/
 
     The included components and their versions are specified in the
     collection's manifest file. Documentation for the collection can be
