@@ -1,9 +1,0 @@
-/.vscode/*
-.envrc
-/st.config
-/cache/
-/out/
-**/*.old
-.task
-/bin/
-host_configuration.json
