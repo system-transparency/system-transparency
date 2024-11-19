@@ -12,6 +12,10 @@ set -eu
 export TZ=UTC0
 export LC_ALL=C
 
+# Ignore the global git config, if read from the default location.
+: "${GIT_CONFIG_GLOBAL:=/dev/null}"
+export GIT_CONFIG_GLOBAL
+
 die() {
     echo "$@" >&2
     exit 1
@@ -122,13 +126,15 @@ usage () {
     echo "            Only the last directory component is included in the archive."
     echo "            (default: name from collection-line in the manifest)."
     echo "  -a FILE OpenSSH allowed signers file (default: 'allowed_signers')."
+    echo "  -m FILE Add top-level Makefile, replacing '@VERSION@' with the collection version."
     echo "  -f      Force-create archive even if tags are not properly signed."
     echo "  -h      Display this help."
 }
 
 FORCE=no
+MAKEFILE_IN=''
 
-while getopts "hfa:o:" option ; do
+while getopts "hfa:o:m:" option ; do
     case "${option}" in
 	h)
 	    usage
@@ -142,6 +148,9 @@ while getopts "hfa:o:" option ; do
 	    ;;
 	f)
 	    FORCE=yes
+	    ;;
+	m)
+	    MAKEFILE_IN="${OPTARG}"
 	    ;;
 	*)
 	    usage >&2
@@ -180,8 +189,14 @@ done
 
 LATEST_COMPONENT="$(ls --zero -At "${DIST_DIR}" | head -z -n1 | tr -d "\0")"
 
-[[ ! -e  "${DIST_DIR}/manifest" ]] || die "'manifest' file already exists in target dir!"
+[[ ! -e "${DIST_DIR}/manifest" ]] || die "'manifest' file already exists in target dir!"
 cp "${MANIFEST}" "${DIST_DIR}/manifest"
+
+if [[ "${MAKEFILE_IN}" ]] ; then
+    msg "Generating top-level Makefile"
+    [[ ! -e "${DIST_DIR}/Makefile" ]] || die "'Makefile' file already exists in target dir!"
+    sed "s/@VERSION@/${COLLECTION}/" < "${MAKEFILE_IN}" > "${DIST_DIR}/Makefile"
+fi
 
 for f in "$@" ; do
     [[ ! -e "${DIST_DIR}/$(basename "$f")" ]] || die "file '$(basename "$f")' already exists in target dir!"

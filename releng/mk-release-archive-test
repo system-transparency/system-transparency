@@ -37,19 +37,26 @@ git init -b main foo-project
     git tag -s -m "Release v0.1" v0.1
 )
 
-{
-    echo collection: test-0.1
-    echo component: file://$(realpath foo-project) v0.1 $(cd foo-project && git rev-list -1 -s --no-commit-header --format='tformat:%H' HEAD)
-} > foo-manifest
+cat > foo-manifest <<EOF
+collection: test-0.1
+component: file://$(realpath foo-project) v0.1 $(cd foo-project && git rev-list -1 -s --no-commit-header --format='tformat:%H' HEAD)
+EOF
 
 echo "New stuff" > NEWS
 
-../mk-release-archive.sh foo-manifest NEWS
+cat > Makefile.in <<EOF
+all:
+	@ echo version @VERSION@
+EOF
+
+../mk-release-archive.sh -m Makefile.in foo-manifest NEWS
 
 tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/foo-project/README' || die "FAIL: README file missing in archive"
 tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/foo-project/TODO' || die "FAIL: TODO file missing in archive"
 tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/manifest' || die "FAIL: manifest file missing in archive"
 tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/NEWS' || die "FAIL: NEWS file missing in archive"
+tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/Makefile' || die "FAIL: Makefile file missing in archive"
+[[ "$(make -f test-0.1/Makefile)" = "version test-0.1" ]] || die "FAIL: Makefile doesn't have expected version"
 
 ! ../mk-release-archive.sh -o test-expect-fail -a /dev/null foo-manifest || die "FAIL: Signatures not enforced"
 
