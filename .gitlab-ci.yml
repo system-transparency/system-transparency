@@ -1,0 +1,7 @@
+test/mk-release-archive:
+  image: debian:bookworm
+  before_script:
+    - apt-get update
+    - apt-get install -qqy git make
+  script:
+    - cd releng && ./mk-release-archive-test

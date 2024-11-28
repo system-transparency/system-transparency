@@ -46,13 +46,16 @@ p
 }' < "$1" | trim_space
 }
 
+# Here and below, use "git rev-list -1" rather than "git show". The
+# latter is a "porcelain" command, and output depends on user config,
+# e.g., setting of log.showsignature.
 commit_hash() {
-    git show -s --format='tformat:%H' "$@"
+    git rev-list -1 -s --no-commit-header --format='tformat:%H' "$@"
 }
 
 # Commit time in seconds since unix epoch.
 commit_seconds() {
-    git show -s --format=tformat:%cd --date=unix "$@"
+    git rev-list -1 -s --no-commit-header --format=tformat:%cd --date=unix HEAD -- "$@"
 }
 
 fix_timestamps() {

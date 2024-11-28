@@ -21,20 +21,25 @@ ssh-keygen -q -N '' -t ed25519 -f testkey
 echo 'rjh@example.org namespaces="git,file" '"$(< testkey.pub)" > allowed_signers
 
 # Populate a repo
-git init foo-project
+git init -b main foo-project
 (
     cd foo-project
+    git config --local user.name "Random J. Hacker"
+    git config --local user.email rjh@example.org
     git config --local gpg.format ssh
     git config --local user.signingkey "$(realpath ../testkey)"
     echo "Test component" > README
     git add README
     git commit -S -m "First revision"
+    echo "Lots!" > TODO
+    git add TODO
+    git commit -S -m "Add TODO file"
     git tag -s -m "Release v0.1" v0.1
 )
 
 {
     echo collection: test-0.1
-    echo component: file://$(realpath foo-project) v0.1 $(cd foo-project && git show -s --format='tformat:%H' HEAD)
+    echo component: file://$(realpath foo-project) v0.1 $(cd foo-project && git rev-list -1 -s --no-commit-header --format='tformat:%H' HEAD)
 } > foo-manifest
 
 echo "New stuff" > NEWS
@@ -42,6 +47,7 @@ echo "New stuff" > NEWS
 ../mk-release-archive.sh foo-manifest NEWS
 
 tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/foo-project/README' || die "FAIL: README file missing in archive"
+tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/foo-project/TODO' || die "FAIL: TODO file missing in archive"
 tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/manifest' || die "FAIL: manifest file missing in archive"
 tar -tzf test-0.1.tar.gz | grep -q '^test-0.1/NEWS' || die "FAIL: NEWS file missing in archive"
 
