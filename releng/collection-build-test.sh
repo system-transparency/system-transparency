@@ -19,9 +19,15 @@ TARFILE="$(realpath "$1")"
 # Change directory to where script is located.
 cd "$(dirname "$0")"
 
+# To ignore the irrelevant git state in the parent directory.
+export GOFLAGS='-buildvcs=false'
+
 rm -rf test-tmp
 mkdir test-tmp
 cd test-tmp
+
+GOBIN="$(pwd)/bin"
+export GOBIN
 
 tar xzf "${TARFILE}"
 
@@ -29,7 +35,7 @@ DIR="$(basename "${TARFILE}" .tar.gz)"
 
 [[ -d "${DIR}" ]] || die "Unexpected unpacked directory name"
 
-echo RUNNING stboot tests
+echo "RUNNING stboot tests"
 
 # Use go work to make stboot integration tests use stmgr from the
 # collection.
@@ -40,18 +46,31 @@ echo RUNNING stboot tests
 ./"${DIR}"/stboot/integration/supermicro-x11scl-bond-iso.sh
 cp "${DIR}"/stboot/integration/out/stboot.iso stboot.iso
 
-echo RUNNING stmgr tests
+# Test that if there is a --version option, we can configure it at build time
+(cd "${DIR}"/stboot
+     if go run . --version >/dev/null 2>&1 ; then
+	 echo "TESTING compile time stboot version"
+	 go build -ldflags="-X main.ConfiguredVersion=collection-test"
+	 STBOOT_VERSION="$(./stboot --version)"
+	 [[ "${STBOOT_VERSION}" = "stboot version: collection-test" ]] \
+	     || die "Failed to set stboot version, got: ${STBOOT_VERSION}"
+     fi
+)
+
+echo "RUNNING stmgr tests"
 
 (cd "${DIR}"/stmgr && go work init && go work use . ../stboot && go test ./... && make check)
 
-# To get stprov integration to use stmgr from the collection, install it in PATH.
-GOBIN="$(pwd)/bin"
-export GOBIN
-(cd "${DIR}"/stmgr && go install .)
+# Make stprov integration tests use stmgr from the collection. For
+# stprov up to v0.3.x, we need to install it in PATH. From v0.4.1, it
+# is configured using go.mod.
+if [[ -f "${DIR}"/stprov/integration/go.mod ]] ; then
+    (cd "${DIR}"/stprov/integration && go work init && go work use . ../../stmgr)
+else
+    (cd "${DIR}"/stmgr && go install .)
+fi
 
-PATH="${GOBIN}:${PATH}"
-
-echo RUNNING stprov tests
+echo "RUNNING stprov tests"
 
 (cd "${DIR}"/stprov && go test ./...)
 
