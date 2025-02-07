@@ -1,7 +1,7 @@
 #! /bin/bash
 
-# Script to unpack a tarball and attempt to build it. Currently very
-# tailored to the contents of the st 1.0.0 collection release.
+# Script to unpack a tarball and attempt to build it. Intended to work
+# for all st 1.* collection releases.
 
 
 set -eu
