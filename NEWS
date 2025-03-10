@@ -1,3 +1,35 @@
+NEWS for st-1.2.0
+
+    This is an update to the st-1.1.0 collection release, with a few
+    new features requested by users. It is intended to be backwards
+    compatible with the st-1.0.0 and st-1.1.0 collections.
+
+    All the components now require go-1.22 or later for building.
+
+    Bug fixes:
+
+    * stprov: Don't add any extra dot when using default hostname
+      (neither -h or -H specified on the command line).
+
+    * stmgr: Properly assign the issuer and subject in generated X.509
+      certificates.
+
+    Features:
+
+    * stboot: Add support for encrypted OS packages.
+
+    * stprov: For network autoselect (-A), prefer the fastest network
+      interface.
+
+    * stboot, stprov: Improvements to logging.
+
+    * stboot, stprov: Display and populate the new (and optional)
+      "description" field in the host configuration.
+
+    * stmgr: The uki subcommand can now produce both .uki and .iso in
+      the same run.
+
+
 NEWS for st-1.1.0
 
     This is an update to the st-1.0.0 collection release, with
