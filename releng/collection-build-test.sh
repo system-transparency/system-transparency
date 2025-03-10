@@ -61,21 +61,36 @@ echo "RUNNING stmgr tests"
 
 (cd "${DIR}"/stmgr && go work init && go work use . ../stboot && go test ./... && make check)
 
-# Make stprov integration tests use stmgr from the collection. For
-# stprov up to v0.3.x, we need to install it in PATH. From v0.4.1, it
-# is configured using go.mod.
+# Make stprov supermicro-x11scl.sh test use stmgr from the collection.
+# For stprov up to v0.3.x, we need to install it in PATH. From v0.4.1,
+# it is configured using go.mod. Unfortunately, using go.work or
+# GOWORK doesn't quite work, at least not with stprov@v0.4.2 (using
+# go.work fails, because it interacts badly with u-root, and using
+# GOWORK fails because both scripts also build the stprov executable,
+# and then GOWORK is applied also to the top-level module rather than
+# to the testonly module it was intended for). Instead add a replace
+# directive to the go.mod file.
 if [[ -f "${DIR}"/stprov/integration/go.mod ]] ; then
-    (cd "${DIR}"/stprov/integration && go work init && go work use . ../../stmgr)
+    echo 'replace system-transparency.org/stmgr => ../../stmgr' >> "${DIR}"/stprov/integration/go.mod
+    (cd "${DIR}"/stprov/integration/ && go mod tidy)
+    ENV=()
 else
     (cd "${DIR}"/stmgr && go install .)
+    ENV=("PATH=${GOBIN}:${PATH}")
 fi
 
 echo "RUNNING stprov tests"
 
 (cd "${DIR}"/stprov && go test ./...)
 
-PATH="${GOBIN}:${PATH}" ./"${DIR}"/stprov/integration/qemu.sh
-PATH="${GOBIN}:${PATH}" ./"${DIR}"/stprov/integration/supermicro-x11scl.sh
+# Workaround for unexpected stprov version
+if grep >/dev/null '^component: https://git.glasklar.is/system-transparency/core/stprov.git v0.4.2 831035a66841c1968787ab51c2c2d76b975f1397$' "${DIR}"/manifest ; then
+    echo "Applying workaround for issue https://git.glasklar.is/system-transparency/core/stprov/-/issues/96"
+    sed -i 's/stprov version v\[^ \]\*; timestamp/stprov version [^ ]*; timestamp/' "${DIR}"/stprov/integration/qemu.sh
+fi
+
+env "${ENV[@]}" ./"${DIR}"/stprov/integration/qemu.sh
+env "${ENV[@]}" ./"${DIR}"/stprov/integration/supermicro-x11scl.sh
 cp "${DIR}"/stprov/integration/build/stprov.iso stprov.iso
 
 echo "All tests pass. To test on hardware, boot test-tmp/{stboot,stprov}.iso."

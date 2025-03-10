@@ -1,5 +1,5 @@
 collection: st-1.2.0-wip
-component: https://git.glasklar.is/system-transparency/core/stboot.git v0.5.1 a87099f91716531e4ff5e7b78cd7cfbebbd9cb30
-component: https://git.glasklar.is/system-transparency/core/stmgr.git v0.5.0 6cdcb68b924367a5b2894d9aa4f2bd93420327c8
-component: https://git.glasklar.is/system-transparency/core/stprov.git v0.4.0 659ce1bb11a2f31459ca5f09d0d7d8b4592ceef2
-component: https://git.glasklar.is/system-transparency/project/docs.git v0.4.0 22193e086b83d6c1d3cb479db3c51066feca880a
+component: https://git.glasklar.is/system-transparency/core/stboot.git v0.5.2 f7778c9d575bb22c997657dcc783cfac326b6812
+component: https://git.glasklar.is/system-transparency/core/stmgr.git v0.5.2 01071873ffc52fc17a46e4605792017fb41044e8
+component: https://git.glasklar.is/system-transparency/core/stprov.git v0.4.2 831035a66841c1968787ab51c2c2d76b975f1397
+component: https://git.glasklar.is/system-transparency/project/docs.git v0.4.1 241677ad9fe0717832ac03420f1e2519c864bb8a
