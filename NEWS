@@ -2,9 +2,14 @@ NEWS for st-1.2.0
 
     This is an update to the st-1.1.0 collection release, with a few
     new features requested by users. It is intended to be backwards
-    compatible with the st-1.0.0 and st-1.1.0 collections.
+    compatible with the st-1.0.0 and st-1.1.0 collections except for
+    a new build-time requirement on go-1.22 or later.
 
-    All the components now require go-1.22 or later for building.
+    The code components of st-1.2.0 are stboot v0.5.2, stmgr v0.5.2,
+    and stprov v0.4.2 (also listed, with corresponding commit hashes,
+    in the manifest file). Corresponding documentation is included in
+    the collection, and it is also published at
+    https://docs.system-transparency.org/st-1.2.0/.
 
     Bug fixes:
 
@@ -28,6 +33,9 @@ NEWS for st-1.2.0
 
     * stmgr: The uki subcommand can now produce both .uki and .iso in
       the same run.
+
+    For more details, see the NEWS files and documentation for
+    respective component.
 
 
 NEWS for st-1.1.0
