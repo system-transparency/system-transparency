@@ -1,3 +1,32 @@
+NEWS for st-1.3.0
+
+    This collection release provides a few minor fixes and two major
+    features: support for Secure Boot provisioning and Sigsum logged OS
+    packages.  The release is intended to be backwards compatible,
+    expect for a new build-time requirement on Go version 1.23 or later.
+
+    The code components of st-1.3.0 are stboot v0.6.5, stmgr v0.6.6, and
+    stprov v0.5.4.  Documentation is included in the collection, and it
+    is also published at https://docs.system-transparency.org/st-1.3.0/.
+
+    Features:
+
+    * stprov: provisioning of Secure Boot variables PK, KEK, db, and
+      dbx.  Associated HOW-TO guides are available in the documentation.
+    * stprov: it is optional to supply a file with TLS root certificates.
+    * stboot: support multiple OS package signing roots.
+    * stboot, stmgr: support for Sigsum signed OS packages.  In other
+      words, it is now possible to use signatures that are transparent.
+    * stmgr: new subcommands for verifying OS packages and creating ISOs
+      from already existing UKIs.
+
+    Miscellaneous:
+
+    * stprov: improved logging, e.g., exactly what is being written to
+      EFI NVRAM when and whether the different subcommands succeeded.
+    * stmgr: more helpful error messages on invalid command-line input.
+
+
 NEWS for st-1.2.0
 
     This is an update to the st-1.1.0 collection release, with a few
