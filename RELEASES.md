@@ -1,7 +1,7 @@
 # Collection releases of ST
 
 This document describes some of the practicalities of making a
-collection release. What is meant by a an ST collection release (in
+collection release. What is meant by an ST collection release (in
 contrast to an ST component release) is described at
 [releases](https://git.glasklar.is/system-transparency/project/docs/-/tree/main/content/docs/releases).
 Related scripts are located in the [releng](./releng) directory.
