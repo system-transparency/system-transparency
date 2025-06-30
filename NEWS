@@ -3,7 +3,7 @@ NEWS for st-1.3.0
     This collection release provides a few minor fixes and two major
     features: support for Secure Boot provisioning and Sigsum logged OS
     packages.  The release is intended to be backwards compatible,
-    expect for a new build-time requirement on Go version 1.23 or later.
+    except for a new build-time requirement on Go version 1.23 or later.
 
     The code components of st-1.3.0 are stboot v0.6.5, stmgr v0.6.6, and
     stprov v0.5.4.  Documentation is included in the collection, and it
