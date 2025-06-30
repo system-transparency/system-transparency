@@ -88,6 +88,10 @@ if grep >/dev/null '^component: https://git.glasklar.is/system-transparency/core
     echo "Applying workaround for issue https://git.glasklar.is/system-transparency/core/stprov/-/issues/96"
     sed -i 's/stprov version v\[^ \]\*; timestamp/stprov version [^ ]*; timestamp/' "${DIR}"/stprov/integration/qemu.sh
 fi
+if grep >/dev/null '^component: https://git.glasklar.is/system-transparency/core/stprov.git v0.5.4 d0acca1fea8138cb7e23ec02e61c0fa026730b7a$' "${DIR}"/manifest ; then
+    echo "Applying workaround for issue https://git.glasklar.is/system-transparency/core/stprov/-/issues/96"
+    sed -i 's/stprov version v\[^ \]\*; timestamp/stprov version [^ ]*; timestamp/' "${DIR}"/stprov/integration/qemu.sh
+fi
 
 env "${ENV[@]}" ./"${DIR}"/stprov/integration/qemu.sh
 env "${ENV[@]}" ./"${DIR}"/stprov/integration/supermicro-x11scl.sh
